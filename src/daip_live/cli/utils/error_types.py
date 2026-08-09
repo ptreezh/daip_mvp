@@ -3,14 +3,14 @@ CLI错误类型定义模块
 遵循TDD原则 - 基于测试需求实现
 """
 
-import asyncio
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional, Dict, Any
+from typing import Any, Optional
 
 
 class ErrorSeverity(Enum):
     """错误严重程度"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -19,6 +19,7 @@ class ErrorSeverity(Enum):
 
 class ErrorCategory(Enum):
     """错误类别"""
+
     NETWORK = "network"
     DATABASE = "database"
     VALIDATION = "validation"
@@ -36,8 +37,8 @@ class CLIError(Exception):
         category: ErrorCategory = ErrorCategory.SYSTEM,
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
         error_code: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
-        original_exception: Optional[Exception] = None
+        details: Optional[dict[str, Any]] = None,
+        original_exception: Optional[Exception] = None,
     ):
         self.message = message
         self.category = category
@@ -47,18 +48,18 @@ class CLIError(Exception):
         self.original_exception = original_exception
         super().__init__(message)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
-            'error_type': self.__class__.__name__,
-            'message': self.message,
-            'category': self.category.value,
-            'severity': self.severity.value,
-            'error_code': self.error_code,
-            'details': self.details,
+            "error_type": self.__class__.__name__,
+            "message": self.message,
+            "category": self.category.value,
+            "severity": self.severity.value,
+            "error_code": self.error_code,
+            "details": self.details,
             # 修复: 原实现用 asyncio.get_event_loop().time() 取全局 event loop 时间，
             # 前置测试关闭 loop 后抛 "There is no current event loop"；改标准库时间
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
 
@@ -70,7 +71,7 @@ class NetworkError(CLIError):
             message,
             category=ErrorCategory.NETWORK,
             severity=ErrorSeverity.HIGH,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -82,7 +83,7 @@ class DatabaseError(CLIError):
             message,
             category=ErrorCategory.DATABASE,
             severity=ErrorSeverity.HIGH,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -94,7 +95,7 @@ class ValidationError(CLIError):
             message,
             category=ErrorCategory.VALIDATION,
             severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -106,7 +107,7 @@ class BusinessError(CLIError):
             message,
             category=ErrorCategory.BUSINESS,
             severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -118,7 +119,7 @@ class SystemError(CLIError):
             message,
             category=ErrorCategory.SYSTEM,
             severity=ErrorSeverity.HIGH,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -130,5 +131,5 @@ class UserInputError(CLIError):
             message,
             category=ErrorCategory.USER_INPUT,
             severity=ErrorSeverity.MEDIUM,
-            **kwargs
+            **kwargs,
         )

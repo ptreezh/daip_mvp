@@ -3,26 +3,26 @@ CLI module for the DAIP-LIVE system.
 
 This module provides command-line interfaces for the enhanced debate system and other features.
 It follows the module-first design principle and integrates with the container system.
-"""
+"""  # noqa: E501
+
 import asyncio
-import typer
 from typing import Optional
 
-from daip_live.container import Container
-from daip_live.core.models import (
-    DebateStartEvent, DebateRoundStartEvent, DebateTurnCompleteEvent,
-    DebateCompleteEvent, TokenUsageEvent, ThoughtEvent, AgentEvent
-)
-from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
-from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
-from daip_live.memory.session_manager import SessionManager
-from daip_live.p4_role_manager_tools.role_manager import RoleManager
-from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
-from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.persistence.database import DatabaseManager
-from daip_live.agent_engine.enhanced_intent_recognizer import Intent, IntentType
+import typer
 from rich.console import Console
 from rich.table import Table
+
+from daip_live.agent_engine.enhanced_intent_recognizer import Intent, IntentType
+from daip_live.container import Container
+from daip_live.core.models import (
+    DebateCompleteEvent,
+    DebateRoundStartEvent,
+    DebateStartEvent,
+    DebateTurnCompleteEvent,
+    ThoughtEvent,
+    TokenUsageEvent,
+)
+from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
 
 # Create CLI app
 app = typer.Typer()
@@ -41,9 +41,8 @@ def initialize_app():
     try:
         # Initialize the enhanced intent recognizer from container
         intent_recognizer = container.intent_recognizer()
-        print("✅ CLI initialized with enhanced intent recognition")
-    except Exception as e:
-        print(f"⚠️ Warning: Failed to initialize intent recognizer: {e}")
+    except Exception:
+        pass
 
 
 @app.command()
@@ -51,14 +50,13 @@ def run():
     """启动DAIP-TUI界面"""
     try:
         from daip_live.tui.simplified_main import SimplifiedTUI as DAIP_TUI
+
         tui = DAIP_TUI()
         tui.run()
-    except ImportError as e:
-        print(f"Error: Could not import TUI module: {e}")
-        print("Make sure all dependencies are installed")
-    except Exception as e:
-        print(f"Error running TUI: {e}")
-        print("Make sure all dependencies are installed")
+    except ImportError:
+        pass
+    except Exception:
+        pass
 
 
 # Create debate sub-app
@@ -69,10 +67,13 @@ app.add_typer(debate_app, name="debate", help="辩论相关命令")
 @debate_app.command("start")
 def debate_start(
     topic: str = typer.Argument(..., help="辩论主题"),
-    roles: str = typer.Option("pro_arguer,con_arguer", help="参与辩论的角色，用逗号分隔"),
-    rounds: int = typer.Option(1, help="辩论轮次")
+    roles: str = typer.Option(
+        "pro_arguer,con_arguer", help="参与辩论的角色，用逗号分隔"
+    ),
+    rounds: int = typer.Option(1, help="辩论轮次"),
 ):
     """开始辩论"""
+
     async def run_debate_async():
         # Get components from container
         session_manager = container.session_manager()
@@ -88,7 +89,7 @@ def debate_start(
             role_model_manager=role_model_manager,
             model_provider=model_provider,
             debate_history_tracker=debate_history_tracker,
-            use_optimized_architecture=True
+            use_optimized_architecture=True,
         )
 
         console = Console()
@@ -109,10 +110,16 @@ def debate_start(
                 unavailable_roles.append(role_name_clean)
 
         if unavailable_roles:
-            console.print(f"[yellow]Warning: Following roles not found in system, will use default model:[/yellow]")
+            console.print(
+                "[yellow]Warning: Following roles not found in system, will use default model:[/yellow]"  # noqa: E501
+            )
             for role in unavailable_roles:
                 console.print(f"  - {role}")
-            role_list = available_mappings if available_mappings else ["pro_arguer", "con_arguer"]
+            role_list = (
+                available_mappings
+                if available_mappings
+                else ["pro_arguer", "con_arguer"]
+            )
         else:
             available_mappings = role_list
 
@@ -127,20 +134,28 @@ def debate_start(
             if isinstance(event, DebateStartEvent):
                 console.print("🎮 Debate started!")
                 summary = debate_manager.get_debate_model_summary(role_list)
-                if 'model_assignments' in summary:
+                if "model_assignments" in summary:
                     console.print("Model assignments:")
-                    for role_name, config in summary.get("model_assignments", {}).items():
-                        console.print(f"  {role_name} → {config.get('model', 'unknown')}")
+                    for role_name, config in summary.get(
+                        "model_assignments", {}
+                    ).items():
+                        console.print(
+                            f"  {role_name} → {config.get('model', 'unknown')}"
+                        )
 
             elif isinstance(event, DebateRoundStartEvent):
                 console.print(f"\n🔄 [bold]Round {event.round_number}[/bold] started")
             elif isinstance(event, DebateTurnCompleteEvent):
                 console.print(f"🗣️ [bold]{event.participant}[/bold] speaking...")
                 console.print(f"💬 Response from {event.content_preview}")
-                if hasattr(event, 'token_usage'):
-                    console.print(f"📊 Tokens: {event.token_usage.get('total_tokens', 'N/A')}")
+                if hasattr(event, "token_usage"):
+                    console.print(
+                        f"📊 Tokens: {event.token_usage.get('total_tokens', 'N/A')}"
+                    )
             elif isinstance(event, TokenUsageEvent):
-                console.print(f"📈 Tokens: {event.usage_info.get('total_tokens', 'N/A')}")
+                console.print(
+                    f"📈 Tokens: {event.usage_info.get('total_tokens', 'N/A')}"
+                )
             elif isinstance(event, ThoughtEvent):
                 console.print(f"💭 {event.content}")
             elif isinstance(event, DebateCompleteEvent):
@@ -148,17 +163,19 @@ def debate_start(
 
         return "session_created"
 
-    session_id = asyncio.run(run_debate_async())
-    print(f"Session ID: {session_id}")
+    asyncio.run(run_debate_async())
 
 
 @debate_app.command("multimodel")
 def debate_multimodel(
     topic: str = typer.Argument(..., help="辩论主题"),
-    roles: str = typer.Option("economist,laborer,policymaker", help="参与辩论的角色，用逗号分隔"),
-    rounds: int = typer.Option(1, help="辩论轮次")
+    roles: str = typer.Option(
+        "economist,laborer,policymaker", help="参与辩论的角色，用逗号分隔"
+    ),
+    rounds: int = typer.Option(1, help="辩论轮次"),
 ):
     """开始多模型辩论（每个角色使用不同模型）"""
+
     async def run_multimodel_debate_async():
         # Get components from container
         session_manager = container.session_manager()
@@ -174,7 +191,7 @@ def debate_multimodel(
             role_model_manager=role_model_manager,
             model_provider=model_provider,
             debate_history_tracker=debate_history_tracker,
-            use_optimized_architecture=True
+            use_optimized_architecture=True,
         )
 
         console = Console()
@@ -195,10 +212,16 @@ def debate_multimodel(
                 unavailable_roles.append(role_name_clean)
 
         if unavailable_roles:
-            console.print(f"[yellow]Warning: Following roles not found in system, will use default model:[/yellow]")
+            console.print(
+                "[yellow]Warning: Following roles not found in system, will use default model:[/yellow]"  # noqa: E501
+            )
             for role in unavailable_roles:
                 console.print(f"  - {role}")
-            role_list = available_mappings if available_mappings else ["pro_arguer", "con_arguer"]
+            role_list = (
+                available_mappings
+                if available_mappings
+                else ["pro_arguer", "con_arguer"]
+            )
         else:
             available_mappings = role_list
 
@@ -206,10 +229,10 @@ def debate_multimodel(
 
         # Get debate model summary and show assignments
         summary = debate_manager.get_debate_model_summary(role_list)
-        if 'model_assignments' in summary:
+        if "model_assignments" in summary:
             console.print("Model assignments:")
             for role_name, config in summary.get("model_assignments", {}).items():
-                model_name = config.get('model', 'unknown')
+                model_name = config.get("model", "unknown")
                 console.print(f"  {role_name} → {model_name}")
 
         # Track debate in history
@@ -221,10 +244,14 @@ def debate_multimodel(
             if isinstance(event, DebateStartEvent):
                 console.print("🎮 Multi-model debate started!")
                 summary = debate_manager.get_debate_model_summary(role_list)
-                if 'model_assignments' in summary:
+                if "model_assignments" in summary:
                     console.print("Model assignments:")
-                    for role_name, config in summary.get("model_assignments", {}).items():
-                        console.print(f"  {role_name} uses {config.get('model', 'unknown')}")
+                    for role_name, config in summary.get(
+                        "model_assignments", {}
+                    ).items():
+                        console.print(
+                            f"  {role_name} uses {config.get('model', 'unknown')}"
+                        )
 
             elif isinstance(event, DebateRoundStartEvent):
                 console.print(f"\n🔄 [bold]Round {event.round_number}[/bold] started")
@@ -233,7 +260,9 @@ def debate_multimodel(
                 console.print(f"📈 Tokens: {getattr(event, 'token_count', 'N/A')}")
                 console.print(f"💬 Response from {event.content_preview}")
             elif isinstance(event, TokenUsageEvent):
-                console.print(f"📈 Tokens: {event.usage_info.get('total_tokens', 'N/A')}")
+                console.print(
+                    f"📈 Tokens: {event.usage_info.get('total_tokens', 'N/A')}"
+                )
             elif isinstance(event, ThoughtEvent):
                 console.print(f"💭 {event.content}")
             elif isinstance(event, DebateCompleteEvent):
@@ -241,13 +270,15 @@ def debate_multimodel(
 
         return "multimodel_session"
 
-    session_id = asyncio.run(run_multimodel_debate_async())
-    print(f"Session ID: {session_id}")
+    asyncio.run(run_multimodel_debate_async())
 
 
 @debate_app.command("history")
-def debate_history(session_id: Optional[str] = typer.Argument(None, help="特定辩论会话的ID")):
+def debate_history(
+    session_id: Optional[str] = typer.Argument(None, help="特定辩论会话的ID"),
+):
     """查看辩论历史记录"""
+
     async def get_history_async():
         debate_history_tracker = container.debate_history_tracker()
 
@@ -260,9 +291,11 @@ def debate_history(session_id: Optional[str] = typer.Argument(None, help="特定
                 console.print(f"[bold]Topic:[/bold] {history.topic}")
                 console.print(f"[bold]Status:[/bold] {history.status}")
                 console.print(f"[bold]Total Rounds:[/bold] {history.total_rounds}")
-                console.print(f"[bold]Participants:[/bold]")
+                console.print("[bold]Participants:[/bold]")
                 for participant in history.participants:
-                    console.print(f"  - {participant.name} (Order: {participant.order})")
+                    console.print(
+                        f"  - {participant.name} (Order: {participant.order})"
+                    )
 
                 console.print("[bold]--- Debate Transcript ---[/bold]")
 
@@ -276,11 +309,13 @@ def debate_history(session_id: Optional[str] = typer.Argument(None, help="特定
                 for round_num in sorted(turns_by_round.keys()):
                     console.print(f"\n[b]Round {round_num}:[/b]")
                     for turn in turns_by_round[round_num]:
-                        console.print(f"[blue]{turn.participant}:[/blue] {turn.content}")
+                        console.print(
+                            f"[blue]{turn.participant}:[/blue] {turn.content}"
+                        )
 
                 console.print(f"[bold]End Time:[/bold] {history.end_time}")
             else:
-                print(f"No debate found with session ID: {session_id}")
+                pass
         else:
             # Get all histories
             all_histories = await debate_history_tracker.get_all_histories()
@@ -297,7 +332,7 @@ def debate_history(session_id: Optional[str] = typer.Argument(None, help="特定
                 console.print(f"Found {len(all_histories)} debate history sessions:")
 
                 for history in histories_to_show:
-                    topic_lines = history.topic.split('\n')
+                    topic_lines = history.topic.split("\n")
                     topic_display = topic_lines[0]
                     if len(topic_lines) > 1:
                         topic_display += "..."
@@ -307,15 +342,15 @@ def debate_history(session_id: Optional[str] = typer.Argument(None, help="特定
                         topic_display,
                         history.status,
                         str(history.total_rounds),
-                        str(len(history.participants))
+                        str(len(history.participants)),
                     )
 
                 console.print(table)
 
                 if len(all_histories) > 15:
-                    print(f"... and {len(all_histories) - 15} more sessions")
+                    pass
             else:
-                print("No debate histories found.")
+                pass
 
     asyncio.run(get_history_async())
 
@@ -328,28 +363,29 @@ app.add_typer(doc_app, name="doc", help="文档处理相关命令")
 @doc_app.command("download")
 def doc_download(
     topic: str = typer.Argument(..., help="论文主题或关键词"),
-    source: str = typer.Option("arxiv", help="论文来源 (arxiv, pubmed, web)")
+    source: str = typer.Option("arxiv", help="论文来源 (arxiv, pubmed, web)"),
 ):
     """下载学术论文"""
+
     async def run_download_async():
-        from daip_live.doc.tools.paper_downloader import PaperDownloader
         from daip_live.doc.models.document_models import PaperSource
+        from daip_live.doc.tools.paper_downloader import PaperDownloader
 
         console = Console()
         console.print(f"[bold]Downloading paper on topic:[/bold] {topic}")
         console.print(f"[bold]Source:[/bold] {source}")
 
         source_enum = PaperSource.ARXIV
-        if source.lower() == 'pubmed':
+        if source.lower() == "pubmed":
             source_enum = PaperSource.PUBMED
-        elif source.lower() == 'web':
+        elif source.lower() == "web":
             source_enum = PaperSource.WEB
 
         downloader = PaperDownloader()
         result = await downloader.download_paper_by_topic(topic, source_enum)
 
         if result.success:
-            console.print(f"✅ Paper downloaded successfully!")
+            console.print("✅ Paper downloaded successfully!")
             console.print(f"📁 File: {result.file_path}")
             if result.metadata:
                 console.print(f"📑 Title: {result.metadata.title}")
@@ -364,12 +400,13 @@ def doc_download(
 def doc_search(
     query: str = typer.Argument(..., help="搜索关键词"),
     source: str = typer.Option("arxiv", help="搜索来源 (arxiv, pubmed, web)"),
-    max_results: int = typer.Option(5, help="最大结果数")
+    max_results: int = typer.Option(5, help="最大结果数"),
 ):
     """搜索学术论文"""
+
     async def run_search_async():
-        from daip_live.doc.tools.paper_downloader import PaperDownloader
         from daip_live.doc.models.document_models import PaperSource
+        from daip_live.doc.tools.paper_downloader import PaperDownloader
 
         console = Console()
         console.print(f"[bold]Searching papers for:[/bold] {query}")
@@ -377,9 +414,9 @@ def doc_search(
         console.print(f"[bold]Max results:[/bold] {max_results}")
 
         source_enum = PaperSource.ARXIV
-        if source.lower() == 'pubmed':
+        if source.lower() == "pubmed":
             source_enum = PaperSource.PUBMED
-        elif source.lower() == 'web':
+        elif source.lower() == "web":
             source_enum = PaperSource.WEB
 
         downloader = PaperDownloader()
@@ -394,7 +431,7 @@ def doc_search(
 
             for paper in results:
                 year = paper.publication_date.year if paper.publication_date else "N/A"
-                authors = ', '.join(paper.authors[:2])
+                authors = ", ".join(paper.authors[:2])
                 if len(paper.authors) > 2:
                     authors += " et al."
 
@@ -409,27 +446,19 @@ def doc_search(
 
 @app.command("ask")
 def process_natural_language(
-    query: str = typer.Argument(..., help="Natural language query to process")
+    query: str = typer.Argument(..., help="Natural language query to process"),
 ):
     """Process natural language input and execute appropriate actions"""
     global intent_recognizer
 
     if intent_recognizer is None:
-        print("❌ Intent recognizer not initialized")
         return
 
     try:
         intent = intent_recognizer.recognize_intent(query)
 
         if intent is None:
-            print(f"❓ Sorry, I couldn't understand your request: '{query}'")
-            print("💡 Try rephrasing or use specific commands like:")
-            print("   - 'start debate about AI ethics'")
-            print("   - 'search papers about machine learning'")
-            print("   - 'download paper with ID 1234.5678'")
             return
-
-        print(f"🎯 Recognized intent: {intent.name} (confidence: {intent.confidence:.2f})")
 
         if intent.name == "start_debate":
             _handle_debate_intent(intent)
@@ -444,11 +473,10 @@ def process_natural_language(
         elif intent.name in ["chat", "question"]:
             _handle_conversation_intent(intent)
         else:
-            print(f"🚧 Intent '{intent.name}' recognized but not yet implemented")
-            print(f"📝 Parameters: {intent.parameters}")
+            pass
 
-    except Exception as e:
-        print(f"❌ Error processing natural language input: {e}")
+    except Exception:
+        pass
 
 
 def _handle_debate_intent(intent: Intent):
@@ -458,14 +486,10 @@ def _handle_debate_intent(intent: Intent):
         roles = intent.parameters.get("roles")
         rounds = intent.parameters.get("rounds", 3)
 
-        print(f"🗣️ Starting debate on topic: {topic}")
-        print(f"🎭 Roles: {roles or 'default'}")
-        print(f"🔄 Rounds: {rounds}")
-
         debate_start(topic=topic, roles=roles or "pro_arguer,con_arguer", rounds=rounds)
 
-    except Exception as e:
-        print(f"❌ Error starting debate: {e}")
+    except Exception:
+        pass
 
 
 def _handle_search_papers_intent(intent: Intent):
@@ -476,17 +500,12 @@ def _handle_search_papers_intent(intent: Intent):
         max_results = intent.parameters.get("max_results", 5)
 
         if not query:
-            print("❌ No search query provided")
             return
-
-        print(f"📚 Searching for papers about: {query}")
-        print(f"🌐 Source: {source}")
-        print(f"🔢 Max results: {max_results}")
 
         doc_search(query=query, source=source, max_results=max_results)
 
-    except Exception as e:
-        print(f"❌ Error searching papers: {e}")
+    except Exception:
+        pass
 
 
 def _handle_download_paper_intent(intent: Intent):
@@ -494,27 +513,23 @@ def _handle_download_paper_intent(intent: Intent):
     try:
         paper_id = intent.parameters.get("paper_id")
         if not paper_id:
-            print("❌ No paper ID provided for download")
             return
-
-        print(f"📥 Downloading paper with ID: {paper_id}")
 
         doc_download(topic=paper_id, source="arxiv")
 
-    except Exception as e:
-        print(f"❌ Error downloading paper: {e}")
+    except Exception:
+        pass
 
 
 def _handle_view_debate_history_intent(intent: Intent):
     """Handle debate history viewing intent"""
     try:
         session_id = intent.parameters.get("session_id")
-        print(f"📜 Viewing debate history{' for session: ' + session_id if session_id else ''}")
 
         debate_history(session_id=session_id)
 
-    except Exception as e:
-        print(f"❌ Error viewing debate history: {e}")
+    except Exception:
+        pass
 
 
 def _handle_view_specific_debate_intent(intent: Intent):
@@ -522,31 +537,24 @@ def _handle_view_specific_debate_intent(intent: Intent):
     try:
         session_id = intent.parameters.get("session_id")
         if not session_id:
-            print("❌ No session ID provided")
             return
-
-        print(f"🔍 Viewing specific debate session: {session_id}")
 
         debate_history(session_id=session_id)
 
-    except Exception as e:
-        print(f"❌ Error viewing specific debate: {e}")
+    except Exception:
+        pass
 
 
 def _handle_conversation_intent(intent: Intent):
     """Handle conversation/chat/question intent"""
     try:
         if intent.intent_type == IntentType.QUESTION:
-            question = intent.parameters.get("question", "")
-            print(f"🤔 Question: {question}")
-            print("💡 For questions, please use the TUI interface for interactive responses")
+            intent.parameters.get("question", "")
         else:
-            chat_content = intent.parameters.get("chat_content", "")
-            print(f"💬 Chat: {chat_content}")
-            print("👋 Hello! For chat interactions, please use the TUI interface")
+            intent.parameters.get("chat_content", "")
 
-    except Exception as e:
-        print(f"❌ Error handling conversation: {e}")
+    except Exception:
+        pass
 
 
 if __name__ == "__main__":

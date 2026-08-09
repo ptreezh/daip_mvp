@@ -1,6 +1,6 @@
 """Implements the DatabaseManager for all database interactions."""
 
-from typing import List, Optional
+from typing import Optional
 
 from sqlalchemy import create_engine, delete, insert, select
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
@@ -51,8 +51,7 @@ class DatabaseManager:
 
         upsert_stmt = sqlite_insert(sessions_table).values(session_dict)
         upsert_stmt = upsert_stmt.on_conflict_do_update(
-            index_elements=["session_id"],
-            set_=dict(upsert_stmt.excluded)
+            index_elements=["session_id"], set_=dict(upsert_stmt.excluded)
         )
 
         with self.engine.begin() as conn:
@@ -60,19 +59,30 @@ class DatabaseManager:
             conn.execute(upsert_stmt)
 
             # 2. Delete old dialogue turns for this session to ensure consistency
-            conn.execute(delete(dialogue_turns_table).where(dialogue_turns_table.c.session_id == session.session_id))
+            conn.execute(
+                delete(dialogue_turns_table).where(
+                    dialogue_turns_table.c.session_id == session.session_id
+                )
+            )
 
             # 3. Insert new dialogue turns if any
             if session_history:
                 turns_to_insert = [
-                    {"session_id": session.session_id, **turn} for turn in session_history
+                    {"session_id": session.session_id, **turn}
+                    for turn in session_history
                 ]
                 conn.execute(insert(dialogue_turns_table), turns_to_insert)
 
     def get_session(self, session_id: str) -> Optional[Session]:
         """Retrieves a full session, including its dialogue history."""
-        session_stmt = select(sessions_table).where(sessions_table.c.session_id == session_id)
-        turns_stmt = select(dialogue_turns_table).where(dialogue_turns_table.c.session_id == session_id).order_by(dialogue_turns_table.c.timestamp)
+        session_stmt = select(sessions_table).where(
+            sessions_table.c.session_id == session_id
+        )
+        turns_stmt = (
+            select(dialogue_turns_table)
+            .where(dialogue_turns_table.c.session_id == session_id)
+            .order_by(dialogue_turns_table.c.timestamp)
+        )
 
         with self.engine.connect() as conn:
             session_row = conn.execute(session_stmt).first()
@@ -89,7 +99,7 @@ class DatabaseManager:
 
         return Session(**session_data)
 
-    def list_sessions(self) -> List[Session]:
+    def list_sessions(self) -> list[Session]:
         """Retrieves all sessions (metadata only, without history)."""
         stmt = select(sessions_table).order_by(sessions_table.c.start_time.desc())
         with self.engine.connect() as conn:
@@ -106,9 +116,15 @@ class DatabaseManager:
         """Deletes a session and its associated dialogue turns."""
         with self.engine.begin() as conn:
             # Delete dialogue turns first (foreign key dependency)
-            turns_deleted = conn.execute(delete(dialogue_turns_table).where(dialogue_turns_table.c.session_id == session_id))
+            conn.execute(
+                delete(dialogue_turns_table).where(
+                    dialogue_turns_table.c.session_id == session_id
+                )
+            )
             # Delete the session
-            session_deleted = conn.execute(delete(sessions_table).where(sessions_table.c.session_id == session_id))
+            session_deleted = conn.execute(
+                delete(sessions_table).where(sessions_table.c.session_id == session_id)
+            )
             return session_deleted.rowcount > 0
 
     def clear_all_sessions(self) -> int:
@@ -137,7 +153,7 @@ class DatabaseManager:
         """
         return self.engine.connect()
 
-    # For backward compatibility, make get_session work as both session retriever and connection provider
+    # For backward compatibility, make get_session work as both session retriever and connection provider  # noqa: E501
     def __call__(self, session_id: Optional[str] = None):
         """
         Make DatabaseManager callable to provide flexible access patterns.
@@ -162,12 +178,14 @@ class DatabaseManager:
     # --- Knowledge Source Methods (Unchanged) ---
 
     def get_knowledge_source_by_path(self, file_path: str) -> Optional[KnowledgeSource]:
-        stmt = select(knowledge_sources_table).where(knowledge_sources_table.c.file_path == file_path)
+        stmt = select(knowledge_sources_table).where(
+            knowledge_sources_table.c.file_path == file_path
+        )
         with self.engine.connect() as conn:
             row = conn.execute(stmt).first()
         return KnowledgeSource(**row._asdict()) if row else None
 
-    def get_all_knowledge_sources(self) -> List[KnowledgeSource]:
+    def get_all_knowledge_sources(self) -> list[KnowledgeSource]:
         stmt = select(knowledge_sources_table)
         with self.engine.connect() as conn:
             rows = conn.execute(stmt).all()
@@ -179,11 +197,11 @@ class DatabaseManager:
         )
         update_stmt = insert_stmt.on_conflict_do_update(
             index_elements=["file_path"],
-            set_=dict(
-                file_hash=insert_stmt.excluded.file_hash,
-                status=insert_stmt.excluded.status,
-                indexed_at=insert_stmt.excluded.indexed_at,
-            )
+            set_={
+                "file_hash": insert_stmt.excluded.file_hash,
+                "status": insert_stmt.excluded.status,
+                "indexed_at": insert_stmt.excluded.indexed_at,
+            },
         ).returning(knowledge_sources_table)
 
         with self.engine.begin() as conn:
@@ -196,13 +214,17 @@ class DatabaseManager:
         return KnowledgeSource(**upserted_row._asdict())
 
     def delete_knowledge_source(self, file_path: str) -> None:
-        stmt = delete(knowledge_sources_table).where(knowledge_sources_table.c.file_path == file_path)
+        stmt = delete(knowledge_sources_table).where(
+            knowledge_sources_table.c.file_path == file_path
+        )
         with self.engine.begin() as conn:
             conn.execute(stmt)
 
-    def get_knowledge_sources_by_ids(self, ids: List[int]) -> List[KnowledgeSource]:
+    def get_knowledge_sources_by_ids(self, ids: list[int]) -> list[KnowledgeSource]:
         """Retrieves a list of KnowledgeSource objects by their primary key IDs."""
-        stmt = select(knowledge_sources_table).where(knowledge_sources_table.c.id.in_(ids))
+        stmt = select(knowledge_sources_table).where(
+            knowledge_sources_table.c.id.in_(ids)
+        )
         with self.engine.connect() as conn:
             rows = conn.execute(stmt).all()
         return [KnowledgeSource(**row._asdict()) for row in rows]

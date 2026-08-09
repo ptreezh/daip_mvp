@@ -4,15 +4,14 @@ Search Engine for Wiki Knowledge Base
 Handles semantic search, text search, and hybrid search capabilities.
 """
 
-from typing import List, Dict, Any, Optional, Tuple
-import re
 import logging
+import re
 from collections import defaultdict
-import asyncio
 from datetime import datetime
+from typing import Any, Optional
 
-from .document import Document, DocumentType
-from .vector_store import VectorStore, SearchResult
+from .document import Document
+from .vector_store import SearchResult, VectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -25,13 +24,13 @@ class SearchEngine:
         vector_store: VectorStore,
         embedding_model: Optional[str] = None,
         enable_text_search: bool = True,
-        enable_semantic_search: bool = True
+        enable_semantic_search: bool = True,
     ):
         self.vector_store = vector_store
         self.embedding_model = embedding_model
         self.enable_text_search = enable_text_search
         self.enable_semantic_search = enable_semantic_search
-        self.search_history: List[Dict[str, Any]] = []
+        self.search_history: list[dict[str, Any]] = []
         self.max_history = 1000
         logger.info("Initialized search engine")
 
@@ -39,10 +38,10 @@ class SearchEngine:
         self,
         query: str,
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         include_chunks: bool = False,
-        threshold: float = 0.0
-    ) -> List[SearchResult]:
+        threshold: float = 0.0,
+    ) -> list[SearchResult]:
         """Perform semantic search on query"""
         if not self.enable_semantic_search:
             return []
@@ -59,7 +58,7 @@ class SearchEngine:
                 query_vector=query_vector,
                 top_k=top_k * 2,  # Get more results for filtering
                 threshold=threshold,
-                include_chunks=include_chunks
+                include_chunks=include_chunks,
             )
 
             # Apply filters
@@ -77,12 +76,12 @@ class SearchEngine:
 
     def semantic_search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         include_chunks: bool = False,
-        threshold: float = 0.0
-    ) -> List[SearchResult]:
+        threshold: float = 0.0,
+    ) -> list[SearchResult]:
         """Perform semantic search with pre-generated vector"""
         if not self.enable_semantic_search:
             return []
@@ -92,7 +91,7 @@ class SearchEngine:
                 query_vector=query_vector,
                 top_k=top_k * 2,
                 threshold=threshold,
-                include_chunks=include_chunks
+                include_chunks=include_chunks,
             )
 
             # Apply filters
@@ -112,10 +111,10 @@ class SearchEngine:
         self,
         query: str,
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         case_sensitive: bool = False,
-        whole_word: bool = False
-    ) -> List[SearchResult]:
+        whole_word: bool = False,
+    ) -> list[SearchResult]:
         """Perform text-based search"""
         if not self.enable_text_search:
             return []
@@ -130,7 +129,9 @@ class SearchEngine:
 
             # Search for matches
             results = []
-            query_pattern = self._build_search_pattern(query, case_sensitive, whole_word)
+            query_pattern = self._build_search_pattern(
+                query, case_sensitive, whole_word
+            )
 
             for document in all_documents:
                 score = self._calculate_text_score(document, query_pattern, query)
@@ -154,11 +155,11 @@ class SearchEngine:
         self,
         query: str,
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         text_weight: float = 0.5,
         semantic_weight: float = 0.5,
-        include_chunks: bool = False
-    ) -> List[SearchResult]:
+        include_chunks: bool = False,
+    ) -> list[SearchResult]:
         """Perform hybrid search combining text and semantic search"""
         if not (self.enable_text_search and self.enable_semantic_search):
             # Fallback to available search method
@@ -183,7 +184,9 @@ class SearchEngine:
             combined_results.sort(key=lambda x: x.score, reverse=True)
 
             # Record search
-            self._record_search(query, len(combined_results), filters, search_type="hybrid")
+            self._record_search(
+                query, len(combined_results), filters, search_type="hybrid"
+            )
 
             return combined_results[:top_k]
 
@@ -195,8 +198,8 @@ class SearchEngine:
         self,
         partial_query: str,
         max_suggestions: int = 5,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> List[str]:
+        filters: Optional[dict[str, Any]] = None,
+    ) -> list[str]:
         """Get search suggestions based on partial query"""
         try:
             # Get all documents
@@ -230,16 +233,19 @@ class SearchEngine:
             # Filter suggestions based on partial query
             partial_query_lower = partial_query.lower()
             filtered_suggestions = [
-                suggestion for suggestion in suggestions
+                suggestion
+                for suggestion in suggestions
                 if partial_query_lower in suggestion.lower()
             ]
 
             # Sort by relevance (exact matches first, then alphabetical)
-            filtered_suggestions.sort(key=lambda x: (
-                0 if x.lower() == partial_query_lower else 1,
-                0 if x.lower().startswith(partial_query_lower) else 1,
-                x.lower()
-            ))
+            filtered_suggestions.sort(
+                key=lambda x: (
+                    0 if x.lower() == partial_query_lower else 1,
+                    0 if x.lower().startswith(partial_query_lower) else 1,
+                    x.lower(),
+                )
+            )
 
             return filtered_suggestions[:max_suggestions]
 
@@ -248,11 +254,8 @@ class SearchEngine:
             return []
 
     def search_by_category(
-        self,
-        category: str,
-        top_k: int = 10,
-        query: Optional[str] = None
-    ) -> List[SearchResult]:
+        self, category: str, top_k: int = 10, query: Optional[str] = None
+    ) -> list[SearchResult]:
         """Search within a specific category"""
         filters = {"category": category}
 
@@ -264,18 +267,14 @@ class SearchEngine:
             category_docs = self._filter_documents(all_documents, filters)
 
             results = [
-                SearchResult(document=doc, score=1.0)
-                for doc in category_docs[:top_k]
+                SearchResult(document=doc, score=1.0) for doc in category_docs[:top_k]
             ]
 
             return results
 
     def get_similar_documents(
-        self,
-        document_id: str,
-        top_k: int = 5,
-        include_chunks: bool = False
-    ) -> List[SearchResult]:
+        self, document_id: str, top_k: int = 5, include_chunks: bool = False
+    ) -> list[SearchResult]:
         """Find documents similar to a given document"""
         try:
             document = self.vector_store.get_document(document_id)
@@ -287,14 +286,14 @@ class SearchEngine:
             return self.semantic_search(
                 query_vector=document.embedding,
                 top_k=top_k,
-                include_chunks=include_chunks
+                include_chunks=include_chunks,
             )
 
         except Exception as e:
             logger.error(f"Error finding similar documents: {e}")
             return []
 
-    def _generate_embedding(self, text: str) -> Optional[List[float]]:
+    def _generate_embedding(self, text: str) -> Optional[list[float]]:
         """Generate embedding for text"""
         try:
             # This would use an actual embedding model in production
@@ -305,7 +304,7 @@ class SearchEngine:
             embedding = []
 
             for i in range(0, min(len(text_hash), 128), 2):
-                hex_pair = text_hash[i:i+2]
+                hex_pair = text_hash[i : i + 2]
                 val = int(hex_pair, 16) / 255.0
                 for _ in range(6):
                     embedding.append(val)
@@ -321,10 +320,8 @@ class SearchEngine:
             return None
 
     def _apply_filters(
-        self,
-        results: List[SearchResult],
-        filters: Dict[str, Any]
-    ) -> List[SearchResult]:
+        self, results: list[SearchResult], filters: dict[str, Any]
+    ) -> list[SearchResult]:
         """Apply filters to search results"""
         filtered_results = []
 
@@ -336,20 +333,15 @@ class SearchEngine:
         return filtered_results
 
     def _filter_documents(
-        self,
-        documents: List[Document],
-        filters: Dict[str, Any]
-    ) -> List[Document]:
+        self, documents: list[Document], filters: dict[str, Any]
+    ) -> list[Document]:
         """Filter documents based on criteria"""
         return [
-            doc for doc in documents
-            if self._document_matches_filters(doc, filters)
+            doc for doc in documents if self._document_matches_filters(doc, filters)
         ]
 
     def _document_matches_filters(
-        self,
-        document: Document,
-        filters: Dict[str, Any]
+        self, document: Document, filters: dict[str, Any]
     ) -> bool:
         """Check if document matches filters"""
         for key, value in filters.items():
@@ -375,17 +367,14 @@ class SearchEngine:
         return True
 
     def _build_search_pattern(
-        self,
-        query: str,
-        case_sensitive: bool,
-        whole_word: bool
+        self, query: str, case_sensitive: bool, whole_word: bool
     ) -> re.Pattern:
         """Build regex pattern for text search"""
         # Escape special regex characters in query
         escaped_query = re.escape(query)
 
         if whole_word:
-            pattern = r'\b' + escaped_query + r'\b'
+            pattern = r"\b" + escaped_query + r"\b"
         else:
             pattern = escaped_query
 
@@ -393,10 +382,7 @@ class SearchEngine:
         return re.compile(pattern, flags)
 
     def _calculate_text_score(
-        self,
-        document: Document,
-        pattern: re.Pattern,
-        original_query: str
+        self, document: Document, pattern: re.Pattern, original_query: str
     ) -> float:
         """Calculate text search score"""
         score = 0.0
@@ -423,11 +409,11 @@ class SearchEngine:
 
     def _combine_search_results(
         self,
-        text_results: List[SearchResult],
-        semantic_results: List[SearchResult],
+        text_results: list[SearchResult],
+        semantic_results: list[SearchResult],
         text_weight: float,
-        semantic_weight: float
-    ) -> List[SearchResult]:
+        semantic_weight: float,
+    ) -> list[SearchResult]:
         """Combine text and semantic search results"""
         combined_scores = defaultdict(float)
         combined_results = {}
@@ -453,22 +439,58 @@ class SearchEngine:
 
         return final_results
 
-    def _extract_words(self, text: str) -> List[str]:
+    def _extract_words(self, text: str) -> list[str]:
         """Extract meaningful words from text"""
         # Remove special characters and split into words
-        words = re.findall(r'\b[a-zA-Z][a-zA-Z0-9]*\b', text.lower())
+        words = re.findall(r"\b[a-zA-Z][a-zA-Z0-9]*\b", text.lower())
 
         # Filter out very short words and common stop words
         stop_words = {
-            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-            'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have',
-            'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should',
-            'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they'
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "this",
+            "that",
+            "these",
+            "those",
+            "i",
+            "you",
+            "he",
+            "she",
+            "it",
+            "we",
+            "they",
         }
 
         meaningful_words = [
-            word for word in words
-            if len(word) >= 3 and word not in stop_words
+            word for word in words if len(word) >= 3 and word not in stop_words
         ]
 
         return meaningful_words
@@ -477,8 +499,8 @@ class SearchEngine:
         self,
         query: str,
         result_count: int,
-        filters: Optional[Dict[str, Any]],
-        search_type: str = "semantic"
+        filters: Optional[dict[str, Any]],
+        search_type: str = "semantic",
     ) -> None:
         """Record search query for analytics"""
         search_record = {
@@ -486,16 +508,16 @@ class SearchEngine:
             "result_count": result_count,
             "filters": filters or {},
             "search_type": search_type,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         self.search_history.append(search_record)
 
         # Limit history size
         if len(self.search_history) > self.max_history:
-            self.search_history = self.search_history[-self.max_history:]
+            self.search_history = self.search_history[-self.max_history :]
 
-    def get_search_analytics(self) -> Dict[str, Any]:
+    def get_search_analytics(self) -> dict[str, Any]:
         """Get search analytics"""
         if not self.search_history:
             return {"total_searches": 0}
@@ -514,7 +536,9 @@ class SearchEngine:
             "total_searches": total_searches,
             "search_types": dict(search_types),
             "average_results": avg_results,
-            "most_recent_search": self.search_history[-1] if self.search_history else None
+            "most_recent_search": self.search_history[-1]
+            if self.search_history
+            else None,
         }
 
     def clear_search_history(self) -> None:

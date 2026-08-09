@@ -7,17 +7,16 @@ Manages enhanced role configurations with model-specific settings.
 import glob
 import logging
 import os
-from typing import Dict, List, Optional
+from typing import Optional
 
 import yaml
 from pydantic import ValidationError
 
 from daip_live.p4_role_manager_tools.role_model_config import (
-    EnhancedRole, 
-    RoleModelMapping, 
-    RoleModelConfig
+    EnhancedRole,
+    RoleModelConfig,
+    RoleModelMapping,
 )
-from daip_live.core.models import Role
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ class RoleModelManager:
     def __init__(self, roles_dir_path: str = None):
         if roles_dir_path is None:
             roles_dir_path = "roles"
-        self._roles: Dict[str, EnhancedRole] = {}
+        self._roles: dict[str, EnhancedRole] = {}
         self._roles_dir_path = roles_dir_path
         self._load_roles_from_directory(roles_dir_path)
 
@@ -41,24 +40,30 @@ class RoleModelManager:
         for extension in ["*.yaml", "*.yml"]:
             for file_path in glob.glob(os.path.join(dir_path, extension)):
                 try:
-                    with open(file_path, encoding='utf-8') as f:
+                    with open(file_path, encoding="utf-8") as f:
                         role_data = yaml.safe_load(f)
                         if not isinstance(role_data, dict):
-                            log.warning(f"Skipping {file_path}: content is not a dictionary.")
+                            log.warning(
+                                f"Skipping {file_path}: content is not a dictionary."
+                            )
                             continue
 
                         role_name = os.path.splitext(os.path.basename(file_path))[0]
                         role_data["name"] = role_name
 
-                        # Try to create EnhancedRole directly. If it fails, log a detailed error.
+                        # Try to create EnhancedRole directly. If it fails, log a detailed error.  # noqa: E501
                         try:
                             role = EnhancedRole(**role_data)
                             self._roles[role.name] = role
-                            log.info(f"Loaded enhanced role: {role.name} with {len(role.model_configs)} model configs")
+                            log.info(
+                                f"Loaded enhanced role: {role.name} with {len(role.model_configs)} model configs"  # noqa: E501
+                            )
                         except ValidationError as e:
-                            # Provide a much more detailed error log to help users fix their YAML files.
+                            # Provide a much more detailed error log to help users fix their YAML files.  # noqa: E501
                             error_details = e.errors()
-                            log.warning(f"Skipping {file_path} due to validation error. Details: {error_details}")
+                            log.warning(
+                                f"Skipping {file_path} due to validation error. Details: {error_details}"  # noqa: E501
+                            )
                             continue
 
                 except yaml.YAMLError as e:
@@ -72,24 +77,30 @@ class RoleModelManager:
         """Get an enhanced role by name."""
         return self._roles.get(name)
 
-    def list_roles(self) -> List[EnhancedRole]:
+    def list_roles(self) -> list[EnhancedRole]:
         """List all enhanced roles."""
         return list(self._roles.values())
 
-    def get_role_model_mapping(self, role_name: str, use_debate_config: bool = True) -> Optional[RoleModelMapping]:
+    def get_role_model_mapping(
+        self, role_name: str, use_debate_config: bool = True
+    ) -> Optional[RoleModelMapping]:
         """Get model mapping for a specific role."""
         role = self.get_role_by_name(role_name)
         if not role:
             return None
-        
+
         return RoleModelMapping.from_role(role, use_debate_config)
 
-    def get_debate_model_mappings(self, role_names: List[str]) -> List[Optional[RoleModelMapping]]:
+    def get_debate_model_mappings(
+        self, role_names: list[str]
+    ) -> list[Optional[RoleModelMapping]]:
         """Get model mappings for multiple roles for debate purposes."""
         mappings = []
         for role_name in role_names:
             mapping = self.get_role_model_mapping(role_name, use_debate_config=True)
-            mappings.append(mapping)  # Include None values to maintain 1:1 relationship with requested roles
+            mappings.append(
+                mapping
+            )  # Include None values to maintain 1:1 relationship with requested roles
         return mappings
 
     def create_role_model_config(
@@ -98,7 +109,7 @@ class RoleModelManager:
         model_name: str,
         provider: str,
         is_primary: bool = False,
-        **kwargs
+        **kwargs,
     ) -> bool:
         """Create or update a role's model configuration."""
         role = self.get_role_by_name(role_name)
@@ -107,7 +118,7 @@ class RoleModelManager:
 
         # Check if model config already exists
         existing_config = role.get_model_config_by_name(model_name)
-        
+
         if existing_config:
             # Update existing config
             for key, value in kwargs.items():
@@ -120,7 +131,7 @@ class RoleModelManager:
                 model_name=model_name,
                 provider=provider,
                 is_primary=is_primary,
-                **kwargs
+                **kwargs,
             )
             role.model_configs.append(new_config)
 
@@ -137,16 +148,16 @@ class RoleModelManager:
         """Save role configuration to YAML file."""
         try:
             file_path = os.path.join(self._roles_dir_path, f"{role.name}.yaml")
-            
+
             # Convert to dict for YAML serialization
-            role_dict = role.model_dump(exclude={'name'})
-            
-            with open(file_path, 'w', encoding='utf-8') as f:
+            role_dict = role.model_dump(exclude={"name"})
+
+            with open(file_path, "w", encoding="utf-8") as f:
                 yaml.dump(role_dict, f, default_flow_style=False, allow_unicode=True)
-            
+
             log.info(f"Saved role {role.name} to {file_path}")
             return True
-            
+
         except Exception as e:
             log.error(f"Failed to save role {role.name}: {e}")
             return False
@@ -155,7 +166,7 @@ class RoleModelManager:
         """Create sample role configuration files with model settings."""
         sample_configs = {
             "researcher": {
-                "persona": "You are a research assistant specializing in academic topics. You provide detailed, well-structured responses with citations and references when possible.",
+                "persona": "You are a research assistant specializing in academic topics. You provide detailed, well-structured responses with citations and references when possible.",  # noqa: E501
                 "tools": ["search_web", "read_document", "summarize_text"],
                 "model_configs": [
                     {
@@ -166,15 +177,15 @@ class RoleModelManager:
                         "top_p": 0.9,
                         "frequency_penalty": 0.0,
                         "presence_penalty": 0.0,
-                        "is_primary": True
+                        "is_primary": True,
                     },
                     {
                         "model_name": "claude-3-sonnet",
                         "provider": "anthropic",
                         "max_tokens": 4000,
                         "temperature": 0.2,
-                        "is_primary": False
-                    }
+                        "is_primary": False,
+                    },
                 ],
                 "debate_model_config": {
                     "model_name": "gpt-4",
@@ -184,11 +195,11 @@ class RoleModelManager:
                     "top_p": 0.9,
                     "frequency_penalty": 0.1,
                     "presence_penalty": 0.1,
-                    "is_primary": True
-                }
+                    "is_primary": True,
+                },
             },
             "creative_writer": {
-                "persona": "You are a creative writer with expertise in storytelling, poetry, and imaginative content. You provide engaging, creative responses with vivid descriptions.",
+                "persona": "You are a creative writer with expertise in storytelling, poetry, and imaginative content. You provide engaging, creative responses with vivid descriptions.",  # noqa: E501
                 "tools": ["write_document", "brainstorm_ideas", "edit_text"],
                 "model_configs": [
                     {
@@ -199,12 +210,12 @@ class RoleModelManager:
                         "top_p": 0.95,
                         "frequency_penalty": 0.1,
                         "presence_penalty": 0.1,
-                        "is_primary": True
+                        "is_primary": True,
                     }
-                ]
+                ],
             },
             "analyst": {
-                "persona": "You are a data analyst specializing in logical reasoning and critical thinking. You provide structured, analytical responses with clear reasoning.",
+                "persona": "You are a data analyst specializing in logical reasoning and critical thinking. You provide structured, analytical responses with clear reasoning.",  # noqa: E501
                 "tools": ["analyze_data", "create_charts", "generate_report"],
                 "model_configs": [
                     {
@@ -215,10 +226,10 @@ class RoleModelManager:
                         "top_p": 0.8,
                         "frequency_penalty": 0.2,
                         "presence_penalty": 0.1,
-                        "is_primary": True
+                        "is_primary": True,
                     }
-                ]
-            }
+                ],
+            },
         }
 
         # Ensure roles directory exists
@@ -229,16 +240,18 @@ class RoleModelManager:
             file_path = os.path.join(self._roles_dir_path, f"{role_name}.yaml")
             if not os.path.exists(file_path):
                 try:
-                    with open(file_path, 'w', encoding='utf-8') as f:
-                        yaml.dump(config_data, f, default_flow_style=False, allow_unicode=True)
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        yaml.dump(
+                            config_data, f, default_flow_style=False, allow_unicode=True
+                        )
                     log.info(f"Created sample role config: {role_name}")
                 except Exception as e:
                     log.error(f"Failed to create sample role {role_name}: {e}")
 
-    def list_available_models(self) -> List[str]:
+    def list_available_models(self) -> list[str]:
         """List all unique model names across all roles."""
         models = set()
         for role in self._roles.values():
             for config in role.model_configs:
                 models.add(config.model_name)
-        return sorted(list(models))
+        return sorted(models)

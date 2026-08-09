@@ -3,17 +3,16 @@
 支持所有角色应用场景的统一会话管理
 """
 
-from typing import Dict, List, Optional, Any, AsyncGenerator
 from dataclasses import dataclass, field
 from datetime import datetime
-import asyncio
+from typing import Any, Optional
 
-from daip_live.core.models import Session, AgentState, DialogueTurn
-from daip_live.p4_role_manager_tools.role_model_config import RoleModelConfig
+from daip_live.core.models import AgentState, Session
+from daip_live.core.universal_memory_system import MemoryType, UniversalMemorySystem
 
 # 导入通用优化组件
 from daip_live.core.universal_model_manager import UniversalModelManager
-from daip_live.core.universal_memory_system import UniversalMemorySystem, MemoryType
+from daip_live.p4_role_manager_tools.role_model_config import RoleModelConfig
 
 
 @dataclass
@@ -27,25 +26,33 @@ class UniversalRoleSession:
     system_prompt: str = ""
 
     # 会话历史
-    dialogue_history: List[Dict[str, Any]] = field(default_factory=list)
+    dialogue_history: list[dict[str, Any]] = field(default_factory=list)
 
     # 个人记忆和上下文
-    personal_context: Dict[str, Any] = field(default_factory=dict)
-    stance_memory: Dict[str, Any] = field(default_factory=dict)
-    preferences: Dict[str, Any] = field(default_factory=dict)
+    personal_context: dict[str, Any] = field(default_factory=dict)
+    stance_memory: dict[str, Any] = field(default_factory=dict)
+    preferences: dict[str, Any] = field(default_factory=dict)
 
     # 应用特定数据
-    application_data: Dict[str, Any] = field(default_factory=dict)
+    application_data: dict[str, Any] = field(default_factory=dict)
 
-    def add_dialogue_turn(self, role: str, content: str, turn_type: str = "dialogue", metadata: Optional[Dict] = None):
+    def add_dialogue_turn(
+        self,
+        role: str,
+        content: str,
+        turn_type: str = "dialogue",
+        metadata: Optional[dict] = None,
+    ):
         """添加对话轮次"""
-        self.dialogue_history.append({
-            "role": role,
-            "content": content,
-            "type": turn_type,
-            "timestamp": datetime.now().isoformat(),
-            "metadata": metadata or {}
-        })
+        self.dialogue_history.append(
+            {
+                "role": role,
+                "content": content,
+                "type": turn_type,
+                "timestamp": datetime.now().isoformat(),
+                "metadata": metadata or {},
+            }
+        )
 
     def update_context(self, key: str, value: Any):
         """更新角色上下文"""
@@ -53,9 +60,13 @@ class UniversalRoleSession:
 
     def add_preference(self, key: str, value: Any, confidence: float = 1.0):
         """添加角色偏好"""
-        self.preferences[key] = {"value": value, "confidence": confidence, "timestamp": datetime.now().isoformat()}
+        self.preferences[key] = {
+            "value": value,
+            "confidence": confidence,
+            "timestamp": datetime.now().isoformat(),
+        }
 
-    def get_recent_history(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_recent_history(self, limit: int = 10) -> list[dict[str, Any]]:
         """获取最近的对话历史"""
         return self.dialogue_history[-limit:]
 
@@ -95,13 +106,13 @@ class UniversalSessionManager:
             self.memory_system = UniversalMemorySystem()
 
             # 通用角色会话
-            self.role_sessions: Dict[str, UniversalRoleSession] = {}
+            self.role_sessions: dict[str, UniversalRoleSession] = {}
 
             # 会话映射
-            self.session_mapping: Dict[str, str] = {}  # session_id -> role_name
+            self.session_mapping: dict[str, str] = {}  # session_id -> role_name
 
         # 传统会话管理（保持兼容性）
-        self.legacy_sessions: Dict[str, Session] = {}
+        self.legacy_sessions: dict[str, Session] = {}
 
     async def create_universal_session(
         self,
@@ -110,7 +121,7 @@ class UniversalSessionManager:
         model_config: RoleModelConfig,
         session_type: str = "conversation",
         system_prompt: str = "",
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
     ) -> str:
         """创建通用角色会话"""
         if not self.use_optimized_architecture:
@@ -124,7 +135,7 @@ class UniversalSessionManager:
             role_persona=role_persona,
             model_config=model_config,
             session_type=session_type,
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
         )
 
         # 建立映射
@@ -136,7 +147,7 @@ class UniversalSessionManager:
             memory_type=MemoryType.SESSION_CONTEXT,
             source="system",
             confidence=1.0,
-            session_id=session_id
+            session_id=session_id,
         )
 
         return session_id
@@ -145,9 +156,9 @@ class UniversalSessionManager:
         self,
         session_id: str,
         prompt: str,
-        context: Optional[Dict[str, Any]] = None,
-        **kwargs
-    ) -> tuple[str, Optional[Dict[str, Any]]]:
+        context: Optional[dict[str, Any]] = None,
+        **kwargs,
+    ) -> tuple[str, Optional[dict[str, Any]]]:
         """生成回复 - 适用于所有应用场景"""
         if not self.use_optimized_architecture:
             raise ValueError("Optimized architecture not enabled")
@@ -159,7 +170,9 @@ class UniversalSessionManager:
         role_session = self.role_sessions[role_name]
 
         # 构建增强提示词
-        enhanced_prompt = self._build_enhanced_prompt(role_session, prompt, context, **kwargs)
+        enhanced_prompt = self._build_enhanced_prompt(
+            role_session, prompt, context, session_id=session_id, **kwargs
+        )
 
         # 使用通用模型管理器生成回复
         response_content, usage = await self.model_manager.generate_response(
@@ -171,14 +184,16 @@ class UniversalSessionManager:
             max_tokens=role_session.model_config.max_tokens,
             top_p=role_session.model_config.top_p,
             frequency_penalty=role_session.model_config.frequency_penalty,
-            presence_penalty=role_session.model_config.presence_penalty
+            presence_penalty=role_session.model_config.presence_penalty,
         )
 
         # 记录对话
-        role_session.add_dialogue_turn("assistant", response_content, "response", {
-            "usage": usage,
-            "context": context
-        })
+        role_session.add_dialogue_turn(
+            "assistant",
+            response_content,
+            "response",
+            {"usage": usage, "context": context},
+        )
 
         # 更新记忆系统
         self.memory_system.add_memory(
@@ -188,7 +203,7 @@ class UniversalSessionManager:
             confidence=0.9,
             role_name=role_name,
             session_id=session_id,
-            metadata={"turn_type": "response", "usage": usage}
+            metadata={"turn_type": "response", "usage": usage},
         )
 
         # 转换usage格式
@@ -197,7 +212,7 @@ class UniversalSessionManager:
             token_info = {
                 "prompt_tokens": usage.get("prompt_tokens", 0),
                 "completion_tokens": usage.get("completion_tokens", 0),
-                "total_tokens": usage.get("total_tokens", 0)
+                "total_tokens": usage.get("total_tokens", 0),
             }
 
         return response_content, token_info
@@ -206,8 +221,9 @@ class UniversalSessionManager:
         self,
         role_session: UniversalRoleSession,
         user_prompt: str,
-        context: Optional[Dict[str, Any]] = None,
-        **kwargs
+        context: Optional[dict[str, Any]] = None,
+        session_id: Optional[str] = None,
+        **kwargs,
     ) -> str:
         """构建增强提示词"""
         prompt_parts = []
@@ -235,7 +251,7 @@ class UniversalSessionManager:
         memory_context = self.memory_system.get_compressed_context(
             role_name=role_session.role_name,
             session_id=session_id,
-            current_round=len(role_session.dialogue_history) + 1
+            current_round=len(role_session.dialogue_history) + 1,
         )
         if memory_context and memory_context != "No relevant memories found.":
             prompt_parts.append(f"\nRelevant Memory:\n{memory_context}")
@@ -245,15 +261,23 @@ class UniversalSessionManager:
 
         # 应用特定指令
         if role_session.session_type == "debate":
-            prompt_parts.append("\nPlease maintain a balanced debate perspective and build upon previous arguments.")
+            prompt_parts.append(
+                "\nPlease maintain a balanced debate perspective and build upon previous arguments."  # noqa: E501
+            )
         elif role_session.session_type == "analysis":
-            prompt_parts.append("\nPlease provide thorough analysis with supporting evidence.")
+            prompt_parts.append(
+                "\nPlease provide thorough analysis with supporting evidence."
+            )
         elif role_session.session_type == "creative":
-            prompt_parts.append("\nPlease be creative and imaginative in your response.")
+            prompt_parts.append(
+                "\nPlease be creative and imaginative in your response."
+            )
 
         return "\n".join(prompt_parts)
 
-    def add_user_message(self, session_id: str, content: str, metadata: Optional[Dict] = None):
+    def add_user_message(
+        self, session_id: str, content: str, metadata: Optional[dict] = None
+    ):
         """添加用户消息"""
         if not self.use_optimized_architecture:
             raise ValueError("Optimized architecture not enabled")
@@ -274,10 +298,10 @@ class UniversalSessionManager:
             confidence=1.0,
             role_name=role_name,
             session_id=session_id,
-            metadata={"turn_type": "user_input"}
+            metadata={"turn_type": "user_input"},
         )
 
-    def get_session_context(self, session_id: str) -> Dict[str, Any]:
+    def get_session_context(self, session_id: str) -> dict[str, Any]:
         """获取会话上下文"""
         if not self.use_optimized_architecture:
             raise ValueError("Optimized architecture not enabled")
@@ -294,10 +318,16 @@ class UniversalSessionManager:
             "dialogue_history": role_session.get_recent_history(),
             "personal_context": role_session.personal_context,
             "preferences": role_session.preferences,
-            "memory_context": self.memory_system.get_context(role_name=role_name, session_id=session_id, current_round=len(role_session.dialogue_history) + 1)
+            "memory_context": self.memory_system.get_context(
+                role_name=role_name,
+                session_id=session_id,
+                current_round=len(role_session.dialogue_history) + 1,
+            ),
         }
 
-    def update_role_preference(self, session_id: str, key: str, value: Any, confidence: float = 1.0):
+    def update_role_preference(
+        self, session_id: str, key: str, value: Any, confidence: float = 1.0
+    ):
         """更新角色偏好"""
         if not self.use_optimized_architecture:
             raise ValueError("Optimized architecture not enabled")
@@ -310,7 +340,7 @@ class UniversalSessionManager:
 
         role_session.add_preference(key, value, confidence)
 
-    def get_session_statistics(self, session_id: str) -> Dict[str, Any]:
+    def get_session_statistics(self, session_id: str) -> dict[str, Any]:
         """获取会话统计信息"""
         if not self.use_optimized_architecture:
             raise ValueError("Optimized architecture not enabled")
@@ -327,10 +357,12 @@ class UniversalSessionManager:
             "session_type": role_session.session_type,
             "dialogue_turns": len(role_session.dialogue_history),
             "preferences_count": len(role_session.preferences),
-            "memory_entries": self.memory_system.get_memory_statistics().get("total_shared_facts", 0)
+            "memory_entries": self.memory_system.get_memory_statistics().get(
+                "total_shared_facts", 0
+            ),
         }
 
-    def list_active_sessions(self) -> List[str]:
+    def list_active_sessions(self) -> list[str]:
         """列出活跃会话"""
         if self.use_optimized_architecture:
             return list(self.session_mapping.keys())
@@ -351,7 +383,7 @@ class UniversalSessionManager:
                 memory_type=MemoryType.SESSION_CONTEXT,
                 source="system",
                 confidence=1.0,
-                session_id=session_id
+                session_id=session_id,
             )
 
             # 清理资源
@@ -360,7 +392,9 @@ class UniversalSessionManager:
                 del self.role_sessions[role_name]
 
     # 兼容性方法 - 保持与现有SessionManager的接口兼容
-    def create_session(self, goal: str, session_type: str, participant_ids: List[str]) -> Session:
+    def create_session(
+        self, goal: str, session_type: str, participant_ids: list[str]
+    ) -> Session:
         """创建传统会话（保持兼容性）"""
         if self.use_optimized_architecture:
             # 如果使用优化架构，创建兼容的会话
@@ -369,7 +403,7 @@ class UniversalSessionManager:
                 goal=goal,
                 session_type=session_type,
                 participant_ids=participant_ids,
-                status=AgentState.RUNNING
+                status=AgentState.RUNNING,
             )
             self.legacy_sessions[session.session_id] = session
             return session
@@ -380,7 +414,7 @@ class UniversalSessionManager:
                 goal=goal,
                 session_type=session_type,
                 participant_ids=participant_ids,
-                status=AgentState.RUNNING
+                status=AgentState.RUNNING,
             )
             self.legacy_sessions[session.session_id] = session
             return session
@@ -394,11 +428,11 @@ class UniversalSessionManager:
         """获取会话"""
         return self.legacy_sessions.get(session_id)
 
-    def list_sessions(self) -> List[Session]:
+    def list_sessions(self) -> list[Session]:
         """列出所有会话"""
         return list(self.legacy_sessions.values())
 
-    def get_optimization_benefits(self) -> Dict[str, Any]:
+    def get_optimization_benefits(self) -> dict[str, Any]:
         """获取优化好处"""
         if not self.use_optimized_architecture:
             return {"message": "优化架构未启用"}
@@ -407,9 +441,15 @@ class UniversalSessionManager:
             "resource_usage": {
                 "ollama_instances": 1,
                 "memory_efficiency": "通用会话管理减少资源浪费",
-                "model_switching": "分时复用避免资源竞争"
+                "model_switching": "分时复用避免资源竞争",
             },
             "memory_system": self.memory_system.get_memory_statistics(),
             "active_sessions": len(self.session_mapping),
-            "supported_session_types": ["conversation", "debate", "analysis", "creative", "roleplay"]
+            "supported_session_types": [
+                "conversation",
+                "debate",
+                "analysis",
+                "creative",
+                "roleplay",
+            ],
         }

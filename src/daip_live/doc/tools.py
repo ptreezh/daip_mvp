@@ -1,25 +1,23 @@
-import os
-import sys
-import time
 import json
-import subprocess
-import platform
-import tempfile
 import logging
-import uuid
-import threading
+import os
+import platform
 import queue
 import re
-from pathlib import Path
-from dataclasses import dataclass, field, asdict
+import subprocess
+import threading
+import time
+import uuid
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Callable, Union, Set
-from shutil import which
 from enum import Enum
+from pathlib import Path
+from shutil import which
+from typing import Any, Callable, Optional
 
 
 def _papers_dir() -> Path:
-    d = Path(os.getcwd())/"docs"/"papers"
+    d = Path(os.getcwd()) / "docs" / "papers"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -38,6 +36,7 @@ def _has_pandoc() -> bool:
 
 class ConversionStatus(Enum):
     """转换状态枚举"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -47,6 +46,7 @@ class ConversionStatus(Enum):
 
 class ConversionPriority(Enum):
     """转换优先级枚举"""
+
     LOW = 1
     NORMAL = 2
     HIGH = 3
@@ -55,17 +55,20 @@ class ConversionPriority(Enum):
 
 class ConversionError(Exception):
     """转换错误异常类"""
+
     pass
 
 
 class ConversionQueueFull(Exception):
     """转换队列满异常"""
+
     pass
 
 
 @dataclass
 class ConversionResult:
     """转换结果数据类"""
+
     success: bool
     source_file: str
     output_file: str
@@ -73,12 +76,12 @@ class ConversionResult:
     error_message: Optional[str] = None
     conversion_time: Optional[float] = None
     file_size: Optional[int] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     task_id: Optional[str] = None
     pages_count: Optional[int] = None
-    warnings: List[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return asdict(self)
 
@@ -91,11 +94,12 @@ class ConversionResult:
 @dataclass
 class ConversionTask:
     """转换任务数据类"""
+
     task_id: str
     source_file: str
     output_file: str
     format: str
-    options: Dict[str, Any] = field(default_factory=dict)
+    options: dict[str, Any] = field(default_factory=dict)
     priority: ConversionPriority = ConversionPriority.NORMAL
     status: ConversionStatus = ConversionStatus.PENDING
     progress: float = 0.0
@@ -103,23 +107,23 @@ class ConversionTask:
     created_at: datetime = field(default_factory=datetime.now)
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
-    result: Optional['ConversionResult'] = None
+    result: Optional["ConversionResult"] = None
     error_message: Optional[str] = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         data = asdict(self)
         # 转换枚举和日期时间
-        data['priority'] = self.priority.value
-        data['status'] = self.status.value
+        data["priority"] = self.priority.value
+        data["status"] = self.status.value
         if self.created_at:
-            data['created_at'] = self.created_at.isoformat()
+            data["created_at"] = self.created_at.isoformat()
         if self.started_at:
-            data['started_at'] = self.started_at.isoformat()
+            data["started_at"] = self.started_at.isoformat()
         if self.completed_at:
-            data['completed_at'] = self.completed_at.isoformat()
+            data["completed_at"] = self.completed_at.isoformat()
         if self.result:
-            data['result'] = asdict(self.result)
+            data["result"] = asdict(self.result)
         return data
 
 
@@ -145,18 +149,18 @@ class FormatConverter:
             "failed_conversions": 0,
             "total_conversion_time": 0.0,
             "average_queue_time": 0.0,
-            "peak_memory_usage": 0.0
+            "peak_memory_usage": 0.0,
         }
 
         # 任务队列和管理
         self.task_queue = queue.PriorityQueue(maxsize=max_queue_size)
-        self.active_tasks: Dict[str, ConversionTask] = {}
-        self.completed_tasks: List[ConversionTask] = []
-        self.task_history: List[ConversionResult] = []
+        self.active_tasks: dict[str, ConversionTask] = {}
+        self.completed_tasks: list[ConversionTask] = []
+        self.task_history: list[ConversionResult] = []
         self.max_history_size = 1000
 
         # 异步处理
-        self.worker_threads: List[threading.Thread] = []
+        self.worker_threads: list[threading.Thread] = []
         self.is_running = False
         self._lock = threading.RLock()
 
@@ -165,7 +169,7 @@ class FormatConverter:
             "conversions_per_minute": 0.0,
             "average_conversion_time": 0.0,
             "success_rate": 0.0,
-            "queue_utilization": 0.0
+            "queue_utilization": 0.0,
         }
 
         # 设置日志
@@ -173,7 +177,7 @@ class FormatConverter:
         if not self.logger.handlers:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
@@ -186,7 +190,7 @@ class FormatConverter:
         """检查Pandoc是否可用"""
         return _has_pandoc()
 
-    def _get_supported_formats(self) -> List[str]:
+    def _get_supported_formats(self) -> list[str]:
         """获取支持的格式列表"""
         if self.pandoc_available:
             return ["pdf", "docx", "html", "txt", "rtf", "odt"]
@@ -210,7 +214,7 @@ class FormatConverter:
         """检查格式是否支持"""
         return format_name.lower() in self.supported_formats
 
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """获取支持格式列表"""
         return self.supported_formats.copy()
 
@@ -233,31 +237,46 @@ class FormatConverter:
         except Exception:
             return False
 
-    def convert_markdown_to_pdf(self,
-                               source_file: str,
-                               output_file: Optional[str] = None,
-                               options: Optional[Dict[str, Any]] = None,
-                               progress_callback: Optional[Callable[[float, str], None]] = None,
-                               cancel_callback: Optional[Callable[[], bool]] = None) -> ConversionResult:
+    def convert_markdown_to_pdf(
+        self,
+        source_file: str,
+        output_file: Optional[str] = None,
+        options: Optional[dict[str, Any]] = None,
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+        cancel_callback: Optional[Callable[[], bool]] = None,
+    ) -> ConversionResult:
         """转换Markdown到PDF"""
-        return self._convert_markdown(source_file, "pdf", output_file, options, progress_callback, cancel_callback)
+        return self._convert_markdown(
+            source_file, "pdf", output_file, options, progress_callback, cancel_callback
+        )
 
-    def convert_markdown_to_docx(self,
-                                source_file: str,
-                                output_file: Optional[str] = None,
-                                options: Optional[Dict[str, Any]] = None,
-                                progress_callback: Optional[Callable[[float, str], None]] = None,
-                                cancel_callback: Optional[Callable[[], bool]] = None) -> ConversionResult:
+    def convert_markdown_to_docx(
+        self,
+        source_file: str,
+        output_file: Optional[str] = None,
+        options: Optional[dict[str, Any]] = None,
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+        cancel_callback: Optional[Callable[[], bool]] = None,
+    ) -> ConversionResult:
         """转换Markdown到DOCX"""
-        return self._convert_markdown(source_file, "docx", output_file, options, progress_callback, cancel_callback)
+        return self._convert_markdown(
+            source_file,
+            "docx",
+            output_file,
+            options,
+            progress_callback,
+            cancel_callback,
+        )
 
-    def _convert_markdown(self,
-                         source_file: str,
-                         target_format: str,
-                         output_file: Optional[str] = None,
-                         options: Optional[Dict[str, Any]] = None,
-                         progress_callback: Optional[Callable[[float, str], None]] = None,
-                         cancel_callback: Optional[Callable[[], bool]] = None) -> ConversionResult:
+    def _convert_markdown(
+        self,
+        source_file: str,
+        target_format: str,
+        output_file: Optional[str] = None,
+        options: Optional[dict[str, Any]] = None,
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+        cancel_callback: Optional[Callable[[], bool]] = None,
+    ) -> ConversionResult:
         """核心Markdown转换方法"""
         start_time = time.time()
 
@@ -290,18 +309,43 @@ class FormatConverter:
                     output_file=output_file,
                     format=target_format,
                     error_message="转换已取消",
-                    conversion_time=time.time() - start_time
+                    conversion_time=time.time() - start_time,
                 )
 
             # 根据格式选择转换方法
             if target_format == "pdf":
-                success = self._convert_to_pdf(source_path, output_path, options or {}, progress_callback, cancel_callback)
+                success = self._convert_to_pdf(
+                    source_path,
+                    output_path,
+                    options or {},
+                    progress_callback,
+                    cancel_callback,
+                )
             elif target_format == "docx":
-                success = self._convert_to_docx(source_path, output_path, options or {}, progress_callback, cancel_callback)
+                success = self._convert_to_docx(
+                    source_path,
+                    output_path,
+                    options or {},
+                    progress_callback,
+                    cancel_callback,
+                )
             elif target_format == "html":
-                success = self._convert_to_html(source_path, output_path, options or {}, progress_callback, cancel_callback)
+                success = self._convert_to_html(
+                    source_path,
+                    output_path,
+                    options or {},
+                    progress_callback,
+                    cancel_callback,
+                )
             else:
-                success = self._convert_with_pandoc(source_path, output_path, target_format, options or {}, progress_callback, cancel_callback)
+                success = self._convert_with_pandoc(
+                    source_path,
+                    output_path,
+                    target_format,
+                    options or {},
+                    progress_callback,
+                    cancel_callback,
+                )
 
             conversion_time = time.time() - start_time
 
@@ -320,7 +364,10 @@ class FormatConverter:
                     format=target_format,
                     conversion_time=conversion_time,
                     file_size=file_size,
-                    metadata={"platform": self.platform, "pandoc_used": self.pandoc_available}
+                    metadata={
+                        "platform": self.platform,
+                        "pandoc_used": self.pandoc_available,
+                    },
                 )
             else:
                 self.conversion_stats["total_conversions"] += 1
@@ -332,7 +379,7 @@ class FormatConverter:
                     output_file=output_file,
                     format=target_format,
                     error_message="转换失败",
-                    conversion_time=conversion_time
+                    conversion_time=conversion_time,
                 )
 
         except Exception as e:
@@ -346,13 +393,17 @@ class FormatConverter:
                 output_file=output_file or "",
                 format=target_format,
                 error_message=str(e),
-                conversion_time=conversion_time
+                conversion_time=conversion_time,
             )
 
-    def _convert_to_pdf(self, source_path: Path, output_path: Path,
-                       options: Dict[str, Any],
-                       progress_callback: Optional[Callable[[float, str], None]] = None,
-                       cancel_callback: Optional[Callable[[], bool]] = None) -> bool:
+    def _convert_to_pdf(
+        self,
+        source_path: Path,
+        output_path: Path,
+        options: dict[str, Any],
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+        cancel_callback: Optional[Callable[[], bool]] = None,
+    ) -> bool:
         """转换为PDF"""
         if not self.pandoc_available:
             self.logger.error("Pandoc不可用，无法转换为PDF")
@@ -399,10 +450,14 @@ class FormatConverter:
             self.logger.error(f"转换过程出错: {str(e)}")
             return False
 
-    def _convert_to_docx(self, source_path: Path, output_path: Path,
-                        options: Dict[str, Any],
-                        progress_callback: Optional[Callable[[float, str], None]] = None,
-                        cancel_callback: Optional[Callable[[], bool]] = None) -> bool:
+    def _convert_to_docx(
+        self,
+        source_path: Path,
+        output_path: Path,
+        options: dict[str, Any],
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+        cancel_callback: Optional[Callable[[], bool]] = None,
+    ) -> bool:
         """转换为DOCX"""
         if not self.pandoc_available:
             # 如果没有Pandoc，创建简单的DOCX占位符
@@ -416,25 +471,36 @@ class FormatConverter:
                 self.logger.error(f"创建DOCX占位符失败: {str(e)}")
                 return False
 
-        return self._convert_with_pandoc(source_path, output_path, "docx", options, progress_callback, cancel_callback)
+        return self._convert_with_pandoc(
+            source_path,
+            output_path,
+            "docx",
+            options,
+            progress_callback,
+            cancel_callback,
+        )
 
-    def _convert_to_html(self, source_path: Path, output_path: Path,
-                        options: Dict[str, Any],
-                        progress_callback: Optional[Callable[[float, str], None]] = None,
-                        cancel_callback: Optional[Callable[[], bool]] = None) -> bool:
+    def _convert_to_html(
+        self,
+        source_path: Path,
+        output_path: Path,
+        options: dict[str, Any],
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+        cancel_callback: Optional[Callable[[], bool]] = None,
+    ) -> bool:
         """转换为HTML"""
         try:
             if progress_callback:
                 progress_callback(0.5, "正在生成HTML...")
 
             # 简单的Markdown到HTML转换
-            md_content = source_path.read_text(encoding='utf-8')
+            md_content = source_path.read_text(encoding="utf-8")
             html_content = self._markdown_to_html_simple(md_content)
 
             if cancel_callback and cancel_callback():
                 return False
 
-            output_path.write_text(html_content, encoding='utf-8')
+            output_path.write_text(html_content, encoding="utf-8")
 
             if progress_callback:
                 progress_callback(1.0, "HTML转换完成")
@@ -444,10 +510,15 @@ class FormatConverter:
             self.logger.error(f"HTML转换失败: {str(e)}")
             return False
 
-    def _convert_with_pandoc(self, source_path: Path, output_path: Path,
-                           target_format: str, options: Dict[str, Any],
-                           progress_callback: Optional[Callable[[float, str], None]] = None,
-                           cancel_callback: Optional[Callable[[], bool]] = None) -> bool:
+    def _convert_with_pandoc(
+        self,
+        source_path: Path,
+        output_path: Path,
+        target_format: str,
+        options: dict[str, Any],
+        progress_callback: Optional[Callable[[float, str], None]] = None,
+        cancel_callback: Optional[Callable[[], bool]] = None,
+    ) -> bool:
         """使用Pandoc进行转换"""
         if not self.pandoc_available:
             return False
@@ -483,8 +554,8 @@ class FormatConverter:
         """创建简单的DOCX占位符文件"""
         # 这是最小可用的DOCX占位符实现
         # 在实际项目中应使用python-docx库
-        content = source_path.read_text(encoding='utf-8')
-        xml_content = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+        content = source_path.read_text(encoding="utf-8")
+        xml_content = f"""<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <?mso-application progid="Word.Document"?>
 <w:wordDocument xmlns:w="http://schemas.microsoft.com/office/word/2003/wordml">
 <w:body>
@@ -494,32 +565,32 @@ class FormatConverter:
 </w:r>
 </w:p>
 </w:body>
-</w:wordDocument>'''
-        return xml_content.encode('utf-8')
+</w:wordDocument>"""
+        return xml_content.encode("utf-8")
 
     def _markdown_to_html_simple(self, markdown_content: str) -> str:
         """简单的Markdown到HTML转换"""
-        lines = markdown_content.split('\n')
+        lines = markdown_content.split("\n")
         html_lines = []
 
         for line in lines:
-            if line.startswith('# '):
-                html_lines.append(f'<h1>{line[2:]}</h1>')
-            elif line.startswith('## '):
-                html_lines.append(f'<h2>{line[3:]}</h2>')
-            elif line.startswith('### '):
-                html_lines.append(f'<h3>{line[4:]}</h3>')
-            elif line.strip() == '':
-                html_lines.append('<br>')
-            elif line.startswith('- '):
-                html_lines.append(f'<li>{line[2:]}</li>')
+            if line.startswith("# "):
+                html_lines.append(f"<h1>{line[2:]}</h1>")
+            elif line.startswith("## "):
+                html_lines.append(f"<h2>{line[3:]}</h2>")
+            elif line.startswith("### "):
+                html_lines.append(f"<h3>{line[4:]}</h3>")
+            elif line.strip() == "":
+                html_lines.append("<br>")
+            elif line.startswith("- "):
+                html_lines.append(f"<li>{line[2:]}</li>")
             else:
                 # 简单的文本处理
-                line = line.replace('**', '<strong>').replace('**', '</strong>')
-                line = line.replace('*', '<em>').replace('*', '</em>')
-                html_lines.append(f'<p>{line}</p>')
+                line = line.replace("**", "<strong>").replace("**", "</strong>")
+                line = line.replace("*", "<em>").replace("*", "</em>")
+                html_lines.append(f"<p>{line}</p>")
 
-        return f'''<!DOCTYPE html>
+        return f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -528,13 +599,15 @@ class FormatConverter:
 <body>
 {chr(10).join(html_lines)}
 </body>
-</html>'''
+</html>"""
 
-    def batch_convert_markdown(self,
-                             source_files: List[str],
-                             output_dir: str,
-                             format: str = "pdf",
-                             options: Optional[Dict[str, Any]] = None) -> List[ConversionResult]:
+    def batch_convert_markdown(
+        self,
+        source_files: list[str],
+        output_dir: str,
+        format: str = "pdf",
+        options: Optional[dict[str, Any]] = None,
+    ) -> list[ConversionResult]:
         """批量转换Markdown文件（同步版本）"""
         results = []
         output_path = Path(output_dir)
@@ -546,30 +619,31 @@ class FormatConverter:
                 output_file = output_path / f"{source_path.stem}.{format}"
 
                 result = self._convert_markdown(
-                    source_file,
-                    format,
-                    str(output_file),
-                    options
+                    source_file, format, str(output_file), options
                 )
                 results.append(result)
 
             except Exception as e:
-                results.append(ConversionResult(
-                    success=False,
-                    source_file=source_file,
-                    output_file="",
-                    format=format,
-                    error_message=str(e)
-                ))
+                results.append(
+                    ConversionResult(
+                        success=False,
+                        source_file=source_file,
+                        output_file="",
+                        format=format,
+                        error_message=str(e),
+                    )
+                )
 
         return results
 
-    def batch_convert_markdown_async(self,
-                                   source_files: List[str],
-                                   output_dir: str,
-                                   format: str = "pdf",
-                                   options: Optional[Dict[str, Any]] = None,
-                                   priority: ConversionPriority = ConversionPriority.NORMAL) -> List[str]:
+    def batch_convert_markdown_async(
+        self,
+        source_files: list[str],
+        output_dir: str,
+        format: str = "pdf",
+        options: Optional[dict[str, Any]] = None,
+        priority: ConversionPriority = ConversionPriority.NORMAL,
+    ) -> list[str]:
         """批量转换Markdown文件（异步版本）"""
         task_ids = []
         output_path = Path(output_dir)
@@ -581,20 +655,20 @@ class FormatConverter:
                 output_file = output_path / f"{source_path.stem}.{format}"
 
                 task_id = self.submit_conversion_task(
-                    source_file,
-                    str(output_file),
-                    format,
-                    options,
-                    priority
+                    source_file, str(output_file), format, options, priority
                 )
                 task_ids.append(task_id)
 
             except Exception as e:
-                self.logger.error(f"提交批量转换任务失败: {source_file}, 错误: {str(e)}")
+                self.logger.error(
+                    f"提交批量转换任务失败: {source_file}, 错误: {str(e)}"
+                )
 
         return task_ids
 
-    def wait_for_tasks(self, task_ids: List[str], timeout: Optional[float] = None) -> List[ConversionResult]:
+    def wait_for_tasks(
+        self, task_ids: list[str], timeout: Optional[float] = None
+    ) -> list[ConversionResult]:
         """等待任务完成"""
         results = []
         start_time = time.time()
@@ -605,7 +679,11 @@ class FormatConverter:
 
             for task_id in task_ids[:]:  # 创建副本以便修改
                 task = self.get_task_status(task_id)
-                if task and task.status in [ConversionStatus.COMPLETED, ConversionStatus.FAILED, ConversionStatus.CANCELLED]:
+                if task and task.status in [
+                    ConversionStatus.COMPLETED,
+                    ConversionStatus.FAILED,
+                    ConversionStatus.CANCELLED,
+                ]:
                     if task.result:
                         results.append(task.result)
                     task_ids.remove(task_id)
@@ -614,15 +692,17 @@ class FormatConverter:
 
         return results
 
-    def convert_markdown_with_format_detection(self,
-                                             source_file: str,
-                                             output_file: Optional[str] = None,
-                                             preferred_format: str = "pdf") -> ConversionResult:
+    def convert_markdown_with_format_detection(
+        self,
+        source_file: str,
+        output_file: Optional[str] = None,
+        preferred_format: str = "pdf",
+    ) -> ConversionResult:
         """智能格式检测和转换"""
         source_path = Path(source_file)
 
         # 分析源文件内容来推荐最佳格式
-        content = source_path.read_text(encoding='utf-8', errors='ignore')
+        content = source_path.read_text(encoding="utf-8", errors="ignore")
 
         recommended_format = self._analyze_content_for_format(content, preferred_format)
 
@@ -634,9 +714,11 @@ class FormatConverter:
     def _analyze_content_for_format(self, content: str, preferred_format: str) -> str:
         """分析内容并推荐最佳格式"""
         # 简单的内容分析
-        has_complex_formatting = bool(re.search(r'```|!\[.*\]\(.*\)|\$\$.*\$\$', content))
-        has_tables = bool(re.search(r'\|.*\|', content))
-        has_math = bool(re.search(r'\$\$.*\$\$', content))
+        has_complex_formatting = bool(
+            re.search(r"```|!\[.*\]\(.*\)|\$\$.*\$\$", content)
+        )
+        has_tables = bool(re.search(r"\|.*\|", content))
+        has_math = bool(re.search(r"\$\$.*\$\$", content))
 
         # 根据内容特征推荐格式
         if has_math or has_complex_formatting:
@@ -649,14 +731,14 @@ class FormatConverter:
         else:
             return preferred_format
 
-    def create_conversion_profile(self, name: str, options: Dict[str, Any]) -> bool:
+    def create_conversion_profile(self, name: str, options: dict[str, Any]) -> bool:
         """创建转换配置文件"""
         try:
             profiles_dir = Path.home() / ".daip" / "conversion_profiles"
             profiles_dir.mkdir(parents=True, exist_ok=True)
 
             profile_file = profiles_dir / f"{name}.json"
-            with open(profile_file, 'w', encoding='utf-8') as f:
+            with open(profile_file, "w", encoding="utf-8") as f:
                 json.dump(options, f, ensure_ascii=False, indent=2)
 
             self.logger.info(f"转换配置文件已创建: {profile_file}")
@@ -666,14 +748,14 @@ class FormatConverter:
             self.logger.error(f"创建转换配置文件失败: {str(e)}")
             return False
 
-    def load_conversion_profile(self, name: str) -> Optional[Dict[str, Any]]:
+    def load_conversion_profile(self, name: str) -> Optional[dict[str, Any]]:
         """加载转换配置文件"""
         try:
             profiles_dir = Path.home() / ".daip" / "conversion_profiles"
             profile_file = profiles_dir / f"{name}.json"
 
             if profile_file.exists():
-                with open(profile_file, 'r', encoding='utf-8') as f:
+                with open(profile_file, encoding="utf-8") as f:
                     return json.load(f)
 
             return None
@@ -682,7 +764,7 @@ class FormatConverter:
             self.logger.error(f"加载转换配置文件失败: {str(e)}")
             return None
 
-    def list_conversion_profiles(self) -> List[str]:
+    def list_conversion_profiles(self) -> list[str]:
         """列出所有转换配置文件"""
         try:
             profiles_dir = Path.home() / ".daip" / "conversion_profiles"
@@ -694,11 +776,11 @@ class FormatConverter:
             self.logger.error(f"列出转换配置文件失败: {str(e)}")
             return []
 
-    def validate_markdown_content(self, source_file: str) -> Dict[str, Any]:
+    def validate_markdown_content(self, source_file: str) -> dict[str, Any]:
         """验证Markdown内容"""
         try:
             source_path = Path(source_file)
-            content = source_path.read_text(encoding='utf-8')
+            content = source_path.read_text(encoding="utf-8")
 
             validation_result = {
                 "valid": True,
@@ -708,12 +790,12 @@ class FormatConverter:
                     "lines": len(content.splitlines()),
                     "characters": len(content),
                     "words": len(content.split()),
-                    "headings": len(re.findall(r'^#+\s', content, re.MULTILINE)),
-                    "links": len(re.findall(r'\[.*\]\(.*\)', content)),
-                    "images": len(re.findall(r'!\[.*\]\(.*\)', content)),
-                    "code_blocks": len(re.findall(r'```', content)) // 2,
-                    "tables": len(re.findall(r'\|.*\|', content))
-                }
+                    "headings": len(re.findall(r"^#+\s", content, re.MULTILINE)),
+                    "links": len(re.findall(r"\[.*\]\(.*\)", content)),
+                    "images": len(re.findall(r"!\[.*\]\(.*\)", content)),
+                    "code_blocks": len(re.findall(r"```", content)) // 2,
+                    "tables": len(re.findall(r"\|.*\|", content)),
+                },
             }
 
             # 检查常见问题
@@ -722,14 +804,16 @@ class FormatConverter:
                 validation_result["valid"] = False
 
             # 检查未配对的代码块
-            code_block_count = len(re.findall(r'```', content))
+            code_block_count = len(re.findall(r"```", content))
             if code_block_count % 2 != 0:
                 validation_result["warnings"].append("存在未配对的代码块标记")
 
             # 检查可能的链接问题
-            broken_links = re.findall(r'\[.*\]\(\s*\)', content)
+            broken_links = re.findall(r"\[.*\]\(\s*\)", content)
             if broken_links:
-                validation_result["warnings"].append(f"发现 {len(broken_links)} 个空链接")
+                validation_result["warnings"].append(
+                    f"发现 {len(broken_links)} 个空链接"
+                )
 
             return validation_result
 
@@ -738,14 +822,14 @@ class FormatConverter:
                 "valid": False,
                 "errors": [f"读取文件失败: {str(e)}"],
                 "warnings": [],
-                "statistics": {}
+                "statistics": {},
             }
 
     def estimate_conversion_time(self, source_file: str, target_format: str) -> float:
         """估算转换时间（秒）"""
         try:
             source_path = Path(source_file)
-            content = source_path.read_text(encoding='utf-8')
+            content = source_path.read_text(encoding="utf-8")
 
             # 基于文件大小和格式复杂度的简单估算
             base_time = 0.5  # 基础时间
@@ -763,7 +847,7 @@ class FormatConverter:
                 complexity_factor = 0.5
 
             # 检查内容复杂度
-            if re.search(r'```|\$\$.*\$\$', content):
+            if re.search(r"```|\$\$.*\$\$", content):
                 complexity_factor += 0.5
 
             estimated_time = base_time + (size_factor * complexity_factor)
@@ -772,11 +856,13 @@ class FormatConverter:
         except Exception:
             return 1.0  # 默认估算时间
 
-    def convert_with_template(self,
-                            source_file: str,
-                            output_file: str,
-                            template_file: str,
-                            options: Optional[Dict[str, Any]] = None) -> ConversionResult:
+    def convert_with_template(
+        self,
+        source_file: str,
+        output_file: str,
+        template_file: str,
+        options: Optional[dict[str, Any]] = None,
+    ) -> ConversionResult:
         """使用模板进行转换"""
         start_time = time.time()
 
@@ -792,16 +878,18 @@ class FormatConverter:
                 raise ConversionError(f"模板文件不存在: {template_file}")
 
             # 读取模板和内容
-            template_content = template_path.read_text(encoding='utf-8')
-            markdown_content = source_path.read_text(encoding='utf-8')
+            template_content = template_path.read_text(encoding="utf-8")
+            markdown_content = source_path.read_text(encoding="utf-8")
 
             # 简单的模板替换
             title = source_path.stem
             body = self._markdown_to_html_simple(markdown_content)
 
-            html_content = template_content.replace('$title$', title).replace('$body$', body)
+            html_content = template_content.replace("$title$", title).replace(
+                "$body$", body
+            )
 
-            output_path.write_text(html_content, encoding='utf-8')
+            output_path.write_text(html_content, encoding="utf-8")
 
             return ConversionResult(
                 success=True,
@@ -810,7 +898,7 @@ class FormatConverter:
                 format="html",
                 conversion_time=time.time() - start_time,
                 file_size=output_path.stat().st_size,
-                metadata={"template_used": template_file}
+                metadata={"template_used": template_file},
             )
 
         except Exception as e:
@@ -820,7 +908,7 @@ class FormatConverter:
                 output_file=output_file,
                 format="html",
                 error_message=str(e),
-                conversion_time=time.time() - start_time
+                conversion_time=time.time() - start_time,
             )
 
     def start_workers(self):
@@ -828,7 +916,9 @@ class FormatConverter:
         if not self.is_running:
             self.is_running = True
             for i in range(self.max_workers):
-                worker = threading.Thread(target=self._worker_loop, name=f"FormatConverter-Worker-{i}")
+                worker = threading.Thread(
+                    target=self._worker_loop, name=f"FormatConverter-Worker-{i}"
+                )
                 worker.daemon = True
                 worker.start()
                 self.worker_threads.append(worker)
@@ -884,14 +974,18 @@ class FormatConverter:
                 task.format,
                 task.output_file,
                 task.options,
-                lambda p, m: self._update_task_progress(task.task_id, p, m)
+                lambda p, m: self._update_task_progress(task.task_id, p, m),
             )
 
             # 更新任务状态
             with self._lock:
                 task.completed_at = datetime.now()
                 task.result = result
-                task.status = ConversionStatus.COMPLETED if result.success else ConversionStatus.FAILED
+                task.status = (
+                    ConversionStatus.COMPLETED
+                    if result.success
+                    else ConversionStatus.FAILED
+                )
 
                 if not result.success:
                     task.error_message = result.error_message
@@ -903,7 +997,7 @@ class FormatConverter:
 
                 # 限制历史记录大小
                 if len(self.task_history) > self.max_history_size:
-                    self.task_history = self.task_history[-self.max_history_size:]
+                    self.task_history = self.task_history[-self.max_history_size :]
 
                 # 更新统计信息
                 self._update_statistics(result)
@@ -956,12 +1050,14 @@ class FormatConverter:
             self.task_queue.qsize() / self.max_queue_size
         )
 
-    def submit_conversion_task(self,
-                             source_file: str,
-                             output_file: str,
-                             format: str,
-                             options: Optional[Dict[str, Any]] = None,
-                             priority: ConversionPriority = ConversionPriority.NORMAL) -> str:
+    def submit_conversion_task(
+        self,
+        source_file: str,
+        output_file: str,
+        format: str,
+        options: Optional[dict[str, Any]] = None,
+        priority: ConversionPriority = ConversionPriority.NORMAL,
+    ) -> str:
         """提交转换任务（异步）"""
         task_id = str(uuid.uuid4())
 
@@ -971,7 +1067,7 @@ class FormatConverter:
             output_file=output_file,
             format=format,
             options=options or {},
-            priority=priority
+            priority=priority,
         )
 
         try:
@@ -1014,7 +1110,7 @@ class FormatConverter:
 
             return False
 
-    def get_queue_status(self) -> Dict[str, Any]:
+    def get_queue_status(self) -> dict[str, Any]:
         """获取队列状态"""
         with self._lock:
             return {
@@ -1023,10 +1119,10 @@ class FormatConverter:
                 "active_tasks": len(self.active_tasks),
                 "completed_tasks": len(self.completed_tasks),
                 "total_workers": len(self.worker_threads),
-                "is_running": self.is_running
+                "is_running": self.is_running,
             }
 
-    def get_conversion_statistics(self) -> Dict[str, Any]:
+    def get_conversion_statistics(self) -> dict[str, Any]:
         """获取转换统计信息"""
         total_time = self.conversion_stats["total_conversion_time"]
         total_conversions = self.conversion_stats["total_conversions"]
@@ -1036,12 +1132,15 @@ class FormatConverter:
         return {
             **self.conversion_stats,
             "average_conversion_time": avg_time,
-            "success_rate": self.conversion_stats["successful_conversions"] / total_conversions if total_conversions > 0 else 0,
+            "success_rate": self.conversion_stats["successful_conversions"]
+            / total_conversions
+            if total_conversions > 0
+            else 0,
             **self.performance_metrics,
-            "queue_status": self.get_queue_status()
+            "queue_status": self.get_queue_status(),
         }
 
-    def get_conversion_history(self, limit: int = 50) -> List[ConversionResult]:
+    def get_conversion_history(self, limit: int = 50) -> list[ConversionResult]:
         """获取转换历史"""
         with self._lock:
             return self.task_history[-limit:] if limit > 0 else self.task_history.copy()
@@ -1053,11 +1152,13 @@ class FormatConverter:
                 "generated_at": datetime.now().isoformat(),
                 "statistics": self.get_conversion_statistics(),
                 "queue_status": self.get_queue_status(),
-                "recent_conversions": [result.to_dict() for result in self.get_conversion_history(100)],
-                "active_tasks": [task.to_dict() for task in self.active_tasks.values()]
+                "recent_conversions": [
+                    result.to_dict() for result in self.get_conversion_history(100)
+                ],
+                "active_tasks": [task.to_dict() for task in self.active_tasks.values()],
             }
 
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(report, f, ensure_ascii=False, indent=2)
 
             self.logger.info(f"转换报告已导出到: {output_file}")
@@ -1074,7 +1175,8 @@ class FormatConverter:
         with self._lock:
             original_count = len(self.completed_tasks)
             self.completed_tasks = [
-                task for task in self.completed_tasks
+                task
+                for task in self.completed_tasks
                 if task.completed_at and task.completed_at.timestamp() > cutoff_time
             ]
 
@@ -1089,7 +1191,7 @@ class FormatConverter:
         """析构函数"""
         try:
             self.stop_workers()
-        except:
+        except Exception:
             pass
 
 

@@ -6,23 +6,23 @@ Wiki知识库集成模块
 
 import json
 import re
-import shutil
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional, NamedTuple
-from dataclasses import dataclass
+from typing import Any, Optional
 
-from .models import WikiPage
 from .manager import WikiManager
+from .models import WikiPage
 
 
 @dataclass
 class ValidationResult:
     """导出验证结果"""
+
     is_valid: bool
-    errors: List[str]
-    warnings: List[str]
-    missing_files: List[str]
+    errors: list[str]
+    warnings: list[str]
+    missing_files: list[str]
 
 
 class WikiKnowledgeExporter:
@@ -60,7 +60,7 @@ class WikiKnowledgeExporter:
                 filepath = export_dir / filename
 
                 # 写入Markdown内容
-                with open(filepath, 'w', encoding='utf-8') as f:
+                with open(filepath, "w", encoding="utf-8") as f:
                     f.write(page.content)
 
             return True
@@ -90,7 +90,7 @@ class WikiKnowledgeExporter:
                 filepath = pages_dir / filename
 
                 html_content = self._markdown_to_html(page.content, page.title)
-                with open(filepath, 'w', encoding='utf-8') as f:
+                with open(filepath, "w", encoding="utf-8") as f:
                     f.write(html_content)
 
             # 生成主页索引
@@ -121,7 +121,7 @@ class WikiKnowledgeExporter:
                 # 处理内容，转换Wiki链接格式
                 processed_content = self._process_obsidian_links(page.content)
 
-                with open(filepath, 'w', encoding='utf-8') as f:
+                with open(filepath, "w", encoding="utf-8") as f:
                     f.write(processed_content)
 
             return True
@@ -143,7 +143,7 @@ class WikiKnowledgeExporter:
             tags_dir.mkdir(parents=True, exist_ok=True)
 
             pages = self.wiki_manager.list_all_pages()
-            tag_pages: Dict[str, List[WikiPage]] = {}
+            tag_pages: dict[str, list[WikiPage]] = {}
 
             # 按标签分组页面
             for page in pages:
@@ -161,9 +161,11 @@ class WikiKnowledgeExporter:
                 content += f"包含此标签的页面 ({len(tagged_pages)} 个):\n\n"
 
                 for page in tagged_pages:
-                    content += f"- [{page.title}]({self._sanitize_filename(page.title)}.md)\n"
+                    content += (
+                        f"- [{page.title}]({self._sanitize_filename(page.title)}.md)\n"
+                    )
 
-                with open(filepath, 'w', encoding='utf-8') as f:
+                with open(filepath, "w", encoding="utf-8") as f:
                     f.write(content)
 
             return True
@@ -213,7 +215,7 @@ h1, h2, h3 { color: #333; }
 a { color: #0066cc; }
 .tag { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
             """
-            with open(css_dir / "style.css", 'w', encoding='utf-8') as f:
+            with open(css_dir / "style.css", "w", encoding="utf-8") as f:
                 f.write(css_content)
 
             # 生成主页索引
@@ -224,7 +226,9 @@ a { color: #0066cc; }
             self.last_error = str(e)
             return False
 
-    def export_with_template(self, export_dir: Path, template_path: Path, format: str = "html") -> bool:
+    def export_with_template(
+        self, export_dir: Path, template_path: Path, format: str = "html"
+    ) -> bool:
         """使用自定义模板导出
 
         Args:
@@ -240,7 +244,7 @@ a { color: #0066cc; }
                 self.last_error = f"模板文件不存在: {template_path}"
                 return False
 
-            template_content = template_path.read_text(encoding='utf-8')
+            template_content = template_path.read_text(encoding="utf-8")
             export_dir.mkdir(parents=True, exist_ok=True)
 
             pages = self.wiki_manager.list_all_pages()
@@ -249,12 +253,14 @@ a { color: #0066cc; }
                 # 替换模板变量
                 rendered_content = template_content.replace("{{title}}", page.title)
                 rendered_content = rendered_content.replace("{{content}}", page.content)
-                rendered_content = rendered_content.replace("{{tags}}", ", ".join(page.tags))
+                rendered_content = rendered_content.replace(
+                    "{{tags}}", ", ".join(page.tags)
+                )
 
                 filename = self._sanitize_filename(page.title) + ".html"
                 filepath = export_dir / filename
 
-                with open(filepath, 'w', encoding='utf-8') as f:
+                with open(filepath, "w", encoding="utf-8") as f:
                     f.write(rendered_content)
 
             return True
@@ -279,7 +285,7 @@ a { color: #0066cc; }
             metadata = {
                 "export_date": datetime.now().isoformat(),
                 "total_pages": len(pages),
-                "pages": []
+                "pages": [],
             }
 
             for page in pages:
@@ -290,12 +296,12 @@ a { color: #0066cc; }
                     "created_at": page.created_at.isoformat(),
                     "modified_at": page.modified_at.isoformat(),
                     "word_count": page.get_word_count(),
-                    "reading_time": page.get_reading_time()
+                    "reading_time": page.get_reading_time(),
                 }
                 metadata["pages"].append(page_metadata)
 
             metadata_file = export_dir / "metadata.json"
-            with open(metadata_file, 'w', encoding='utf-8') as f:
+            with open(metadata_file, "w", encoding="utf-8") as f:
                 json.dump(metadata, f, ensure_ascii=False, indent=2)
 
             return True
@@ -303,7 +309,9 @@ a { color: #0066cc; }
             self.last_error = str(e)
             return False
 
-    def export_with_cross_references(self, export_dir: Path, format: str = "markdown") -> bool:
+    def export_with_cross_references(
+        self, export_dir: Path, format: str = "markdown"
+    ) -> bool:
         """导出交叉引用链接
 
         Args:
@@ -327,7 +335,7 @@ a { color: #0066cc; }
                 filename = self._sanitize_filename(page.title) + ".md"
                 filepath = export_dir / filename
 
-                with open(filepath, 'w', encoding='utf-8') as f:
+                with open(filepath, "w", encoding="utf-8") as f:
                     f.write(processed_content)
 
             return True
@@ -351,7 +359,7 @@ a { color: #0066cc; }
             search_index = {
                 "version": "1.0",
                 "created_at": datetime.now().isoformat(),
-                "documents": []
+                "documents": [],
             }
 
             for page in pages:
@@ -364,12 +372,12 @@ a { color: #0066cc; }
                     "url": f"{self._sanitize_filename(page.title)}.md",
                     "created_at": page.created_at.isoformat(),
                     "modified_at": page.modified_at.isoformat(),
-                    "word_count": page.get_word_count()
+                    "word_count": page.get_word_count(),
                 }
                 search_index["documents"].append(doc)
 
             index_file = export_dir / "search_index.json"
-            with open(index_file, 'w', encoding='utf-8') as f:
+            with open(index_file, "w", encoding="utf-8") as f:
                 json.dump(search_index, f, ensure_ascii=False, indent=2)
 
             return True
@@ -377,7 +385,9 @@ a { color: #0066cc; }
             self.last_error = str(e)
             return False
 
-    def export_with_validation(self, export_dir: Path, format: str = "markdown") -> bool:
+    def export_with_validation(
+        self, export_dir: Path, format: str = "markdown"
+    ) -> bool:
         """导出并验证
 
         Args:
@@ -408,10 +418,10 @@ a { color: #0066cc; }
             "is_valid": validation_result.is_valid,
             "errors": validation_result.errors,
             "warnings": validation_result.warnings,
-            "missing_files": validation_result.missing_files
+            "missing_files": validation_result.missing_files,
         }
 
-        with open(validation_file, 'w', encoding='utf-8') as f:
+        with open(validation_file, "w", encoding="utf-8") as f:
             json.dump(validation_data, f, ensure_ascii=False, indent=2)
 
         return validation_result.is_valid
@@ -430,7 +440,11 @@ a { color: #0066cc; }
             # 检查是否已存在导出
             if not export_dir.exists():
                 # 如果不存在，执行完整导出
-                return self.export_to_markdown(export_dir) if format == "markdown" else self.export_to_html(export_dir)
+                return (
+                    self.export_to_markdown(export_dir)
+                    if format == "markdown"
+                    else self.export_to_html(export_dir)
+                )
 
             # 导出所有页面（简化实现：总是重新导出所有文件）
             success = self.export_to_markdown(export_dir)
@@ -440,7 +454,9 @@ a { color: #0066cc; }
             self.last_error = str(e)
             return False
 
-    def export_with_configuration(self, export_dir: Path, config: Dict[str, Any]) -> bool:
+    def export_with_configuration(
+        self, export_dir: Path, config: dict[str, Any]
+    ) -> bool:
         """使用配置导出
 
         Args:
@@ -470,7 +486,7 @@ a { color: #0066cc; }
 
             # 保存配置
             config_file = export_dir / "export_config.json"
-            with open(config_file, 'w', encoding='utf-8') as f:
+            with open(config_file, "w", encoding="utf-8") as f:
                 json.dump(config, f, ensure_ascii=False, indent=2)
 
             return True
@@ -527,37 +543,37 @@ a { color: #0066cc; }
             is_valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,
-            missing_files=missing_files
+            missing_files=missing_files,
         )
 
     # 私有辅助方法
     def _sanitize_filename(self, title: str) -> str:
         """清理文件名，移除不安全字符"""
         # 移除或替换不安全的字符
-        sanitized = re.sub(r'[<>:"/\\|?*]', '_', title)
+        sanitized = re.sub(r'[<>:"/\\|?*]', "_", title)
         # 将空格替换为下划线
-        sanitized = re.sub(r'\s+', '_', sanitized)
+        sanitized = re.sub(r"\s+", "_", sanitized)
         # 移除多个连续的下划线
-        sanitized = re.sub(r'_+', '_', sanitized)
+        sanitized = re.sub(r"_+", "_", sanitized)
         # 移除开头和结尾的下划线
-        sanitized = sanitized.strip('_')
+        sanitized = sanitized.strip("_")
         return sanitized
 
     def _markdown_to_html(self, content: str, title: str) -> str:
         """简单的Markdown到HTML转换"""
         # 这是一个简化的实现，实际项目中应使用专业的Markdown解析器
-        html = f"<!DOCTYPE html>\n<html>\n<head>\n"
+        html = "<!DOCTYPE html>\n<html>\n<head>\n"
         html += f"<title>{title}</title>\n"
-        html += f"<meta charset=\"utf-8\">\n"
-        html += f"</head>\n<body>\n"
+        html += '<meta charset="utf-8">\n'
+        html += "</head>\n<body>\n"
         html += f"<h1>{title}</h1>\n"
 
         # 简单的Markdown转换
-        lines = content.split('\n')
+        lines = content.split("\n")
         for line in lines:
-            if line.startswith('# '):
-                level = len(line) - len(line.lstrip('#'))
-                text = line.lstrip('# ').strip()
+            if line.startswith("# "):
+                level = len(line) - len(line.lstrip("#"))
+                text = line.lstrip("# ").strip()
                 html += f"<h{level}>{text}</h{level}>\n"
             elif line.strip():
                 html += f"<p>{line}</p>\n"
@@ -571,8 +587,9 @@ a { color: #0066cc; }
         # 简化实现，保持原格式
         return content
 
-    def _process_wiki_links(self, content: str, title_map: Dict[str, WikiPage]) -> str:
+    def _process_wiki_links(self, content: str, title_map: dict[str, WikiPage]) -> str:
         """处理Wiki链接 [[Page Name]]"""
+
         def replace_link(match):
             page_name = match.group(1)
             if page_name in title_map:
@@ -581,9 +598,9 @@ a { color: #0066cc; }
             return match.group(0)
 
         # 替换 [[Page Name]] 格式的链接
-        return re.sub(r'\[\[([^\]]+)\]\]', replace_link, content)
+        return re.sub(r"\[\[([^\]]+)\]\]", replace_link, content)
 
-    def _generate_html_index(self, export_dir: Path, pages: List[WikiPage]) -> None:
+    def _generate_html_index(self, export_dir: Path, pages: list[WikiPage]) -> None:
         """生成HTML索引页面"""
         index_content = """<!DOCTYPE html>
 <html>
@@ -598,14 +615,16 @@ a { color: #0066cc; }
 """
         for page in pages:
             filename = f"{self._sanitize_filename(page.title)}.html"
-            index_content += f'        <li><a href="pages/{filename}">{page.title}</a></li>\n'
+            index_content += (
+                f'        <li><a href="pages/{filename}">{page.title}</a></li>\n'
+            )
 
         index_content += """    </ul>
 </body>
 </html>
 """
         index_file = export_dir / "index.html"
-        with open(index_file, 'w', encoding='utf-8') as f:
+        with open(index_file, "w", encoding="utf-8") as f:
             f.write(index_content)
 
     def _generate_site_index(self, export_dir: Path) -> None:
@@ -625,7 +644,7 @@ a { color: #0066cc; }
             index_content += "\n"
 
         index_file = export_dir / "index.md"
-        with open(index_file, 'w', encoding='utf-8') as f:
+        with open(index_file, "w", encoding="utf-8") as f:
             f.write(index_content)
 
     def _is_valid_path(self, path: Path) -> bool:
@@ -639,7 +658,7 @@ a { color: #0066cc; }
         """
         try:
             # 对于Unix风格的绝对路径（如/invalid/path），在Windows上无效
-            if str(path).startswith('/') and not path.is_absolute():
+            if str(path).startswith("/") and not path.is_absolute():
                 return False
 
             # 尝试解析路径，如果抛出异常则为无效路径

@@ -12,28 +12,29 @@ This module provides comprehensive task management capabilities including:
 """
 
 import asyncio
-import uuid
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional, Set, Tuple, Union
-from enum import Enum
-from dataclasses import dataclass, field
+import heapq
 import json
 import logging
+import os
 import sqlite3
-from pathlib import Path
-import heapq
+import threading
+import uuid
 from collections import defaultdict, deque
-import re
+
 # import cron_parser  # Using custom implementation instead
 from concurrent.futures import ThreadPoolExecutor
-import threading
-from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class TaskStatus(Enum):
     """Task execution status"""
+
     PENDING = "pending"
     READY = "ready"
     RUNNING = "running"
@@ -47,6 +48,7 @@ class TaskStatus(Enum):
 
 class TaskPriority(Enum):
     """Task priority levels"""
+
     CRITICAL = 0  # Highest priority
     HIGH = 1
     NORMAL = 2
@@ -56,6 +58,7 @@ class TaskPriority(Enum):
 
 class TaskType(Enum):
     """Task types for different handling strategies"""
+
     IMMEDIATE = "immediate"  # Execute immediately
     SCHEDULED = "scheduled"  # Scheduled for specific time
     RECURRING = "recurring"  # Recurring task
@@ -67,6 +70,7 @@ class TaskType(Enum):
 @dataclass
 class TaskDependency:
     """Task dependency definition"""
+
     task_id: str
     dependency_type: str = "finish_to_start"  # finish_to_start, start_to_start, etc.
     lag_minutes: int = 0
@@ -76,6 +80,7 @@ class TaskDependency:
 @dataclass
 class TaskSchedule:
     """Task scheduling information"""
+
     scheduled_at: Optional[datetime] = None
     deadline: Optional[datetime] = None
     duration_estimate_minutes: Optional[int] = None
@@ -90,6 +95,7 @@ class TaskSchedule:
 @dataclass
 class TaskMetrics:
     """Task execution metrics"""
+
     created_at: datetime = field(default_factory=datetime.now)
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
@@ -107,12 +113,13 @@ class TaskMetrics:
 @dataclass
 class TaskNotification:
     """Task notification configuration"""
+
     notify_on_creation: bool = False
     notify_on_start: bool = True
     notify_on_completion: bool = True
     notify_on_failure: bool = True
     notify_on_timeout: bool = True
-    notification_channels: List[str] = field(default_factory=list)
+    notification_channels: list[str] = field(default_factory=list)
     custom_notification_message: Optional[str] = None
 
 
@@ -126,11 +133,11 @@ class Task:
         task_type: TaskType = TaskType.IMMEDIATE,
         priority: TaskPriority = TaskPriority.NORMAL,
         task_id: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None,
-        tags: Optional[List[str]] = None,
+        context: Optional[dict[str, Any]] = None,
+        tags: Optional[list[str]] = None,
         assignee: Optional[str] = None,
         estimated_effort: Optional[float] = None,
-        actual_effort: Optional[float] = None
+        actual_effort: Optional[float] = None,
     ):
         self.id = task_id or str(uuid.uuid4())
         self.title = title
@@ -145,23 +152,23 @@ class Task:
         self.actual_effort = actual_effort
 
         # Dependencies and scheduling
-        self.dependencies: List[TaskDependency] = []
-        self.dependents: Set[str] = set()
+        self.dependencies: list[TaskDependency] = []
+        self.dependents: set[str] = set()
         self.schedule = TaskSchedule()
         self.notification = TaskNotification()
 
         # Execution details
         self.command: Optional[str] = None
         self.script_path: Optional[str] = None
-        self.parameters: Dict[str, Any] = {}
-        self.result: Optional[Dict[str, Any]] = None
+        self.parameters: dict[str, Any] = {}
+        self.result: Optional[dict[str, Any]] = None
         self.error_message: Optional[str] = None
         self.stack_trace: Optional[str] = None
 
         # Progress tracking
         self.progress_percentage: float = 0.0
         self.progress_message: str = ""
-        self.subtasks: List[str] = []
+        self.subtasks: list[str] = []
         self.parent_task_id: Optional[str] = None
 
         # Metadata
@@ -175,7 +182,7 @@ class Task:
 
         # Metrics and analytics
         self.metrics = TaskMetrics()
-        self.custom_attributes: Dict[str, Any] = {}
+        self.custom_attributes: dict[str, Any] = {}
 
         # External integrations
         self.external_id: Optional[str] = None
@@ -183,14 +190,19 @@ class Task:
         self.webhook_url: Optional[str] = None
 
         # Quality and validation
-        self.validation_rules: List[Dict[str, Any]] = []
-        self.quality_checks: List[Dict[str, Any]] = []
+        self.validation_rules: list[dict[str, Any]] = []
+        self.quality_checks: list[dict[str, Any]] = []
         self.approval_required: bool = False
         self.approved_by: Optional[str] = None
         self.approved_at: Optional[datetime] = None
 
-    def add_dependency(self, task_id: str, dependency_type: str = "finish_to_start",
-                      lag_minutes: int = 0, is_optional: bool = False) -> None:
+    def add_dependency(
+        self,
+        task_id: str,
+        dependency_type: str = "finish_to_start",
+        lag_minutes: int = 0,
+        is_optional: bool = False,
+    ) -> None:
         """Add a dependency to this task"""
         dependency = TaskDependency(task_id, dependency_type, lag_minutes, is_optional)
         self.dependencies.append(dependency)
@@ -205,7 +217,7 @@ class Task:
             return True
         return False
 
-    def can_start(self, completed_tasks: Set[str]) -> bool:
+    def can_start(self, completed_tasks: set[str]) -> bool:
         """Check if task can start based on dependencies"""
         if self.status not in [TaskStatus.PENDING, TaskStatus.BLOCKED]:
             return False
@@ -215,7 +227,9 @@ class Task:
                 return False
         return True
 
-    def calculate_critical_path(self, all_tasks: Dict[str, 'Task']) -> Tuple[float, List[str]]:
+    def calculate_critical_path(
+        self, all_tasks: dict[str, "Task"]
+    ) -> tuple[float, list[str]]:
         """Calculate critical path for this task"""
         if not self.dependencies:
             return 0.0, [self.id]
@@ -227,7 +241,9 @@ class Task:
             if dep.task_id in all_tasks:
                 dep_task = all_tasks[dep.task_id]
                 dep_duration, dep_path = dep_task.calculate_critical_path(all_tasks)
-                total_duration = dep_duration + (dep_task.schedule.duration_estimate_minutes or 0)
+                total_duration = dep_duration + (
+                    dep_task.schedule.duration_estimate_minutes or 0
+                )
 
                 if total_duration > max_duration:
                     max_duration = total_duration
@@ -241,7 +257,7 @@ class Task:
         self.progress_message = message
         self.updated_at = datetime.now()
 
-    def complete_task(self, result: Optional[Dict[str, Any]] = None) -> None:
+    def complete_task(self, result: Optional[dict[str, Any]] = None) -> None:
         """Mark task as completed"""
         self.status = TaskStatus.COMPLETED
         self.completed_at = datetime.now()
@@ -249,7 +265,9 @@ class Task:
         self.progress_percentage = 100.0
         self.metrics.completed_at = self.completed_at
         if self.metrics.started_at:
-            self.metrics.execution_time_seconds = (self.completed_at - self.metrics.started_at).total_seconds()
+            self.metrics.execution_time_seconds = (
+                self.completed_at - self.metrics.started_at
+            ).total_seconds()
         self.updated_at = datetime.now()
 
     def fail_task(self, error_message: str, stack_trace: Optional[str] = None) -> None:
@@ -287,7 +305,10 @@ class Task:
 
     def is_overdue(self) -> bool:
         """Check if task is overdue"""
-        if self.schedule.deadline and self.status not in [TaskStatus.COMPLETED, TaskStatus.CANCELLED]:
+        if self.schedule.deadline and self.status not in [
+            TaskStatus.COMPLETED,
+            TaskStatus.CANCELLED,
+        ]:
             return datetime.now() > self.schedule.deadline
         return False
 
@@ -297,7 +318,9 @@ class Task:
 
         # Adjust for urgency (deadline proximity)
         if self.schedule.deadline:
-            hours_until_deadline = (self.schedule.deadline - datetime.now()).total_seconds() / 3600
+            hours_until_deadline = (
+                self.schedule.deadline - datetime.now()
+            ).total_seconds() / 3600
             if hours_until_deadline < 1:
                 base_score -= 0.5  # Very urgent
             elif hours_until_deadline < 24:
@@ -307,12 +330,14 @@ class Task:
 
         # Adjust for age (older tasks get slightly higher priority)
         age_hours = (datetime.now() - self.created_at).total_seconds() / 3600
-        age_factor = min(age_hours / 168, 0.2)  # Max 0.2 adjustment for 1-week-old tasks
+        age_factor = min(
+            age_hours / 168, 0.2
+        )  # Max 0.2 adjustment for 1-week-old tasks
         base_score -= age_factor
 
         return base_score
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert task to dictionary"""
         return {
             "id": self.id,
@@ -331,20 +356,25 @@ class Task:
                     "task_id": dep.task_id,
                     "dependency_type": dep.dependency_type,
                     "lag_minutes": dep.lag_minutes,
-                    "is_optional": dep.is_optional
-                } for dep in self.dependencies
+                    "is_optional": dep.is_optional,
+                }
+                for dep in self.dependencies
             ],
             "dependents": list(self.dependents),
             "schedule": {
-                "scheduled_at": self.schedule.scheduled_at.isoformat() if self.schedule.scheduled_at else None,
-                "deadline": self.schedule.deadline.isoformat() if self.schedule.deadline else None,
+                "scheduled_at": self.schedule.scheduled_at.isoformat()
+                if self.schedule.scheduled_at
+                else None,
+                "deadline": self.schedule.deadline.isoformat()
+                if self.schedule.deadline
+                else None,
                 "duration_estimate_minutes": self.schedule.duration_estimate_minutes,
                 "cron_expression": self.schedule.cron_expression,
                 "timezone": self.schedule.timezone,
                 "max_execution_time_minutes": self.schedule.max_execution_time_minutes,
                 "retry_count": self.schedule.retry_count,
                 "max_retries": self.schedule.max_retries,
-                "backoff_factor": self.schedule.backoff_factor
+                "backoff_factor": self.schedule.backoff_factor,
             },
             "notification": {
                 "notify_on_creation": self.notification.notify_on_creation,
@@ -353,7 +383,7 @@ class Task:
                 "notify_on_failure": self.notification.notify_on_failure,
                 "notify_on_timeout": self.notification.notify_on_timeout,
                 "notification_channels": self.notification.notification_channels,
-                "custom_notification_message": self.notification.custom_notification_message
+                "custom_notification_message": self.notification.custom_notification_message,  # noqa: E501
             },
             "command": self.command,
             "script_path": self.script_path,
@@ -368,7 +398,9 @@ class Task:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": self.completed_at.isoformat()
+            if self.completed_at
+            else None,
             "created_by": self.created_by,
             "modified_by": self.modified_by,
             "version": self.version,
@@ -376,8 +408,12 @@ class Task:
             "template_name": self.template_name,
             "metrics": {
                 "created_at": self.metrics.created_at.isoformat(),
-                "started_at": self.metrics.started_at.isoformat() if self.metrics.started_at else None,
-                "completed_at": self.metrics.completed_at.isoformat() if self.metrics.completed_at else None,
+                "started_at": self.metrics.started_at.isoformat()
+                if self.metrics.started_at
+                else None,
+                "completed_at": self.metrics.completed_at.isoformat()
+                if self.metrics.completed_at
+                else None,
                 "execution_time_seconds": self.metrics.execution_time_seconds,
                 "cpu_time_seconds": self.metrics.cpu_time_seconds,
                 "memory_usage_mb": self.metrics.memory_usage_mb,
@@ -386,7 +422,7 @@ class Task:
                 "success_count": self.metrics.success_count,
                 "average_execution_time": self.metrics.average_execution_time,
                 "last_failure_reason": self.metrics.last_failure_reason,
-                "performance_score": self.metrics.performance_score
+                "performance_score": self.metrics.performance_score,
             },
             "custom_attributes": self.custom_attributes,
             "external_id": self.external_id,
@@ -396,11 +432,11 @@ class Task:
             "quality_checks": self.quality_checks,
             "approval_required": self.approval_required,
             "approved_by": self.approved_by,
-            "approved_at": self.approved_at.isoformat() if self.approved_at else None
+            "approved_at": self.approved_at.isoformat() if self.approved_at else None,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Task':
+    def from_dict(cls, data: dict[str, Any]) -> "Task":
         """Create task from dictionary"""
         task = cls(
             title=data["title"],
@@ -412,7 +448,7 @@ class Task:
             tags=data.get("tags", []),
             assignee=data.get("assignee"),
             estimated_effort=data.get("estimated_effort"),
-            actual_effort=data.get("actual_effort")
+            actual_effort=data.get("actual_effort"),
         )
 
         # Restore status
@@ -424,7 +460,7 @@ class Task:
                 dep_data["task_id"],
                 dep_data.get("dependency_type", "finish_to_start"),
                 dep_data.get("lag_minutes", 0),
-                dep_data.get("is_optional", False)
+                dep_data.get("is_optional", False),
             )
 
         task.dependents = set(data.get("dependents", []))
@@ -432,26 +468,46 @@ class Task:
         # Restore schedule
         schedule_data = data.get("schedule", {})
         if schedule_data.get("scheduled_at"):
-            task.schedule.scheduled_at = datetime.fromisoformat(schedule_data["scheduled_at"])
+            task.schedule.scheduled_at = datetime.fromisoformat(
+                schedule_data["scheduled_at"]
+            )
         if schedule_data.get("deadline"):
             task.schedule.deadline = datetime.fromisoformat(schedule_data["deadline"])
-        task.schedule.duration_estimate_minutes = schedule_data.get("duration_estimate_minutes")
+        task.schedule.duration_estimate_minutes = schedule_data.get(
+            "duration_estimate_minutes"
+        )
         task.schedule.cron_expression = schedule_data.get("cron_expression")
         task.schedule.timezone = schedule_data.get("timezone", "UTC")
-        task.schedule.max_execution_time_minutes = schedule_data.get("max_execution_time_minutes")
+        task.schedule.max_execution_time_minutes = schedule_data.get(
+            "max_execution_time_minutes"
+        )
         task.schedule.retry_count = schedule_data.get("retry_count", 0)
         task.schedule.max_retries = schedule_data.get("max_retries", 3)
         task.schedule.backoff_factor = schedule_data.get("backoff_factor", 2.0)
 
         # Restore notification settings
         notification_data = data.get("notification", {})
-        task.notification.notify_on_creation = notification_data.get("notify_on_creation", False)
-        task.notification.notify_on_start = notification_data.get("notify_on_start", True)
-        task.notification.notify_on_completion = notification_data.get("notify_on_completion", True)
-        task.notification.notify_on_failure = notification_data.get("notify_on_failure", True)
-        task.notification.notify_on_timeout = notification_data.get("notify_on_timeout", True)
-        task.notification.notification_channels = notification_data.get("notification_channels", [])
-        task.notification.custom_notification_message = notification_data.get("custom_notification_message")
+        task.notification.notify_on_creation = notification_data.get(
+            "notify_on_creation", False
+        )
+        task.notification.notify_on_start = notification_data.get(
+            "notify_on_start", True
+        )
+        task.notification.notify_on_completion = notification_data.get(
+            "notify_on_completion", True
+        )
+        task.notification.notify_on_failure = notification_data.get(
+            "notify_on_failure", True
+        )
+        task.notification.notify_on_timeout = notification_data.get(
+            "notify_on_timeout", True
+        )
+        task.notification.notification_channels = notification_data.get(
+            "notification_channels", []
+        )
+        task.notification.custom_notification_message = notification_data.get(
+            "custom_notification_message"
+        )
 
         # Restore execution details
         task.command = data.get("command")
@@ -489,7 +545,9 @@ class Task:
         if metrics_data.get("started_at"):
             task.metrics.started_at = datetime.fromisoformat(metrics_data["started_at"])
         if metrics_data.get("completed_at"):
-            task.metrics.completed_at = datetime.fromisoformat(metrics_data["completed_at"])
+            task.metrics.completed_at = datetime.fromisoformat(
+                metrics_data["completed_at"]
+            )
         task.metrics.execution_time_seconds = metrics_data.get("execution_time_seconds")
         task.metrics.cpu_time_seconds = metrics_data.get("cpu_time_seconds")
         task.metrics.memory_usage_mb = metrics_data.get("memory_usage_mb")
@@ -520,8 +578,10 @@ class Task:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"Task(id={self.id[:8]}..., title='{self.title}', "
-                f"status='{self.status.value}', priority='{self.priority.name}')")
+        return (
+            f"Task(id={self.id[:8]}..., title='{self.title}', "
+            f"status='{self.status.value}', priority='{self.priority.name}')"
+        )
 
 
 class TaskQueue:
@@ -566,7 +626,7 @@ class TaskQueue:
                 return False
 
             # Mark as removed (lazy deletion)
-            entry = self._task_map[task_id]
+            self._task_map[task_id]
             self._task_map[task_id] = None
             return True
 
@@ -606,9 +666,9 @@ class TaskTemplate:
         description_template: str = "",
         default_task_type: TaskType = TaskType.IMMEDIATE,
         default_priority: TaskPriority = TaskPriority.NORMAL,
-        default_parameters: Optional[Dict[str, Any]] = None,
-        validation_rules: Optional[List[Dict[str, Any]]] = None,
-        template_id: Optional[str] = None
+        default_parameters: Optional[dict[str, Any]] = None,
+        validation_rules: Optional[list[dict[str, Any]]] = None,
+        template_id: Optional[str] = None,
     ):
         self.id = template_id or str(uuid.uuid4())
         self.name = name
@@ -621,23 +681,27 @@ class TaskTemplate:
         self.created_at = datetime.now()
         self.usage_count = 0
 
-    def create_task(self, parameters: Dict[str, Any], **kwargs) -> Task:
+    def create_task(self, parameters: dict[str, Any], **kwargs) -> Task:
         """Create task from template"""
         # Merge template parameters with provided parameters
         merged_params = {**self.default_parameters, **parameters}
 
         # Format title and description
         title = self.title_template.format(**merged_params)
-        description = self.description_template.format(**merged_params) if self.description_template else ""
+        description = (
+            self.description_template.format(**merged_params)
+            if self.description_template
+            else ""
+        )
 
         task = Task(
             title=title,
             description=description,
-            task_type=kwargs.get('task_type', self.default_task_type),
-            priority=kwargs.get('priority', self.default_priority),
-            context=kwargs.get('context', {}),
-            tags=kwargs.get('tags', []),
-            assignee=kwargs.get('assignee')
+            task_type=kwargs.get("task_type", self.default_task_type),
+            priority=kwargs.get("priority", self.default_priority),
+            context=kwargs.get("context", {}),
+            tags=kwargs.get("tags", []),
+            assignee=kwargs.get("assignee"),
         )
 
         # Apply template-specific settings
@@ -649,7 +713,7 @@ class TaskTemplate:
         self.usage_count += 1
         return task
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert template to dictionary"""
         return {
             "id": self.id,
@@ -661,7 +725,7 @@ class TaskTemplate:
             "default_parameters": self.default_parameters,
             "validation_rules": self.validation_rules,
             "created_at": self.created_at.isoformat(),
-            "usage_count": self.usage_count
+            "usage_count": self.usage_count,
         }
 
 
@@ -669,18 +733,20 @@ class TaskManager:
     """Production-level Task Manager with comprehensive functionality"""
 
     def __init__(self, storage_path: Optional[str] = None):
-        self.storage_path = Path(storage_path) if storage_path else Path("data/tasks.db")
+        self.storage_path = (
+            Path(storage_path) if storage_path else Path("data/tasks.db")
+        )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
 
         # In-memory storage
-        self.tasks: Dict[str, Task] = {}
-        self.templates: Dict[str, TaskTemplate] = {}
+        self.tasks: dict[str, Task] = {}
+        self.templates: dict[str, TaskTemplate] = {}
         self.task_queue = TaskQueue()
 
         # Execution management
-        self.running_tasks: Dict[str, asyncio.Task] = {}
-        self.completed_tasks: Set[str] = set()
-        self.failed_tasks: Set[str] = set()
+        self.running_tasks: dict[str, asyncio.Task] = {}
+        self.completed_tasks: set[str] = set()
+        self.failed_tasks: set[str] = set()
 
         # Scheduling
         self.scheduler_active = False
@@ -688,7 +754,9 @@ class TaskManager:
         self.schedule_interval_seconds = 60  # Check every minute
 
         # Threading and execution
-        self.executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="task_executor")
+        self.executor = ThreadPoolExecutor(
+            max_workers=4, thread_name_prefix="task_executor"
+        )
         self.max_concurrent_tasks = 10
 
         # Analytics and monitoring
@@ -788,14 +856,28 @@ class TaskManager:
                         template = TaskTemplate(
                             name=template_data["name"],
                             title_template=template_data["title_template"],
-                            description_template=template_data.get("description_template", ""),
-                            default_task_type=TaskType(template_data.get("default_task_type", TaskType.IMMEDIATE.value)),
-                            default_priority=TaskPriority(template_data.get("default_priority", TaskPriority.NORMAL.value)),
-                            default_parameters=template_data.get("default_parameters", {}),
+                            description_template=template_data.get(
+                                "description_template", ""
+                            ),
+                            default_task_type=TaskType(
+                                template_data.get(
+                                    "default_task_type", TaskType.IMMEDIATE.value
+                                )
+                            ),
+                            default_priority=TaskPriority(
+                                template_data.get(
+                                    "default_priority", TaskPriority.NORMAL.value
+                                )
+                            ),
+                            default_parameters=template_data.get(
+                                "default_parameters", {}
+                            ),
                             validation_rules=template_data.get("validation_rules", []),
-                            template_id=template_data.get("id")
+                            template_id=template_data.get("id"),
                         )
-                        template.created_at = datetime.fromisoformat(template_data["created_at"])
+                        template.created_at = datetime.fromisoformat(
+                            template_data["created_at"]
+                        )
                         template.usage_count = template_data.get("usage_count", 0)
                         self.templates[template_id] = template
 
@@ -812,8 +894,8 @@ class TaskManager:
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT OR REPLACE INTO tasks (id, data, updated_at) VALUES (?, ?, ?)",
-                    (task.id, json.dumps(task.to_dict()), datetime.now().isoformat())
+                    "INSERT OR REPLACE INTO tasks (id, data, updated_at) VALUES (?, ?, ?)",  # noqa: E501
+                    (task.id, json.dumps(task.to_dict()), datetime.now().isoformat()),
                 )
                 conn.commit()
         except Exception as e:
@@ -825,7 +907,7 @@ class TaskManager:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
                     "INSERT OR REPLACE INTO task_templates (id, data) VALUES (?, ?)",
-                    (template.id, json.dumps(template.to_dict()))
+                    (template.id, json.dumps(template.to_dict())),
                 )
                 conn.commit()
         except Exception as e:
@@ -837,13 +919,13 @@ class TaskManager:
         description: str = "",
         task_type: TaskType = TaskType.IMMEDIATE,
         priority: TaskPriority = TaskPriority.NORMAL,
-        context: Optional[Dict[str, Any]] = None,
-        tags: Optional[List[str]] = None,
+        context: Optional[dict[str, Any]] = None,
+        tags: Optional[list[str]] = None,
         assignee: Optional[str] = None,
         scheduled_at: Optional[datetime] = None,
         deadline: Optional[datetime] = None,
-        dependencies: Optional[List[TaskDependency]] = None,
-        **kwargs
+        dependencies: Optional[list[TaskDependency]] = None,
+        **kwargs,
     ) -> str:
         """Create a new task with comprehensive parameters"""
         task = Task(
@@ -854,7 +936,7 @@ class TaskManager:
             context=context,
             tags=tags,
             assignee=assignee,
-            estimated_effort=kwargs.get('estimated_effort')
+            estimated_effort=kwargs.get("estimated_effort"),
         )
 
         # Apply scheduling
@@ -886,10 +968,7 @@ class TaskManager:
         return task.id
 
     async def create_task_from_template(
-        self,
-        template_name: str,
-        parameters: Dict[str, Any],
-        **kwargs
+        self, template_name: str, parameters: dict[str, Any], **kwargs
     ) -> str:
         """Create task from template"""
         template = None
@@ -909,7 +988,9 @@ class TaskManager:
         if task.can_start(self.completed_tasks):
             self.task_queue.put(task)
 
-        logger.info(f"Created task from template '{template_name}': {task.title} ({task.id})")
+        logger.info(
+            f"Created task from template '{template_name}': {task.title} ({task.id})"
+        )
         return task.id
 
     def create_template(
@@ -919,8 +1000,8 @@ class TaskManager:
         description_template: str = "",
         default_task_type: TaskType = TaskType.IMMEDIATE,
         default_priority: TaskPriority = TaskPriority.NORMAL,
-        default_parameters: Optional[Dict[str, Any]] = None,
-        validation_rules: Optional[List[Dict[str, Any]]] = None
+        default_parameters: Optional[dict[str, Any]] = None,
+        validation_rules: Optional[list[dict[str, Any]]] = None,
     ) -> str:
         """Create a new task template"""
         template = TaskTemplate(
@@ -930,7 +1011,7 @@ class TaskManager:
             default_task_type=default_task_type,
             default_priority=default_priority,
             default_parameters=default_parameters,
-            validation_rules=validation_rules
+            validation_rules=validation_rules,
         )
 
         self.templates[template.id] = template
@@ -948,13 +1029,21 @@ class TaskManager:
 
         # Update allowed fields
         updatable_fields = [
-            'title', 'description', 'priority', 'context', 'tags', 'assignee',
-            'estimated_effort', 'command', 'script_path', 'parameters'
+            "title",
+            "description",
+            "priority",
+            "context",
+            "tags",
+            "assignee",
+            "estimated_effort",
+            "command",
+            "script_path",
+            "parameters",
         ]
 
-        for field, value in kwargs.items():
-            if field in updatable_fields:
-                setattr(task, field, value)
+        for field_name, value in kwargs.items():
+            if field_name in updatable_fields:
+                setattr(task, field_name, value)
 
         task.updated_at = datetime.now()
         self._save_task(task)
@@ -972,10 +1061,14 @@ class TaskManager:
         # Safety checks
         if not force:
             if task.status == TaskStatus.RUNNING:
-                raise ValueError("Cannot delete running task. Use force=True to override.")
+                raise ValueError(
+                    "Cannot delete running task. Use force=True to override."
+                )
 
             if task.dependents:
-                raise ValueError(f"Cannot delete task with dependents: {task.dependents}")
+                raise ValueError(
+                    f"Cannot delete task with dependents: {task.dependents}"
+                )
 
         # Remove from queue
         self.task_queue.remove(task_id)
@@ -1014,7 +1107,9 @@ class TaskManager:
             return False
 
         if len(self.running_tasks) >= self.max_concurrent_tasks:
-            logger.warning(f"Maximum concurrent tasks ({self.max_concurrent_tasks}) reached")
+            logger.warning(
+                f"Maximum concurrent tasks ({self.max_concurrent_tasks}) reached"
+            )
             return False
 
         # Start task execution
@@ -1033,12 +1128,16 @@ class TaskManager:
             # Check for execution timeout
             if task.schedule.max_execution_time_minutes:
                 timeout_seconds = task.schedule.max_execution_time_minutes * 60
-                await asyncio.wait_for(self._execute_task_core(task), timeout=timeout_seconds)
+                await asyncio.wait_for(
+                    self._execute_task_core(task), timeout=timeout_seconds
+                )
             else:
                 await self._execute_task_core(task)
 
             # Task completed successfully
-            task.complete_task({"status": "success", "message": "Task completed successfully"})
+            task.complete_task(
+                {"status": "success", "message": "Task completed successfully"}
+            )
             self.completed_tasks.add(task.id)
             await self._send_notification(task, "completed")
 
@@ -1047,7 +1146,7 @@ class TaskManager:
 
         except asyncio.TimeoutError:
             task.status = TaskStatus.TIMEOUT
-            task.error_message = f"Task timed out after {task.schedule.max_execution_time_minutes} minutes"
+            task.error_message = f"Task timed out after {task.schedule.max_execution_time_minutes} minutes"  # noqa: E501
             await self._send_notification(task, "timeout")
             await self._handle_task_failure(task)
 
@@ -1080,18 +1179,17 @@ class TaskManager:
 
     async def _execute_command(self, task: Task) -> None:
         """Execute shell command"""
-        import subprocess
 
         try:
             # Enhanced command execution with proper handling
-            env = {**os.environ, **task.context.get('environment', {})}
+            env = {**os.environ, **task.context.get("environment", {})}
 
             process = await asyncio.create_subprocess_shell(
                 task.command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 env=env,
-                cwd=task.context.get('working_directory', '.')
+                cwd=task.context.get("working_directory", "."),
             )
 
             stdout, stderr = await process.communicate()
@@ -1100,11 +1198,13 @@ class TaskManager:
                 "return_code": process.returncode,
                 "stdout": stdout.decode() if stdout else "",
                 "stderr": stderr.decode() if stderr else "",
-                "command": task.command
+                "command": task.command,
             }
 
             if process.returncode != 0:
-                raise RuntimeError(f"Command failed with return code {process.returncode}: {task.result['stderr']}")
+                raise RuntimeError(
+                    f"Command failed with return code {process.returncode}: {task.result['stderr']}"  # noqa: E501
+                )
 
         except Exception as e:
             raise RuntimeError(f"Failed to execute command '{task.command}': {e}")
@@ -1126,21 +1226,24 @@ class TaskManager:
 
             # Prepare execution context
             execution_context = {
-                'task': task,
-                'parameters': task.parameters,
-                'context': task.context,
-                'logger': logger
+                "task": task,
+                "parameters": task.parameters,
+                "context": task.context,
+                "logger": logger,
             }
 
             # Execute script
             spec.loader.exec_module(module)
 
             # Call main function if exists
-            if hasattr(module, 'main'):
-                result = await module['main'](execution_context)
+            if hasattr(module, "main"):
+                result = await module["main"](execution_context)
                 task.result = {"result": result, "script": str(script_path)}
             else:
-                task.result = {"message": "Script executed successfully", "script": str(script_path)}
+                task.result = {
+                    "message": "Script executed successfully",
+                    "script": str(script_path),
+                }
 
         except Exception as e:
             raise RuntimeError(f"Failed to execute script '{task.script_path}': {e}")
@@ -1153,7 +1256,7 @@ class TaskManager:
         task.result = {
             "message": "Parameter-based execution completed",
             "parameters": task.parameters,
-            "execution_type": "parameters"
+            "execution_type": "parameters",
         }
 
     async def _handle_task_failure(self, task: Task) -> None:
@@ -1166,15 +1269,19 @@ class TaskManager:
             task.status = TaskStatus.PENDING
 
             # Calculate backoff delay
-            delay_seconds = task.schedule.backoff_factor ** task.schedule.retry_count
+            delay_seconds = task.schedule.backoff_factor**task.schedule.retry_count
             delay_seconds = min(delay_seconds, 300)  # Cap at 5 minutes
 
-            logger.info(f"Scheduling retry for task {task.id} in {delay_seconds} seconds")
+            logger.info(
+                f"Scheduling retry for task {task.id} in {delay_seconds} seconds"
+            )
 
             # Schedule retry
             asyncio.create_task(self._retry_task(task, delay_seconds))
         else:
-            logger.error(f"Task {task.id} failed after {task.schedule.max_retries} retries")
+            logger.error(
+                f"Task {task.id} failed after {task.schedule.max_retries} retries"
+            )
 
     async def _retry_task(self, task: Task, delay_seconds: float) -> None:
         """Retry task after delay"""
@@ -1186,8 +1293,10 @@ class TaskManager:
     async def _check_dependent_tasks(self, completed_task_id: str) -> None:
         """Check and queue tasks that depend on completed task"""
         for task_id, task in self.tasks.items():
-            if (task.status in [TaskStatus.PENDING, TaskStatus.BLOCKED] and
-                task.can_start(self.completed_tasks)):
+            if task.status in [
+                TaskStatus.PENDING,
+                TaskStatus.BLOCKED,
+            ] and task.can_start(self.completed_tasks):
                 self.task_queue.put(task)
 
     async def _send_notification(self, task: Task, event_type: str) -> None:
@@ -1206,8 +1315,8 @@ class TaskManager:
         assignee_filter: Optional[str] = None,
         tag_filter: Optional[str] = None,
         limit: Optional[int] = None,
-        offset: int = 0
-    ) -> List[Task]:
+        offset: int = 0,
+    ) -> list[Task]:
         """List tasks with filtering and pagination"""
         tasks = list(self.tasks.values())
 
@@ -1232,7 +1341,7 @@ class TaskManager:
 
         return tasks
 
-    async def get_task_statistics(self) -> Dict[str, Any]:
+    async def get_task_statistics(self) -> dict[str, Any]:
         """Get comprehensive task statistics"""
         total_tasks = len(self.tasks)
         status_counts = defaultdict(int)
@@ -1252,9 +1361,11 @@ class TaskManager:
             if task.is_overdue():
                 overdue_tasks += 1
 
-            if (task.schedule.deadline and
-                task.status not in [TaskStatus.COMPLETED, TaskStatus.CANCELLED] and
-                0 < (task.schedule.deadline - now).total_seconds() / 3600 <= 24):
+            if (
+                task.schedule.deadline
+                and task.status not in [TaskStatus.COMPLETED, TaskStatus.CANCELLED]
+                and 0 < (task.schedule.deadline - now).total_seconds() / 3600 <= 24
+            ):
                 upcoming_deadlines += 1
 
         return {
@@ -1266,8 +1377,12 @@ class TaskManager:
             "upcoming_deadlines": upcoming_deadlines,
             "running_tasks": len(self.running_tasks),
             "queued_tasks": self.task_queue.size(),
-            "completion_rate": len(self.completed_tasks) / total_tasks if total_tasks > 0 else 0,
-            "failure_rate": len(self.failed_tasks) / total_tasks if total_tasks > 0 else 0
+            "completion_rate": len(self.completed_tasks) / total_tasks
+            if total_tasks > 0
+            else 0,
+            "failure_rate": len(self.failed_tasks) / total_tasks
+            if total_tasks > 0
+            else 0,
         }
 
     async def start_scheduler(self) -> None:
@@ -1310,10 +1425,12 @@ class TaskManager:
         ready_tasks = []
 
         for task in self.tasks.values():
-            if (task.status == TaskStatus.PENDING and
-                task.schedule.scheduled_at and
-                task.schedule.scheduled_at <= now and
-                task.can_start(self.completed_tasks)):
+            if (
+                task.status == TaskStatus.PENDING
+                and task.schedule.scheduled_at
+                and task.schedule.scheduled_at <= now
+                and task.can_start(self.completed_tasks)
+            ):
                 ready_tasks.append(task)
 
         # Queue ready tasks
@@ -1326,26 +1443,36 @@ class TaskManager:
         warning_hours = [1, 24, 72]  # Send warnings at these intervals
 
         for task in self.tasks.values():
-            if task.schedule.deadline and task.status not in [TaskStatus.COMPLETED, TaskStatus.CANCELLED]:
-                hours_until_deadline = (task.schedule.deadline - now).total_seconds() / 3600
+            if task.schedule.deadline and task.status not in [
+                TaskStatus.COMPLETED,
+                TaskStatus.CANCELLED,
+            ]:
+                hours_until_deadline = (
+                    task.schedule.deadline - now
+                ).total_seconds() / 3600
 
                 for warning_hour in warning_hours:
-                    if hours_until_deadline <= warning_hour and hours_until_deadline > warning_hour - 1:
+                    if (
+                        hours_until_deadline <= warning_hour
+                        and hours_until_deadline > warning_hour - 1
+                    ):
                         await self._send_deadline_warning(task, hours_until_deadline)
                         break
 
     async def _send_deadline_warning(self, task: Task, hours_remaining: float) -> None:
         """Send deadline warning notification"""
-        logger.warning(f"Deadline warning: Task '{task.title}' has {hours_remaining:.1f} hours remaining")
+        logger.warning(
+            f"Deadline warning: Task '{task.title}' has {hours_remaining:.1f} hours remaining"  # noqa: E501
+        )
 
     async def _cleanup_completed_tasks(self) -> None:
         """Clean up old completed tasks"""
         cutoff_date = datetime.now() - timedelta(days=30)  # Keep for 30 days
 
         old_completed_tasks = [
-            task_id for task_id, task in self.tasks.items()
-            if (task.status == TaskStatus.COMPLETED and
-                task.updated_at < cutoff_date)
+            task_id
+            for task_id, task in self.tasks.items()
+            if (task.status == TaskStatus.COMPLETED and task.updated_at < cutoff_date)
         ]
 
         for task_id in old_completed_tasks:
@@ -1354,7 +1481,10 @@ class TaskManager:
 
     async def process_task_queue(self) -> None:
         """Process tasks from the queue"""
-        while not self.task_queue.is_empty() and len(self.running_tasks) < self.max_concurrent_tasks:
+        while (
+            not self.task_queue.is_empty()
+            and len(self.running_tasks) < self.max_concurrent_tasks
+        ):
             task = self.task_queue.get()
             if task and await self.execute_task(task.id):
                 logger.debug(f"Queued task for execution: {task.title}")
@@ -1370,7 +1500,9 @@ class TaskManager:
 
         # Wait for running tasks to complete (with timeout)
         if self.running_tasks:
-            logger.info(f"Waiting for {len(self.running_tasks)} running tasks to complete")
+            logger.info(
+                f"Waiting for {len(self.running_tasks)} running tasks to complete"
+            )
 
             # Cancel remaining tasks after timeout
             await asyncio.sleep(10)  # Give tasks time to complete
@@ -1389,5 +1521,5 @@ class TaskManager:
 
     def __del__(self):
         """Cleanup when object is destroyed"""
-        if hasattr(self, 'executor'):
+        if hasattr(self, "executor"):
             self.executor.shutdown(wait=False)

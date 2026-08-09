@@ -4,18 +4,19 @@ Model Configuration for Model Switching System
 Handles model configuration management, validation, and serialization.
 """
 
-from typing import Dict, Any, Optional, List
-from datetime import datetime
-from enum import Enum
-import uuid
 import json
 import logging
+import uuid
+from datetime import datetime
+from enum import Enum
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class ConfigType(Enum):
     """Configuration types"""
+
     CHAT = "chat"
     COMPLETION = "completion"
     EMBEDDING = "embedding"
@@ -43,9 +44,9 @@ class ModelConfig:
         rate_limit_rpm: Optional[int] = None,
         specialization: Optional[str] = None,
         description: str = "",
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        config_id: Optional[str] = None
+        tags: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
+        config_id: Optional[str] = None,
     ):
         self.id = config_id or str(uuid.uuid4())
         self.name = name
@@ -77,11 +78,13 @@ class ModelConfig:
         if hasattr(self, parameter):
             setattr(self, parameter, value)
             self.updated_at = datetime.now()
-            logger.debug(f"Updated parameter {parameter} to {value} for model {self.name}")
+            logger.debug(
+                f"Updated parameter {parameter} to {value} for model {self.name}"
+            )
         else:
             logger.warning(f"Unknown parameter: {parameter}")
 
-    def get_parameters(self) -> Dict[str, Any]:
+    def get_parameters(self) -> dict[str, Any]:
         """Get all model parameters"""
         return {
             "max_tokens": self.max_tokens,
@@ -90,7 +93,7 @@ class ModelConfig:
             "frequency_penalty": self.frequency_penalty,
             "presence_penalty": self.presence_penalty,
             "timeout": self.timeout,
-            "retry_attempts": self.retry_attempts
+            "retry_attempts": self.retry_attempts,
         }
 
     def is_valid(self) -> bool:
@@ -137,13 +140,22 @@ class ModelConfig:
             return True
 
         # Default validation based on config type
-        if task_type in ["chat", "conversation"] and self.config_type == ConfigType.CHAT:
+        if (
+            task_type in ["chat", "conversation"]
+            and self.config_type == ConfigType.CHAT
+        ):
             return True
 
-        if task_type in ["completion", "generation"] and self.config_type == ConfigType.COMPLETION:
+        if (
+            task_type in ["completion", "generation"]
+            and self.config_type == ConfigType.COMPLETION
+        ):
             return True
 
-        if task_type in ["embedding", "vector"] and self.config_type == ConfigType.EMBEDDING:
+        if (
+            task_type in ["embedding", "vector"]
+            and self.config_type == ConfigType.EMBEDDING
+        ):
             return True
 
         return False
@@ -153,13 +165,13 @@ class ModelConfig:
         self.usage_count += 1
         self.last_used = datetime.now()
 
-    def get_usage_stats(self) -> Dict[str, Any]:
+    def get_usage_stats(self) -> dict[str, Any]:
         """Get usage statistics"""
         return {
             "usage_count": self.usage_count,
             "last_used": self.last_used.isoformat() if self.last_used else None,
             "created_at": self.created_at.isoformat(),
-            "days_since_creation": (datetime.now() - self.created_at).days
+            "days_since_creation": (datetime.now() - self.created_at).days,
         }
 
     def clone(self, new_name: Optional[str] = None) -> "ModelConfig":
@@ -182,10 +194,10 @@ class ModelConfig:
             specialization=self.specialization,
             description=self.description,
             tags=self.tags.copy(),
-            metadata=self.metadata.copy()
+            metadata=self.metadata.copy(),
         )
 
-    def to_dict(self, include_sensitive: bool = False) -> Dict[str, Any]:
+    def to_dict(self, include_sensitive: bool = False) -> dict[str, Any]:
         """Convert configuration to dictionary"""
         data = {
             "id": self.id,
@@ -210,7 +222,7 @@ class ModelConfig:
             "updated_at": self.updated_at.isoformat(),
             "is_active": self.is_active,
             "usage_count": self.usage_count,
-            "last_used": self.last_used.isoformat() if self.last_used else None
+            "last_used": self.last_used.isoformat() if self.last_used else None,
         }
 
         # Include API key only if explicitly requested
@@ -220,7 +232,7 @@ class ModelConfig:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "ModelConfig":
+    def from_dict(cls, data: dict[str, Any]) -> "ModelConfig":
         """Create configuration from dictionary"""
         # Handle config_type enum
         if "config_type" in data and isinstance(data["config_type"], str):
@@ -256,7 +268,7 @@ class ModelConfig:
             description=data.get("description", ""),
             tags=data.get("tags", []),
             metadata=data.get("metadata", {}),
-            config_id=data.get("id")
+            config_id=data.get("id"),
         )
 
         # Restore additional attributes
@@ -299,7 +311,9 @@ class ModelConfig:
 
         return ModelConfig.from_dict(merged_data)
 
-    def get_effective_parameters(self, overrides: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def get_effective_parameters(
+        self, overrides: Optional[dict[str, Any]] = None
+    ) -> dict[str, Any]:
         """Get effective parameters with optional overrides"""
         params = self.get_parameters()
 
@@ -308,7 +322,7 @@ class ModelConfig:
 
         return params
 
-    def estimate_cost(self, input_tokens: int, output_tokens: int) -> Dict[str, float]:
+    def estimate_cost(self, input_tokens: int, output_tokens: int) -> dict[str, float]:
         """Estimate cost for a given request"""
         # This is a simplified cost estimation
         # In a real implementation, you'd use actual pricing from providers
@@ -318,7 +332,7 @@ class ModelConfig:
             "openai": {"input": 0.001, "output": 0.002},
             "anthropic": {"input": 0.0008, "output": 0.0024},
             "local": {"input": 0.0, "output": 0.0},
-            "custom": {"input": 0.001, "output": 0.002}
+            "custom": {"input": 0.001, "output": 0.002},
         }
 
         provider_pricing = pricing.get(self.provider.lower(), pricing["custom"])
@@ -331,7 +345,7 @@ class ModelConfig:
             "input_cost": input_cost,
             "output_cost": output_cost,
             "total_cost": total_cost,
-            "currency": "USD"
+            "currency": "USD",
         }
 
     def __str__(self) -> str:
@@ -340,9 +354,11 @@ class ModelConfig:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"ModelConfig(id={self.id[:8]}..., name='{self.name}', "
-                f"provider='{self.provider}', type={self.model_type}, "
-                f"active={self.is_active}, usage={self.usage_count})")
+        return (
+            f"ModelConfig(id={self.id[:8]}..., name='{self.name}', "
+            f"provider='{self.provider}', type={self.model_type}, "
+            f"active={self.is_active}, usage={self.usage_count})"
+        )
 
     def __eq__(self, other) -> bool:
         """Equality comparison based on ID"""

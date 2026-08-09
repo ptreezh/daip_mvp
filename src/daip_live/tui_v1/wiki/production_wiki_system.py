@@ -17,30 +17,29 @@ Key Features:
 """
 
 import asyncio
+import hashlib
+import json
 import logging
+import threading
 import time
 import uuid
+import zipfile
 from abc import ABC, abstractmethod
-from collections import defaultdict, OrderedDict, deque
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
+from queue import Empty, Queue
 from typing import (
-    Any, Dict, List, Optional, Set, Tuple, Union,
-    Callable, AsyncGenerator, TypeVar, Generic
+    Any,
+    Callable,
+    Optional,
+    TypeVar,
+    Union,
 )
-import json
-import os
-import shutil
-import threading
-import zipfile
-import hashlib
-import pickle
-from queue import Queue, Empty
-import weakref
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +48,12 @@ DocumentID = str
 VectorID = str
 UserID = str
 BatchID = str
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class DocumentStatus(Enum):
     """Document processing status"""
+
     PENDING = "pending"
     PROCESSING = "processing"
     EMBEDDING = "embedding"
@@ -65,6 +65,7 @@ class DocumentStatus(Enum):
 
 class DocumentType(Enum):
     """Document types"""
+
     TEXT = "text"
     MARKDOWN = "markdown"
     PDF = "pdf"
@@ -81,6 +82,7 @@ class DocumentType(Enum):
 
 class SearchType(Enum):
     """Search types"""
+
     SEMANTIC = "semantic"
     KEYWORD = "keyword"
     HYBRID = "hybrid"
@@ -90,6 +92,7 @@ class SearchType(Enum):
 
 class ProcessingPriority(Enum):
     """Processing priority levels"""
+
     LOW = 1
     NORMAL = 5
     HIGH = 10
@@ -99,10 +102,11 @@ class ProcessingPriority(Enum):
 @dataclass
 class PerformanceMetrics:
     """Performance metrics tracking"""
+
     operation_count: int = 0
     total_duration: float = 0.0
     avg_duration: float = 0.0
-    min_duration: float = float('inf')
+    min_duration: float = float("inf")
     max_duration: float = 0.0
     error_count: int = 0
     last_updated: datetime = field(default_factory=datetime.now)
@@ -128,6 +132,7 @@ class PerformanceMetrics:
 @dataclass
 class DocumentMetadata:
     """Enhanced document metadata"""
+
     title: str
     file_path: Optional[str] = None
     file_size: int = 0
@@ -138,11 +143,11 @@ class DocumentMetadata:
     created_at: datetime = field(default_factory=datetime.now)
     modified_at: Optional[datetime] = None
     indexed_at: Optional[datetime] = None
-    tags: List[str] = field(default_factory=list)
-    categories: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
+    categories: list[str] = field(default_factory=list)
     version: int = 1
     checksum: Optional[str] = None
-    custom_fields: Dict[str, Any] = field(default_factory=dict)
+    custom_fields: dict[str, Any] = field(default_factory=dict)
     access_level: str = "public"
     retention_policy: Optional[str] = None
 
@@ -150,6 +155,7 @@ class DocumentMetadata:
 @dataclass
 class DocumentChunk:
     """Document chunk for processing"""
+
     chunk_id: str
     document_id: DocumentID
     content: str
@@ -157,13 +163,14 @@ class DocumentChunk:
     end_pos: int = 0
     chunk_index: int = 0
     total_chunks: int = 1
-    embedding: Optional[List[float]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    embedding: Optional[list[float]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class SearchResult:
     """Enhanced search result"""
+
     document_id: DocumentID
     chunk_id: Optional[str] = None
     title: str = ""
@@ -171,17 +178,18 @@ class SearchResult:
     score: float = 0.0
     relevance_score: float = 0.0
     similarity_score: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    highlights: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    highlights: list[str] = field(default_factory=list)
     document_type: Optional[DocumentType] = None
     ranking_position: int = 0
     search_type: Optional[SearchType] = None
-    matched_terms: List[str] = field(default_factory=list)
+    matched_terms: list[str] = field(default_factory=list)
 
 
 @dataclass
 class ProcessingTask:
     """Document processing task"""
+
     task_id: str
     document_id: DocumentID
     operation: str
@@ -194,7 +202,7 @@ class ProcessingTask:
     retry_count: int = 0
     max_retries: int = 3
     progress: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def duration(self) -> Optional[timedelta]:
@@ -235,8 +243,8 @@ class CircuitBreaker:
     def _should_attempt_reset(self) -> bool:
         """Check if circuit breaker should attempt reset"""
         return (
-            self.last_failure_time and
-            time.time() - self.last_failure_time >= self.recovery_timeout
+            self.last_failure_time
+            and time.time() - self.last_failure_time >= self.recovery_timeout
         )
 
     def _on_success(self) -> None:
@@ -286,17 +294,21 @@ class VectorIndex:
     def __init__(self, dimension: int, index_type: str = "faiss"):
         self.dimension = dimension
         self.index_type = index_type
-        self.vectors: Dict[VectorID, List[float]] = {}
-        self.metadata: Dict[VectorID, Dict[str, Any]] = {}
+        self.vectors: dict[VectorID, list[float]] = {}
+        self.metadata: dict[VectorID, dict[str, Any]] = {}
         self.index: Optional[Any] = None
         self.is_initialized = False
         self._lock = threading.RLock()
 
-    def add_vector(self, vector_id: VectorID, vector: List[float], metadata: Dict[str, Any] = None) -> bool:
+    def add_vector(
+        self, vector_id: VectorID, vector: list[float], metadata: dict[str, Any] = None
+    ) -> bool:
         """Add vector to index"""
         with self._lock:
             if len(vector) != self.dimension:
-                raise ValueError(f"Vector dimension mismatch: expected {self.dimension}, got {len(vector)}")
+                raise ValueError(
+                    f"Vector dimension mismatch: expected {self.dimension}, got {len(vector)}"  # noqa: E501
+                )
 
             self.vectors[vector_id] = vector
             if metadata:
@@ -309,14 +321,18 @@ class VectorIndex:
 
             return True
 
-    def search(self, query_vector: List[float], top_k: int = 10, filters: Dict[str, Any] = None) -> List[Tuple[VectorID, float]]:
+    def search(
+        self, query_vector: list[float], top_k: int = 10, filters: dict[str, Any] = None
+    ) -> list[tuple[VectorID, float]]:
         """Search for similar vectors"""
         with self._lock:
             if not self.is_initialized:
                 self._initialize_index()
 
             if len(query_vector) != self.dimension:
-                raise ValueError(f"Query vector dimension mismatch: expected {self.dimension}, got {len(query_vector)}")
+                raise ValueError(
+                    f"Query vector dimension mismatch: expected {self.dimension}, got {len(query_vector)}"  # noqa: E501
+                )
 
             # Simple cosine similarity implementation (mock)
             results = []
@@ -339,7 +355,7 @@ class VectorIndex:
                 return True
             return False
 
-    def get_vector(self, vector_id: VectorID) -> Optional[List[float]]:
+    def get_vector(self, vector_id: VectorID) -> Optional[list[float]]:
         """Get vector by ID"""
         with self._lock:
             return self.vectors.get(vector_id)
@@ -354,12 +370,12 @@ class VectorIndex:
         self.is_initialized = True
         # Mock implementation - in production would use FAISS or similar
 
-    def _add_to_index(self, vector_id: VectorID, vector: List[float]) -> None:
+    def _add_to_index(self, vector_id: VectorID, vector: list[float]) -> None:
         """Add vector to initialized index"""
         # Mock implementation
         pass
 
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Calculate cosine similarity between vectors"""
         dot_product = sum(a * b for a, b in zip(vec1, vec2))
         norm1 = sum(a * a for a in vec1) ** 0.5
@@ -368,7 +384,9 @@ class VectorIndex:
             return 0.0
         return dot_product / (norm1 * norm2)
 
-    def _passes_filters(self, vector_id: VectorID, filters: Dict[str, Any] = None) -> bool:
+    def _passes_filters(
+        self, vector_id: VectorID, filters: dict[str, Any] = None
+    ) -> bool:
         """Check if vector passes metadata filters"""
         if not filters:
             return True
@@ -389,7 +407,9 @@ class DocumentProcessor(ABC):
         pass
 
     @abstractmethod
-    async def process(self, file_path: str, metadata: DocumentMetadata = None) -> Tuple[str, List[DocumentChunk]]:
+    async def process(
+        self, file_path: str, metadata: DocumentMetadata = None
+    ) -> tuple[str, list[DocumentChunk]]:
         """Process document and return chunks"""
         pass
 
@@ -404,12 +424,14 @@ class TextProcessor(DocumentProcessor):
     def can_process(self, file_path: str, mime_type: str = None) -> bool:
         """Check if can process text file"""
         ext = Path(file_path).suffix.lower()
-        return ext in ['.txt', '.md', '.rst', '.log']
+        return ext in [".txt", ".md", ".rst", ".log"]
 
-    async def process(self, file_path: str, metadata: DocumentMetadata = None) -> Tuple[str, List[DocumentChunk]]:
+    async def process(
+        self, file_path: str, metadata: DocumentMetadata = None
+    ) -> tuple[str, list[DocumentChunk]]:
         """Process text document"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Generate document ID
@@ -424,7 +446,9 @@ class TextProcessor(DocumentProcessor):
             logger.error(f"Error processing text file {file_path}: {e}")
             raise
 
-    def _create_chunks(self, document_id: DocumentID, content: str) -> List[DocumentChunk]:
+    def _create_chunks(
+        self, document_id: DocumentID, content: str
+    ) -> list[DocumentChunk]:
         """Create document chunks"""
         chunks = []
         content_length = len(content)
@@ -443,7 +467,7 @@ class TextProcessor(DocumentProcessor):
                 start_pos=start,
                 end_pos=end,
                 chunk_index=chunk_index,
-                total_chunks=(content_length // self.chunk_size) + 1
+                total_chunks=(content_length // self.chunk_size) + 1,
             )
 
             chunks.append(chunk)
@@ -463,9 +487,11 @@ class PDFProcessor(DocumentProcessor):
     def can_process(self, file_path: str, mime_type: str = None) -> bool:
         """Check if can process PDF file"""
         ext = Path(file_path).suffix.lower()
-        return ext == '.pdf' or (mime_type and mime_type == 'application/pdf')
+        return ext == ".pdf" or (mime_type and mime_type == "application/pdf")
 
-    async def process(self, file_path: str, metadata: DocumentMetadata = None) -> Tuple[str, List[DocumentChunk]]:
+    async def process(
+        self, file_path: str, metadata: DocumentMetadata = None
+    ) -> tuple[str, list[DocumentChunk]]:
         """Process PDF document"""
         try:
             # Mock PDF processing - in production would use PyPDF2 or pdfplumber
@@ -482,7 +508,9 @@ class PDFProcessor(DocumentProcessor):
             logger.error(f"Error processing PDF file {file_path}: {e}")
             raise
 
-    def _create_chunks(self, document_id: DocumentID, content: str) -> List[DocumentChunk]:
+    def _create_chunks(
+        self, document_id: DocumentID, content: str
+    ) -> list[DocumentChunk]:
         """Create document chunks from PDF content"""
         chunks = []
         content_length = len(content)
@@ -503,7 +531,7 @@ class PDFProcessor(DocumentProcessor):
                 end_pos=end,
                 chunk_index=chunk_index,
                 total_chunks=(content_length // chunk_size) + 1,
-                metadata={"source": "pdf"}
+                metadata={"source": "pdf"},
             )
 
             chunks.append(chunk)
@@ -518,7 +546,9 @@ class PDFProcessor(DocumentProcessor):
 class EmbeddingService:
     """Production embedding service with rate limiting and circuit breaker"""
 
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2", max_calls_per_minute: int = 60):
+    def __init__(
+        self, model_name: str = "all-MiniLM-L6-v2", max_calls_per_minute: int = 60
+    ):
         self.model_name = model_name
         self.dimension = 384  # Mock dimension for the model
         self.rate_limiter = RateLimiter(max_calls_per_minute, 60)
@@ -526,7 +556,9 @@ class EmbeddingService:
         self.metrics = PerformanceMetrics()
         self._model = None  # Lazy loading
 
-    async def encode(self, texts: Union[str, List[str]], batch_size: int = 32) -> Union[List[float], List[List[float]]]:
+    async def encode(
+        self, texts: Union[str, list[str]], batch_size: int = 32
+    ) -> Union[list[float], list[list[float]]]:
         """Encode text(s) to embeddings"""
         is_single = isinstance(texts, str)
         if is_single:
@@ -536,13 +568,13 @@ class EmbeddingService:
 
         # Process in batches
         for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
+            batch = texts[i : i + batch_size]
             batch_embeddings = await self._encode_batch(batch)
             embeddings.extend(batch_embeddings)
 
         return embeddings[0] if is_single else embeddings
 
-    async def _encode_batch(self, texts: List[str]) -> List[List[float]]:
+    async def _encode_batch(self, texts: list[str]) -> list[list[float]]:
         """Encode a batch of texts"""
         self.rate_limiter.wait_for_slot()
 
@@ -552,7 +584,7 @@ class EmbeddingService:
             embeddings = []
             for text in texts:
                 # Create deterministic but realistic-looking embeddings
-                hash_input = text.encode('utf-8')
+                hash_input = text.encode("utf-8")
                 hash_obj = hashlib.md5(hash_input)
                 seed = int(hash_obj.hexdigest()[:8], 16)
 
@@ -582,13 +614,13 @@ class EmbeddingService:
             logger.error(f"Error generating embeddings: {e}")
             raise
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get embedding service metrics"""
         return {
             "model_name": self.model_name,
             "dimension": self.dimension,
             "metrics": asdict(self.metrics),
-            "success_rate": self.metrics.get_success_rate()
+            "success_rate": self.metrics.get_success_rate(),
         }
 
 
@@ -601,7 +633,7 @@ class ProductionWikiKnowledgeSystem:
         embedding_dimension: int = 384,
         max_concurrent_processors: int = 4,
         chunk_size: int = 1000,
-        enable_monitoring: bool = True
+        enable_monitoring: bool = True,
     ):
         self.storage_path = Path(storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
@@ -612,26 +644,26 @@ class ProductionWikiKnowledgeSystem:
         # Initialize components
         self.vector_index = VectorIndex(dimension=embedding_dimension)
         self.embedding_service = EmbeddingService()
-        self.processors: List[DocumentProcessor] = []
+        self.processors: list[DocumentProcessor] = []
 
         # Task processing
         self.task_queue: Queue = Queue()
-        self.processing_tasks: Dict[str, ProcessingTask] = {}
+        self.processing_tasks: dict[str, ProcessingTask] = {}
         self.executor = ThreadPoolExecutor(max_workers=max_concurrent_processors)
         self._processing_active = False
         self._processor_thread = None
 
         # Document storage
-        self.documents: Dict[DocumentID, Dict[str, Any]] = {}
-        self.chunks: Dict[str, DocumentChunk] = {}
-        self.metadata_index: Dict[str, Set[DocumentID]] = defaultdict(set)
+        self.documents: dict[DocumentID, dict[str, Any]] = {}
+        self.chunks: dict[str, DocumentChunk] = {}
+        self.metadata_index: dict[str, set[DocumentID]] = defaultdict(set)
 
         # Performance tracking
         self.metrics = {
             "documents_processed": PerformanceMetrics(),
             "searches_performed": PerformanceMetrics(),
             "embeddings_generated": PerformanceMetrics(),
-            "indexing_operations": PerformanceMetrics()
+            "indexing_operations": PerformanceMetrics(),
         }
 
         # Load existing data
@@ -651,7 +683,7 @@ class ProductionWikiKnowledgeSystem:
         self,
         file_path: str,
         metadata: DocumentMetadata = None,
-        priority: ProcessingPriority = ProcessingPriority.NORMAL
+        priority: ProcessingPriority = ProcessingPriority.NORMAL,
     ) -> DocumentID:
         """Add document to processing queue"""
         try:
@@ -663,7 +695,7 @@ class ProductionWikiKnowledgeSystem:
                 metadata = DocumentMetadata(
                     title=Path(file_path).stem,
                     file_path=file_path,
-                    file_size=Path(file_path).stat().st_size
+                    file_size=Path(file_path).stat().st_size,
                 )
 
             # Create processing task
@@ -673,7 +705,7 @@ class ProductionWikiKnowledgeSystem:
                 operation="process_document",
                 priority=priority,
                 created_at=datetime.now(),
-                metadata={"file_path": file_path, "metadata": asdict(metadata)}
+                metadata={"file_path": file_path, "metadata": asdict(metadata)},
             )
 
             # Store document info
@@ -683,7 +715,7 @@ class ProductionWikiKnowledgeSystem:
                 "metadata": asdict(metadata),
                 "status": DocumentStatus.PENDING.value,
                 "created_at": datetime.now().isoformat(),
-                "chunks": []
+                "chunks": [],
             }
 
             # Add to processing queue
@@ -702,9 +734,9 @@ class ProductionWikiKnowledgeSystem:
         query: str,
         top_k: int = 10,
         search_type: SearchType = SearchType.SEMANTIC,
-        filters: Dict[str, Any] = None,
-        include_content: bool = False
-    ) -> List[SearchResult]:
+        filters: dict[str, Any] = None,
+        include_content: bool = False,
+    ) -> list[SearchResult]:
         """Search the knowledge base"""
         start_time = time.time()
         try:
@@ -712,7 +744,9 @@ class ProductionWikiKnowledgeSystem:
             query_embedding = await self.embedding_service.encode(query)
 
             # Search vector index
-            vector_results = self.vector_index.search(query_embedding, top_k * 2, filters)
+            vector_results = self.vector_index.search(
+                query_embedding, top_k * 2, filters
+            )
 
             # Convert to SearchResult objects
             results = []
@@ -730,12 +764,16 @@ class ProductionWikiKnowledgeSystem:
                     document_id=chunk.document_id,
                     chunk_id=chunk_id,
                     title=document_info["metadata"].get("title", "Untitled"),
-                    content_snippet=chunk.content[:200] + "..." if len(chunk.content) > 200 else chunk.content,
+                    content_snippet=chunk.content[:200] + "..."
+                    if len(chunk.content) > 200
+                    else chunk.content,
                     similarity_score=similarity_score,
-                    relevance_score=similarity_score,  # Will be calculated based on search type
+                    relevance_score=similarity_score,  # Will be calculated based on search type  # noqa: E501
                     metadata=document_info["metadata"],
-                    document_type=DocumentType(document_info["metadata"].get("document_type", "text")),
-                    search_type=search_type
+                    document_type=DocumentType(
+                        document_info["metadata"].get("document_type", "text")
+                    ),
+                    search_type=search_type,
                 )
 
                 results.append(result)
@@ -763,26 +801,52 @@ class ProductionWikiKnowledgeSystem:
 
         return DocumentStatus(doc_info["status"])
 
-    def get_processing_queue_status(self) -> Dict[str, Any]:
+    def get_processing_queue_status(self) -> dict[str, Any]:
         """Get processing queue status"""
         return {
             "queue_size": self.task_queue.qsize(),
-            "active_tasks": len([t for t in self.processing_tasks.values() if t.status == DocumentStatus.PROCESSING]),
-            "pending_tasks": len([t for t in self.processing_tasks.values() if t.status == DocumentStatus.PENDING]),
-            "completed_tasks": len([t for t in self.processing_tasks.values() if t.status == DocumentStatus.COMPLETED]),
-            "failed_tasks": len([t for t in self.processing_tasks.values() if t.status == DocumentStatus.FAILED])
+            "active_tasks": len(
+                [
+                    t
+                    for t in self.processing_tasks.values()
+                    if t.status == DocumentStatus.PROCESSING
+                ]
+            ),
+            "pending_tasks": len(
+                [
+                    t
+                    for t in self.processing_tasks.values()
+                    if t.status == DocumentStatus.PENDING
+                ]
+            ),
+            "completed_tasks": len(
+                [
+                    t
+                    for t in self.processing_tasks.values()
+                    if t.status == DocumentStatus.COMPLETED
+                ]
+            ),
+            "failed_tasks": len(
+                [
+                    t
+                    for t in self.processing_tasks.values()
+                    if t.status == DocumentStatus.FAILED
+                ]
+            ),
         }
 
-    def get_system_metrics(self) -> Dict[str, Any]:
+    def get_system_metrics(self) -> dict[str, Any]:
         """Get comprehensive system metrics"""
         return {
             "documents_count": len(self.documents),
             "chunks_count": len(self.chunks),
             "vector_index_size": self.vector_index.size(),
-            "processing_metrics": {name: asdict(metrics) for name, metrics in self.metrics.items()},
+            "processing_metrics": {
+                name: asdict(metrics) for name, metrics in self.metrics.items()
+            },
             "embedding_service_metrics": self.embedding_service.get_metrics(),
             "queue_status": self.get_processing_queue_status(),
-            "storage_usage": self._get_storage_usage()
+            "storage_usage": self._get_storage_usage(),
         }
 
     async def delete_document(self, document_id: DocumentID) -> bool:
@@ -818,7 +882,7 @@ class ProductionWikiKnowledgeSystem:
             backup_path = str(self.storage_path / f"wiki_backup_{timestamp}.zip")
 
         try:
-            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                 # Add documents
                 for file_path in self.storage_path.glob("*"):
                     if file_path.is_file() and not file_path.name.startswith("."):
@@ -828,12 +892,19 @@ class ProductionWikiKnowledgeSystem:
                 # Add system state
                 state_data = {
                     "documents": self.documents,
-                    "chunks": {chunk_id: asdict(chunk) for chunk_id, chunk in self.chunks.items()},
-                    "metadata_index": {key: list(value) for key, value in self.metadata_index.items()},
+                    "chunks": {
+                        chunk_id: asdict(chunk)
+                        for chunk_id, chunk in self.chunks.items()
+                    },
+                    "metadata_index": {
+                        key: list(value) for key, value in self.metadata_index.items()
+                    },
                     "backup_timestamp": datetime.now().isoformat(),
-                    "version": "1.0"
+                    "version": "1.0",
                 }
-                zipf.writestr("system_state.json", json.dumps(state_data, indent=2, default=str))
+                zipf.writestr(
+                    "system_state.json", json.dumps(state_data, indent=2, default=str)
+                )
 
             logger.info(f"System backup created: {backup_path}")
             return backup_path
@@ -864,7 +935,9 @@ class ProductionWikiKnowledgeSystem:
     def _start_background_processor(self) -> None:
         """Start background document processor"""
         self._processing_active = True
-        self._processor_thread = threading.Thread(target=self._process_documents_loop, daemon=True)
+        self._processor_thread = threading.Thread(
+            target=self._process_documents_loop, daemon=True
+        )
         self._processor_thread.start()
         logger.info("Background document processor started")
 
@@ -907,7 +980,9 @@ class ProductionWikiKnowledgeSystem:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                document_id, chunks = loop.run_until_complete(processor.process(file_path, metadata))
+                document_id, chunks = loop.run_until_complete(
+                    processor.process(file_path, metadata)
+                )
 
                 # 归一化文档 ID：add_document 已生成并返回 task.document_id，
                 # 处理器自生成的随机 ID 不能作为最终键（否则调用方持有的 ID 在
@@ -933,7 +1008,10 @@ class ProductionWikiKnowledgeSystem:
                 self.vector_index.add_vector(
                     chunk.chunk_id,
                     embedding,
-                    {"document_id": chunk.document_id, "chunk_index": chunk.chunk_index}
+                    {
+                        "document_id": chunk.document_id,
+                        "chunk_index": chunk.chunk_index,
+                    },
                 )
 
             # Update document info
@@ -973,11 +1051,8 @@ class ProductionWikiKnowledgeSystem:
         return None
 
     def _rank_results(
-        self,
-        results: List[SearchResult],
-        search_type: SearchType,
-        query: str
-    ) -> List[SearchResult]:
+        self, results: list[SearchResult], search_type: SearchType, query: str
+    ) -> list[SearchResult]:
         """Rank and sort search results"""
         for i, result in enumerate(results):
             result.ranking_position = i + 1
@@ -991,13 +1066,17 @@ class ProductionWikiKnowledgeSystem:
                 content_lower = result.content_snippet.lower()
                 matched_terms = [term for term in query_terms if term in content_lower]
                 result.matched_terms = matched_terms
-                result.relevance_score = len(matched_terms) / len(query_terms) if query_terms else 0
+                result.relevance_score = (
+                    len(matched_terms) / len(query_terms) if query_terms else 0
+                )
             else:  # HYBRID
                 # Combine semantic and keyword scores
                 query_terms = query.lower().split()
                 content_lower = result.content_snippet.lower()
                 matched_terms = [term for term in query_terms if term in content_lower]
-                keyword_score = len(matched_terms) / len(query_terms) if query_terms else 0
+                keyword_score = (
+                    len(matched_terms) / len(query_terms) if query_terms else 0
+                )
                 result.relevance_score = (result.similarity_score + keyword_score) / 2
                 result.matched_terms = matched_terms
 
@@ -1005,7 +1084,7 @@ class ProductionWikiKnowledgeSystem:
         results.sort(key=lambda x: x.relevance_score, reverse=True)
         return results
 
-    def _get_storage_usage(self) -> Dict[str, Any]:
+    def _get_storage_usage(self) -> dict[str, Any]:
         """Get storage usage statistics"""
         total_size = 0
         file_count = 0
@@ -1019,7 +1098,7 @@ class ProductionWikiKnowledgeSystem:
             "total_size_bytes": total_size,
             "total_size_mb": round(total_size / (1024 * 1024), 2),
             "file_count": file_count,
-            "storage_path": str(self.storage_path)
+            "storage_path": str(self.storage_path),
         }
 
     def _save_system_state(self) -> None:
@@ -1028,13 +1107,17 @@ class ProductionWikiKnowledgeSystem:
             state_file = self.storage_path / "system_state.json"
             state_data = {
                 "documents": self.documents,
-                "chunks": {chunk_id: asdict(chunk) for chunk_id, chunk in self.chunks.items()},
-                "metadata_index": {key: list(value) for key, value in self.metadata_index.items()},
+                "chunks": {
+                    chunk_id: asdict(chunk) for chunk_id, chunk in self.chunks.items()
+                },
+                "metadata_index": {
+                    key: list(value) for key, value in self.metadata_index.items()
+                },
                 "version": "1.0",
-                "saved_at": datetime.now().isoformat()
+                "saved_at": datetime.now().isoformat(),
             }
 
-            with open(state_file, 'w') as f:
+            with open(state_file, "w") as f:
                 json.dump(state_data, f, indent=2, default=str)
 
         except Exception as e:
@@ -1045,7 +1128,7 @@ class ProductionWikiKnowledgeSystem:
         try:
             state_file = self.storage_path / "system_state.json"
             if state_file.exists():
-                with open(state_file, 'r') as f:
+                with open(state_file) as f:
                     state_data = json.load(f)
 
                 self.documents = state_data.get("documents", {})
@@ -1069,10 +1152,12 @@ class ProductionWikiKnowledgeSystem:
                         self.vector_index.add_vector(
                             chunk_id,
                             chunk.embedding,
-                            {"document_id": chunk.document_id}
+                            {"document_id": chunk.document_id},
                         )
 
-                logger.info(f"Loaded system state: {len(self.documents)} documents, {len(self.chunks)} chunks")
+                logger.info(
+                    f"Loaded system state: {len(self.documents)} documents, {len(self.chunks)} chunks"  # noqa: E501
+                )
 
         except Exception as e:
             logger.error(f"Error loading system state: {e}")
@@ -1092,8 +1177,7 @@ class ProductionWikiKnowledgeSystem:
 
 # Factory function for easy initialization
 def create_production_wiki_system(
-    storage_path: str,
-    **kwargs
+    storage_path: str, **kwargs
 ) -> ProductionWikiKnowledgeSystem:
     """Create and configure a production wiki knowledge system"""
     system = ProductionWikiKnowledgeSystem(storage_path, **kwargs)

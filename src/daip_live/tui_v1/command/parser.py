@@ -5,7 +5,6 @@ Implements command parsing logic following TDD approach.
 """
 
 import shlex
-from typing import List, Dict, Any, Optional
 
 from .models import Command
 
@@ -68,9 +67,5 @@ class CommandParser:
             i += 1
 
         return Command(
-            raw=command_str,
-            command=command,
-            action=action,
-            args=args,
-            options=options
+            raw=command_str, command=command, action=action, args=args, options=options
         )

@@ -4,14 +4,15 @@ This module provides OpenAPI/Swagger documentation specifications,
 request/response schemas, and examples for all API endpoints.
 """
 
-from typing import List, Optional, Dict, Any
 from datetime import datetime
-from pydantic import BaseModel, Field
+from typing import Any, Optional
 
+from pydantic import BaseModel, Field
 
 # ============================================================================
 # Request/Response Schemas with Documentation
 # ============================================================================
+
 
 class SessionCreateRequest(BaseModel):
     """Request schema for creating a new session.
@@ -25,15 +26,16 @@ class SessionCreateRequest(BaseModel):
     goal: str = Field(
         ...,
         description="The primary objective or task for this session",
-        examples=["Analyze market trends for AI adoption", "Debate the pros and cons of remote work"]
+        examples=[
+            "Analyze market trends for AI adoption",
+            "Debate the pros and cons of remote work",
+        ],
     )
     session_type: str = Field(
-        default="workflow",
-        description="Type of session: chat, workflow, or debate"
+        default="workflow", description="Type of session: chat, workflow, or debate"
     )
-    participant_ids: List[str] = Field(
-        default=["agent", "user"],
-        description="List of participant identifiers"
+    participant_ids: list[str] = Field(
+        default=["agent", "user"], description="List of participant identifiers"
     )
 
     model_config = {
@@ -42,7 +44,7 @@ class SessionCreateRequest(BaseModel):
                 {
                     "goal": "Analyze market trends for AI adoption in 2024",
                     "session_type": "workflow",
-                    "participant_ids": ["agent", "user"]
+                    "participant_ids": ["agent", "user"],
                 }
             ]
         }
@@ -55,7 +57,7 @@ class SessionResponse(BaseModel):
     session_id: str = Field(..., description="Unique session identifier")
     session_type: str = Field(..., description="Type of session")
     goal: str = Field(..., description="Session objective or goal")
-    participant_ids: List[str] = Field(..., description="Participant identifiers")
+    participant_ids: list[str] = Field(..., description="Participant identifiers")
     created_at: datetime = Field(..., description="Session creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
     status: Optional[str] = Field(None, description="Current session status")
@@ -65,15 +67,15 @@ class HealthCheckResponse(BaseModel):
     """Response schema for health check endpoint."""
 
     status: str = Field(
-        ...,
-        description="System health status: healthy, degraded, or unhealthy"
+        ..., description="System health status: healthy, degraded, or unhealthy"
     )
     timestamp: datetime = Field(..., description="Health check timestamp")
     version: str = Field(..., description="Application version")
-    uptime_seconds: Optional[float] = Field(None, description="Server uptime in seconds")
-    components: Optional[Dict[str, str]] = Field(
-        None,
-        description="Health status of individual components"
+    uptime_seconds: Optional[float] = Field(
+        None, description="Server uptime in seconds"
+    )
+    components: Optional[dict[str, str]] = Field(
+        None, description="Health status of individual components"
     )
 
 
@@ -84,9 +86,8 @@ class RoleInfoResponse(BaseModel):
     description: str = Field(..., description="Role description")
     system_prompt: str = Field(..., description="System prompt for this role")
     model: Optional[str] = Field(None, description="Assigned model for this role")
-    capabilities: Optional[List[str]] = Field(
-        None,
-        description="List of capabilities for this role"
+    capabilities: Optional[list[str]] = Field(
+        None, description="List of capabilities for this role"
     )
 
 
@@ -97,7 +98,9 @@ class KnowledgeStatusResponse(BaseModel):
     last_sync: datetime = Field(..., description="Last synchronization timestamp")
     total_documents: int = Field(..., description="Total number of documents")
     index_size: Optional[int] = Field(None, description="Size of the vector index")
-    embedding_dimension: Optional[int] = Field(None, description="Embedding vector dimension")
+    embedding_dimension: Optional[int] = Field(
+        None, description="Embedding vector dimension"
+    )
 
 
 class ErrorResponse(BaseModel):
@@ -116,24 +119,21 @@ class ErrorResponse(BaseModel):
 API_TAGS = [
     {
         "name": "sessions",
-        "description": "Session management operations. Create, list, retrieve, and delete user sessions."
+        "description": "Session management operations. Create, list, retrieve, and delete user sessions.",  # noqa: E501
     },
-    {
-        "name": "health",
-        "description": "System health and status monitoring endpoints."
-    },
+    {"name": "health", "description": "System health and status monitoring endpoints."},
     {
         "name": "roles",
-        "description": "Role management operations. List available agent roles and their configurations."
+        "description": "Role management operations. List available agent roles and their configurations.",  # noqa: E501
     },
     {
         "name": "knowledge",
-        "description": "Knowledge base operations. Check status and manage documents."
+        "description": "Knowledge base operations. Check status and manage documents.",
     },
     {
         "name": "websocket",
-        "description": "WebSocket endpoints for real-time agent communication."
-    }
+        "description": "WebSocket endpoints for real-time agent communication.",
+    },
 ]
 
 
@@ -167,19 +167,11 @@ No rate limiting is currently enforced for local deployments.
         "contact": {
             "name": "DAIP-LIVE Team",
         },
-        "license": {
-            "name": "MIT"
-        }
+        "license": {"name": "MIT"},
     },
     "servers": [
-        {
-            "url": "http://localhost:8000",
-            "description": "Local development server"
-        },
-        {
-            "url": "http://localhost:8080",
-            "description": "Alternative local port"
-        }
+        {"url": "http://localhost:8000", "description": "Local development server"},
+        {"url": "http://localhost:8080", "description": "Alternative local port"},
     ],
     "tags": API_TAGS,
     "paths": {
@@ -188,23 +180,27 @@ No rate limiting is currently enforced for local deployments.
             "post": {
                 "tags": ["sessions"],
                 "summary": "Create a new session",
-                "description": "Creates a new session with the specified goal and configuration.",
+                "description": "Creates a new session with the specified goal and configuration.",  # noqa: E501
                 "requestBody": {
                     "required": True,
                     "content": {
                         "application/json": {
-                            "schema": {"$ref": "#/components/schemas/SessionCreateRequest"}
+                            "schema": {
+                                "$ref": "#/components/schemas/SessionCreateRequest"
+                            }
                         }
-                    }
+                    },
                 },
                 "responses": {
                     "200": {
                         "description": "Session created successfully",
                         "content": {
                             "application/json": {
-                                "schema": {"$ref": "#/components/schemas/SessionResponse"}
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionResponse"
+                                }
                             }
-                        }
+                        },
                     },
                     "400": {
                         "description": "Invalid request parameters",
@@ -212,9 +208,9 @@ No rate limiting is currently enforced for local deployments.
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/ErrorResponse"}
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             },
             "get": {
                 "tags": ["sessions"],
@@ -227,13 +223,15 @@ No rate limiting is currently enforced for local deployments.
                             "application/json": {
                                 "schema": {
                                     "type": "array",
-                                    "items": {"$ref": "#/components/schemas/SessionResponse"}
+                                    "items": {
+                                        "$ref": "#/components/schemas/SessionResponse"
+                                    },
                                 }
                             }
-                        }
+                        },
                     }
-                }
-            }
+                },
+            },
         },
         "/api/sessions/{session_id}": {
             "get": {
@@ -246,7 +244,7 @@ No rate limiting is currently enforced for local deployments.
                         "in": "path",
                         "required": True,
                         "schema": {"type": "string"},
-                        "description": "Session identifier"
+                        "description": "Session identifier",
                     }
                 ],
                 "responses": {
@@ -254,9 +252,11 @@ No rate limiting is currently enforced for local deployments.
                         "description": "Session details",
                         "content": {
                             "application/json": {
-                                "schema": {"$ref": "#/components/schemas/SessionResponse"}
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionResponse"
+                                }
                             }
-                        }
+                        },
                     },
                     "404": {
                         "description": "Session not found",
@@ -264,9 +264,9 @@ No rate limiting is currently enforced for local deployments.
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/ErrorResponse"}
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             },
             "delete": {
                 "tags": ["sessions"],
@@ -278,23 +278,21 @@ No rate limiting is currently enforced for local deployments.
                         "in": "path",
                         "required": True,
                         "schema": {"type": "string"},
-                        "description": "Session identifier"
+                        "description": "Session identifier",
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Session deleted successfully"
-                    },
+                    "200": {"description": "Session deleted successfully"},
                     "404": {
                         "description": "Session not found",
                         "content": {
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/ErrorResponse"}
                             }
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         },
         # Health
         "/api/health": {
@@ -307,11 +305,13 @@ No rate limiting is currently enforced for local deployments.
                         "description": "System health status",
                         "content": {
                             "application/json": {
-                                "schema": {"$ref": "#/components/schemas/HealthCheckResponse"}
+                                "schema": {
+                                    "$ref": "#/components/schemas/HealthCheckResponse"
+                                }
                             }
-                        }
+                        },
                     }
-                }
+                },
             }
         },
         # Roles
@@ -319,7 +319,7 @@ No rate limiting is currently enforced for local deployments.
             "get": {
                 "tags": ["roles"],
                 "summary": "List available roles",
-                "description": "Retrieves a list of all available agent roles with their configurations.",
+                "description": "Retrieves a list of all available agent roles with their configurations.",  # noqa: E501
                 "responses": {
                     "200": {
                         "description": "List of roles",
@@ -327,12 +327,14 @@ No rate limiting is currently enforced for local deployments.
                             "application/json": {
                                 "schema": {
                                     "type": "array",
-                                    "items": {"$ref": "#/components/schemas/RoleInfoResponse"}
+                                    "items": {
+                                        "$ref": "#/components/schemas/RoleInfoResponse"
+                                    },
                                 }
                             }
-                        }
+                        },
                     }
-                }
+                },
             }
         },
         # Knowledge
@@ -340,17 +342,19 @@ No rate limiting is currently enforced for local deployments.
             "get": {
                 "tags": ["knowledge"],
                 "summary": "Get knowledge base status",
-                "description": "Retrieves the current status and statistics of the knowledge base.",
+                "description": "Retrieves the current status and statistics of the knowledge base.",  # noqa: E501
                 "responses": {
                     "200": {
                         "description": "Knowledge base status",
                         "content": {
                             "application/json": {
-                                "schema": {"$ref": "#/components/schemas/KnowledgeStatusResponse"}
+                                "schema": {
+                                    "$ref": "#/components/schemas/KnowledgeStatusResponse"  # noqa: E501
+                                }
                             }
-                        }
+                        },
                     }
-                }
+                },
             }
         },
         # WebSocket
@@ -377,11 +381,11 @@ Establishes a WebSocket connection for real-time agent communication.
                         "in": "path",
                         "required": True,
                         "schema": {"type": "string"},
-                        "description": "Session identifier"
+                        "description": "Session identifier",
                     }
-                ]
+                ],
             }
-        }
+        },
     },
     "components": {
         "schemas": {
@@ -393,10 +397,10 @@ Establishes a WebSocket connection for real-time agent communication.
                     "participant_ids": {
                         "type": "array",
                         "items": {"type": "string"},
-                        "default": ["agent", "user"]
-                    }
+                        "default": ["agent", "user"],
+                    },
                 },
-                "required": ["goal"]
+                "required": ["goal"],
             },
             "SessionResponse": {
                 "type": "object",
@@ -407,8 +411,8 @@ Establishes a WebSocket connection for real-time agent communication.
                     "participant_ids": {"type": "array", "items": {"type": "string"}},
                     "created_at": {"type": "string", "format": "date-time"},
                     "updated_at": {"type": "string", "format": "date-time"},
-                    "status": {"type": "string"}
-                }
+                    "status": {"type": "string"},
+                },
             },
             "HealthCheckResponse": {
                 "type": "object",
@@ -419,9 +423,9 @@ Establishes a WebSocket connection for real-time agent communication.
                     "uptime_seconds": {"type": "number"},
                     "components": {
                         "type": "object",
-                        "additionalProperties": {"type": "string"}
-                    }
-                }
+                        "additionalProperties": {"type": "string"},
+                    },
+                },
             },
             "RoleInfoResponse": {
                 "type": "object",
@@ -430,8 +434,8 @@ Establishes a WebSocket connection for real-time agent communication.
                     "description": {"type": "string"},
                     "system_prompt": {"type": "string"},
                     "model": {"type": "string"},
-                    "capabilities": {"type": "array", "items": {"type": "string"}}
-                }
+                    "capabilities": {"type": "array", "items": {"type": "string"}},
+                },
             },
             "KnowledgeStatusResponse": {
                 "type": "object",
@@ -440,8 +444,8 @@ Establishes a WebSocket connection for real-time agent communication.
                     "last_sync": {"type": "string", "format": "date-time"},
                     "total_documents": {"type": "integer"},
                     "index_size": {"type": "integer"},
-                    "embedding_dimension": {"type": "integer"}
-                }
+                    "embedding_dimension": {"type": "integer"},
+                },
             },
             "ErrorResponse": {
                 "type": "object",
@@ -449,12 +453,12 @@ Establishes a WebSocket connection for real-time agent communication.
                     "error": {"type": "string"},
                     "message": {"type": "string"},
                     "detail": {"type": "string"},
-                    "timestamp": {"type": "string", "format": "date-time"}
+                    "timestamp": {"type": "string", "format": "date-time"},
                 },
-                "required": ["error", "message", "timestamp"]
-            }
+                "required": ["error", "message", "timestamp"],
+            },
         }
-    }
+    },
 }
 
 
@@ -462,7 +466,8 @@ Establishes a WebSocket connection for real-time agent communication.
 # Utility Functions
 # ============================================================================
 
-def get_openapi_spec() -> Dict[str, Any]:
+
+def get_openapi_spec() -> dict[str, Any]:
     """Returns the complete OpenAPI specification."""
     return OPENAPI_SPEC
 

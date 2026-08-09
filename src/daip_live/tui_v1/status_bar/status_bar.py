@@ -4,12 +4,12 @@ Main Status Bar for newP6 TUI
 Provides real-time status bar functionality with widget management.
 """
 
-from typing import Dict, List, Optional, Any
-import logging
 import asyncio
+import logging
+from typing import Any, Optional
 
-from .status_widget import StatusWidget
 from .status_updater import StatusUpdater
+from .status_widget import StatusWidget
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class StatusBar:
     """Main status bar class that manages all status widgets"""
 
     def __init__(self):
-        self._widgets: Dict[str, StatusWidget] = {}
+        self._widgets: dict[str, StatusWidget] = {}
         self._updater: Optional[StatusUpdater] = None
         self._visible: bool = True
         self._initialized: bool = False
@@ -28,7 +28,9 @@ class StatusBar:
         self.state_manager: Optional[Any] = None
         self.service_container: Optional[Any] = None
 
-    def initialize(self, event_system: Any, state_manager: Any, service_container: Any) -> None:
+    def initialize(
+        self, event_system: Any, state_manager: Any, service_container: Any
+    ) -> None:
         """Initialize the status bar with dependencies"""
         self.event_system = event_system
         self.state_manager = state_manager
@@ -41,7 +43,9 @@ class StatusBar:
     def add_widget(self, widget: StatusWidget) -> None:
         """Add a status widget to the status bar"""
         if not isinstance(widget, StatusWidget):
-            raise TypeError(f"Widget must be a StatusWidget instance, got {type(widget)}")
+            raise TypeError(
+                f"Widget must be a StatusWidget instance, got {type(widget)}"
+            )
 
         self._widgets[widget.name] = widget
         logger.info(f"Added widget: {widget.name}")
@@ -64,7 +68,7 @@ class StatusBar:
         """Get a status widget by name"""
         return self._widgets.get(widget_name)
 
-    def list_widgets(self) -> List[str]:
+    def list_widgets(self) -> list[str]:
         """Get list of all widget names"""
         return list(self._widgets.keys())
 
@@ -93,7 +97,7 @@ class StatusBar:
                 # No event loop running, run synchronously
                 asyncio.run(widget.refresh())
 
-    def get_content(self) -> Dict[str, str]:
+    def get_content(self) -> dict[str, str]:
         """Get content from all widgets"""
         content = {}
         for name, widget in self._widgets.items():

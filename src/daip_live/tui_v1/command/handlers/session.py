@@ -4,10 +4,8 @@ Session Command Handlers for newP6 TUI
 Implements handlers for session management commands.
 """
 
-from typing import List
-
-from .base import BaseCommandHandler
 from ..models import CommandResult
+from .base import BaseCommandHandler
 
 
 class SessionListHandler(BaseCommandHandler):
@@ -18,15 +16,14 @@ class SessionListHandler(BaseCommandHandler):
         self.description = "List all sessions"
         self.session_service = None
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle session list command"""
         if self.session_service:
             # Use real service if available
             sessions = self.session_service.list_sessions()
-            session_list = "\n".join([
-                f"  📁 {s['id']}: {s['name']} ({s['status']})"
-                for s in sessions
-            ])
+            session_list = "\n".join(
+                [f"  📁 {s['id']}: {s['name']} ({s['status']})" for s in sessions]
+            )
             message = f"📚 Available Sessions:\n{session_list}"
         else:
             # Mock data for testing
@@ -45,7 +42,7 @@ class SessionShowHandler(BaseCommandHandler):
         self.description = "Show session details"
         self.session_service = None
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle session show command"""
         if not self.validate_args(args, min_args=1):
             return CommandResult.error_result(
@@ -61,10 +58,10 @@ class SessionShowHandler(BaseCommandHandler):
                 return CommandResult.error_result(f"Session {session_id} not found")
 
             message = f"""📁 Session Details:
-  ID: {session['id']}
-  Status: {session['status']}
-  Created: {session.get('created_at', 'Unknown')}
-  Last Activity: {session.get('last_activity', 'Unknown')}"""
+  ID: {session["id"]}
+  Status: {session["status"]}
+  Created: {session.get("created_at", "Unknown")}
+  Last Activity: {session.get("last_activity", "Unknown")}"""
         else:
             # Mock data for testing
             message = f"""📁 Session {session_id}:
@@ -85,7 +82,7 @@ class SessionNewHandler(BaseCommandHandler):
         self.description = "Create new session"
         self.session_service = None
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle session new command"""
         session_name = " ".join(args) if args else "New Session"
 
@@ -109,7 +106,7 @@ class SessionDeleteHandler(BaseCommandHandler):
         self.description = "Delete a session"
         self.session_service = None
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle session delete command"""
         if not self.validate_args(args, min_args=1):
             return CommandResult.error_result(
@@ -122,7 +119,9 @@ class SessionDeleteHandler(BaseCommandHandler):
             # Use real service if available
             success = self.session_service.delete_session(session_id)
             if not success:
-                return CommandResult.error_result(f"Failed to delete session {session_id}")
+                return CommandResult.error_result(
+                    f"Failed to delete session {session_id}"
+                )
 
             message = f"🗑️ Deleted session: {session_id}"
         else:
@@ -140,7 +139,7 @@ class SessionSwitchHandler(BaseCommandHandler):
         self.description = "Switch to a session"
         self.session_service = None
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle session switch command"""
         if not self.validate_args(args, min_args=1):
             return CommandResult.error_result(
@@ -153,7 +152,9 @@ class SessionSwitchHandler(BaseCommandHandler):
             # Use real service if available
             success = self.session_service.switch_session(session_id)
             if not success:
-                return CommandResult.error_result(f"Failed to switch to session {session_id}")
+                return CommandResult.error_result(
+                    f"Failed to switch to session {session_id}"
+                )
 
             message = f"🔄 Switched to session: {session_id}"
         else:

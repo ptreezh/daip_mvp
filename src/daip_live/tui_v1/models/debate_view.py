@@ -1,12 +1,14 @@
 """Enhanced debate view models for TUI visualization."""
+
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
 class DebateParticipantView(BaseModel):
     """Represents a debate participant with visual styling information."""
+
     name: str
     color: str = Field(default="#87CEEB")  # Light blue as default
     symbol: str = Field(default="👤")
@@ -15,6 +17,7 @@ class DebateParticipantView(BaseModel):
 
 class DebateTurnView(BaseModel):
     """Represents a single turn in the debate with styling."""
+
     participant_name: str
     content: str
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -25,10 +28,11 @@ class DebateTurnView(BaseModel):
 
 class DebateHistoryView(BaseModel):
     """Represents the complete history of a debate session."""
+
     session_id: str
     topic: str
-    participants: List[DebateParticipantView]
-    turns: List[DebateTurnView] = Field(default_factory=list)
+    participants: list[DebateParticipantView]
+    turns: list[DebateTurnView] = Field(default_factory=list)
     start_time: datetime = Field(default_factory=datetime.now)
     end_time: Optional[datetime] = None
     total_rounds: int = Field(default=0)
@@ -39,18 +43,19 @@ class DebateHistoryView(BaseModel):
 
 class EnhancedDebateView(BaseModel):
     """Enhanced visual representation of a debate in progress."""
+
     session_id: str
     topic: str
-    participants: List[DebateParticipantView]
+    participants: list[DebateParticipantView]
     current_turn: Optional[str] = None
     current_round: int = Field(default=1)
     total_rounds: int = Field(default=3)
-    history: List[DebateTurnView] = Field(default_factory=list)
+    history: list[DebateTurnView] = Field(default_factory=list)
     start_time: datetime = Field(default_factory=datetime.now)
     status: str = Field(default="active")  # active, completed, paused
     color_scheme: dict = Field(default_factory=dict)
     summary: Optional[str] = None  # Summary of the debate
-    
+
     def __init__(self, **data):
         super().__init__(**data)
         # Set default color scheme if not provided
@@ -59,9 +64,9 @@ class EnhancedDebateView(BaseModel):
                 "background": "#1E1E1E",
                 "text": "#FFFFFF",
                 "highlight": "#FFD700",
-                "participant_colors": self._get_default_participant_colors()
+                "participant_colors": self._get_default_participant_colors(),
             }
-    
+
     def _get_default_participant_colors(self) -> dict:
         """Generate default colors for participants."""
         colors = [
@@ -72,4 +77,6 @@ class EnhancedDebateView(BaseModel):
             "#F0E68C",  # Khaki
             "#FFA07A",  # Light salmon
         ]
-        return {p.name: colors[i % len(colors)] for i, p in enumerate(self.participants)}
+        return {
+            p.name: colors[i % len(colors)] for i, p in enumerate(self.participants)
+        }

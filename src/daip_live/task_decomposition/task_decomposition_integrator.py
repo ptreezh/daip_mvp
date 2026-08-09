@@ -2,10 +2,17 @@
 大模型任务分解与执行集成器
 将任务分解引擎集成到现有的意图识别和执行流程中
 """
-from typing import Optional, Dict, Any, List
-from daip_live.task_decomposition.task_decomposition_engine import TaskDecompositionEngine, SequentialTaskExecutor, DecomposedTask
-from daip_live.task_decomposition.task_visualization import TaskVisualizationManager, get_task_visualization_manager
+
 import asyncio
+from typing import Any
+
+from daip_live.task_decomposition.task_decomposition_engine import (
+    SequentialTaskExecutor,
+    TaskDecompositionEngine,
+)
+from daip_live.task_decomposition.task_visualization import (
+    get_task_visualization_manager,
+)
 
 
 class TaskDecompositionIntegrator:
@@ -16,14 +23,13 @@ class TaskDecompositionIntegrator:
         self.decomposer = TaskDecompositionEngine(model_provider)
         self.executor = SequentialTaskExecutor(model_provider)
         self.visualization_manager = get_task_visualization_manager()
-    
+
     async def should_decompose_request(self, user_request: str) -> bool:
         """判断用户请求是否需要分解"""
         return await self.decomposer.should_decompose_task(user_request)
-    
-    async def decompose_and_execute(self, user_request: str) -> Dict[str, Any]:
+
+    async def decompose_and_execute(self, user_request: str) -> dict[str, Any]:
         """分解并执行用户的复杂请求"""
-        print(f"[INTEGRATOR] 收到复杂请求，开始自动分解: {user_request[:50]}...")
 
         # 1. 分解任务
         tasks = await self.decomposer.decompose_task(user_request)
@@ -32,24 +38,24 @@ class TaskDecompositionIntegrator:
         self.visualization_manager.update_and_display(tasks, user_request)
 
         # 2. 执行任务（需要修改执行器以支持可视化更新）
-        results = await self.executor.execute_decomposed_tasks_with_visualization(tasks, user_request, self.visualization_manager)
-
-        print(f"[INTEGRATOR] 任务分解执行完成 - 结果摘要: {results['final_result'][:200]}...")
+        results = await self.executor.execute_decomposed_tasks_with_visualization(
+            tasks, user_request, self.visualization_manager
+        )
 
         # 最终显示完成状态
         self.visualization_manager.update_and_display(tasks, user_request)
 
         return results
-    
-    def get_execution_summary(self, execution_results: Dict[str, Any]) -> str:
+
+    def get_execution_summary(self, execution_results: dict[str, Any]) -> str:
         """生成执行摘要"""
         summary = f"""任务分解执行摘要:
-- 原始请求: {execution_results['original_request'][:100]}...
-- 总任务数: {execution_results['total_tasks']}
-- 成功任务: {execution_results['completed_tasks']}
-- 失败任务: {execution_results['failed_tasks']}
-- 执行摘要: {execution_results['final_result'][:300]}..."""
-        
+- 原始请求: {execution_results["original_request"][:100]}...
+- 总任务数: {execution_results["total_tasks"]}
+- 成功任务: {execution_results["completed_tasks"]}
+- 失败任务: {execution_results["failed_tasks"]}
+- 执行摘要: {execution_results["final_result"][:300]}..."""
+
         return summary
 
 
@@ -57,90 +63,93 @@ class TaskDecompositionIntegrator:
 def integrate_task_decomposition(intent_recognizer, model_provider=None):
     """将任务分解功能集成到意图识别器中"""
     integrator = TaskDecompositionIntegrator(model_provider)
-    
+
     # 保存原始的意图识别方法
     original_recognize_intent = intent_recognizer.recognize_intent
-    
+
     # 创建新的意图识别方法，包含任务分解逻辑
     def enhanced_recognize_intent(text: str, session_id: str = "default"):
         # 首先使用原始逻辑进行意图识别
         intent = original_recognize_intent(text, session_id)
-        
+
         # 如果没有识别到明确意图，或者判断该请求很复杂，则考虑任务分解
         if not intent or intent.name in ["question", "execute_skill", "chat"]:
             # 检查是否需要任务分解
             import asyncio
+
             try:
                 # 使用当前事件循环检查是否需要分解
-                loop = asyncio.get_running_loop()
-                should_decompose_future = integrator.should_decompose_request(text)
-                
+                asyncio.get_running_loop()
+                integrator.should_decompose_request(text)
+
                 # 创建一个新的协程包装来运行异步函数
                 async def check_decomposition():
-                    return await should_decompose_request(text)
-                
+                    return await integrator.should_decompose_request(text)
+
             except RuntimeError:
                 # 没有活跃的事件循环，使用临时循环
                 import asyncio
-                should_decompose = asyncio.run(integrator.should_decompose_request(text))
-                
+
+                should_decompose = asyncio.run(
+                    integrator.should_decompose_request(text)
+                )
+
                 if should_decompose:
                     # 标记此请求需要进行任务分解处理
-                    if not hasattr(intent, 'requires_task_decomposition'):
+                    if not hasattr(intent, "requires_task_decomposition"):
                         # 如果没有识别到明确意图，创建一个特殊意图
                         if not intent:
                             from daip_live.core.models import Intent, IntentType
+
                             intent = Intent(
                                 name="task_decomposition",
                                 confidence=0.8,
                                 description="需要任务分解的复杂请求",
                                 parameters={"user_request": text},
                                 intent_type=IntentType.WORKFLOW,
-                                requires_confidence_check=False
+                                requires_confidence_check=False,
                             )
-                        
+
                         # 添加任务分解标记
                         intent.requires_task_decomposition = True
                         intent.task_decomposition_integrator = integrator
-        
+
         return intent
-    
+
     # 替换原方法
     intent_recognizer.recognize_intent = enhanced_recognize_intent
     intent_recognizer.task_decomposition_integrator = integrator
-    
+
     return intent_recognizer
 
 
 # 执行器增强功能
 def enhance_executor_with_task_decomposition(executor):
     """为执行器增强任务分解功能"""
-    
+
     # 保存原始执行方法
-    original_execute = executor.execute if hasattr(executor, 'execute') else None
-    
+    original_execute = executor.execute if hasattr(executor, "execute") else None
+
     async def enhanced_execute(user_request: str):
         """增强的执行方法，支持任务分解"""
-        
+
         # 首先检查是否已经有了任务分解功能
-        if hasattr(executor, 'task_decomposition_integrator'):
+        if hasattr(executor, "task_decomposition_integrator"):
             integrator = executor.task_decomposition_integrator
-            
+
             # 检查是否需要任务分解
             should_decompose = await integrator.should_decompose_request(user_request)
-            
+
             if should_decompose:
-                print(f"[EXECUTOR ENHANCED] 检测到复杂请求，启动自动任务分解...")
-                
                 # 执行任务分解和执行流程
                 results = await integrator.decompose_and_execute(user_request)
-                
+
                 return {
                     "type": "task_decomposition_result",
                     "results": results,
-                    "summary": integrator.get_execution_summary(results)
+                    "summary": integrator.get_execution_summary(results),
                 }
-        
+
         # 如果不需要任务分解或没有集成器，使用原始逻辑
         if original_execute:
             return await original_execute(user_request)
@@ -149,26 +158,23 @@ def enhance_executor_with_task_decomposition(executor):
             return {
                 "type": "simple_response",
                 "response": "思考中...",
-                "request": user_request
+                "request": user_request,
             }
-    
+
     # 添加增强的执行方法
     executor.enhanced_execute = enhanced_execute
-    
+
     # 如果原始执行器有execute方法，则替换
     if original_execute:
         executor.execute = enhanced_execute
-    
+
     return executor
 
 
 # 测试集成
 async def test_integration():
     """测试集成功能"""
-    print("="*70)
-    print("🔌 测试大模型任务分解与现有系统集成")
-    print("="*70)
-    
+
     # 创建模拟模型提供者
     class MockModelProvider:
         async def generate(self, prompt: str):
@@ -179,75 +185,61 @@ async def test_integration():
 3. 挑战评估: 评估面临的主要挑战和障碍
 4. 建议总结: 总结发展前景和应对建议"""
             elif "执行以下子任务" in prompt:
-                subtask_title = prompt.split('子任务标题:')[1].split('\\n')[0] if '子任务标题:' in prompt else '分析任务'
+                subtask_title = (
+                    prompt.split("子任务标题:")[1].split("\\n")[0]
+                    if "子任务标题:" in prompt
+                    else "分析任务"
+                )
                 return f"完成{subtask_title} - 详细分析结果..."
             else:
                 return "这是对原始复杂请求的完整分析回答。"
-    
+
     mock_provider = MockModelProvider()
-    
+
     # 创建集成器并测试
     integrator = TaskDecompositionIntegrator(mock_provider)
-    
+
     test_request = "请帮我深入分析人工智能在医疗领域的应用前景、挑战和未来发展建议"
-    
-    print(f"\\n📝 测试复杂请求: {test_request[:80]}...")
-    
+
     # 检查是否需要分解
     should_decompose = await integrator.should_decompose_request(test_request)
-    print(f"   需要任务分解: {should_decompose}")
-    
+
     if should_decompose:
         # 执行分解和执行
-        results = await integrator.decompose_and_execute(test_request)
-        
-        print(f"   执行结果:")
-        print(f"   - 总任务数: {results['total_tasks']}")
-        print(f"   - 成功任务: {results['completed_tasks']}")
-        print(f"   - 执行摘要: {results['final_result'][:150]}...")
-    
-    print("\\n✅ 集成功能测试完成!")
-    
+        await integrator.decompose_and_execute(test_request)
+
     # 模拟集成到意图识别器
-    print("\\n🔄 模拟集成到意图识别器...")
-    
+
     class MockIntentRecognizer:
         def recognize_intent(self, text: str, session_id: str = "default"):
             # 简单模拟意图识别
             if "分析" in text or "研究" in text:
-                return type('MockIntent', (), {
-                    'name': 'execute_skill',
-                    'confidence': 0.7,
-                    'description': '技能执行',
-                    'parameters': {'content': text}
-                })()
+                return type(
+                    "MockIntent",
+                    (),
+                    {
+                        "name": "execute_skill",
+                        "confidence": 0.7,
+                        "description": "技能执行",
+                        "parameters": {"content": text},
+                    },
+                )()
             else:
                 return None
-    
+
     recognizer = MockIntentRecognizer()
-    integrated_recognizer = integrate_task_decomposition(recognizer, mock_provider)
-    
-    print("   意图识别器已集成任务分解功能")
-    
+    integrate_task_decomposition(recognizer, mock_provider)
+
     # 模拟执行器集成
-    print("\\n🔄 模拟集成到执行器...")
-    
+
     class MockExecutor:
         pass
-    
+
     executor = MockExecutor()
-    enhanced_executor = enhance_executor_with_task_decomposition(executor)
-    
-    print("   执行器已增强任务分解功能")
-    
-    print("\\n🎯 集成验证完成!")
-    print("系统现在能够在处理复杂请求时自动:")
-    print("  - 检测任务复杂度")
-    print("  - 自动分解为子任务") 
-    print("  - 顺序执行子任务")
-    print("  - 合成最终结果")
+    enhance_executor_with_task_decomposition(executor)
 
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(test_integration())

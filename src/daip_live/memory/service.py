@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional
+from typing import Optional
 
 from daip_live.config_bridge import config_bridge
 from daip_live.core.models import Session, TodoItem
@@ -12,10 +12,12 @@ class MemoryService:
     def __init__(self, model_provider: LiteLLMProvider):
         # Load the long term memory file path from the configuration
         config = config_bridge.get_config_data()
-        db_path = config.get('database', {}).get('path', 'daip_live.db')
-        self.long_term_memory_file = os.path.join(os.path.dirname(db_path), "project_context.md")
+        db_path = config.get("database", {}).get("path", "daip_live.db")
+        self.long_term_memory_file = os.path.join(
+            os.path.dirname(db_path), "project_context.md"
+        )
         self.model_provider = model_provider
-        self.todo_list: List[TodoItem] = []
+        self.todo_list: list[TodoItem] = []
 
     def get_long_term_memory(self) -> str:
         """Gets the long term memory from a file."""
@@ -28,7 +30,7 @@ class MemoryService:
         """Adds an item to the to-do list."""
         self.todo_list.append(item)
 
-    async def get_todo_list(self) -> List[TodoItem]:
+    async def get_todo_list(self) -> list[TodoItem]:
         """Returns a list of tasks to be completed."""
         return self.todo_list
 
@@ -70,7 +72,7 @@ Dialogue History:
 {history_string}
 ---
 Structured Summary:
-"""
+"""  # noqa: E501
 
         # 3. Call the LLM to get the summary
         summary, _ = await self.model_provider.generate(prompt)
@@ -100,7 +102,11 @@ Structured Summary:
             prompt += f"Compressed history: {session.compressed_history}\n"
         config_data = config_bridge.get_config_data()
         rag_cfg = config_data.get("rag", {})
-        if rag_cfg.get("enabled", False) and hasattr(self, "knowledge_manager") and self.knowledge_manager:
+        if (
+            rag_cfg.get("enabled", False)
+            and hasattr(self, "knowledge_manager")
+            and self.knowledge_manager
+        ):
             top_k = rag_cfg.get("top_k", 5)
             results = await self.knowledge_manager.search(goal, top_k=top_k)
             if results:
@@ -120,5 +126,5 @@ Structured Summary:
                     prompt += f"- {name}({', '.join(keys)})\n"
         for turn in session.history[-10:]:
             prompt += f"{turn.participant_id}: {turn.content}\n"
-        prompt += "Please analyze the situation and decide whether to use a tool or respond. Format for tool use: Use Tool: tool_name(arg1=value1, ...). Format for final answer: Final Answer. Confidence: X.X"
+        prompt += "Please analyze the situation and decide whether to use a tool or respond. Format for tool use: Use Tool: tool_name(arg1=value1, ...). Format for final answer: Final Answer. Confidence: X.X"  # noqa: E501
         return prompt

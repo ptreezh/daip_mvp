@@ -1,18 +1,25 @@
 """
 Skill management system for the Skills layer.
 """
+
+import asyncio
 import importlib
 import importlib.util
+import logging
 import os
-import requests
 import tempfile
 import zipfile
-import logging
-from typing import Dict, List, Optional, Type, Any, Set
 from pathlib import Path
-from ..skills.base import Skill, SkillMetadata, SkillInput, SkillOutput
+from typing import Optional
+
+import requests
+
+from ..skills.base import Skill, SkillInput, SkillMetadata, SkillOutput
 from .cache import SkillCache
-from .dependency import SkillDependencyGraph, DependencyValidationResult, DependencyStatus
+from .dependency import (
+    DependencyValidationResult,
+    SkillDependencyGraph,
+)
 
 
 class SkillManager:
@@ -22,7 +29,7 @@ class SkillManager:
         self,
         enable_cache: bool = True,
         cache_max_size: int = 100,
-        cache_default_ttl: Optional[float] = None
+        cache_default_ttl: Optional[float] = None,
     ):
         """
         Initialize the SkillManager.
@@ -31,21 +38,19 @@ class SkillManager:
             enable_cache: Whether to enable skill execution caching
             cache_max_size: Maximum number of cached entries
             cache_default_ttl: Default TTL for cached entries in seconds (None = no expiration)
-        """
-        self._skills: Dict[str, Skill] = {}
-        self._metadata: Dict[str, SkillMetadata] = {}
+        """  # noqa: E501
+        self._skills: dict[str, Skill] = {}
+        self._metadata: dict[str, SkillMetadata] = {}
         self._logger = logging.getLogger(__name__)
 
         # Initialize skill cache
         self._cache = SkillCache(
-            max_size=cache_max_size,
-            default_ttl=cache_default_ttl,
-            enabled=enable_cache
+            max_size=cache_max_size, default_ttl=cache_default_ttl, enabled=enable_cache
         )
 
         # Initialize dependency graph
         self._dependency_graph = SkillDependencyGraph()
-    
+
     def register_skill(self, skill: Skill) -> None:
         """
         Register a skill with the manager.
@@ -62,7 +67,7 @@ class SkillManager:
 
         # Add to dependency graph
         self._dependency_graph.add_skill(name, skill.metadata.dependencies or [])
-    
+
     def unregister_skill(self, name: str) -> None:
         """
         Unregister a skill from the manager.
@@ -76,41 +81,41 @@ class SkillManager:
 
             # Remove from dependency graph
             self._dependency_graph.remove_skill(name)
-    
+
     def get_skill(self, name: str) -> Optional[Skill]:
         """
         Get a registered skill by name.
-        
+
         Args:
             name: The name of the skill to retrieve
-            
+
         Returns:
             The skill if found, None otherwise
         """
         return self._skills.get(name)
-    
-    def list_skills(self) -> List[str]:
+
+    def list_skills(self) -> list[str]:
         """
         List all registered skill names.
-        
+
         Returns:
             List of skill names
         """
         return list(self._skills.keys())
-    
+
     def get_metadata(self, name: str) -> Optional[SkillMetadata]:
         """
         Get metadata for a specific skill.
-        
+
         Args:
             name: The name of the skill
-            
+
         Returns:
             SkillMetadata if skill exists, None otherwise
         """
         return self._metadata.get(name)
-    
-    def find_skills_by_tag(self, tag: str) -> List[str]:
+
+    def find_skills_by_tag(self, tag: str) -> list[str]:
         """
         Find skills that have a specific tag.
 
@@ -131,7 +136,7 @@ class SkillManager:
         skill_name: str,
         input: SkillInput,
         use_cache: bool = True,
-        cache_ttl: Optional[float] = None
+        cache_ttl: Optional[float] = None,
     ) -> SkillOutput:
         """
         Execute a skill with caching support.
@@ -181,7 +186,9 @@ class SkillManager:
         """
         return self._cache
 
-    def invalidate_skill_cache(self, skill_name: str, input: Optional[SkillInput] = None) -> int:
+    def invalidate_skill_cache(
+        self, skill_name: str, input: Optional[SkillInput] = None
+    ) -> int:
         """
         Invalidate cached results for a specific skill.
 
@@ -213,7 +220,9 @@ class SkillManager:
 
     # Dependency Management Methods
 
-    def validate_dependencies(self, enabled_skills: Optional[Set[str]] = None) -> DependencyValidationResult:
+    def validate_dependencies(
+        self, enabled_skills: Optional[set[str]] = None
+    ) -> DependencyValidationResult:
         """
         Validate all skill dependencies.
 
@@ -224,9 +233,13 @@ class SkillManager:
             DependencyValidationResult with validation status
         """
         if enabled_skills is None:
-            enabled_skills = {name for name, skill in self._skills.items() if skill.is_enabled}
+            enabled_skills = {
+                name for name, skill in self._skills.items() if skill.is_enabled
+            }
 
-        return self._dependency_graph.validate_dependencies(self._metadata, enabled_skills)
+        return self._dependency_graph.validate_dependencies(
+            self._metadata, enabled_skills
+        )
 
     def get_dependency_graph(self) -> SkillDependencyGraph:
         """
@@ -237,7 +250,7 @@ class SkillManager:
         """
         return self._dependency_graph
 
-    def get_execution_order(self, skill_name: str) -> List[str]:
+    def get_execution_order(self, skill_name: str) -> list[str]:
         """
         Get the execution order for a skill and its dependencies.
 
@@ -269,7 +282,9 @@ class SkillManager:
         if skill is None or not skill.is_enabled:
             return False
 
-        enabled_skills = {name for name, skill in self._skills.items() if skill.is_enabled}
+        enabled_skills = {
+            name for name, skill in self._skills.items() if skill.is_enabled
+        }
         return self._dependency_graph.can_execute(skill_name, enabled_skills)
 
     def execute_chain(
@@ -278,8 +293,8 @@ class SkillManager:
         input: SkillInput,
         stop_on_failure: bool = False,
         use_cache: bool = True,
-        require_all_dependencies: bool = True
-    ) -> Dict[str, SkillOutput]:
+        require_all_dependencies: bool = True,
+    ) -> dict[str, SkillOutput]:
         """
         Execute a skill and its dependencies in the correct order.
 
@@ -296,21 +311,23 @@ class SkillManager:
 
         Raises:
             ValueError: If skill is not found or require_all_dependencies=True and skill cannot be executed
-        """
+        """  # noqa: E501
         # Validate skill exists
         if skill_name not in self._skills:
             raise ValueError(f"Skill '{skill_name}' not found")
 
         # Check if all dependencies are available
         if require_all_dependencies and not self.can_execute(skill_name):
-            raise ValueError(f"Skill '{skill_name}' cannot be executed (missing or disabled dependencies)")
+            raise ValueError(
+                f"Skill '{skill_name}' cannot be executed (missing or disabled dependencies)"  # noqa: E501
+            )
 
         # Get execution order
         execution_order = self._dependency_graph.get_execution_order(skill_name)
 
         # Execute each skill in order
-        results: Dict[str, SkillOutput] = {}
-        failures: List[str] = []
+        results: dict[str, SkillOutput] = {}
+        failures: list[str] = []
 
         for name in execution_order:
             try:
@@ -329,7 +346,9 @@ class SkillManager:
                 for dep in dependencies:
                     if dep not in results:
                         # Dependency failed or was skipped
-                        self._logger.warning(f"Skipping skill '{name}' because dependency '{dep}' failed")
+                        self._logger.warning(
+                            f"Skipping skill '{name}' because dependency '{dep}' failed"
+                        )
                         failures.append(name)
                         dependencies_met = False
                         break
@@ -350,7 +369,9 @@ class SkillManager:
                     break
 
         if failures:
-            self._logger.warning(f"Failed to execute skills in chain: {', '.join(failures)}")
+            self._logger.warning(
+                f"Failed to execute skills in chain: {', '.join(failures)}"
+            )
 
         return results
 
@@ -360,8 +381,8 @@ class SkillManager:
         initial_input: SkillInput,
         output_transform=None,
         stop_on_failure: bool = False,
-        use_cache: bool = True
-    ) -> Dict[str, SkillOutput]:
+        use_cache: bool = True,
+    ) -> dict[str, SkillOutput]:
         """
         Execute a skill chain where each skill's output becomes input for the next.
 
@@ -380,15 +401,17 @@ class SkillManager:
             raise ValueError(f"Skill '{skill_name}' not found")
 
         if not self.can_execute(skill_name):
-            raise ValueError(f"Skill '{skill_name}' cannot be executed (missing or disabled dependencies)")
+            raise ValueError(
+                f"Skill '{skill_name}' cannot be executed (missing or disabled dependencies)"  # noqa: E501
+            )
 
         # Get execution order
         execution_order = self._dependency_graph.get_execution_order(skill_name)
 
         # Execute each skill with transformed input
-        results: Dict[str, SkillOutput] = {}
+        results: dict[str, SkillOutput] = {}
         current_input = initial_input
-        failures: List[str] = []
+        failures: list[str] = []
 
         for name in execution_order:
             try:
@@ -402,8 +425,7 @@ class SkillManager:
                 else:
                     # Default: use output as next input's data
                     current_input = SkillInput(
-                        data=output.result,
-                        context=output.metadata
+                        data=output.result, context=output.metadata
                     )
 
             except Exception as e:
@@ -414,60 +436,73 @@ class SkillManager:
                     break
 
         if failures:
-            self._logger.warning(f"Failed to execute skills in chain: {', '.join(failures)}")
+            self._logger.warning(
+                f"Failed to execute skills in chain: {', '.join(failures)}"
+            )
 
         return results
-    
+
     def load_skills_from_directory(self, directory: str) -> int:
         """
         Dynamically load skills from a directory.
-        
+
         Args:
             directory: The directory to load skills from
-            
+
         Returns:
             Number of skills loaded
         """
         skills_loaded = 0
-        
+
         if not os.path.exists(directory):
             self._logger.warning(f"Skills directory not found: {directory}")
             return skills_loaded
-        
+
         # This is a simplified implementation
         # In a real system, you would need more sophisticated plugin loading
         for filename in os.listdir(directory):
-            if filename.endswith('.py') and not filename.startswith('__'):
+            if filename.endswith(".py") and not filename.startswith("__"):
                 try:
                     # Import the module
                     module_name = filename[:-3]  # Remove .py extension
                     spec = importlib.util.spec_from_file_location(
-                        module_name, os.path.join(directory, filename))
+                        module_name, os.path.join(directory, filename)
+                    )
                     module = importlib.util.module_from_spec(spec)
                     spec.loader.exec_module(module)
-                    
+
                     # Look for skill classes in the module
                     for attr_name in dir(module):
                         attr = getattr(module, attr_name)
-                        if (isinstance(attr, type) and 
-                            issubclass(attr, Skill) and 
-                            attr != Skill):
+                        if (
+                            isinstance(attr, type)
+                            and issubclass(attr, Skill)
+                            and attr != Skill
+                        ):
                             # Try to instantiate the skill
                             try:
                                 skill_instance = attr()
                                 self.register_skill(skill_instance)
                                 skills_loaded += 1
-                                self._logger.info(f"Loaded skill: {skill_instance.metadata.name}")
+                                self._logger.info(
+                                    f"Loaded skill: {skill_instance.metadata.name}"
+                                )
                             except Exception as e:
-                                self._logger.warning(f"Failed to instantiate skill from {filename}: {e}")
+                                self._logger.warning(
+                                    f"Failed to instantiate skill from {filename}: {e}"
+                                )
                                 pass
                 except Exception as e:
-                    self._logger.warning(f"Failed to import skill module {filename}: {e}")
+                    self._logger.warning(
+                        f"Failed to import skill module {filename}: {e}"
+                    )
                     pass
-        
+
         return skills_loaded
-    
-    def download_and_install_skill(self, url: str, target_directory: str = None) -> bool:
+
+    def download_and_install_skill(
+        self, url: str, target_directory: str = None
+    ) -> bool:
         """
         Download and install a skill from a URL.
 
@@ -495,8 +530,8 @@ class SkillManager:
                 tmp_filename = tmp_file.name
 
             # If it's a zip file, extract it
-            if url.endswith('.zip'):
-                with zipfile.ZipFile(tmp_filename, 'r') as zip_ref:
+            if url.endswith(".zip"):
+                with zipfile.ZipFile(tmp_filename, "r") as zip_ref:
                     zip_ref.extractall(target_directory)
             else:
                 # Save as a Python file
@@ -507,7 +542,9 @@ class SkillManager:
             # Load the skills from the directory
             loaded_count = self.load_skills_from_directory(target_directory)
 
-            self._logger.info(f"Successfully downloaded and installed {loaded_count} skills from {url}")
+            self._logger.info(
+                f"Successfully downloaded and installed {loaded_count} skills from {url}"  # noqa: E501
+            )
             return loaded_count > 0
 
         except Exception as e:
@@ -523,7 +560,7 @@ class SkillManager:
 
         Returns:
             Number of skills loaded
-        """
+        """  # noqa: E501
         from .claude_skill_adapter import ClaudeSkillAdapterManager
 
         skills_loaded = 0
@@ -537,10 +574,14 @@ class SkillManager:
         adapter_manager = ClaudeSkillAdapterManager(self)
 
         try:
-            loaded_skills = asyncio.run(adapter_manager.load_claude_skills_from_directory(directory))
+            loaded_skills = asyncio.run(
+                adapter_manager.load_claude_skills_from_directory(directory)
+            )
             skills_loaded = len(loaded_skills)
-            self._logger.info(f"Successfully loaded {skills_loaded} Claude skills from {directory}")
-        except Exception as e:
+            self._logger.info(
+                f"Successfully loaded {skills_loaded} Claude skills from {directory}"
+            )
+        except Exception:
             # Handle case where asyncio.run is not appropriate
             # Create a simple manifest.json and tools.json parser
             skills_loaded = self._load_claude_skills_simple(directory)
@@ -559,8 +600,10 @@ class SkillManager:
             Number of skills loaded
         """
         import json
+
         import yaml
-        from .updated_claude_adapter import ClaudeSkillDefinition, ClaudeSkillAdapter
+
+        from .updated_claude_adapter import ClaudeSkillAdapter, ClaudeSkillDefinition
 
         skills_loaded = 0
         skills_dir = Path(directory)
@@ -580,54 +623,70 @@ class SkillManager:
                     # Load traditional format
                     try:
                         # Load manifest and tools files
-                        with open(manifest_file, 'r', encoding='utf-8') as f:
+                        with open(manifest_file, encoding="utf-8") as f:
                             manifest_data = json.load(f)
 
-                        with open(tools_file, 'r', encoding='utf-8') as f:
+                        with open(tools_file, encoding="utf-8") as f:
                             tools_data = json.load(f)
 
                         # Create Claude skill definition
                         skill_def = ClaudeSkillDefinition(
                             name=manifest_data.get("name", skill_dir.name),
                             version=manifest_data.get("version", "1.0"),
-                            description=manifest_data.get("description", f"Skill from {skill_dir.name}"),
-                            manifest_version=manifest_data.get("manifest_version", "1.0"),
+                            description=manifest_data.get(
+                                "description", f"Skill from {skill_dir.name}"
+                            ),
+                            manifest_version=manifest_data.get(
+                                "manifest_version", "1.0"
+                            ),
                             author=manifest_data.get("author"),
                             api=manifest_data.get("api"),
                             tags=manifest_data.get("tags", []),
-                            tools=tools_data.get("tools", [])
+                            tools=tools_data.get("tools", []),
                         )
 
                         # Create Claude skill adapter
                         adapter = ClaudeSkillAdapter(
                             skill_name=skill_def.name,
                             manifest_data=manifest_data,
-                            skill_manager=self
+                            skill_manager=self,
                         )
 
                         # Register the adapter as a skill
                         self.register_skill(adapter)
                         skills_loaded += 1
-                        self._logger.info(f"Loaded Claude skill (traditional): {skill_def.name}")
+                        self._logger.info(
+                            f"Loaded Claude skill (traditional): {skill_def.name}"
+                        )
 
                     except Exception as e:
-                        self._logger.error(f"Failed to load traditional Claude skill from {skill_dir}: {e}")
+                        self._logger.error(
+                            f"Failed to load traditional Claude skill from {skill_dir}: {e}"  # noqa: E501
+                        )
                         continue
                 else:
                     # Check for new format (SKILL.md files)
                     skill_md_files = list(skill_dir.glob("SKILL.md"))
                     if not skill_md_files:
-                        skill_md_files = list(skill_dir.glob("*.md"))  # Look for any markdown file
+                        skill_md_files = list(
+                            skill_dir.glob("*.md")
+                        )  # Look for any markdown file
 
                     for skill_md in skill_md_files:
                         try:
                             # Read the SKILL.md file
-                            with open(skill_md, 'r', encoding='utf-8') as f:
+                            with open(skill_md, encoding="utf-8") as f:
                                 skill_content = f.read()
 
                             # Extract skill name from directory name or filename
-                            skill_name = skill_dir.name if skill_dir.name != skill_md.stem else skill_md.stem
-                            skill_name = f"{skill_name}_{skill_md.stem}".replace("SKILL", "").strip("_")
+                            skill_name = (
+                                skill_dir.name
+                                if skill_dir.name != skill_md.stem
+                                else skill_md.stem
+                            )
+                            skill_name = f"{skill_name}_{skill_md.stem}".replace(
+                                "SKILL", ""
+                            ).strip("_")
 
                             # If there's YAML frontmatter, extract metadata
                             description = f"Skill from {skill_name}"
@@ -636,28 +695,40 @@ class SkillManager:
                                     # Extract YAML frontmatter
                                     end_frontmatter = skill_content.find("---", 3)
                                     if end_frontmatter != -1:
-                                        yaml_content = skill_content[3:end_frontmatter].strip()
+                                        yaml_content = skill_content[
+                                            3:end_frontmatter
+                                        ].strip()
                                         frontmatter = yaml.safe_load(yaml_content)
-                                        if frontmatter and isinstance(frontmatter, dict):
-                                            description = frontmatter.get("description", description)
-                                            skill_name = frontmatter.get("name", skill_name)
-                                except:
+                                        if frontmatter and isinstance(
+                                            frontmatter, dict
+                                        ):
+                                            description = frontmatter.get(
+                                                "description", description
+                                            )
+                                            skill_name = frontmatter.get(
+                                                "name", skill_name
+                                            )
+                                except Exception:
                                     pass  # If YAML parsing fails, use default values
 
                             # Create Claude skill adapter for new format
                             adapter = ClaudeSkillAdapter(
                                 skill_name=skill_name,
                                 skill_content=skill_content,
-                                skill_manager=self
+                                skill_manager=self,
                             )
 
                             # Register the adapter as a skill
                             self.register_skill(adapter)
                             skills_loaded += 1
-                            self._logger.info(f"Loaded Claude skill (new format): {skill_name}")
+                            self._logger.info(
+                                f"Loaded Claude skill (new format): {skill_name}"
+                            )
 
                         except Exception as e:
-                            self._logger.error(f"Failed to load new format Claude skill from {skill_md}: {e}")
+                            self._logger.error(
+                                f"Failed to load new format Claude skill from {skill_md}: {e}"  # noqa: E501
+                            )
                             continue
 
         return skills_loaded

@@ -5,7 +5,6 @@ Provides base functionality for all command handlers.
 """
 
 from abc import ABC, abstractmethod
-from typing import List
 
 from ..models import CommandResult
 
@@ -18,11 +17,13 @@ class BaseCommandHandler(ABC):
         self.description = "Base command handler"
 
     @abstractmethod
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle the command with given arguments"""
         pass
 
-    def validate_args(self, args: List[str], min_args: int = 0, max_args: int = None) -> bool:
+    def validate_args(
+        self, args: list[str], min_args: int = 0, max_args: int = None
+    ) -> bool:
         """Validate argument count"""
         if len(args) < min_args:
             return False

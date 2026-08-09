@@ -13,36 +13,33 @@ This module provides comprehensive command handling capabilities including:
 """
 
 import asyncio
-import uuid
-import time
-import psutil
-import threading
-import traceback
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional, Set, Callable, Union
-from dataclasses import dataclass, field
-from enum import Enum
-import logging
 import json
-import sqlite3
-from pathlib import Path
-import signal
+import logging
 import os
-import sys
-from contextlib import asynccontextmanager
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import resource
-import tempfile
 import shutil
+import sqlite3
+import tempfile
+import traceback
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Optional
 
-from .production_parser import ParsedCommand, CommandType, SecurityLevel
-from .models import Command
+import psutil
+
+from .production_parser import CommandType, ParsedCommand, SecurityLevel
 
 logger = logging.getLogger(__name__)
 
 
 class ExecutionStatus(Enum):
     """Command execution status"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -54,6 +51,7 @@ class ExecutionStatus(Enum):
 
 class TaskPriority(Enum):
     """Task priority levels"""
+
     CRITICAL = 0
     HIGH = 1
     NORMAL = 2
@@ -64,6 +62,7 @@ class TaskPriority(Enum):
 @dataclass
 class ExecutionResult:
     """Command execution result"""
+
     execution_id: str
     command: ParsedCommand
     status: ExecutionStatus
@@ -73,14 +72,15 @@ class ExecutionResult:
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     execution_time_ms: Optional[float] = None
-    resource_usage: Dict[str, float] = field(default_factory=dict)
-    warnings: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    resource_usage: dict[str, float] = field(default_factory=dict)
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class ResourceLimits:
     """Resource limits for command execution"""
+
     max_memory_mb: Optional[int] = None
     max_cpu_percent: Optional[float] = None
     max_execution_time_seconds: Optional[int] = None
@@ -92,11 +92,12 @@ class ResourceLimits:
 @dataclass
 class ExecutionContext:
     """Execution context for commands"""
+
     user_id: Optional[str] = None
     session_id: Optional[str] = None
     request_id: Optional[str] = None
-    security_context: Dict[str, Any] = field(default_factory=dict)
-    environment_variables: Dict[str, str] = field(default_factory=dict)
+    security_context: dict[str, Any] = field(default_factory=dict)
+    environment_variables: dict[str, str] = field(default_factory=dict)
     working_directory: Optional[str] = None
     timeout_seconds: Optional[int] = None
     retry_count: int = 0
@@ -108,12 +109,17 @@ class ExecutionSandbox:
     """Secure sandbox for command execution"""
 
     def __init__(self):
-        self.temp_dirs: Dict[str, Path] = {}
-        self.active_processes: Dict[str, psutil.Process] = {}
+        self.temp_dirs: dict[str, Path] = {}
+        self.active_processes: dict[str, psutil.Process] = {}
 
     @asynccontextmanager
-    async def execute(self, execution_id: str, command: ParsedCommand,
-                     context: ExecutionContext, resource_limits: ResourceLimits):
+    async def execute(
+        self,
+        execution_id: str,
+        command: ParsedCommand,
+        context: ExecutionContext,
+        resource_limits: ResourceLimits,
+    ):
         """Execute command within sandbox environment"""
         temp_dir = None
         process = None
@@ -143,20 +149,24 @@ class ExecutionSandbox:
             # Cleanup
             await self._cleanup_sandbox(execution_id, temp_dir, process)
 
-    def _prepare_sandbox_environment(self, context: ExecutionContext, temp_dir: Path) -> Dict[str, str]:
+    def _prepare_sandbox_environment(
+        self, context: ExecutionContext, temp_dir: Path
+    ) -> dict[str, str]:
         """Prepare sandbox environment variables"""
         env = os.environ.copy()
 
         # Add context-specific environment variables
         env.update(context.environment_variables)
-        env.update({
-            "SANDBOX_TEMP_DIR": str(temp_dir),
-            "SANDBOX_USER_ID": context.user_id or "anonymous",
-            "SANDBOX_SESSION_ID": context.session_id or "unknown",
-            "PYTHONPATH": str(temp_dir),
-            "TMPDIR": str(temp_dir),
-            "HOME": str(temp_dir),  # Isolate home directory
-        })
+        env.update(
+            {
+                "SANDBOX_TEMP_DIR": str(temp_dir),
+                "SANDBOX_USER_ID": context.user_id or "anonymous",
+                "SANDBOX_SESSION_ID": context.session_id or "unknown",
+                "PYTHONPATH": str(temp_dir),
+                "TMPDIR": str(temp_dir),
+                "HOME": str(temp_dir),  # Isolate home directory
+            }
+        )
 
         # Remove potentially dangerous environment variables
         dangerous_vars = ["SSH_AUTH_SOCK", "SSH_AGENT_PID", "KRB5CCNAME"]
@@ -175,24 +185,37 @@ class ExecutionSandbox:
 
             # File descriptor limit
             if limits.max_file_descriptors:
-                resource.setrlimit(resource.RLIMIT_NOFILE,
-                                 (limits.max_file_descriptors, limits.max_file_descriptors))
+                resource.setrlimit(
+                    resource.RLIMIT_NOFILE,
+                    (limits.max_file_descriptors, limits.max_file_descriptors),
+                )
 
             # Process limit
             if limits.max_processes:
-                resource.setrlimit(resource.RLIMIT_NPROC,
-                                 (limits.max_processes, limits.max_processes))
+                resource.setrlimit(
+                    resource.RLIMIT_NPROC, (limits.max_processes, limits.max_processes)
+                )
 
             # CPU time limit
             if limits.max_execution_time_seconds:
-                resource.setrlimit(resource.RLIMIT_CPU,
-                                 (limits.max_execution_time_seconds, limits.max_execution_time_seconds))
+                resource.setrlimit(
+                    resource.RLIMIT_CPU,
+                    (
+                        limits.max_execution_time_seconds,
+                        limits.max_execution_time_seconds,
+                    ),
+                )
 
         except (ValueError, OSError) as e:
             logger.warning(f"Failed to apply resource limits: {e}")
 
-    async def _execute_in_sandbox(self, command: ParsedCommand, context: ExecutionContext,
-                                env: Dict[str, str], limits: ResourceLimits) -> ExecutionResult:
+    async def _execute_in_sandbox(
+        self,
+        command: ParsedCommand,
+        context: ExecutionContext,
+        env: dict[str, str],
+        limits: ResourceLimits,
+    ) -> ExecutionResult:
         """Execute command within sandbox"""
         execution_id = str(uuid.uuid4())
         start_time = datetime.now()
@@ -203,21 +226,27 @@ class ExecutionSandbox:
                 execution_id=execution_id,
                 command=command,
                 status=ExecutionStatus.RUNNING,
-                start_time=start_time
+                start_time=start_time,
             )
 
             # Find and execute handler
             handler = self._get_command_handler(command.command_type)
             if not handler:
-                raise ValueError(f"No handler found for command type: {command.command_type}")
+                raise ValueError(
+                    f"No handler found for command type: {command.command_type}"
+                )
 
             # Execute with timeout
-            timeout = context.timeout_seconds or limits.max_execution_time_seconds or 300
+            timeout = (
+                context.timeout_seconds or limits.max_execution_time_seconds or 300
+            )
 
             if context.background_execution:
                 # Background execution
                 task = asyncio.create_task(
-                    self._execute_handler_with_monitoring(handler, command, context, result)
+                    self._execute_handler_with_monitoring(
+                        handler, command, context, result
+                    )
                 )
                 result.metadata["task"] = task
                 result.metadata["background"] = True
@@ -225,17 +254,23 @@ class ExecutionSandbox:
                 # Foreground execution with timeout
                 try:
                     await asyncio.wait_for(
-                        self._execute_handler_with_monitoring(handler, command, context, result),
-                        timeout=timeout
+                        self._execute_handler_with_monitoring(
+                            handler, command, context, result
+                        ),
+                        timeout=timeout,
                     )
                 except asyncio.TimeoutError:
                     result.status = ExecutionStatus.TIMEOUT
-                    result.error_message = f"Command execution timed out after {timeout} seconds"
+                    result.error_message = (
+                        f"Command execution timed out after {timeout} seconds"
+                    )
 
             # Calculate execution time
             if result.end_time is None:
                 result.end_time = datetime.now()
-            result.execution_time_ms = (result.end_time - start_time).total_seconds() * 1000
+            result.execution_time_ms = (
+                result.end_time - start_time
+            ).total_seconds() * 1000
 
             return result
 
@@ -244,11 +279,18 @@ class ExecutionSandbox:
             result.error_message = str(e)
             result.error_traceback = traceback.format_exc()
             result.end_time = datetime.now()
-            result.execution_time_ms = (result.end_time - start_time).total_seconds() * 1000
+            result.execution_time_ms = (
+                result.end_time - start_time
+            ).total_seconds() * 1000
             return result
 
-    async def _execute_handler_with_monitoring(self, handler: Callable, command: ParsedCommand,
-                                             context: ExecutionContext, result: ExecutionResult) -> None:
+    async def _execute_handler_with_monitoring(
+        self,
+        handler: Callable,
+        command: ParsedCommand,
+        context: ExecutionContext,
+        result: ExecutionResult,
+    ) -> None:
         """Execute handler with resource monitoring"""
         # Get current process for monitoring
         process = psutil.Process()
@@ -256,9 +298,7 @@ class ExecutionSandbox:
 
         try:
             # Monitor resources during execution
-            monitor_task = asyncio.create_task(
-                self._monitor_resources(process, result)
-            )
+            monitor_task = asyncio.create_task(self._monitor_resources(process, result))
 
             # Execute the handler
             handler_result = await handler(command, context)
@@ -285,7 +325,9 @@ class ExecutionSandbox:
             if result.execution_id in self.active_processes:
                 del self.active_processes[result.execution_id]
 
-    async def _monitor_resources(self, process: psutil.Process, result: ExecutionResult) -> None:
+    async def _monitor_resources(
+        self, process: psutil.Process, result: ExecutionResult
+    ) -> None:
         """Monitor resource usage during execution"""
         try:
             while True:
@@ -323,8 +365,12 @@ class ExecutionSandbox:
         # For now, return None to be implemented by the main handler
         return None
 
-    async def _cleanup_sandbox(self, execution_id: str, temp_dir: Optional[Path],
-                              process: Optional[psutil.Process]) -> None:
+    async def _cleanup_sandbox(
+        self,
+        execution_id: str,
+        temp_dir: Optional[Path],
+        process: Optional[psutil.Process],
+    ) -> None:
         """Clean up sandbox resources"""
         # Terminate process if still running
         if process:
@@ -356,18 +402,20 @@ class ProductionCommandHandler:
     """Production-grade command handler with comprehensive features"""
 
     def __init__(self, storage_path: Optional[str] = None):
-        self.storage_path = Path(storage_path) if storage_path else Path("data/command_handler.db")
+        self.storage_path = (
+            Path(storage_path) if storage_path else Path("data/command_handler.db")
+        )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Core components
         self.sandbox = ExecutionSandbox()
-        self.handlers: Dict[CommandType, Callable] = {}
-        self.middleware: List[Callable] = []
+        self.handlers: dict[CommandType, Callable] = {}
+        self.middleware: list[Callable] = []
 
         # Execution tracking
-        self.active_executions: Dict[str, ExecutionResult] = {}
-        self.execution_history: List[ExecutionResult] = []
-        self.background_tasks: Dict[str, asyncio.Task] = {}
+        self.active_executions: dict[str, ExecutionResult] = {}
+        self.execution_history: list[ExecutionResult] = []
+        self.background_tasks: dict[str, asyncio.Task] = {}
 
         # Resource management
         self.default_resource_limits = ResourceLimits(
@@ -375,7 +423,7 @@ class ProductionCommandHandler:
             max_cpu_percent=80.0,
             max_execution_time_seconds=300,
             max_file_descriptors=100,
-            max_processes=10
+            max_processes=10,
         )
 
         # Performance monitoring
@@ -385,7 +433,7 @@ class ProductionCommandHandler:
             "failed_executions": 0,
             "average_execution_time_ms": 0.0,
             "resource_violations": 0,
-            "timeout_violations": 0
+            "timeout_violations": 0,
         }
 
         # Queue and concurrency management
@@ -394,7 +442,9 @@ class ProductionCommandHandler:
         self.current_executions = 0
 
         # Thread pool for blocking operations
-        self.thread_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="cmd_handler")
+        self.thread_pool = ThreadPoolExecutor(
+            max_workers=4, thread_name_prefix="cmd_handler"
+        )
 
         # Database initialization
         self._init_database()
@@ -452,10 +502,18 @@ class ProductionCommandHandler:
                 """)
 
                 # Indexes
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_executions_timestamp ON command_executions (created_at)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_executions_status ON command_executions (status)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_executions_user ON command_executions (user_id)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON execution_metrics (timestamp)")
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_executions_timestamp ON command_executions (created_at)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_executions_status ON command_executions (status)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_executions_user ON command_executions (user_id)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON execution_metrics (timestamp)"  # noqa: E501
+                )
 
                 conn.commit()
 
@@ -484,9 +542,12 @@ class ProductionCommandHandler:
         """Register middleware for command processing"""
         self.middleware.append(middleware)
 
-    async def execute_command(self, command: ParsedCommand,
-                            context: Optional[ExecutionContext] = None,
-                            resource_limits: Optional[ResourceLimits] = None) -> ExecutionResult:
+    async def execute_command(
+        self,
+        command: ParsedCommand,
+        context: Optional[ExecutionContext] = None,
+        resource_limits: Optional[ResourceLimits] = None,
+    ) -> ExecutionResult:
         """Execute command with comprehensive monitoring and error handling"""
         execution_id = str(uuid.uuid4())
 
@@ -509,7 +570,7 @@ class ProductionCommandHandler:
             result = ExecutionResult(
                 execution_id=execution_id,
                 command=command,
-                status=ExecutionStatus.PENDING
+                status=ExecutionStatus.PENDING,
             )
 
             # Track execution
@@ -531,7 +592,9 @@ class ProductionCommandHandler:
                 return result
 
             # Execute in sandbox
-            async with self.sandbox.execute(execution_id, command, context, limits) as sandbox_result:
+            async with self.sandbox.execute(
+                execution_id, command, context, limits
+            ) as sandbox_result:
                 result.status = sandbox_result.status
                 result.result = sandbox_result.result
                 result.error_message = sandbox_result.error_message
@@ -558,7 +621,7 @@ class ProductionCommandHandler:
                 status=ExecutionStatus.FAILED,
                 error_message=str(e),
                 error_traceback=traceback.format_exc(),
-                end_time=datetime.now()
+                end_time=datetime.now(),
             )
 
             self._update_metrics(result)
@@ -571,8 +634,9 @@ class ProductionCommandHandler:
             self.active_executions.pop(execution_id, None)
             self.current_executions -= 1
 
-    async def execute_background_command(self, command: ParsedCommand,
-                                       context: Optional[ExecutionContext] = None) -> str:
+    async def execute_background_command(
+        self, command: ParsedCommand, context: Optional[ExecutionContext] = None
+    ) -> str:
         """Execute command in background"""
         execution_id = str(uuid.uuid4())
 
@@ -582,17 +646,15 @@ class ProductionCommandHandler:
         context.background_execution = True
 
         # Create and start background task
-        task = asyncio.create_task(
-            self.execute_command(command, context)
-        )
+        task = asyncio.create_task(self.execute_command(command, context))
         self.background_tasks[execution_id] = task
 
         # Log background task
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT INTO background_tasks (execution_id, task_data, status) VALUES (?, ?, ?)",
-                    (execution_id, json.dumps({"command": command.raw}), "running")
+                    "INSERT INTO background_tasks (execution_id, task_data, status) VALUES (?, ?, ?)",  # noqa: E501
+                    (execution_id, json.dumps({"command": command.raw}), "running"),
                 )
                 conn.commit()
         except Exception as e:
@@ -600,22 +662,24 @@ class ProductionCommandHandler:
 
         return execution_id
 
-    async def get_background_task_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    async def get_background_task_status(
+        self, execution_id: str
+    ) -> Optional[dict[str, Any]]:
         """Get status of background task"""
         if execution_id not in self.background_tasks:
             # Check database
             try:
                 with sqlite3.connect(self.storage_path) as conn:
                     cursor = conn.execute(
-                        "SELECT task_data, status FROM background_tasks WHERE execution_id = ?",
-                        (execution_id,)
+                        "SELECT task_data, status FROM background_tasks WHERE execution_id = ?",  # noqa: E501
+                        (execution_id,),
                     )
                     row = cursor.fetchone()
                     if row:
                         return {
                             "execution_id": execution_id,
                             "task_data": json.loads(row[0]),
-                            "status": row[1]
+                            "status": row[1],
                         }
             except Exception as e:
                 logger.error(f"Failed to get background task status: {e}")
@@ -628,19 +692,18 @@ class ProductionCommandHandler:
                 return {
                     "execution_id": execution_id,
                     "status": "completed",
-                    "result": result.to_dict() if hasattr(result, 'to_dict') else result
+                    "result": result.to_dict()
+                    if hasattr(result, "to_dict")
+                    else result,
                 }
             except Exception as e:
                 return {
                     "execution_id": execution_id,
                     "status": "failed",
-                    "error": str(e)
+                    "error": str(e),
                 }
         else:
-            return {
-                "execution_id": execution_id,
-                "status": "running"
-            }
+            return {"execution_id": execution_id, "status": "running"}
 
     async def cancel_background_task(self, execution_id: str) -> bool:
         """Cancel background task"""
@@ -659,8 +722,8 @@ class ProductionCommandHandler:
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "UPDATE background_tasks SET status = ?, updated_at = ? WHERE execution_id = ?",
-                    ("cancelled", datetime.now().isoformat(), execution_id)
+                    "UPDATE background_tasks SET status = ?, updated_at = ? WHERE execution_id = ?",  # noqa: E501
+                    ("cancelled", datetime.now().isoformat(), execution_id),
                 )
                 conn.commit()
         except Exception as e:
@@ -685,8 +748,9 @@ class ProductionCommandHandler:
 
         raise ValueError(f"Execution result not found for {execution_id}")
 
-    async def _check_security_permissions(self, command: ParsedCommand,
-                                        context: ExecutionContext) -> bool:
+    async def _check_security_permissions(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> bool:
         """Check security permissions for command execution"""
         # This is a simplified implementation
         # In production, implement proper RBAC/ABAC
@@ -720,7 +784,10 @@ class ProductionCommandHandler:
 
         # Update average execution time
         if result.execution_time_ms is not None:
-            total_time = self.performance_metrics.get("total_execution_time", 0.0) + result.execution_time_ms
+            total_time = (
+                self.performance_metrics.get("total_execution_time", 0.0)
+                + result.execution_time_ms
+            )
             count = self.performance_metrics["total_executions"]
             self.performance_metrics["average_execution_time_ms"] = total_time / count
             self.performance_metrics["total_execution_time"] = total_time
@@ -732,7 +799,9 @@ class ProductionCommandHandler:
         if len(self.execution_history) > 1000:
             self.execution_history = self.execution_history[-500:]
 
-    async def _log_execution(self, result: ExecutionResult, context: ExecutionContext) -> None:
+    async def _log_execution(
+        self, result: ExecutionResult, context: ExecutionContext
+    ) -> None:
         """Log execution to database"""
         try:
             with sqlite3.connect(self.storage_path) as conn:
@@ -742,16 +811,20 @@ class ProductionCommandHandler:
                     (id, command_data, status, result_data, error_message, error_traceback,
                      start_time, end_time, execution_time_ms, resource_usage, user_id, session_id)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
+                    """,  # noqa: E501
                     (
                         result.execution_id,
-                        json.dumps({
-                            "command": result.command.raw,
-                            "type": result.command.command_type.value,
-                            "security_level": result.command.security_level.value
-                        }),
+                        json.dumps(
+                            {
+                                "command": result.command.raw,
+                                "type": result.command.command_type.value,
+                                "security_level": result.command.security_level.value,
+                            }
+                        ),
                         result.status.value,
-                        json.dumps(result.result) if result.result is not None else None,
+                        json.dumps(result.result)
+                        if result.result is not None
+                        else None,
                         result.error_message,
                         result.error_traceback,
                         result.start_time.isoformat() if result.start_time else None,
@@ -759,8 +832,8 @@ class ProductionCommandHandler:
                         result.execution_time_ms,
                         json.dumps(result.resource_usage),
                         context.user_id,
-                        context.session_id
-                    )
+                        context.session_id,
+                    ),
                 )
                 conn.commit()
         except Exception as e:
@@ -771,13 +844,19 @@ class ProductionCommandHandler:
         while not self._shutdown_event.is_set():
             try:
                 # Process queued commands
-                if not self.execution_queue.empty() and self.current_executions < self.max_concurrent_executions:
-                    execution_id, command, context, limits = await self.execution_queue.get()
+                if (
+                    not self.execution_queue.empty()
+                    and self.current_executions < self.max_concurrent_executions
+                ):
+                    (
+                        execution_id,
+                        command,
+                        context,
+                        limits,
+                    ) = await self.execution_queue.get()
 
                     # Execute queued command
-                    asyncio.create_task(
-                        self.execute_command(command, context, limits)
-                    )
+                    asyncio.create_task(self.execute_command(command, context, limits))
 
                 # Periodic metrics collection
                 await asyncio.sleep(1)
@@ -787,7 +866,9 @@ class ProductionCommandHandler:
                 await asyncio.sleep(5)
 
     # Built-in command handlers
-    async def _handle_system_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_system_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle system commands"""
         action = command.action
 
@@ -800,7 +881,9 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown system command: {action}")
 
-    async def _handle_session_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_session_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle session commands"""
         action = command.action
         session_id = command.options.get("session_id")
@@ -815,7 +898,9 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown session command: {action}")
 
-    async def _handle_knowledge_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_knowledge_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle knowledge commands"""
         action = command.action
         query = command.options.get("query")
@@ -829,7 +914,9 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown knowledge command: {action}")
 
-    async def _handle_debate_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_debate_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle debate commands"""
         action = command.action
         topic = command.options.get("topic")
@@ -843,7 +930,9 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown debate command: {action}")
 
-    async def _handle_model_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_model_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle model commands"""
         action = command.action
         model_name = command.options.get("model_name")
@@ -857,7 +946,9 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown model command: {action}")
 
-    async def _handle_assistant_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_assistant_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle assistant commands"""
         action = command.action
 
@@ -870,7 +961,9 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown assistant command: {action}")
 
-    async def _handle_ui_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_ui_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle UI commands"""
         action = command.action
 
@@ -881,7 +974,9 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown UI command: {action}")
 
-    async def _handle_plugin_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_plugin_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle plugin commands"""
         action = command.action
         plugin_name = command.options.get("plugin_name")
@@ -895,11 +990,13 @@ class ProductionCommandHandler:
         else:
             raise ValueError(f"Unknown plugin command: {action}")
 
-    async def _handle_custom_command(self, command: ParsedCommand, context: ExecutionContext) -> Any:
+    async def _handle_custom_command(
+        self, command: ParsedCommand, context: ExecutionContext
+    ) -> Any:
         """Handle custom commands"""
         return {"message": f"Custom command executed: {command.command}"}
 
-    def get_execution_statistics(self) -> Dict[str, Any]:
+    def get_execution_statistics(self) -> dict[str, Any]:
         """Get comprehensive execution statistics"""
         return {
             "active_executions": len(self.active_executions),
@@ -911,10 +1008,10 @@ class ProductionCommandHandler:
                     "execution_id": result.execution_id,
                     "command": result.command.raw,
                     "status": result.status.value,
-                    "execution_time_ms": result.execution_time_ms
+                    "execution_time_ms": result.execution_time_ms,
                 }
                 for result in self.execution_history[-10:]
-            ]
+            ],
         }
 
     async def shutdown(self) -> None:
@@ -942,7 +1039,9 @@ class ProductionCommandHandler:
 
         # Wait for active executions to complete
         if self.active_executions:
-            logger.info(f"Waiting for {len(self.active_executions)} active executions to complete")
+            logger.info(
+                f"Waiting for {len(self.active_executions)} active executions to complete"  # noqa: E501
+            )
             # Give some time for graceful shutdown
             await asyncio.sleep(5)
 

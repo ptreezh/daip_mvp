@@ -4,15 +4,14 @@ Document Ingestion for Wiki Knowledge Base
 Handles document parsing, processing, and embedding generation.
 """
 
-from typing import List, Dict, Any, Optional, Union
-import os
-import logging
-from pathlib import Path
 import asyncio
 import hashlib
+import logging
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional, Union
 
-from .document import Document, DocumentType, DocumentStatus
+from .document import Document, DocumentStatus, DocumentType
 
 logger = logging.getLogger(__name__)
 
@@ -56,15 +55,17 @@ class DocumentIngestor:
             ".toml": DocumentType.CODE,
             ".ini": DocumentType.CODE,
             ".cfg": DocumentType.CODE,
-            ".conf": DocumentType.CODE
+            ".conf": DocumentType.CODE,
         }
-        logger.info(f"Initialized document ingestor with {len(self.supported_formats)} supported formats")
+        logger.info(
+            f"Initialized document ingestor with {len(self.supported_formats)} supported formats"  # noqa: E501
+        )
 
     def ingest_file(
         self,
         file_path: str,
-        metadata: Optional[Dict[str, Any]] = None,
-        generate_embedding: bool = True
+        metadata: Optional[dict[str, Any]] = None,
+        generate_embedding: bool = True,
     ) -> Optional[Document]:
         """Ingest a single file"""
         try:
@@ -94,13 +95,15 @@ class DocumentIngestor:
                 content=content,
                 file_path=str(file_path),
                 document_type=doc_type,
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             # Add file metadata
             file_stats = file_path.stat()
             document.update_metadata("file_size", file_stats.st_size)
-            document.update_metadata("file_modified", datetime.fromtimestamp(file_stats.st_mtime).isoformat())
+            document.update_metadata(
+                "file_modified", datetime.fromtimestamp(file_stats.st_mtime).isoformat()
+            )
             document.update_metadata("file_hash", self._calculate_file_hash(file_path))
 
             # Generate embedding if requested
@@ -111,7 +114,9 @@ class DocumentIngestor:
                         document.set_embedding(embedding)
                         document.update_status(DocumentStatus.PROCESSED)
                     else:
-                        document.update_status(DocumentStatus.FAILED, "Failed to generate embedding")
+                        document.update_status(
+                            DocumentStatus.FAILED, "Failed to generate embedding"
+                        )
                 except Exception as e:
                     logger.error(f"Error generating embedding for {file_path}: {e}")
                     document.update_status(DocumentStatus.FAILED, str(e))
@@ -127,11 +132,11 @@ class DocumentIngestor:
 
     def ingest_files_batch(
         self,
-        file_paths: List[str],
-        metadata: Optional[Dict[str, Any]] = None,
+        file_paths: list[str],
+        metadata: Optional[dict[str, Any]] = None,
         generate_embeddings: bool = True,
-        max_concurrent: int = 5
-    ) -> List[Document]:
+        max_concurrent: int = 5,
+    ) -> list[Document]:
         """Ingest multiple files in batch"""
         documents = []
         semaphore = asyncio.Semaphore(max_concurrent)
@@ -140,7 +145,7 @@ class DocumentIngestor:
             async with semaphore:
                 return self.ingest_file(file_path, metadata, generate_embeddings)
 
-        async def process_batch() -> List[Document]:
+        async def process_batch() -> list[Document]:
             tasks = [process_file(file_path) for file_path in file_paths]
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -172,10 +177,10 @@ class DocumentIngestor:
         self,
         directory_path: str,
         recursive: bool = True,
-        metadata: Optional[Dict[str, Any]] = None,
-        include_patterns: Optional[List[str]] = None,
-        exclude_patterns: Optional[List[str]] = None
-    ) -> List[Document]:
+        metadata: Optional[dict[str, Any]] = None,
+        include_patterns: Optional[list[str]] = None,
+        exclude_patterns: Optional[list[str]] = None,
+    ) -> list[Document]:
         """Ingest all supported files from a directory"""
         directory_path = Path(directory_path)
         if not directory_path.exists() or not directory_path.is_dir():
@@ -189,15 +194,25 @@ class DocumentIngestor:
         exclude_list = exclude_patterns or []
 
         # Find all files
-        for file_path in directory_path.rglob("*") if recursive else directory_path.iterdir():
+        for file_path in (
+            directory_path.rglob("*") if recursive else directory_path.iterdir()
+        ):
             if file_path.is_file():
                 # Check include patterns
-                included = any(fnmatch.fnmatch(file_path.name, pattern) for pattern in pattern_list)
+                included = any(
+                    fnmatch.fnmatch(file_path.name, pattern) for pattern in pattern_list
+                )
 
                 # Check exclude patterns
-                excluded = any(fnmatch.fnmatch(file_path.name, pattern) for pattern in exclude_list)
+                excluded = any(
+                    fnmatch.fnmatch(file_path.name, pattern) for pattern in exclude_list
+                )
 
-                if included and not excluded and file_path.suffix.lower() in self.supported_formats:
+                if (
+                    included
+                    and not excluded
+                    and file_path.suffix.lower() in self.supported_formats
+                ):
                     files.append(str(file_path))
 
         logger.info(f"Found {len(files)} files to ingest from {directory_path}")
@@ -233,16 +248,18 @@ class DocumentIngestor:
 
     def _extract_text_content(self, file_path: Path) -> str:
         """Extract content from text file"""
-        encodings = ['utf-8', 'utf-16', 'latin-1', 'cp1252']
+        encodings = ["utf-8", "utf-16", "latin-1", "cp1252"]
 
         for encoding in encodings:
             try:
-                with open(file_path, 'r', encoding=encoding) as f:
+                with open(file_path, encoding=encoding) as f:
                     return f.read()
             except UnicodeDecodeError:
                 continue
 
-        raise ValueError(f"Could not decode file {file_path} with any supported encoding")
+        raise ValueError(
+            f"Could not decode file {file_path} with any supported encoding"
+        )
 
     def _extract_markdown_content(self, file_path: Path) -> str:
         """Extract content from markdown file"""
@@ -254,7 +271,8 @@ class DocumentIngestor:
         """Extract text from PDF file"""
         try:
             import PyPDF2
-            with open(file_path, 'rb') as file:
+
+            with open(file_path, "rb") as file:
                 reader = PyPDF2.PdfReader(file)
                 text = ""
                 for page in reader.pages:
@@ -271,8 +289,9 @@ class DocumentIngestor:
         """Extract text content from HTML file"""
         try:
             from bs4 import BeautifulSoup
+
             content = self._extract_text_content(file_path)
-            soup = BeautifulSoup(content, 'html.parser')
+            soup = BeautifulSoup(content, "html.parser")
             return soup.get_text()
         except ImportError:
             logger.warning("BeautifulSoup not available, returning raw HTML")
@@ -285,6 +304,7 @@ class DocumentIngestor:
         """Extract content from JSON file"""
         try:
             import json
+
             content = self._extract_text_content(file_path)
             data = json.loads(content)
             return json.dumps(data, indent=2)
@@ -296,6 +316,7 @@ class DocumentIngestor:
         """Extract content from CSV file"""
         try:
             import csv
+
             content = self._extract_text_content(file_path)
             reader = csv.reader(content.splitlines())
             rows = list(reader)
@@ -304,19 +325,22 @@ class DocumentIngestor:
             logger.error(f"Error extracting CSV content: {e}")
             return self._extract_text_content(file_path)
 
-    def _generate_title(self, file_path: Path, content: str, doc_type: DocumentType) -> str:
+    def _generate_title(
+        self, file_path: Path, content: str, doc_type: DocumentType
+    ) -> str:
         """Generate document title"""
         # Try to get title from content first
         if doc_type == DocumentType.MARKDOWN:
-            lines = content.split('\n')
+            lines = content.split("\n")
             for line in lines:
-                if line.startswith('# '):
+                if line.startswith("# "):
                     return line[2:].strip()
         elif doc_type == DocumentType.HTML:
             try:
                 from bs4 import BeautifulSoup
-                soup = BeautifulSoup(content, 'html.parser')
-                title_tag = soup.find('title')
+
+                soup = BeautifulSoup(content, "html.parser")
+                title_tag = soup.find("title")
                 if title_tag:
                     return title_tag.get_text().strip()
             except ImportError:
@@ -324,14 +348,15 @@ class DocumentIngestor:
         elif doc_type == DocumentType.JSON:
             try:
                 import json
+
                 data = json.loads(content)
-                if isinstance(data, dict) and 'title' in data:
-                    return str(data['title'])
-            except:
+                if isinstance(data, dict) and "title" in data:
+                    return str(data["title"])
+            except Exception:
                 pass
 
         # Fallback to filename
-        return file_path.stem.replace('_', ' ').replace('-', ' ').title()
+        return file_path.stem.replace("_", " ").replace("-", " ").title()
 
     def _calculate_file_hash(self, file_path: Path) -> str:
         """Calculate SHA256 hash of file"""
@@ -345,7 +370,7 @@ class DocumentIngestor:
             logger.error(f"Error calculating file hash: {e}")
             return ""
 
-    def _generate_embedding(self, content: str) -> Optional[List[float]]:
+    def _generate_embedding(self, content: str) -> Optional[list[float]]:
         """Generate embedding for content"""
         try:
             # This is a mock embedding generator
@@ -358,7 +383,7 @@ class DocumentIngestor:
             # Convert hash to 768-dimensional embedding (common size)
             embedding = []
             for i in range(0, min(len(content_hash), 128), 2):
-                hex_pair = content_hash[i:i+2]
+                hex_pair = content_hash[i : i + 2]
                 val = int(hex_pair, 16) / 255.0  # Normalize to 0-1
                 # Replicate to reach desired dimension
                 for _ in range(6):  # 128 * 6 = 768
@@ -375,7 +400,7 @@ class DocumentIngestor:
             logger.error(f"Error generating embedding: {e}")
             return None
 
-    def get_supported_formats(self) -> Dict[str, DocumentType]:
+    def get_supported_formats(self) -> dict[str, DocumentType]:
         """Get supported file formats"""
         return self.supported_formats.copy()
 

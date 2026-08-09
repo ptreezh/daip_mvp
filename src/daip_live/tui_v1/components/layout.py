@@ -8,9 +8,9 @@ and container functionality for other components.
 Based on newP6 specification requirements for layout management.
 """
 
-from typing import Any, Dict, Optional, List
-from textual.widgets import Static
-from textual.containers import Vertical, Horizontal, Container
+from typing import Any, Optional
+
+from textual.containers import Container, Horizontal, Vertical
 
 from .base import TUIComponent
 
@@ -35,7 +35,7 @@ class LayoutComponent(TUIComponent):
         layout_type: str = "vertical",
         responsive: bool = True,
         padding: int = 0,
-        margins: int = 0
+        margins: int = 0,
     ):
         """
         Initialize the layout component.
@@ -57,7 +57,7 @@ class LayoutComponent(TUIComponent):
             margins=margins,
             width=100,
             height=100,
-            children_count=0
+            children_count=0,
         )
 
     def render(self):
@@ -67,12 +67,12 @@ class LayoutComponent(TUIComponent):
         Returns:
             Widget: The rendered layout widget
         """
-        layout_type = self.state.get('layout_type', 'vertical')
-        padding = self.state.get('padding', 0)
+        layout_type = self.state.get("layout_type", "vertical")
+        padding = self.state.get("padding", 0)
 
-        if layout_type == 'vertical':
+        if layout_type == "vertical":
             container = Vertical()
-        elif layout_type == 'horizontal':
+        elif layout_type == "horizontal":
             container = Horizontal()
         else:
             container = Container()
@@ -105,15 +105,17 @@ class LayoutComponent(TUIComponent):
             event: The event to handle
         """
         # Update layout-specific state based on events
-        if hasattr(event, 'event_type'):
-            if event.event_type.value == 'resize':
+        if hasattr(event, "event_type"):
+            if event.event_type.value == "resize":
                 self.update_state(
-                    width=event.data.get('width', self.state.get('width')),
-                    height=event.data.get('height', self.state.get('height'))
+                    width=event.data.get("width", self.state.get("width")),
+                    height=event.data.get("height", self.state.get("height")),
                 )
-            elif event.event_type.value == 'layout_change':
+            elif event.event_type.value == "layout_change":
                 self.update_state(
-                    layout_type=event.data.get('layout_type', self.state.get('layout_type'))
+                    layout_type=event.data.get(
+                        "layout_type", self.state.get("layout_type")
+                    )
                 )
 
     def add_child_component(self, child_component: TUIComponent) -> None:

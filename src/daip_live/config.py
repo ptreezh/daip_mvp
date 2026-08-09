@@ -1,4 +1,3 @@
-
 import os
 from typing import Optional
 
@@ -10,11 +9,13 @@ from daip_live.core.models import AppConfig
 
 class ConfigError(Exception):
     """Custom exception for configuration-related errors."""
+
     pass
 
 
 class ConfigManager:
     """Manages loading, validation, and access to application configuration."""
+
     def __init__(self, config_path: str = "config.yaml"):
         self._config_path = config_path
         self._config: Optional[AppConfig] = None
@@ -22,7 +23,7 @@ class ConfigManager:
     def _load(self) -> None:
         """Loads, validates, and stores the configuration."""
         try:
-            with open(self._config_path, encoding='utf-8') as f:
+            with open(self._config_path, encoding="utf-8") as f:
                 raw_config = yaml.safe_load(f)
             self._config = AppConfig(**raw_config)
         except FileNotFoundError:
@@ -39,10 +40,11 @@ class ConfigManager:
         if not self.is_loaded():
             self._load()
 
-        if self._config is None: # Should not happen if load() works correctly
+        if self._config is None:  # Should not happen if load() works correctly
             raise ConfigError("Configuration is None after loading.")
 
         return self._config
+
 
 def create_config_yaml_if_not_exists(path: str = "config.yaml") -> None:
     """Creates a default config.yaml if one doesn't exist."""
@@ -55,9 +57,8 @@ def create_config_yaml_if_not_exists(path: str = "config.yaml") -> None:
             },
             "knowledge_base": {"directory": "docs/"},
         }
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, "w", encoding="utf-8") as f:
             yaml.dump(default_config, f, indent=2)
-        print(f"Created default configuration file at: {path}")
 
 
 def check_and_update_model_availability() -> str:
@@ -66,9 +67,9 @@ def check_and_update_model_availability() -> str:
 
     Returns:
         str: The model that will be used (either original or fallback)
-    """
-    from daip_live.model_provider.provider import LiteLLMProvider
+    """  # noqa: E501
     from daip_live.core.models import ProviderConfig
+    from daip_live.model_provider.provider import LiteLLMProvider
 
     # Get current config
     config = config_manager.get_config()
@@ -83,24 +84,21 @@ def check_and_update_model_availability() -> str:
 
     # If the fallback model is different from the current model, update the config
     if fallback_model != current_model:
-        print(f"🔄 Model '{current_model}' not available, switching to '{fallback_model}'")
-
         # Update the config file with the new model
         try:
-            with open(config_manager._config_path, 'r', encoding='utf-8') as f:
+            with open(config_manager._config_path, encoding="utf-8") as f:
                 raw_config = yaml.safe_load(f)
 
             raw_config["llm_provider"]["default_model"] = fallback_model
 
-            with open(config_manager._config_path, 'w', encoding='utf-8') as f:
+            with open(config_manager._config_path, "w", encoding="utf-8") as f:
                 yaml.dump(raw_config, f, indent=2)
 
             # Reset the config manager so it reloads the updated config
             config_manager._config = None
 
             return fallback_model
-        except Exception as e:
-            print(f"⚠️ Failed to update config file: {e}")
+        except Exception:
             return current_model
     else:
         return current_model
@@ -109,4 +107,3 @@ def check_and_update_model_availability() -> str:
 # Global instance of the ConfigManager
 # The application will use this instance throughout.
 config_manager = ConfigManager()
-

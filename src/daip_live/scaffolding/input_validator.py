@@ -3,21 +3,22 @@
 遵循SOLID原则，负责验证用户输入的有效性和安全性
 """
 
+import mimetypes
 import os
 import re
 from pathlib import Path
-from typing import List, Optional, Callable, Dict, Any
-import mimetypes
+from typing import Callable, Optional
 
 # python-magic 是可选依赖
 try:
     import magic
+
     MAGIC_AVAILABLE = True
 except ImportError:
     magic = None
     MAGIC_AVAILABLE = False
 
-from .models import ValidationError, ValidationConstants, ErrorMessages
+from .models import ErrorMessages, ValidationConstants
 
 
 class ValidationResult:
@@ -29,8 +30,8 @@ class ValidationResult:
     def __init__(
         self,
         is_valid: bool = True,
-        errors: Optional[List[str]] = None,
-        warnings: Optional[List[str]] = None
+        errors: Optional[list[str]] = None,
+        warnings: Optional[list[str]] = None,
     ):
         self.is_valid = is_valid
         self.errors = errors or []
@@ -53,12 +54,12 @@ class ValidationResult:
         """检查是否有警告"""
         return len(self.warnings) > 0
 
-    def merge(self, other: 'ValidationResult') -> 'ValidationResult':
+    def merge(self, other: "ValidationResult") -> "ValidationResult":
         """合并另一个验证结果"""
         return ValidationResult(
             is_valid=self.is_valid and other.is_valid,
             errors=self.errors + other.errors,
-            warnings=self.warnings + other.warnings
+            warnings=self.warnings + other.warnings,
         )
 
     def __str__(self) -> str:
@@ -87,7 +88,7 @@ class InputValidator:
         max_description_length: int = ValidationConstants.MAX_DESCRIPTION_LENGTH,
         max_file_size: int = ValidationConstants.MAX_FILE_SIZE,
         supported_extensions: Optional[set] = None,
-        strict_mode: bool = False
+        strict_mode: bool = False,
     ):
         """初始化验证器
 
@@ -101,18 +102,19 @@ class InputValidator:
         self.min_description_length = min_description_length
         self.max_description_length = max_description_length
         self.max_file_size = max_file_size
-        self.supported_extensions = supported_extensions or ValidationConstants.SUPPORTED_FILE_EXTENSIONS
+        self.supported_extensions = (
+            supported_extensions or ValidationConstants.SUPPORTED_FILE_EXTENSIONS
+        )
         self.strict_mode = strict_mode
 
         # 自定义验证规则
-        self._custom_rules: Dict[str, Callable[[str], List[str]]] = {}
+        self._custom_rules: dict[str, Callable[[str], list[str]]] = {}
 
         # 预编译的正则表达式
-        self._path_traversal_pattern = re.compile(r'\.\.[\\/]|[\\/]\.\.')
+        self._path_traversal_pattern = re.compile(r"\.\.[\\/]|[\\/]\.\.")
         self._invalid_filename_pattern = re.compile(r'[<>:"|?*\x00-\x1f]')
         self._sensitive_info_pattern = re.compile(
-            r'(password|passwd|secret|key|token|auth)\s*[:=]\s*[^\s]+',
-            re.IGNORECASE
+            r"(password|passwd|secret|key|token|auth)\s*[:=]\s*[^\s]+", re.IGNORECASE
         )
 
     def validate_description(self, description: str) -> ValidationResult:
@@ -137,13 +139,13 @@ class InputValidator:
         if len(cleaned_description) < self.min_description_length:
             result.add_error(
                 f"描述至少需要{self.min_description_length}个字符 "
-                f"(当前: {len(cleaned_description)}, 需要: {self.min_description_length})"
+                f"(当前: {len(cleaned_description)}, 需要: {self.min_description_length})"  # noqa: E501
             )
 
         if len(cleaned_description) > self.max_description_length:
             result.add_error(
                 f"{ErrorMessages.DESCRIPTION_TOO_LONG} "
-                f"(当前: {len(cleaned_description)}, 最大: {self.max_description_length})"
+                f"(当前: {len(cleaned_description)}, 最大: {self.max_description_length})"  # noqa: E501
             )
 
         # 内容检查
@@ -161,7 +163,9 @@ class InputValidator:
 
         return result
 
-    def _validate_description_content(self, description: str, result: ValidationResult) -> None:
+    def _validate_description_content(
+        self, description: str, result: ValidationResult
+    ) -> None:
         """验证描述内容
 
         Args:
@@ -172,12 +176,12 @@ class InputValidator:
         sensitive_matches = self._sensitive_info_pattern.findall(description)
         if sensitive_matches:
             result.add_warning(
-                f"描述中可能包含敏感信息: {', '.join(matches for matches in sensitive_matches[:3])}"
+                f"描述中可能包含敏感信息: {', '.join(matches for matches in sensitive_matches[:3])}"  # noqa: E501
             )
 
         # 字符编码检查
         try:
-            description.encode('utf-8')
+            description.encode("utf-8")
         except UnicodeEncodeError as e:
             result.add_error(f"描述包含无效的Unicode字符: {str(e)}")
 
@@ -223,8 +227,7 @@ class InputValidator:
             file_size = path_obj.stat().st_size
             if file_size > self.max_file_size:
                 result.add_error(
-                    f"文件过大 "
-                    f"(当前: {file_size}字节, 最大: {self.max_file_size}字节)"
+                    f"文件过大 (当前: {file_size}字节, 最大: {self.max_file_size}字节)"
                 )
 
             # 文件扩展名检查
@@ -269,19 +272,23 @@ class InputValidator:
             if MAGIC_AVAILABLE:
                 try:
                     mime_type = magic.from_file(file_path, mime=True)
-                    if mime_type.startswith('application/') and not mime_type.endswith('text'):
-                        result.add_warning(f"文件类型为 '{mime_type}'，可能不是纯文本文件")
+                    if mime_type.startswith("application/") and not mime_type.endswith(
+                        "text"
+                    ):
+                        result.add_warning(
+                            f"文件类型为 '{mime_type}'，可能不是纯文本文件"
+                        )
                 except Exception:
                     # magic检测失败，继续其他检查
                     pass
             else:
                 # python-magic不可用，使用mimetypes
-                if file_type and not file_type.startswith('text/'):
+                if file_type and not file_type.startswith("text/"):
                     result.add_warning(f"文件类型为 '{file_type}'，建议使用纯文本文件")
 
             # 检查文件内容是否为纯文本
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     # 尝试读取前1KB内容
                     content = f.read(1024)
                     if not content:
@@ -295,9 +302,7 @@ class InputValidator:
             result.add_warning(f"无法验证文件内容: {str(e)}")
 
     def validate_input(
-        self,
-        description: Optional[str] = None,
-        file_path: Optional[str] = None
+        self, description: Optional[str] = None, file_path: Optional[str] = None
     ) -> ValidationResult:
         """综合验证输入
 
@@ -337,10 +342,7 @@ class InputValidator:
         return result
 
     def _validate_input_consistency(
-        self,
-        description: str,
-        file_path: str,
-        result: ValidationResult
+        self, description: str, file_path: str, result: ValidationResult
     ) -> None:
         """验证输入一致性
 
@@ -369,7 +371,7 @@ class InputValidator:
         if len(text) >= max_consecutive:
             consecutive_count = 1
             for i in range(1, len(text)):
-                if text[i] == text[i-1]:
+                if text[i] == text[i - 1]:
                     consecutive_count += 1
                     if consecutive_count >= max_consecutive:
                         return True
@@ -393,7 +395,7 @@ class InputValidator:
     def _contains_binary_content(self, content: str) -> bool:
         """检查文本是否包含二进制内容"""
         # 简单的启发式方法：检查null字节和不可打印字符的比例
-        null_count = content.count('\x00')
+        null_count = content.count("\x00")
         if null_count > 0:
             return True
 
@@ -404,7 +406,7 @@ class InputValidator:
 
         return False
 
-    def add_custom_rule(self, name: str, rule_func: Callable[[str], List[str]]) -> None:
+    def add_custom_rule(self, name: str, rule_func: Callable[[str], list[str]]) -> None:
         """添加自定义验证规则
 
         Args:
@@ -450,7 +452,7 @@ class InputValidator:
         max_description_length: Optional[int] = None,
         max_file_size: Optional[int] = None,
         supported_extensions: Optional[set] = None,
-        strict_mode: Optional[bool] = None
+        strict_mode: Optional[bool] = None,
     ) -> None:
         """配置验证器参数
 
@@ -482,7 +484,7 @@ class InputValidator:
         if strict_mode is not None:
             self.strict_mode = strict_mode
 
-    def get_supported_formats(self) -> List[str]:
+    def get_supported_formats(self) -> list[str]:
         """获取支持的文件格式列表"""
         return sorted(self.supported_extensions)
 

@@ -4,7 +4,8 @@ Ollama实例管理器
 """
 
 import asyncio
-from typing import Tuple, Any, Optional
+from typing import Any, Optional
+
 from daip_live.core.exceptions import ModelError
 
 
@@ -17,7 +18,9 @@ class OllamaInstanceManager:
         self._provider = shared_provider  # 共享的Provider实例
         self._model_configs = {}  # 模型配置缓存
 
-    async def generate_with_model(self, model_name: str, prompt: str, **kwargs) -> Tuple[str, Any]:
+    async def generate_with_model(
+        self, model_name: str, prompt: str, **kwargs
+    ) -> tuple[str, Any]:
         """分时复用单一Ollama实例生成回复"""
         async with self._lock:
             # 模型切换（如果需要）
@@ -28,7 +31,6 @@ class OllamaInstanceManager:
 
     async def _switch_model(self, model_name: str):
         """切换当前模型"""
-        old_model = self._current_model
 
         # 只有在模型不同时才切换
         if self._current_model != model_name:
@@ -40,11 +42,10 @@ class OllamaInstanceManager:
             if model_name not in self._model_configs:
                 self._model_configs[model_name] = self._load_model_config(model_name)
 
-            print(f"🔄 模型已从 '{old_model}' 切换至 '{model_name}'")
         else:
-            print(f"🔄 模型保持为 '{model_name}'，无需切换")
+            pass
 
-    async def _generate(self, prompt: str, **kwargs) -> Tuple[str, Any]:
+    async def _generate(self, prompt: str, **kwargs) -> tuple[str, Any]:
         """使用当前模型生成回复"""
         if self._current_model is None:
             raise ModelError("No model is currently selected")
@@ -59,12 +60,13 @@ class OllamaInstanceManager:
 
         # 初始化或获取模型提供者
         if self._provider is None:
-            from daip_live.model_provider.provider import LiteLLMProvider
             from daip_live.core.models import ProviderConfig
+            from daip_live.model_provider.provider import LiteLLMProvider
+
             # 创建Ollama配置的LiteLLMProvider（使用规范化后的模型名）
             config = ProviderConfig(
                 model=model_name,
-                base_url="http://localhost:11434"  # Ollama默认端口
+                base_url="http://localhost:11434",  # Ollama默认端口
             )
             self._provider = LiteLLMProvider(config)
 
@@ -73,16 +75,15 @@ class OllamaInstanceManager:
             # 过滤掉Ollama不支持的参数
             filtered_kwargs = {}
             for key, value in kwargs.items():
-                if key in ['frequency_penalty', 'presence_penalty']:
+                if key in ["frequency_penalty", "presence_penalty"]:
                     # Ollama不支持这些参数
                     continue
                 else:
                     filtered_kwargs[key] = value
 
-            # 生成响应（LiteLLMProvider.generate 为 async generator，模型名由 ProviderConfig 持有）
+            # 生成响应（LiteLLMProvider.generate 为 async generator，模型名由 ProviderConfig 持有）  # noqa: E501
             async for chunk in self._provider.generate(
-                prompt=prompt,
-                params=filtered_kwargs
+                prompt=prompt, params=filtered_kwargs
             ):
                 response = chunk
                 break
@@ -92,15 +93,29 @@ class OllamaInstanceManager:
         except Exception as e:
             # 捕获并处理特定的Ollama相关异常，提供更友好的错误信息
             error_msg = str(e)
-            model_name = getattr(self, '_current_model', 'unknown')
+            model_name = getattr(self, "_current_model", "unknown")
 
             # 检查是否为Ollama连接相关错误
-            if "OllamaException" in error_msg or "ConnectionError" in error_msg or "connect to Ollama" in error_msg:
-                raise ModelError(f"无法连接到Ollama服务。请确认Ollama服务正在运行，模型'{model_name}'已安装并可访问。")
-            elif "not found" in error_msg.lower() or "model" in error_msg.lower() and "not" in error_msg.lower():
-                raise ModelError(f"模型'{model_name}'未找到。请确认模型已正确下载到Ollama。")
+            if (
+                "OllamaException" in error_msg
+                or "ConnectionError" in error_msg
+                or "connect to Ollama" in error_msg
+            ):
+                raise ModelError(
+                    f"无法连接到Ollama服务。请确认Ollama服务正在运行，模型'{model_name}'已安装并可访问。"
+                )
+            elif (
+                "not found" in error_msg.lower()
+                or "model" in error_msg.lower()
+                and "not" in error_msg.lower()
+            ):
+                raise ModelError(
+                    f"模型'{model_name}'未找到。请确认模型已正确下载到Ollama。"
+                )
             elif "Connection refused" in error_msg:
-                raise ModelError(f"无法连接到Ollama服务。请确认Ollama服务在端口11434上运行。")
+                raise ModelError(
+                    "无法连接到Ollama服务。请确认Ollama服务在端口11434上运行。"
+                )
             else:
                 # 其他未处理的异常
                 raise ModelError(f"调用模型'{model_name}'时发生错误: {str(e)}")
@@ -114,7 +129,7 @@ class OllamaInstanceManager:
             "max_tokens": 4000,
             "top_p": 1.0,
             "frequency_penalty": 0.0,
-            "presence_penalty": 0.0
+            "presence_penalty": 0.0,
         }
 
     def get_current_model(self) -> Optional[str]:
@@ -146,5 +161,5 @@ class OllamaInstanceManager:
         return {
             "current_model": self._current_model,
             "cached_models": len(self._model_configs),
-            "lock_status": "locked" if self._lock.locked() else "unlocked"
+            "lock_status": "locked" if self._lock.locked() else "unlocked",
         }

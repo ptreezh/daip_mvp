@@ -3,21 +3,21 @@
 遵循TDD原则 - 基于测试需求实现
 """
 
-import json
 import builtins
-from typing import List, Optional, Dict, Any
+import json
+from typing import Optional
+
 import typer
 from rich.console import Console
-from rich.table import Table
-from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
-from ..utils.error_handler import ErrorHandler
-from ..utils.performance_monitor import PerformanceMonitor
-from ...memory.session_manager import SessionManager
-from ...persistence.database import DatabaseManager
 from ...config import ConfigManager
 from ...core.models import AgentState, Session
+from ...memory.session_manager import SessionManager
+from ...persistence.database import DatabaseManager
+from ..utils.error_handler import ErrorHandler
+from ..utils.performance_monitor import PerformanceMonitor
 
 
 def _get_db_manager() -> DatabaseManager:
@@ -34,7 +34,7 @@ def _get_db_manager() -> DatabaseManager:
 app = typer.Typer(
     name="session",
     help="Manage conversation sessions in the DAIP-LIVE system",
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
 
 # Create instances
@@ -51,23 +51,31 @@ def list(
         False, "--verbose", "-v", help="Show detailed session information"
     ),
     session_type: Optional[str] = typer.Option(
-        None, "--type", "-t", help="Filter by session type (debate, chat, workflow, etc.)"
+        None,
+        "--type",
+        "-t",
+        help="Filter by session type (debate, chat, workflow, etc.)",
     ),
     status: Optional[str] = typer.Option(
-        None, "--status", "-s", help="Filter by status (active, completed, paused, etc.)"
+        None,
+        "--status",
+        "-s",
+        help="Filter by status (active, completed, paused, etc.)",
     ),
     limit: Optional[int] = typer.Option(
         None, "--limit", "-l", help="Limit number of sessions to display"
-    )
+    ),
 ):
     """List all conversation sessions"""
 
     @error_handler.handle_command_errors(command_name="session list")
     async def _list_sessions():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("session_list") as metrics:
+        async with perf_monitor.measure_command("session_list"):
             if not json_output:
-                console.print("[bold blue]📋 Fetching conversation sessions...[/bold blue]")
+                console.print(
+                    "[bold blue]📋 Fetching conversation sessions...[/bold blue]"
+                )
 
             # Get database and session manager
             db_manager = _get_db_manager()
@@ -79,7 +87,7 @@ def list(
                         SpinnerColumn(),
                         TextColumn("[progress.description]{task.description}"),
                         console=console,
-                        transient=True
+                        transient=True,
                     ) as progress:
                         task = progress.add_task("Getting sessions...", total=None)
 
@@ -100,7 +108,11 @@ def list(
                         status_enum = AgentState[status.upper()]
                     except KeyError:
                         status_enum = None
-                    sessions = [s for s in sessions if status_enum is not None and s.status == status_enum]
+                    sessions = [
+                        s
+                        for s in sessions
+                        if status_enum is not None and s.status == status_enum
+                    ]
 
                 if limit:
                     sessions = sessions[:limit]
@@ -114,8 +126,8 @@ def list(
                             "filters": {
                                 "type": session_type,
                                 "status": status,
-                                "limit": limit
-                            }
+                                "limit": limit,
+                            },
                         }
                         console.print(json.dumps(output_data, indent=2))
                     else:
@@ -128,12 +140,14 @@ def list(
                                 filters.append(f"status: {status}")
                             if limit:
                                 filters.append(f"limit: {limit}")
-                            console.print(f"[dim]Applied filters: {', '.join(filters)}[/dim]")
+                            console.print(
+                                f"[dim]Applied filters: {', '.join(filters)}[/dim]"
+                            )
                     return
 
                 if json_output:
                     # JSON output
-                    # Convert pydantic Session models (incl. datetime/Enum) to JSON-safe dicts
+                    # Convert pydantic Session models (incl. datetime/Enum) to JSON-safe dicts  # noqa: E501
                     json_sessions = [s.model_dump(mode="json") for s in sessions]
 
                     output_data = {
@@ -142,8 +156,8 @@ def list(
                         "filters": {
                             "type": session_type,
                             "status": status,
-                            "limit": limit
-                        }
+                            "limit": limit,
+                        },
                     }
                     console.print(json.dumps(output_data, indent=2))
                 else:
@@ -153,10 +167,7 @@ def list(
             except Exception as e:
                 if json_output:
                     # For JSON output, print error as JSON
-                    error_data = {
-                        "error": str(e),
-                        "error_type": type(e).__name__
-                    }
+                    error_data = {"error": str(e), "error_type": type(e).__name__}
                     console.print(json.dumps(error_data, indent=2))
                 else:
                     console.print(f"[red]❌ Error fetching sessions: {str(e)}[/red]")
@@ -164,10 +175,11 @@ def list(
 
     # Run the async function
     import asyncio
+
     asyncio.run(_list_sessions())
 
 
-def _display_sessions_table(sessions: List[Session], verbose: bool = False):
+def _display_sessions_table(sessions: builtins.list[Session], verbose: bool = False):
     """Display sessions in a formatted table"""
 
     table = Table(title="Conversation Sessions")
@@ -193,15 +205,17 @@ def _display_sessions_table(sessions: List[Session], verbose: bool = False):
             session.goal[:30],  # Truncate long goals
             _get_status_indicator(session.status.name.lower()),
             str(len(session.history)),
-            _format_datetime(session.start_time)
+            _format_datetime(session.start_time),
         ]
 
         # Verbose info
         if verbose:
-            row.extend([
-                f"{len(session.participant_ids)} participants",
-                _format_datetime(session.end_time)
-            ])
+            row.extend(
+                [
+                    f"{len(session.participant_ids)} participants",
+                    _format_datetime(session.end_time),
+                ]
+            )
 
         table.add_row(*row)
 
@@ -217,11 +231,11 @@ def _display_sessions_table(sessions: List[Session], verbose: bool = False):
 def _get_status_indicator(status: str) -> str:
     """Get status indicator with color"""
     status_colors = {
-        'running': '🟢',
-        'completed': '🔵',
-        'paused': '⏸️',
-        'error': '🔴',
-        'unknown': '❓'
+        "running": "🟢",
+        "completed": "🔵",
+        "paused": "⏸️",
+        "error": "🔴",
+        "unknown": "❓",
     }
     return f"{status_colors.get(status, '❓')} {status.title()}"
 
@@ -231,7 +245,7 @@ def _format_datetime(dt_obj) -> str:
     if not dt_obj:
         return "Unknown"
 
-    if hasattr(dt_obj, 'strftime'):
+    if hasattr(dt_obj, "strftime"):
         return dt_obj.strftime("%Y-%m-%d %H:%M")
 
     return str(dt_obj)
@@ -239,9 +253,7 @@ def _format_datetime(dt_obj) -> str:
 
 @app.command()
 def clear(
-    force: bool = typer.Option(
-        False, "--force", "-f", help="Skip confirmation prompt"
-    )
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation prompt"),
 ):
     """Clear all conversation sessions"""
 
@@ -249,13 +261,18 @@ def clear(
     async def _clear_sessions():
         if not force:
             # Ask for confirmation unless --force is used
-            if not typer.confirm("Are you sure you want to clear all conversation sessions? This cannot be undone.", default=False):
+            if not typer.confirm(
+                "Are you sure you want to clear all conversation sessions? This cannot be undone.",  # noqa: E501
+                default=False,
+            ):
                 console.print("[yellow]Session clearing cancelled.[/yellow]")
                 return
 
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("session_clear") as metrics:
-            console.print("[bold red]🗑️  Clearing all conversation sessions...[/bold red]")
+        async with perf_monitor.measure_command("session_clear"):
+            console.print(
+                "[bold red]🗑️  Clearing all conversation sessions...[/bold red]"
+            )
 
             # Get database and session manager
             db_manager = _get_db_manager()
@@ -266,10 +283,16 @@ def clear(
                 cleared_count = session_manager.clear_all_sessions()
 
                 if cleared_count == 0:
-                    console.print("[yellow]ℹ️  No sessions to clear. Database is already empty.[/yellow]")
+                    console.print(
+                        "[yellow]ℹ️  No sessions to clear. Database is already empty.[/yellow]"  # noqa: E501
+                    )
                 else:
-                    console.print(f"[green]✅ Successfully cleared {cleared_count} session(s)[/green]")
-                    console.print(f"[dim]All conversation history has been removed.[/dim]")
+                    console.print(
+                        f"[green]✅ Successfully cleared {cleared_count} session(s)[/green]"  # noqa: E501
+                    )
+                    console.print(
+                        "[dim]All conversation history has been removed.[/dim]"
+                    )
 
             except Exception as e:
                 console.print(f"[red]❌ Error clearing sessions: {str(e)}[/red]")
@@ -277,4 +300,5 @@ def clear(
 
     # Run the async function
     import asyncio
+
     asyncio.run(_clear_sessions())

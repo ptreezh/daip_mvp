@@ -2,30 +2,31 @@
 
 import asyncio
 import subprocess
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import litellm
+
+from daip_live.core.config import is_local_model
 from daip_live.core.exceptions import ModelAuthenticationError, ModelError
 from daip_live.core.interfaces import IModelProvider
 from daip_live.core.models import ProviderConfig
-from daip_live.core.config import is_local_model
 
 
 class LiteLLMProvider(IModelProvider):
-    """An adapter that uses the litellm library to fulfill the IModelProvider contract."""
+    """An adapter that uses the litellm library to fulfill the IModelProvider contract."""  # noqa: E501
 
     def __init__(self, config: ProviderConfig):
         self.config = config
 
-    def _build_litellm_params(self, prompt: str, **kwargs) -> Dict[str, Any]:
+    def _build_litellm_params(self, prompt: str, **kwargs) -> dict[str, Any]:
         """Constructs the parameter dictionary for the litellm.completion call."""
         # Safely access config attributes
-        config_model = getattr(self.config, 'model', 'test-model')
-        config_num_retries = getattr(self.config, 'num_retries', 3)
-        config_api_key = getattr(self.config, 'api_key', None)
-        config_base_url = getattr(self.config, 'base_url', None)
-        config_temperature = getattr(self.config, 'temperature', None)
-        config_max_tokens = getattr(self.config, 'max_tokens', None)
+        config_model = getattr(self.config, "model", "test-model")
+        config_num_retries = getattr(self.config, "num_retries", 3)
+        config_api_key = getattr(self.config, "api_key", None)
+        config_base_url = getattr(self.config, "base_url", None)
+        config_temperature = getattr(self.config, "temperature", None)
+        config_max_tokens = getattr(self.config, "max_tokens", None)
 
         params = {
             "model": config_model,
@@ -45,24 +46,26 @@ class LiteLLMProvider(IModelProvider):
         # Filter out parameters that Ollama doesn't support
         # Only add supported parameters from kwargs
         for key, value in kwargs.items():
-            if key in ['temperature', 'max_tokens', 'top_p', 'stop', 'stream', 'seed']:
+            if key in ["temperature", "max_tokens", "top_p", "stop", "stream", "seed"]:
                 # These are generally supported by most providers including Ollama
                 params[key] = value
-            elif key in ['frequency_penalty', 'presence_penalty'] and not config_model.startswith("ollama/"):
+            elif key in [
+                "frequency_penalty",
+                "presence_penalty",
+            ] and not config_model.startswith("ollama/"):
                 # frequency_penalty and presence_penalty are not supported by Ollama
                 params[key] = value
-            elif key not in ['frequency_penalty', 'presence_penalty']:
+            elif key not in ["frequency_penalty", "presence_penalty"]:
                 # Add other parameters that are not known problematic ones
                 params[key] = value
 
-        # For Ollama models, explicitly set drop_params to True to ignore unsupported parameters
+        # For Ollama models, explicitly set drop_params to True to ignore unsupported parameters  # noqa: E501
         if config_model.startswith("ollama/"):
             params["drop_params"] = True
 
         return params
 
-
-    def _generate_mock_response(self, prompt: str, model: str) -> Tuple[str, Any]:
+    def _generate_mock_response(self, prompt: str, model: str) -> tuple[str, Any]:
         """生成模拟响应用于测试"""
         # 根据模型类型生成不同的模拟响应
         if model == "test-model":
@@ -73,18 +76,20 @@ class LiteLLMProvider(IModelProvider):
             content = f"Local model response to: {prompt[:50]}..."
 
         usage = {
-            'prompt_tokens': len(prompt.split()),
-            'completion_tokens': len(content.split()),
-            'total_tokens': len(prompt.split()) + len(content.split())
+            "prompt_tokens": len(prompt.split()),
+            "completion_tokens": len(content.split()),
+            "total_tokens": len(prompt.split()) + len(content.split()),
         }
 
         return content, usage
 
-    async def embed(self, text: str) -> List[float]:
+    async def embed(self, text: str) -> list[float]:
         """Creates an embedding vector for the given text using litellm."""
-        config_model = getattr(self.config, 'embedding_model', None) or 'text-embedding-ada-002'
-        config_api_key = getattr(self.config, 'api_key', None)
-        config_base_url = getattr(self.config, 'base_url', None)
+        config_model = (
+            getattr(self.config, "embedding_model", None) or "text-embedding-ada-002"
+        )
+        config_api_key = getattr(self.config, "api_key", None)
+        config_base_url = getattr(self.config, "base_url", None)
 
         # Handle mock embedding for testing and local models
         if config_model == "mock-embedding" or is_local_model(config_model):
@@ -94,58 +99,66 @@ class LiteLLMProvider(IModelProvider):
         if config_model.startswith("ollama/"):
             effective_model = self._get_fallback_model(config_model)
             if effective_model != config_model:
-                print(f"🔄 Embedding model switched from '{config_model}' to '{effective_model}' due to availability.")
                 config_model = effective_model
 
         # Normalize model name for different providers
         normalized_model = self._normalize_model_name(config_model)
 
         try:
-            return await self._try_embedding(normalized_model, text, config_api_key, config_base_url)
+            return await self._try_embedding(
+                normalized_model, text, config_api_key, config_base_url
+            )
         except litellm.exceptions.AuthenticationError as e:
             raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
         except Exception as e:
-            return await self._handle_embedding_failure(e, text, config_api_key, config_base_url)
-    
-    def _generate_mock_embedding(self) -> List[float]:
+            return await self._handle_embedding_failure(
+                e, text, config_api_key, config_base_url
+            )
+
+    def _generate_mock_embedding(self) -> list[float]:
         """Generate a mock embedding vector for testing purposes."""
         return [0.1] * 384
-    
+
     def _normalize_model_name(self, model: str) -> str:
         """Normalize model name with appropriate provider prefix."""
         # Don't normalize mock embeddings
         if model == "mock-embedding":
             return model
-        if model.startswith("all-MiniLM") or ("MiniLM" in model and "mock" not in model.lower()):
+        if model.startswith("all-MiniLM") or (
+            "MiniLM" in model and "mock" not in model.lower()
+        ):
             return f"huggingface/{model}"
         return model
-    
-    async def _try_embedding(self, model: str, text: str, api_key: str, base_url: str) -> List[float]:
+
+    async def _try_embedding(
+        self, model: str, text: str, api_key: str, base_url: str
+    ) -> list[float]:
         """Attempt to generate embedding with the specified model."""
-        params = {
-            "model": model,
-            "input": [text]
-        }
+        params = {"model": model, "input": [text]}
         if api_key:
             params["api_key"] = api_key
         if base_url:
             params["base_url"] = base_url
-        
+
         response = await litellm.aembedding(**params)
         return response.data[0].embedding
-    
-    async def _handle_embedding_failure(self, error: Exception, text: str, api_key: str, base_url: str) -> List[float]:
+
+    async def _handle_embedding_failure(
+        self, error: Exception, text: str, api_key: str, base_url: str
+    ) -> list[float]:
         """Handle embedding failures with fallback logic."""
         if "LLM Provider NOT provided" in str(error):
             return await self._try_fallback_embedding(text, api_key, base_url)
         raise ModelError(f"LiteLLM embedding error: {error}") from error
-    
-    async def _try_fallback_embedding(self, text: str, api_key: str, base_url: str) -> List[float]:
+
+    async def _try_fallback_embedding(
+        self, text: str, api_key: str, base_url: str
+    ) -> list[float]:
         """Try fallback embedding when primary model fails."""
         # Use mock embedding as fallback to avoid API calls
         return self._generate_mock_embedding()
 
-    def get_available_models(self) -> List[str]:
+    def get_available_models(self) -> list[str]:
         """
         Get list of available models from the provider.
 
@@ -164,7 +177,7 @@ class LiteLLMProvider(IModelProvider):
             "ollama/codellama",
             "ollama/nomic-embed-text",
             "ollama/phi",
-            "ollama/neural-chat"
+            "ollama/neural-chat",
         ]
 
         # Common cloud models
@@ -173,12 +186,16 @@ class LiteLLMProvider(IModelProvider):
             "gpt-4",
             "claude-3-sonnet-20240229",
             "claude-3-haiku-20240307",
-            "gemini-pro"
+            "gemini-pro",
         ]
 
         # Try to determine if we have access to cloud models
-        if (hasattr(self.config, 'api_key') and self.config.api_key and
-            self.config.api_key.strip() and self.config.api_key != "your-api-key-here"):
+        if (
+            hasattr(self.config, "api_key")
+            and self.config.api_key
+            and self.config.api_key.strip()
+            and self.config.api_key != "your-api-key-here"
+        ):
             available_models.extend(cloud_models)
 
         # Always include common Ollama models (users may have them installed)
@@ -199,29 +216,34 @@ class LiteLLMProvider(IModelProvider):
         available_models = self.get_available_models()
         return model_name in available_models
 
-    def _get_available_ollama_models(self) -> List[str]:
+    def _get_available_ollama_models(self) -> list[str]:
         """Get list of available Ollama models by calling ollama list."""
         models = []
         try:
             result = subprocess.run(
-                ["ollama", "list"],
-                capture_output=True,
-                text=True,
-                timeout=10
+                ["ollama", "list"], capture_output=True, text=True, timeout=10
             )
 
             if result.returncode == 0:
                 # Parse Ollama output
-                lines = result.stdout.strip().split('\n')
+                lines = result.stdout.strip().split("\n")
                 if len(lines) > 1:  # Skip header line
                     for line in lines[1:]:
                         parts = line.split()
                         if len(parts) >= 1:
                             model_name = parts[0]
                             # Add model with ollama/ prefix as expected by the system
-                            full_model_name = f"ollama/{model_name}" if not model_name.startswith("ollama/") else model_name
+                            full_model_name = (
+                                f"ollama/{model_name}"
+                                if not model_name.startswith("ollama/")
+                                else model_name
+                            )
                             models.append(full_model_name)
-        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+        except (
+            subprocess.TimeoutExpired,
+            subprocess.SubprocessError,
+            FileNotFoundError,
+        ):
             # Ollama not installed or not running - return empty list
             pass
 
@@ -232,13 +254,15 @@ class LiteLLMProvider(IModelProvider):
         available_models = self._get_available_ollama_models()
         return model_name in available_models
 
-    def _get_fallback_model(self, original_model: str, force_fallback: bool = False) -> str:
-        """Get a fallback model if the original model is not available or force_fallback is True."""
+    def _get_fallback_model(
+        self, original_model: str, force_fallback: bool = False
+    ) -> str:
+        """Get a fallback model if the original model is not available or force_fallback is True."""  # noqa: E501
         if force_fallback or not self._is_model_available(original_model):
             # Get available Ollama models as fallback options
             available_models = self._get_available_ollama_models()
 
-            # Prefer models similar to the original, otherwise use the first available one
+            # Prefer models similar to the original, otherwise use the first available one  # noqa: E501
             if available_models:
                 # Extract just the model name part (after provider prefix)
                 # e.g., "ollama/mistral-something" -> "mistral-something"
@@ -248,7 +272,7 @@ class LiteLLMProvider(IModelProvider):
                     model_name_part = original_model.lower()
 
                 # Define model family keywords to search for
-                # Order by specificity - more specific matches first to avoid partial matches
+                # Order by specificity - more specific matches first to avoid partial matches  # noqa: E501
                 family_keywords = [
                     ("codellama", lambda model: "codellama" in model.lower()),
                     ("llama3", lambda model: "llama3" in model.lower()),
@@ -273,9 +297,9 @@ class LiteLLMProvider(IModelProvider):
         else:
             return original_model
 
-    async def generate(self, prompt: str, params: Dict):
+    async def generate(self, prompt: str, params: dict):
         """Generates a response from a language model using litellm."""
-        config_model = getattr(self.config, 'model', 'test-model')
+        config_model = getattr(self.config, "model", "test-model")
 
         # 如果是本地模型，返回模拟响应
         if is_local_model(config_model):
@@ -291,7 +315,6 @@ class LiteLLMProvider(IModelProvider):
         if effective_model != config_model:
             litellm_params["model"] = effective_model
             # 记录模型切换信息
-            print(f"🔄 Model switched from '{config_model}' to '{effective_model}' due to availability.")
 
         try:
             # litellm.completion is a synchronous call, run it in a thread
@@ -301,7 +324,7 @@ class LiteLLMProvider(IModelProvider):
             if content is None:
                 raise ModelError("Received null content from model.")
 
-            # Yield the content as a single chunk (for compatibility with streaming interface)
+            # Yield the content as a single chunk (for compatibility with streaming interface)  # noqa: E501
             yield content
         except litellm.exceptions.AuthenticationError as e:
             raise ModelAuthenticationError(f"LiteLLM auth error: {e}") from e
@@ -314,14 +337,14 @@ class LiteLLMProvider(IModelProvider):
         prompt: str,
         model: str = None,
         temperature: float = 0.7,
-        max_tokens: int = 1000
-    ) -> Tuple[str, Dict[str, Any]]:
+        max_tokens: int = 1000,
+    ) -> tuple[str, dict[str, Any]]:
         """生成完整响应，返回 (content, metadata) 二元组。
 
         与 ``generate``（async generator 流式）不同，``agenerate`` 收集完整响应后
         一次性返回，便于调用方直接 ``await`` 使用。
         """
-        config_model = model or getattr(self.config, 'model', 'test-model')
+        config_model = model or getattr(self.config, "model", "test-model")
 
         # 与 generate 保持一致：本地模型返回模拟响应
         if is_local_model(config_model):
@@ -343,8 +366,8 @@ class LiteLLMProvider(IModelProvider):
             if content is None:
                 raise ModelError("Received null content from model.")
 
-            usage = getattr(response, 'usage', None)
-            metadata: Dict[str, Any] = {
+            usage = getattr(response, "usage", None)
+            metadata: dict[str, Any] = {
                 "model": effective_model,
                 "usage": usage.model_dump() if usage else None,
             }
@@ -357,7 +380,7 @@ class LiteLLMProvider(IModelProvider):
 
     def get_default_model(self) -> str:
         """Get the default model for this provider."""
-        config_model = getattr(self.config, 'model', 'test-model')
+        config_model = getattr(self.config, "model", "test-model")
 
         # First try to get the configured model
         if self._is_model_available(config_model):
@@ -369,4 +392,4 @@ class LiteLLMProvider(IModelProvider):
             return available_models[0]
 
         # Final fallback
-        return 'test-model'
+        return "test-model"

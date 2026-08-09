@@ -9,8 +9,8 @@ try:
     # Create and register the config manager with the bridge
     _global_config_manager = ConfigManager()
     config_bridge.set_config_manager(_global_config_manager)
-except Exception as e:
+except Exception:
     # If config initialization fails, the bridge will use default values
-    print(f"Warning: Could not initialize config manager during package loading: {e}")
+    pass
 
-__all__ = ['config_bridge']
+__all__ = ["config_bridge"]

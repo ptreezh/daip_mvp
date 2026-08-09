@@ -4,13 +4,16 @@ import asyncio
 import hashlib
 import logging
 from pathlib import Path
-from typing import Dict, List
 
 import faiss
 import numpy as np
 
 from daip_live.core.interfaces import IKnowledgeManager, IModelProvider
-from daip_live.core.models import KnowledgeBaseChanges, KnowledgeSource, KnowledgeBaseConfig
+from daip_live.core.models import (
+    KnowledgeBaseChanges,
+    KnowledgeBaseConfig,
+    KnowledgeSource,
+)
 from daip_live.persistence.database import DatabaseManager
 
 
@@ -47,15 +50,32 @@ class KnowledgeManager(IKnowledgeManager):
 
     def _scan_and_detect_changes(self) -> KnowledgeBaseChanges:
         """Compares files on disk with records in the DB to find changes."""
-        db_sources = {s.file_path: s for s in self.db_manager.get_all_knowledge_sources()}
-        
+        db_sources = {
+            s.file_path: s for s in self.db_manager.get_all_knowledge_sources()
+        }
+
         # Only process text files, skip binary files like .faiss, .pkl, etc.
-        text_extensions = {'.txt', '.md', '.py', '.js', '.html', '.css', '.json', '.xml', '.yaml', '.yml', '.csv', '.log'}
+        text_extensions = {
+            ".txt",
+            ".md",
+            ".py",
+            ".js",
+            ".html",
+            ".css",
+            ".json",
+            ".xml",
+            ".yaml",
+            ".yml",
+            ".csv",
+            ".log",
+        }
         disk_files = {
-            str(p) for p in self.knowledge_dir.rglob("*") 
-            if p.is_file() and (
-                p.suffix.lower() in text_extensions or
-                not p.suffix  # Include files without extensions
+            str(p)
+            for p in self.knowledge_dir.rglob("*")
+            if p.is_file()
+            and (
+                p.suffix.lower() in text_extensions
+                or not p.suffix  # Include files without extensions
             )
         }
 
@@ -81,11 +101,14 @@ class KnowledgeManager(IKnowledgeManager):
 
         return changes
 
-    async def sync_knowledge_base(self) -> Dict[str, int]:
+    async def sync_knowledge_base(self) -> dict[str, int]:
         """Scans the knowledge directory, processes changes, and updates the index."""
         changes = self._scan_and_detect_changes()
         summary = {
-            "added": 0, "updated": 0, "removed": 0, "unchanged": len(changes.unchanged)
+            "added": 0,
+            "updated": 0,
+            "removed": 0,
+            "unchanged": len(changes.unchanged),
         }
 
         # Process added files
@@ -95,18 +118,27 @@ class KnowledgeManager(IKnowledgeManager):
                 content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
                 file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
                 embedding = await self.model_provider.embed(content)
-            except (UnicodeDecodeError, IOError) as e:
-                self._logger.warning(f"Skipping file {file_path_str} due to read error: {e}")
+            except (OSError, UnicodeDecodeError) as e:
+                self._logger.warning(
+                    f"Skipping file {file_path_str} due to read error: {e}"
+                )
                 summary["added"] -= 1  # Don't count this as added
                 continue
 
-            source = KnowledgeSource(file_path=file_path_str, file_hash=file_hash, status="indexed")
-            new_source = await asyncio.to_thread(self.db_manager.upsert_knowledge_source, source)
+            source = KnowledgeSource(
+                file_path=file_path_str, file_hash=file_hash, status="indexed"
+            )
+            new_source = await asyncio.to_thread(
+                self.db_manager.upsert_knowledge_source, source
+            )
             new_id = new_source.id
 
             if self.faiss_index and new_id is not None:
                 # FAISS requires a 2D array for additions
-                self.faiss_index.add_with_ids(np.array([embedding], dtype=np.float32), np.array([new_id], dtype=np.int64))
+                self.faiss_index.add_with_ids(
+                    np.array([embedding], dtype=np.float32),
+                    np.array([new_id], dtype=np.int64),
+                )
 
             summary["added"] += 1
 
@@ -114,7 +146,9 @@ class KnowledgeManager(IKnowledgeManager):
         for source in changes.deleted:
             if self.faiss_index and source.id is not None:
                 self.faiss_index.remove_ids(np.array([source.id], dtype=np.int64))
-            await asyncio.to_thread(self.db_manager.delete_knowledge_source, file_path=source.file_path)
+            await asyncio.to_thread(
+                self.db_manager.delete_knowledge_source, file_path=source.file_path
+            )
             summary["removed"] += 1
 
         # Process updated files
@@ -128,17 +162,29 @@ class KnowledgeManager(IKnowledgeManager):
                 content = await asyncio.to_thread(file_path.read_text, encoding="utf-8")
                 file_hash = await asyncio.to_thread(self._get_file_hash, file_path)
                 embedding = await self.model_provider.embed(content)
-            except (UnicodeDecodeError, IOError) as e:
-                self._logger.warning(f"Skipping file {file_path_str} due to read error: {e}")
+            except (OSError, UnicodeDecodeError) as e:
+                self._logger.warning(
+                    f"Skipping file {file_path_str} due to read error: {e}"
+                )
                 summary["updated"] -= 1  # Don't count this as updated
                 continue
 
-            source = KnowledgeSource(file_path=file_path_str, file_hash=file_hash, status="indexed", id=old_source.id)
-            updated_source = await asyncio.to_thread(self.db_manager.upsert_knowledge_source, source)
+            source = KnowledgeSource(
+                file_path=file_path_str,
+                file_hash=file_hash,
+                status="indexed",
+                id=old_source.id,
+            )
+            updated_source = await asyncio.to_thread(
+                self.db_manager.upsert_knowledge_source, source
+            )
             updated_id = updated_source.id
 
             if self.faiss_index and updated_id is not None:
-                self.faiss_index.add_with_ids(np.array([embedding], dtype=np.float32), np.array([updated_id], dtype=np.int64))
+                self.faiss_index.add_with_ids(
+                    np.array([embedding], dtype=np.float32),
+                    np.array([updated_id], dtype=np.int64),
+                )
 
             summary["updated"] += 1
 
@@ -148,7 +194,7 @@ class KnowledgeManager(IKnowledgeManager):
 
         return summary
 
-    async def search(self, query_text: str, top_k: int = 5) -> List[Dict]:
+    async def search(self, query_text: str, top_k: int = 5) -> list[dict]:
         """
         Searches for the most relevant documents for a given query text.
         """
@@ -174,7 +220,9 @@ class KnowledgeManager(IKnowledgeManager):
             return []
 
         # This method needs to be implemented in the DatabaseManager
-        sources = await asyncio.to_thread(self.db_manager.get_knowledge_sources_by_ids, source_ids)
+        sources = await asyncio.to_thread(
+            self.db_manager.get_knowledge_sources_by_ids, source_ids
+        )
 
         # 4. Format the results.
         # Create a mapping from id to source for easy lookup
@@ -184,11 +232,13 @@ class KnowledgeManager(IKnowledgeManager):
         for i, source_id in enumerate(source_ids):
             source = source_map.get(source_id)
             if source:
-                results.append({
-                    "file_path": source.file_path,
-                    "distance": float(distances[0][i]),
-                    "status": source.status,
-                    "indexed_at": source.indexed_at
-                })
+                results.append(
+                    {
+                        "file_path": source.file_path,
+                        "distance": float(distances[0][i]),
+                        "status": source.status,
+                        "indexed_at": source.indexed_at,
+                    }
+                )
 
         return results

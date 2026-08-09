@@ -13,33 +13,16 @@ Features:
 """
 
 import asyncio
-from typing import Optional, Any, Dict
+from typing import Any, Optional
+
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Vertical, Horizontal
 from textual.screen import Screen
-from textual.widgets import Header, Footer
-
-# Import newP6 components
-from daip_live.tui_v1.components.base import TUIComponent
-from daip_live.tui_v1.components.layout import LayoutComponent
-from daip_live.tui_v1.components.navigation import NavigationComponent
-from daip_live.tui_v1.components.content import ContentComponent
-from daip_live.tui_v1.components.input_area import InputAreaComponent
-from daip_live.tui_v1.components.display_area import DisplayAreaComponent
-from daip_live.tui_v1.components.status_bar import StatusBarComponent
+from textual.widgets import Footer, Header
 
 # Import DAIP services
 from daip_live.agent_engine.executor import AgentExecutor
-from daip_live.memory.session_manager import SessionManager
-from daip_live.knowledge.manager import KnowledgeManager
-from daip_live.model_provider.provider import LiteLLMProvider
-from daip_live.p4_role_manager_tools.role_manager import RoleManager
-from daip_live.p8_debate_system.manager import DebateManager
-from daip_live.persistence.database import DatabaseManager
 from daip_live.config import ConfigManager
-from daip_live.skills.manager import SkillManager
-from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager
 
 # Import DAIP event models
 from daip_live.core.models import (
@@ -49,8 +32,22 @@ from daip_live.core.models import (
     ModelMetricsEvent,
     PermissionRequestEvent,
     ThoughtEvent,
-    TokenUsageEvent
+    TokenUsageEvent,
 )
+from daip_live.knowledge.manager import KnowledgeManager
+from daip_live.memory.session_manager import SessionManager
+from daip_live.model_provider.provider import LiteLLMProvider
+from daip_live.p4_role_manager_tools.role_manager import RoleManager
+from daip_live.p8_debate_system.manager import DebateManager
+from daip_live.persistence.database import DatabaseManager
+
+# Import newP6 components
+from daip_live.tui_v1.components.base import TUIComponent
+from daip_live.tui_v1.components.display_area import DisplayAreaComponent
+from daip_live.tui_v1.components.input_area import InputAreaComponent
+from daip_live.tui_v1.components.layout import LayoutComponent
+from daip_live.tui_v1.components.navigation import NavigationComponent
+from daip_live.tui_v1.components.status_bar import StatusBarComponent
 
 
 class DAIPScreen(Screen):
@@ -87,11 +84,11 @@ class DAIPScreen(Screen):
     }
     """
 
-    def __init__(self, daip_services: Dict[str, Any]) -> None:
+    def __init__(self, daip_services: dict[str, Any]) -> None:
         """Initialize screen with DAIP services."""
         super().__init__()
         self.daip_services = daip_services
-        self.components: Dict[str, TUIComponent] = {}
+        self.components: dict[str, TUIComponent] = {}
 
     def compose(self: "DAIPScreen") -> ComposeResult:
         """Compose the screen layout using newP6 components."""
@@ -100,28 +97,24 @@ class DAIPScreen(Screen):
 
         # Main layout container
         main_layout = LayoutComponent(
-            component_id="main_layout",
-            layout_type="vertical"
+            component_id="main_layout", layout_type="vertical"
         )
 
         # Navigation component
-        navigation = NavigationComponent(
-            component_id="navigation",
-            show_menu=True
-        )
+        navigation = NavigationComponent(component_id="navigation", show_menu=True)
 
         # Content display area
         display_area = DisplayAreaComponent(
             component_id="main_log",  # Maintain backwards compatibility
             auto_scroll=True,
-            max_lines=1000
+            max_lines=1000,
         )
 
         # Input area
         input_area = InputAreaComponent(
             component_id="user_input",  # Maintain backwards compatibility
             placeholder="Enter command or ask for help...",
-            auto_complete=True
+            auto_complete=True,
         )
 
         # Status bar
@@ -129,17 +122,19 @@ class DAIPScreen(Screen):
             component_id="status_bar",  # Maintain backwards compatibility
             show_progress=True,
             show_time=True,
-            show_system_info=True
+            show_system_info=True,
         )
 
         # Store component references
-        self.components.update({
-            'main_layout': main_layout,
-            'navigation': navigation,
-            'display_area': display_area,
-            'input_area': input_area,
-            'status_bar': status_bar
-        })
+        self.components.update(
+            {
+                "main_layout": main_layout,
+                "navigation": navigation,
+                "display_area": display_area,
+                "input_area": input_area,
+                "status_bar": status_bar,
+            }
+        )
 
         # Compose the layout
         yield main_layout.render()
@@ -169,41 +164,42 @@ class DAIPScreen(Screen):
             await component.mount()
 
         # Set up navigation menu items
-        navigation = self.components['navigation']
-        navigation.add_menu_item({
-            "label": "Agent Control",
-            "action": "agent_control"
-        })
-        navigation.add_menu_item({
-            "label": "Knowledge Base",
-            "action": "knowledge_manage"
-        })
-        navigation.add_menu_item({
-            "label": "Session History",
-            "action": "session_history"
-        })
-        navigation.add_menu_item({
-            "label": "Debate System",
-            "action": "debate_system"
-        })
-        navigation.add_menu_item({
-            "label": "Skills Management",
-            "action": "skills_manage"
-        })
+        navigation = self.components["navigation"]
+        navigation.add_menu_item({"label": "Agent Control", "action": "agent_control"})
+        navigation.add_menu_item(
+            {"label": "Knowledge Base", "action": "knowledge_manage"}
+        )
+        navigation.add_menu_item(
+            {"label": "Session History", "action": "session_history"}
+        )
+        navigation.add_menu_item({"label": "Debate System", "action": "debate_system"})
+        navigation.add_menu_item(
+            {"label": "Skills Management", "action": "skills_manage"}
+        )
 
         # Set up input area with DAIP commands
-        input_area = self.components['input_area']
+        input_area = self.components["input_area"]
 
         def daip_command_suggestions(input_text: str) -> list:
             """Provide DAIP command suggestions."""
             commands = [
-                "help", "status", "quit", "clear",
-                "agent list", "agent switch <name>",
-                "session list", "session show <id>",
-                "knowledge sync", "knowledge search <query>",
-                "debate start <topic>", "debate list",
-                "model list", "model status",
-                "/skill", "/ppt", "/survey"
+                "help",
+                "status",
+                "quit",
+                "clear",
+                "agent list",
+                "agent switch <name>",
+                "session list",
+                "session show <id>",
+                "knowledge sync",
+                "knowledge search <query>",
+                "debate start <topic>",
+                "debate list",
+                "model list",
+                "model status",
+                "/skill",
+                "/ppt",
+                "/survey",
             ]
             return [cmd for cmd in commands if cmd.startswith(input_text.lower())]
 
@@ -211,38 +207,46 @@ class DAIPScreen(Screen):
 
     async def _initialize_skills(self) -> None:
         """Initialize skill system and load existing skills."""
-        skill_manager = self.daip_services.get('skill_manager')
+        skill_manager = self.daip_services.get("skill_manager")
         if skill_manager:
             # Load any existing Claude skills from the claude_skills directory
             try:
-                loaded_count = skill_manager.load_claude_skills_from_directory("./claude_skills")
-                display_area = self.components['display_area']
+                loaded_count = skill_manager.load_claude_skills_from_directory(
+                    "./claude_skills"
+                )
+                display_area = self.components["display_area"]
                 if loaded_count > 0:
-                    display_area.write(f"🔄 已从 ./claude_skills 加载 {loaded_count} 个Claude技能")
+                    display_area.write(
+                        f"🔄 已从 ./claude_skills 加载 {loaded_count} 个Claude技能"
+                    )
                 else:
-                    display_area.write("📁 未找到本地Claude技能，可在需要时从GitHub下载")
-            except Exception as e:
-                print(f"⚠️ 加载本地技能时出错: {e}")
+                    display_area.write(
+                        "📁 未找到本地Claude技能，可在需要时从GitHub下载"
+                    )
+            except Exception:
+                pass
 
     async def _setup_daip_integrations(self) -> None:
         """Set up integration with DAIP services."""
         # Connect display area to DAIP executor events
-        display_area = self.components['display_area']
-        executor = self.daip_services.get('executor')
+        display_area = self.components["display_area"]
+        executor = self.daip_services.get("executor")
 
         if executor:
             # Subscribe to executor events
             self._setup_executor_listeners(executor, display_area)
 
         # Connect status bar to system monitoring
-        status_bar = self.components['status_bar']
+        status_bar = self.components["status_bar"]
         await self._setup_status_monitoring(status_bar)
 
         # Connect input area to command processing
-        input_area = self.components['input_area']
+        input_area = self.components["input_area"]
         await self._setup_command_processing(input_area)
 
-    def _setup_executor_listeners(self, executor: AgentExecutor, display_area: DisplayAreaComponent) -> None:
+    def _setup_executor_listeners(
+        self, executor: AgentExecutor, display_area: DisplayAreaComponent
+    ) -> None:
         """Set up event listeners for the agent executor."""
         # This would integrate with DAIP's event system
         # For now, we'll simulate the event handling
@@ -250,14 +254,15 @@ class DAIPScreen(Screen):
 
     async def _setup_status_monitoring(self, status_bar: StatusBarComponent) -> None:
         """Set up system status monitoring."""
+
         # Simulate system metrics updates
         async def update_system_status():
             while True:
                 # Update system info (mock implementation)
                 system_info = {
-                    'cpu_percent': 45.0,
-                    'memory_percent': 60.0,
-                    'active_agents': 1
+                    "cpu_percent": 45.0,
+                    "memory_percent": 60.0,
+                    "active_agents": 1,
                 }
                 status_bar.update_system_info(system_info)
                 status_bar.update_time()
@@ -268,27 +273,36 @@ class DAIPScreen(Screen):
     async def _setup_command_processing(self, input_area: InputAreaComponent) -> None:
         """Set up command processing for input area."""
         # Get the skill manager and Claude integration service from DAIP services
-        skill_manager = self.daip_services.get('skill_manager')
-        claude_integration_service = self.daip_services.get('claude_integration_service')
+        skill_manager = self.daip_services.get("skill_manager")
+        claude_integration_service = self.daip_services.get(
+            "claude_integration_service"
+        )
 
         if skill_manager is None:
             # If not provided in daip_services, create a default one
             from daip_live.skills.manager import SkillManager
+
             skill_manager = SkillManager()
-            self.daip_services['skill_manager'] = skill_manager
+            self.daip_services["skill_manager"] = skill_manager
 
         if claude_integration_service is None:
             # Initialize Claude integration service if not provided
-            from daip_live.skills.enhanced_integration import EnhancedClaudeSkillsManager
+            from daip_live.skills.enhanced_integration import (
+                EnhancedClaudeSkillsManager,
+            )
+
             claude_integration_service = EnhancedClaudeSkillsManager(skill_manager)
-            self.daip_services['claude_integration_service'] = claude_integration_service
+            self.daip_services["claude_integration_service"] = (
+                claude_integration_service
+            )
 
         # Setup command processing system
         from daip_live.tui_v1.command.command_processor import setup_command_processing
+
         self.command_processor = setup_command_processing(
             self,  # Pass self as the tui_app parameter
             skill_manager,
-            claude_integration_service
+            claude_integration_service,
         )
 
         # Set up event handling for user input
@@ -301,25 +315,25 @@ class DAIPScreen(Screen):
 
                 if result:  # If command was processed
                     # Display the command result
-                    display_area = self.components['display_area']
+                    display_area = self.components["display_area"]
                     display_area.write(result)
                     input_area.clear_input()
                 else:
                     # If not a recognized command, it might be a natural language query
                     # This would be handled by the intent recognition system
-                    display_area = self.components['display_area']
+                    display_area = self.components["display_area"]
                     display_area.write(f"🤔 检测到非命令输入: {user_input}")
                     display_area.write("💡 提示: 输入 /help 查看可用命令")
                     input_area.clear_input()
 
         # Add callback to input area's submit event
-        # This is a simplified implementation - in a real app, you'd connect to actual events
+        # This is a simplified implementation - in a real app, you'd connect to actual events  # noqa: E501
         pass
 
     async def _start_monitoring(self) -> None:
         """Start background monitoring tasks."""
-        display_area = self.components['display_area']
-        status_bar = self.components['status_bar']
+        display_area = self.components["display_area"]
+        status_bar = self.components["status_bar"]
 
         # Display welcome message
         display_area.write("🚀 DAIP-LIVE Agent Engine V1 Started")
@@ -331,8 +345,8 @@ class DAIPScreen(Screen):
 
     def handle_daip_event(self, event: Any) -> None:
         """Handle events from DAIP services."""
-        display_area = self.components['display_area']
-        status_bar = self.components['status_bar']
+        display_area = self.components["display_area"]
+        status_bar = self.components["status_bar"]
 
         # Process different event types
         if isinstance(event, ThoughtEvent):
@@ -346,7 +360,7 @@ class DAIPScreen(Screen):
             display_area.write(f"✅ {event.content}")
             status_bar.set_success_status("Task Completed")
         elif isinstance(event, TokenUsageEvent):
-            status_bar.indicate_activity(f"Processing tokens...")
+            status_bar.indicate_activity("Processing tokens...")
         elif isinstance(event, ModelMetricsEvent):
             # Update status with model performance metrics
             pass
@@ -373,7 +387,7 @@ class DAIPNewP6App(App):
         Binding("ctrl+l", "clear", "Clear", show=True),
     ]
 
-    def __init__(self, daip_services: Dict[str, Any]) -> None:
+    def __init__(self, daip_services: dict[str, Any]) -> None:
         """Initialize app with DAIP services."""
         super().__init__()
         self.daip_services = daip_services
@@ -386,16 +400,16 @@ class DAIPNewP6App(App):
     def action_clear(self) -> None:
         """Clear the display area."""
         screen = self.screen
-        if hasattr(screen, 'components'):
-            display_area = screen.components.get('display_area')
+        if hasattr(screen, "components"):
+            display_area = screen.components.get("display_area")
             if display_area:
                 display_area.clear()
 
     def action_help(self) -> None:
         """Show help information."""
         screen = self.screen
-        if hasattr(screen, 'components'):
-            display_area = screen.components.get('display_area')
+        if hasattr(screen, "components"):
+            display_area = screen.components.get("display_area")
             if display_area:
                 display_area.write("📖 DAIP-LIVE Help")
                 display_area.write("─" * 30)
@@ -418,7 +432,7 @@ def create_daip_newp6_app(
     debate_manager: Optional[DebateManager] = None,
     db_manager: Optional[DatabaseManager] = None,
     config_manager: Optional[ConfigManager] = None,
-    **kwargs
+    **kwargs,
 ) -> DAIPNewP6App:
     """
     Create a DAIP-LIVE TUI application with newP6 architecture.
@@ -438,15 +452,15 @@ def create_daip_newp6_app(
         DAIPNewP6App: Configured TUI application
     """
     daip_services = {
-        'executor': executor,
-        'session_manager': session_manager,
-        'knowledge_manager': knowledge_manager,
-        'model_provider': model_provider,
-        'role_manager': role_manager,
-        'debate_manager': debate_manager,
-        'db_manager': db_manager,
-        'config_manager': config_manager,
-        **kwargs
+        "executor": executor,
+        "session_manager": session_manager,
+        "knowledge_manager": knowledge_manager,
+        "model_provider": model_provider,
+        "role_manager": role_manager,
+        "debate_manager": debate_manager,
+        "db_manager": db_manager,
+        "config_manager": config_manager,
+        **kwargs,
     }
 
     return DAIPNewP6App(daip_services)

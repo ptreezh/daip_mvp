@@ -7,11 +7,12 @@ import json
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Optional, Any
+from typing import Any, Optional
 
 
 class LogLevel(Enum):
     """Log level enumeration."""
+
     DEBUG = logging.DEBUG
     INFO = logging.INFO
     WARNING = logging.WARNING
@@ -44,12 +45,29 @@ class JsonFormatter(logging.Formatter):
         # Add extra context fields
         for key, value in record.__dict__.items():
             if key not in {
-                "name", "msg", "args", "levelname", "levelno",
-                "pathname", "filename", "module", "exc_info",
-                "exc_text", "stack_info", "lineno", "funcName",
-                "created", "msecs", "relativeCreated", "thread",
-                "threadName", "processName", "process", "message",
-                "asctime", "levelname"
+                "name",
+                "msg",
+                "args",
+                "levelname",
+                "levelno",
+                "pathname",
+                "filename",
+                "module",
+                "exc_info",
+                "exc_text",
+                "stack_info",
+                "lineno",
+                "funcName",
+                "created",
+                "msecs",
+                "relativeCreated",
+                "thread",
+                "threadName",
+                "processName",
+                "process",
+                "message",
+                "asctime",
+                "levelname",
             }:
                 log_data[key] = value
 
@@ -59,9 +77,9 @@ class JsonFormatter(logging.Formatter):
 class StructuredLogger:
     """Structured logger with JSON formatting."""
 
-    _loggers: Dict[str, "StructuredLogger"] = {}
+    _loggers: dict[str, "StructuredLogger"] = {}
 
-    def __init__(self, name: str, context: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, context: Optional[dict[str, Any]] = None):
         """Initialize a structured logger.
 
         Args:
@@ -110,7 +128,7 @@ class StructuredLogger:
         self._log(LogLevel.CRITICAL, message, **kwargs)
 
 
-def get_logger(name: str, context: Optional[Dict[str, Any]] = None) -> StructuredLogger:
+def get_logger(name: str, context: Optional[dict[str, Any]] = None) -> StructuredLogger:
     """Get or create a structured logger.
 
     Args:

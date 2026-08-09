@@ -4,7 +4,6 @@ Connection Status Widget for newP6 TUI Status Bar
 Displays connection status to various services.
 """
 
-from typing import Optional
 import logging
 
 from .status_widget import StatusWidget

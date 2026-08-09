@@ -1,35 +1,35 @@
 """
 Debate history tracking service with proper async patterns.
 """
+
 import asyncio
 import json
 import sqlite3
 import threading
 import uuid
 from datetime import datetime
-from typing import List, Optional
-
+from typing import Optional
 
 from daip_live.core.models import (
-    DebateTurnCompleteEvent, 
-    DebateStartEvent, 
-    DebateCompleteEvent
+    DebateCompleteEvent,
+    DebateStartEvent,
+    DebateTurnCompleteEvent,
 )
 from daip_live.tui_v1.models.debate_view import (
-    DebateHistoryView, 
-    DebateParticipantView, 
-    DebateTurnView
+    DebateHistoryView,
+    DebateParticipantView,
+    DebateTurnView,
 )
 
 
 class DebateHistoryTracker:
     """Service to track and manage debate history for visualization."""
-    
+
     def __init__(self, db_path: str = ":memory:"):
         # Use file-based database for persistence across thread boundaries
-        import tempfile
         import os
-        
+        import tempfile
+
         # 修复: ":memory:" 语义下此前使用固定临时文件 daip_debate_history.db，
         # 导致多实例/多次运行共享同一持久 DB，turns 跨会话累积（INSERT OR REPLACE 只覆盖
         # session 行、不清理旧 turns）。改为每实例唯一临时文件，避免跨实例污染。
@@ -39,8 +39,8 @@ class DebateHistoryTracker:
             )
         else:
             self.db_path = db_path
-        
-        # Use single threading lock for all database operations to avoid async/threading issues
+
+        # Use single threading lock for all database operations to avoid async/threading issues  # noqa: E501
         self._db_lock = threading.Lock()
         self._init_database()
 
@@ -48,7 +48,7 @@ class DebateHistoryTracker:
         """Initialize the database tables for debate history storage."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            
+
             # Create debate sessions table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS debate_sessions (
@@ -63,7 +63,7 @@ class DebateHistoryTracker:
                     end_time TIMESTAMP
                 )
             """)
-            
+
             # Create debate turns table
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS debate_turns (
@@ -77,110 +77,144 @@ class DebateHistoryTracker:
                     FOREIGN KEY (session_id) REFERENCES debate_sessions (session_id)
                 )
             """)
-            
+
             conn.commit()
 
     async def start_tracking(self, start_event: DebateStartEvent) -> DebateHistoryView:
         """Start tracking a new debate session."""
         loop = asyncio.get_event_loop()
-        
+
         def db_operation():
             with self._db_lock:  # Use threading lock for database operations
                 # Create participant views
                 participants = []
                 for i, name in enumerate(start_event.roles):
-                    participants.append(DebateParticipantView(
-                        name=name,
-                        turn_order=i,
-                        color=f"#{(i*0x111111) % 0xFFFFFF:06x}" if i < 16 else "#FFFFFF"  # Generate different colors
-                    ))
-                
+                    participants.append(
+                        DebateParticipantView(
+                            name=name,
+                            turn_order=i,
+                            color=f"#{(i * 0x111111) % 0xFFFFFF:06x}"
+                            if i < 16
+                            else "#FFFFFF",  # Generate different colors
+                        )
+                    )
+
                 # Create history view
                 history_view = DebateHistoryView(
                     session_id=start_event.session_id,
                     topic=start_event.topic,
                     participants=participants,
                     total_rounds=start_event.rounds,
-                    current_round=0
+                    current_round=0,
                 )
-                
+
                 # Store in database
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    
+
                     # Convert participants to JSON
-                    participants_json = json.dumps([
-                        {"name": p.name, "turn_order": p.turn_order, "color": p.color} 
-                        for p in participants
-                    ])
-                    
-                    cursor.execute("""
-                        INSERT OR REPLACE INTO debate_sessions 
+                    participants_json = json.dumps(
+                        [
+                            {
+                                "name": p.name,
+                                "turn_order": p.turn_order,
+                                "color": p.color,
+                            }
+                            for p in participants
+                        ]
+                    )
+
+                    cursor.execute(
+                        """
+                        INSERT OR REPLACE INTO debate_sessions
                         (session_id, topic, status, total_rounds, current_round, participants, start_time)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """, (
-                        start_event.session_id,
-                        start_event.topic,
-                        "active",
-                        start_event.rounds,
-                        0,
-                        participants_json,
-                        datetime.now().isoformat()
-                    ))
-                    
+                    """,  # noqa: E501
+                        (
+                            start_event.session_id,
+                            start_event.topic,
+                            "active",
+                            start_event.rounds,
+                            0,
+                            participants_json,
+                            datetime.now().isoformat(),
+                        ),
+                    )
+
                     conn.commit()
-                
+
                 return history_view
-        
+
         # Run database operation in thread pool to avoid blocking the event loop
         return await loop.run_in_executor(None, db_operation)
 
-    async def add_turn(self, turn_event: DebateTurnCompleteEvent) -> Optional[DebateHistoryView]:
+    async def add_turn(
+        self, turn_event: DebateTurnCompleteEvent
+    ) -> Optional[DebateHistoryView]:
         """Add a turn to the debate history."""
         loop = asyncio.get_event_loop()
-        
+
         def db_operation():
             with self._db_lock:  # Use threading lock for database operations
                 # Add the turn to database
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    cursor.execute("""
-                        INSERT INTO debate_turns 
+                    cursor.execute(
+                        """
+                        INSERT INTO debate_turns
                         (session_id, participant_name, round_number, content, turn_in_round)
                         VALUES (?, ?, ?, ?, ?)
-                    """, (
-                        turn_event.session_id,
-                        turn_event.participant,
-                        turn_event.round_number,
-                        turn_event.content_preview,
-                        1  # We'll update this properly later
-                    ))
-                    
+                    """,  # noqa: E501
+                        (
+                            turn_event.session_id,
+                            turn_event.participant,
+                            turn_event.round_number,
+                            turn_event.content_preview,
+                            1,  # We'll update this properly later
+                        ),
+                    )
+
                     # Update current round in sessions table
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         UPDATE debate_sessions SET current_round = ?
                         WHERE session_id = ?
-                    """, (turn_event.round_number, turn_event.session_id))
-                    
+                    """,
+                        (turn_event.round_number, turn_event.session_id),
+                    )
+
                     conn.commit()
-                
+
                 # Now read back the full history to return updated view
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    
+
                     # Get debate session
-                    cursor.execute("""
-                        SELECT session_id, topic, status, total_rounds, current_round, 
+                    cursor.execute(
+                        """
+                        SELECT session_id, topic, status, total_rounds, current_round,
                                participants, summary, start_time, end_time
                         FROM debate_sessions WHERE session_id = ?
-                    """, (turn_event.session_id,))
-                    
+                    """,
+                        (turn_event.session_id,),
+                    )
+
                     row = cursor.fetchone()
                     if not row:
                         return None
-                    
-                    session_id, topic, status, total_rounds, current_round, participants_json, summary, start_time, end_time = row
-                    
+
+                    (
+                        session_id,
+                        topic,
+                        status,
+                        total_rounds,
+                        current_round,
+                        participants_json,
+                        summary,
+                        start_time,
+                        end_time,
+                    ) = row
+
                     # Parse participants from JSON
                     try:
                         participants_data = json.loads(participants_json or "[]")
@@ -188,20 +222,24 @@ class DebateHistoryTracker:
                             DebateParticipantView(
                                 name=p["name"],
                                 turn_order=p.get("turn_order", 0),
-                                color=p.get("color", "#FFFFFF")
-                            ) for p in participants_data
+                                color=p.get("color", "#FFFFFF"),
+                            )
+                            for p in participants_data
                         ]
                     except json.JSONDecodeError:
                         participants = []
-                    
+
                     # Get all turns for this session
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         SELECT participant_name, content, round_number, turn_in_round, timestamp
-                        FROM debate_turns 
+                        FROM debate_turns
                         WHERE session_id = ?
                         ORDER BY round_number, turn_in_round
-                    """, (turn_event.session_id,))
-                    
+                    """,  # noqa: E501
+                        (turn_event.session_id,),
+                    )
+
                     turns_rows = cursor.fetchall()
                     turns = [
                         DebateTurnView(
@@ -210,10 +248,14 @@ class DebateHistoryTracker:
                             round_number=row[2],
                             turn_in_round=row[3],
                             timestamp=row[4],
-                            color=next((p.color for p in participants if p.name == row[0]), "#FFFFFF")
-                        ) for row in turns_rows
+                            color=next(
+                                (p.color for p in participants if p.name == row[0]),
+                                "#FFFFFF",
+                            ),
+                        )
+                        for row in turns_rows
                     ]
-                    
+
                     # Create history view
                     debate_history_view = DebateHistoryView(
                         session_id=session_id,
@@ -223,56 +265,76 @@ class DebateHistoryTracker:
                         total_rounds=total_rounds,
                         current_round=current_round,
                         status=status,
-                        created_at=datetime.fromisoformat(start_time) if start_time else datetime.now(),
-                        end_time=datetime.fromisoformat(end_time) if end_time else None
+                        created_at=datetime.fromisoformat(start_time)
+                        if start_time
+                        else datetime.now(),
+                        end_time=datetime.fromisoformat(end_time) if end_time else None,
                     )
-                    
+
                     if summary:
                         debate_history_view.summary = summary
-                    
+
                     return debate_history_view
-        
+
         # Run database operation in thread pool to avoid blocking the event loop
         return await loop.run_in_executor(None, db_operation)
 
-    async def complete_debate(self, complete_event: DebateCompleteEvent) -> Optional[DebateHistoryView]:
+    async def complete_debate(
+        self, complete_event: DebateCompleteEvent
+    ) -> Optional[DebateHistoryView]:
         """Mark a debate as completed."""
         loop = asyncio.get_event_loop()
-        
+
         def db_operation():
             with self._db_lock:  # Use threading lock for database operations
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    
-                    cursor.execute("""
-                        UPDATE debate_sessions 
+
+                    cursor.execute(
+                        """
+                        UPDATE debate_sessions
                         SET status = ?, summary = ?, end_time = ?
                         WHERE session_id = ?
-                    """, (
-                        "completed",
-                        complete_event.summary,
-                        datetime.now().isoformat(),
-                        complete_event.session_id
-                    ))
-                    
+                    """,
+                        (
+                            "completed",
+                            complete_event.summary,
+                            datetime.now().isoformat(),
+                            complete_event.session_id,
+                        ),
+                    )
+
                     conn.commit()
-            
+
             # After updating DB, read the updated record
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
-                
-                cursor.execute("""
-                    SELECT session_id, topic, status, total_rounds, current_round, 
+
+                cursor.execute(
+                    """
+                    SELECT session_id, topic, status, total_rounds, current_round,
                            participants, summary, start_time, end_time
                     FROM debate_sessions WHERE session_id = ?
-                """, (complete_event.session_id,))
-                
+                """,
+                    (complete_event.session_id,),
+                )
+
                 row = cursor.fetchone()
                 if not row:
                     return None
-                
-                session_id, topic, status, total_rounds, current_round, participants_json, summary, start_time, end_time = row
-                
+
+                (
+                    session_id,
+                    topic,
+                    status,
+                    total_rounds,
+                    current_round,
+                    participants_json,
+                    summary,
+                    start_time,
+                    end_time,
+                ) = row
+
                 # Parse participants from JSON
                 try:
                     participants_data = json.loads(participants_json or "[]")
@@ -280,20 +342,24 @@ class DebateHistoryTracker:
                         DebateParticipantView(
                             name=p["name"],
                             turn_order=p.get("turn_order", 0),
-                            color=p.get("color", "#FFFFFF")
-                        ) for p in participants_data
+                            color=p.get("color", "#FFFFFF"),
+                        )
+                        for p in participants_data
                     ]
                 except json.JSONDecodeError:
                     participants = []
-                
+
                 # Get all turns for this session
-                cursor.execute("""
+                cursor.execute(
+                    """
                     SELECT participant_name, content, round_number, turn_in_round, timestamp
-                    FROM debate_turns 
+                    FROM debate_turns
                     WHERE session_id = ?
                     ORDER BY round_number, turn_in_round
-                """, (complete_event.session_id,))
-                
+                """,  # noqa: E501
+                    (complete_event.session_id,),
+                )
+
                 turns_rows = cursor.fetchall()
                 turns = [
                     DebateTurnView(
@@ -302,10 +368,14 @@ class DebateHistoryTracker:
                         round_number=row[2],
                         turn_in_round=row[3],
                         timestamp=row[4],
-                        color=next((p.color for p in participants if p.name == row[0]), "#FFFFFF")
-                    ) for row in turns_rows
+                        color=next(
+                            (p.color for p in participants if p.name == row[0]),
+                            "#FFFFFF",
+                        ),
+                    )
+                    for row in turns_rows
                 ]
-                
+
                 # Create history view
                 debate_history_view = DebateHistoryView(
                     session_id=session_id,
@@ -315,40 +385,55 @@ class DebateHistoryTracker:
                     total_rounds=total_rounds,
                     current_round=current_round,
                     status=status,
-                    created_at=datetime.fromisoformat(start_time) if start_time else datetime.now(),
-                    end_time=datetime.fromisoformat(end_time) if end_time else None
+                    created_at=datetime.fromisoformat(start_time)
+                    if start_time
+                    else datetime.now(),
+                    end_time=datetime.fromisoformat(end_time) if end_time else None,
                 )
-                
+
                 if summary:
                     debate_history_view.summary = summary
-                
+
                 return debate_history_view
-        
+
         # Run database operation in thread pool to avoid blocking the event loop
         return await loop.run_in_executor(None, db_operation)
 
     async def get_history(self, session_id: str) -> Optional[DebateHistoryView]:
         """Get the history for a specific debate session."""
         loop = asyncio.get_event_loop()
-        
+
         def db_operation():
             with self._db_lock:  # Use threading lock for database operations
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    
+
                     # Get debate session
-                    cursor.execute("""
-                        SELECT session_id, topic, status, total_rounds, current_round, 
+                    cursor.execute(
+                        """
+                        SELECT session_id, topic, status, total_rounds, current_round,
                                participants, summary, start_time, end_time
                         FROM debate_sessions WHERE session_id = ?
-                    """, (session_id,))
-                    
+                    """,
+                        (session_id,),
+                    )
+
                     row = cursor.fetchone()
                     if not row:
                         return None
-                    
-                    session_id_val, topic, status, total_rounds, current_round, participants_json, summary, start_time, end_time = row
-                    
+
+                    (
+                        session_id_val,
+                        topic,
+                        status,
+                        total_rounds,
+                        current_round,
+                        participants_json,
+                        summary,
+                        start_time,
+                        end_time,
+                    ) = row
+
                     # Parse participants from JSON
                     try:
                         participants_data = json.loads(participants_json or "[]")
@@ -356,20 +441,24 @@ class DebateHistoryTracker:
                             DebateParticipantView(
                                 name=p["name"],
                                 turn_order=p.get("turn_order", 0),
-                                color=p.get("color", "#FFFFFF")
-                            ) for p in participants_data
+                                color=p.get("color", "#FFFFFF"),
+                            )
+                            for p in participants_data
                         ]
                     except json.JSONDecodeError:
                         participants = []
-                    
+
                     # Get all turns for this session
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         SELECT participant_name, content, round_number, turn_in_round, timestamp
-                        FROM debate_turns 
+                        FROM debate_turns
                         WHERE session_id = ?
                         ORDER BY round_number, turn_in_round
-                    """, (session_id,))
-                    
+                    """,  # noqa: E501
+                        (session_id,),
+                    )
+
                     turns_rows = cursor.fetchall()
                     turns = [
                         DebateTurnView(
@@ -378,10 +467,14 @@ class DebateHistoryTracker:
                             round_number=row[2],
                             turn_in_round=row[3],
                             timestamp=row[4],
-                            color=next((p.color for p in participants if p.name == row[0]), "#FFFFFF")
-                        ) for row in turns_rows
+                            color=next(
+                                (p.color for p in participants if p.name == row[0]),
+                                "#FFFFFF",
+                            ),
+                        )
+                        for row in turns_rows
                     ]
-                    
+
                     # Create history view
                     debate_history_view = DebateHistoryView(
                         session_id=session_id_val,
@@ -391,41 +484,53 @@ class DebateHistoryTracker:
                         total_rounds=total_rounds,
                         current_round=current_round,
                         status=status,
-                        created_at=datetime.fromisoformat(start_time) if start_time else datetime.now(),
-                        end_time=datetime.fromisoformat(end_time) if end_time else None
+                        created_at=datetime.fromisoformat(start_time)
+                        if start_time
+                        else datetime.now(),
+                        end_time=datetime.fromisoformat(end_time) if end_time else None,
                     )
-                    
+
                     if summary:
                         debate_history_view.summary = summary
-                    
+
                     return debate_history_view
-        
+
         # Run database operation in thread pool to avoid blocking the event loop
         return await loop.run_in_executor(None, db_operation)
 
-    async def get_all_histories(self) -> List[DebateHistoryView]:
+    async def get_all_histories(self) -> list[DebateHistoryView]:
         """Get all tracked debate histories."""
         loop = asyncio.get_event_loop()
-        
+
         def db_operation():
             with self._db_lock:  # Use threading lock for database operations
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    
+
                     # Get all debate sessions
                     cursor.execute("""
-                        SELECT session_id, topic, status, total_rounds, current_round, 
+                        SELECT session_id, topic, status, total_rounds, current_round,
                                participants, summary, start_time, end_time
                         FROM debate_sessions
                         ORDER BY start_time DESC
                     """)
-                    
+
                     rows = cursor.fetchall()
-                    
+
                     histories = []
                     for row in rows:
-                        session_id, topic, status, total_rounds, current_round, participants_json, summary, start_time, end_time = row
-                        
+                        (
+                            session_id,
+                            topic,
+                            status,
+                            total_rounds,
+                            current_round,
+                            participants_json,
+                            summary,
+                            start_time,
+                            end_time,
+                        ) = row
+
                         # Parse participants from JSON
                         try:
                             participants_data = json.loads(participants_json or "[]")
@@ -433,20 +538,24 @@ class DebateHistoryTracker:
                                 DebateParticipantView(
                                     name=p["name"],
                                     turn_order=p.get("turn_order", 0),
-                                    color=p.get("color", "#FFFFFF")
-                                ) for p in participants_data
+                                    color=p.get("color", "#FFFFFF"),
+                                )
+                                for p in participants_data
                             ]
                         except json.JSONDecodeError:
                             participants = []
-                        
+
                         # Get all turns for this session
-                        cursor.execute("""
+                        cursor.execute(
+                            """
                             SELECT participant_name, content, round_number, turn_in_round, timestamp
-                            FROM debate_turns 
+                            FROM debate_turns
                             WHERE session_id = ?
                             ORDER BY round_number, turn_in_round
-                        """, (session_id,))
-                        
+                        """,  # noqa: E501
+                            (session_id,),
+                        )
+
                         turns_rows = cursor.fetchall()
                         turns = [
                             DebateTurnView(
@@ -455,10 +564,14 @@ class DebateHistoryTracker:
                                 round_number=row[2],
                                 turn_in_round=row[3],
                                 timestamp=row[4],
-                                color=next((p.color for p in participants if p.name == row[0]), "#FFFFFF")
-                            ) for row in turns_rows
+                                color=next(
+                                    (p.color for p in participants if p.name == row[0]),
+                                    "#FFFFFF",
+                                ),
+                            )
+                            for row in turns_rows
                         ]
-                        
+
                         # Create history view
                         debate_history_view = DebateHistoryView(
                             session_id=session_id,
@@ -468,39 +581,48 @@ class DebateHistoryTracker:
                             total_rounds=total_rounds,
                             current_round=current_round,
                             status=status,
-                            created_at=datetime.fromisoformat(start_time) if start_time else datetime.now(),
-                            end_time=datetime.fromisoformat(end_time) if end_time else None
+                            created_at=datetime.fromisoformat(start_time)
+                            if start_time
+                            else datetime.now(),
+                            end_time=datetime.fromisoformat(end_time)
+                            if end_time
+                            else None,
                         )
-                        
+
                         if summary:
                             debate_history_view.summary = summary
-                        
+
                         histories.append(debate_history_view)
-                    
+
                     return histories
-        
+
         # Run database operation in thread pool to avoid blocking the event loop
         return await loop.run_in_executor(None, db_operation)
 
     async def clear_history(self, session_id: str) -> bool:
         """Clear history for a specific debate session."""
         loop = asyncio.get_event_loop()
-        
+
         def db_operation():
             with self._db_lock:  # Use threading lock for database operations
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
-                    
+
                     # Delete turns first (due to foreign key constraint)
-                    cursor.execute("DELETE FROM debate_turns WHERE session_id = ?", (session_id,))
-                    
+                    cursor.execute(
+                        "DELETE FROM debate_turns WHERE session_id = ?", (session_id,)
+                    )
+
                     # Delete session
-                    cursor.execute("DELETE FROM debate_sessions WHERE session_id = ?", (session_id,))
-                    
+                    cursor.execute(
+                        "DELETE FROM debate_sessions WHERE session_id = ?",
+                        (session_id,),
+                    )
+
                     conn.commit()
-                    
+
                     # Return True if any rows were affected
                     return cursor.rowcount > 0
-        
+
         # Run database operation in thread pool to avoid blocking the event loop
         return await loop.run_in_executor(None, db_operation)

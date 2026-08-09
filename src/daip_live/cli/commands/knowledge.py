@@ -5,30 +5,30 @@
 
 import json
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Optional
+
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
+from ...core.models import KnowledgeBaseConfig, ProviderConfig
+from ...knowledge.manager import KnowledgeManager
+from ...model_provider.provider import LiteLLMProvider
+from ...persistence.database import DatabaseManager
 from ..utils.error_handler import ErrorHandler
 from ..utils.performance_monitor import PerformanceMonitor
-from ...knowledge.manager import KnowledgeManager
-from ...persistence.database import DatabaseManager
-from ...model_provider.provider import LiteLLMProvider
-from ...core.models import KnowledgeBaseConfig, ProviderConfig
 
 
 def _execute_default_behavior(
-    query: Optional[str] = None,
-    sync: bool = False,
-    search_opt: Optional[str] = None
+    query: Optional[str] = None, sync: bool = False, search_opt: Optional[str] = None
 ):
     """
     执行默认行为：当没有子命令时
     """
     import asyncio
+
     # 决定执行哪个操作
     if query is not None or search_opt is not None:
         # 执行搜索
@@ -41,6 +41,7 @@ def _execute_default_behavior(
         # 默认同步（没有参数或显式 sync=True）
         asyncio.run(_sync_knowledge_default())
 
+
 # Create the knowledge command app
 app = typer.Typer(
     name="knowledge",
@@ -48,32 +49,27 @@ app = typer.Typer(
     rich_markup_mode="rich",
 )
 
+
 # Define a default command that can be called explicitly
 @app.command("auto")
 def auto_cmd(
     query: Optional[str] = typer.Argument(
         None,
-        help="Search query. If provided, performs search. If not provided, syncs by default."
+        help="Search query. If provided, performs search. If not provided, syncs by default.",  # noqa: E501
     ),
     sync: bool = typer.Option(
         None,
         "--sync/--no-sync",
-        help="Force sync operation (mutually exclusive with search)"
+        help="Force sync operation (mutually exclusive with search)",
     ),
     search_opt: Optional[str] = typer.Option(
-        None,
-        "--search", "-s",
-        help="Search query (alternative to positional argument)"
-    )
+        None, "--search", "-s", help="Search query (alternative to positional argument)"
+    ),
 ):
     """
     Default behavior for knowledge command (sync if no query, search if query)
     """
-    _execute_default_behavior(
-        query=query,
-        sync=sync is True,
-        search_opt=search_opt
-    )
+    _execute_default_behavior(query=query, sync=sync is True, search_opt=search_opt)
 
 
 # Create an alias command for the default behavior
@@ -81,27 +77,22 @@ def auto_cmd(
 def default_cmd(
     query: Optional[str] = typer.Argument(
         None,
-        help="Search query. If provided, performs search. If not provided, syncs by default."
+        help="Search query. If provided, performs search. If not provided, syncs by default.",  # noqa: E501
     ),
     sync: bool = typer.Option(
         None,
         "--sync/--no-sync",
-        help="Force sync operation (mutually exclusive with search)"
+        help="Force sync operation (mutually exclusive with search)",
     ),
     search_opt: Optional[str] = typer.Option(
-        None,
-        "--search", "-s",
-        help="Search query (alternative to positional argument)"
-    )
+        None, "--search", "-s", help="Search query (alternative to positional argument)"
+    ),
 ):
     """
     Alias for auto command - provides the same default behavior
     """
-    _execute_default_behavior(
-        query=query,
-        sync=sync is True,
-        search_opt=search_opt
-    )
+    _execute_default_behavior(query=query, sync=sync is True, search_opt=search_opt)
+
 
 # Create instances
 console = Console()
@@ -111,22 +102,26 @@ error_handler = ErrorHandler()
 async def _sync_knowledge_default():
     """默认同步函数"""
     perf_monitor = PerformanceMonitor()
-    async with perf_monitor.measure_command("knowledge_sync") as metrics:
+    async with perf_monitor.measure_command("knowledge_sync"):
         console.print("[bold blue]📚 Synchronizing knowledge base...[/bold blue]")
 
         try:
             # Load config from YAML or use defaults
             import yaml
+
             config_path = Path("config.yaml")
             if config_path.exists():
-                with open(config_path, 'r', encoding='utf-8') as f:
+                with open(config_path, encoding="utf-8") as f:
                     config_data = yaml.safe_load(f)
 
-                knowledge_dir = config_data.get('knowledge_base', {}).get('directory', 'docs/')
-                embedding_model = config_data.get('llm_provider', {}).get('embedding_model', 'mock-embedding')
+                knowledge_dir = config_data.get("knowledge_base", {}).get(
+                    "directory", "docs/"
+                )
+                config_data.get("llm_provider", {}).get(
+                    "embedding_model", "mock-embedding"
+                )
             else:
-                knowledge_dir = 'docs/'
-                embedding_model = 'mock-embedding'
+                knowledge_dir = "docs/"
 
             # Create configuration
             knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
@@ -137,23 +132,25 @@ async def _sync_knowledge_default():
             # Use mock provider to avoid embedding issues during CLI sync
             try:
                 from ...model_provider.mock_provider import MockModelProvider
+
                 model_provider = MockModelProvider()
             except ImportError:
                 # Fallback to LiteLLMProvider with mock configuration
                 provider_config = ProviderConfig(
-                    model="mock-embedding",
-                    provider="mock"
+                    model="mock-embedding", provider="mock"
                 )
                 model_provider = LiteLLMProvider(provider_config)
 
             knowledge_manager = KnowledgeManager(
                 db_manager=db_manager,
                 model_provider=model_provider,
-                config=knowledge_config
+                config=knowledge_config,
             )
 
             # Actual sync (without dry_run or verbose for default)
-            console.print(f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]")
+            console.print(
+                f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]"
+            )
 
             # Run the actual sync
             sync_result = await knowledge_manager.sync_knowledge_base()
@@ -169,24 +166,25 @@ async def _sync_knowledge_default():
 async def _search_knowledge_default(query: str):
     """默认搜索函数"""
     perf_monitor = PerformanceMonitor()
-    async with perf_monitor.measure_command("knowledge_search") as metrics:
-        console.print(f"[bold blue]🔍 Searching knowledge base for: {query}[/bold blue]")
+    async with perf_monitor.measure_command("knowledge_search"):
+        console.print(
+            f"[bold blue]🔍 Searching knowledge base for: {query}[/bold blue]"
+        )
 
         try:
             # Create default configuration
             knowledge_config = KnowledgeBaseConfig(directory="knowledge")
             provider_config = ProviderConfig(
-                model="text-embedding-3-small",
-                provider="openai"
+                model="text-embedding-3-small", provider="openai"
             )
 
             # Initialize dependencies
             db_manager = DatabaseManager()
             model_provider = LiteLLMProvider(provider_config)
-            knowledge_manager = KnowledgeManager(
+            KnowledgeManager(
                 db_manager=db_manager,
                 model_provider=model_provider,
-                config=knowledge_config
+                config=knowledge_config,
             )
 
             # Mock search results
@@ -203,78 +201,95 @@ async def _search_knowledge_default(query: str):
 @app.command()
 def sync(
     dry_run: bool = typer.Option(
-        False, "--dry-run", "-d", help="Show what would be synced without making changes"
+        False,
+        "--dry-run",
+        "-d",
+        help="Show what would be synced without making changes",
     ),
     json_output: bool = typer.Option(
         False, "--json", "-j", help="Output in JSON format"
     ),
     verbose: bool = typer.Option(
         False, "--verbose", "-v", help="Show detailed sync information"
-    )
+    ),
 ):
     """Synchronize the knowledge base with document files"""
 
     @error_handler.handle_command_errors(command_name="knowledge sync")
     async def _sync_knowledge():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("knowledge_sync") as metrics:
+        async with perf_monitor.measure_command("knowledge_sync"):
             if not json_output:
-                console.print("[bold blue]📚 Synchronizing knowledge base...[/bold blue]")
+                console.print(
+                    "[bold blue]📚 Synchronizing knowledge base...[/bold blue]"
+                )
 
             try:
                 # Load config from YAML or use defaults
                 import yaml
+
                 config_path = Path("config.yaml")
                 if config_path.exists():
-                    with open(config_path, 'r', encoding='utf-8') as f:
+                    with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    knowledge_dir = config_data.get('knowledge_base', {}).get('directory', 'docs/')
-                    embedding_model = config_data.get('llm_provider', {}).get('embedding_model', 'mock-embedding')
+                    knowledge_dir = config_data.get("knowledge_base", {}).get(
+                        "directory", "docs/"
+                    )
+                    config_data.get("llm_provider", {}).get(
+                        "embedding_model", "mock-embedding"
+                    )
                 else:
-                    knowledge_dir = 'docs/'
-                    embedding_model = 'mock-embedding'
+                    knowledge_dir = "docs/"
 
                 # Create configuration
                 from daip_live.core.models import KnowledgeBaseConfig
+
                 knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
 
                 # Initialize database manager
                 from daip_live.persistence.database import DatabaseManager
+
                 db_manager = DatabaseManager(":memory:")  # Using in-memory for CLI
 
                 # Use mock provider to avoid embedding issues during CLI sync
                 try:
                     from daip_live.model_provider.mock_provider import MockModelProvider
+
                     model_provider = MockModelProvider()
                 except ImportError:
                     # Fallback to LiteLLMProvider with mock configuration
-                    from daip_live.model_provider.provider import LiteLLMProvider
                     from daip_live.core.models import ProviderConfig
+                    from daip_live.model_provider.provider import LiteLLMProvider
+
                     provider_config = ProviderConfig(
                         model="mock-embedding",
                         provider="mock",
-                        embedding_model="mock-embedding"
+                        embedding_model="mock-embedding",
                     )
                     model_provider = LiteLLMProvider(provider_config)
 
                 knowledge_manager = KnowledgeManager(
                     db_manager=db_manager,
                     model_provider=model_provider,
-                    config=knowledge_config
+                    config=knowledge_config,
                 )
 
                 if dry_run:
                     # Dry run mode - only show what would change
                     if not json_output:
-                        console.print("[yellow]🔍 DRY RUN MODE - No changes will be made[/yellow]")
+                        console.print(
+                            "[yellow]🔍 DRY RUN MODE - No changes will be made[/yellow]"
+                        )
                         with Progress(
                             SpinnerColumn(),
                             TextColumn("[progress.description]{task.description}"),
                             console=console,
-                            transient=True
+                            transient=True,
                         ) as progress:
-                            task = progress.add_task("Scanning for changes...", total=None)
+                            task = progress.add_task(
+                                "Scanning for changes...", total=None
+                            )
 
                             # Get changes without making actual changes
                             changes = knowledge_manager._scan_and_detect_changes()
@@ -284,38 +299,52 @@ def sync(
                         for f in changes.added[:5]:  # Show first 5
                             console.print(f"  📄 [green]+ {f}[/green]")
                         if len(changes.added) > 5:
-                            console.print(f"  ... and {len(changes.added)-5} more")
+                            console.print(f"  ... and {len(changes.added) - 5} more")
 
                         for f in changes.updated[:5]:  # Show first 5
                             file_path, _ = f
                             console.print(f"  🔄 [yellow]~ {file_path}[/yellow]")
                         if len(changes.updated) > 5:
-                            console.print(f"  ... and {len(changes.updated)-5} more")
+                            console.print(f"  ... and {len(changes.updated) - 5} more")
 
                         for f in changes.deleted[:5]:  # Show first 5
                             console.print(f"  🗑️  [red]- {f.file_path}[/red]")
                         if len(changes.deleted) > 5:
-                            console.print(f"  ... and {len(changes.deleted)-5} more")
+                            console.print(f"  ... and {len(changes.deleted) - 5} more")
 
                     # JSON output for dry run
                     dry_run_data = {
                         "dry_run": True,
                         "changes": {
-                            "added": changes.added if hasattr(changes, 'added') else [],
-                            "updated": [f[0] for f in changes.updated] if hasattr(changes, 'updated') else [],
-                            "deleted": [f.file_path for f in changes.deleted] if hasattr(changes, 'deleted') else [],
-                            "unchanged": len(changes.unchanged) if hasattr(changes, 'unchanged') else 0
+                            "added": changes.added if hasattr(changes, "added") else [],
+                            "updated": [f[0] for f in changes.updated]
+                            if hasattr(changes, "updated")
+                            else [],
+                            "deleted": [f.file_path for f in changes.deleted]
+                            if hasattr(changes, "deleted")
+                            else [],
+                            "unchanged": len(changes.unchanged)
+                            if hasattr(changes, "unchanged")
+                            else 0,
                         },
                         "summary": {
-                            "total_changes": len(changes.added) + len(changes.updated) + len(changes.deleted) if hasattr(changes, 'added') and hasattr(changes, 'updated') and hasattr(changes, 'deleted') else 0
-                        }
+                            "total_changes": len(changes.added)
+                            + len(changes.updated)
+                            + len(changes.deleted)
+                            if hasattr(changes, "added")
+                            and hasattr(changes, "updated")
+                            and hasattr(changes, "deleted")
+                            else 0
+                        },
                     }
                     console.print(json.dumps(dry_run_data, indent=2))
                     return
 
                 # Actual sync
                 if not json_output and verbose:
-                    console.print(f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]")
+                    console.print(
+                        f"[dim]Scanning knowledge directory for changes: {knowledge_dir}[/dim]"  # noqa: E501
+                    )
 
                 # Run the actual sync
                 sync_result = await knowledge_manager.sync_knowledge_base()
@@ -325,7 +354,7 @@ def sync(
                     output_data = {
                         "sync_complete": True,
                         "summary": sync_result,
-                        "timestamp": "2025-11-13T11:45:00Z"
+                        "timestamp": "2025-11-13T11:45:00Z",
                     }
                     console.print(json.dumps(output_data, indent=2))
                 else:
@@ -334,21 +363,21 @@ def sync(
 
             except Exception as e:
                 if json_output:
-                    error_data = {
-                        "error": str(e),
-                        "error_type": type(e).__name__
-                    }
+                    error_data = {"error": str(e), "error_type": type(e).__name__}
                     console.print(json.dumps(error_data, indent=2))
                 else:
-                    console.print(f"[red]❌ Error syncing knowledge base: {str(e)}[/red]")
+                    console.print(
+                        f"[red]❌ Error syncing knowledge base: {str(e)}[/red]"
+                    )
                 raise
 
     # Run the async function
     import asyncio
+
     asyncio.run(_sync_knowledge())
 
 
-def _display_sync_summary(summary: Dict[str, int], verbose: bool = False):
+def _display_sync_summary(summary: dict[str, int], verbose: bool = False):
     """Display sync summary in formatted way"""
 
     total_changes = summary["added"] + summary["updated"] + summary["removed"]
@@ -356,7 +385,9 @@ def _display_sync_summary(summary: Dict[str, int], verbose: bool = False):
     if total_changes == 0:
         console.print("[green]✅ Knowledge base is up to date[/green]")
         if summary["unchanged"] > 0:
-            console.print(f"[dim]No changes needed. {summary['unchanged']} documents unchanged.[/dim]")
+            console.print(
+                f"[dim]No changes needed. {summary['unchanged']} documents unchanged.[/dim]"  # noqa: E501
+            )
     else:
         console.print("[green]✅ Knowledge base sync complete[/green]")
 
@@ -382,32 +413,33 @@ def _display_sync_summary(summary: Dict[str, int], verbose: bool = False):
 def status(
     json_output: bool = typer.Option(
         False, "--json", "-j", help="Output in JSON format"
-    )
+    ),
 ):
     """Show knowledge base status and statistics"""
 
     @error_handler.handle_command_errors(command_name="knowledge status")
     async def _show_status():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("knowledge_status") as metrics:
+        async with perf_monitor.measure_command("knowledge_status"):
             if not json_output:
-                console.print("[bold blue]📊 Getting knowledge base status...[/bold blue]")
+                console.print(
+                    "[bold blue]📊 Getting knowledge base status...[/bold blue]"
+                )
 
             try:
                 # Create default configuration
                 knowledge_config = KnowledgeBaseConfig(directory="knowledge")
                 provider_config = ProviderConfig(
-                    model="text-embedding-3-small",
-                    provider="openai"
+                    model="text-embedding-3-small", provider="openai"
                 )
 
                 # Initialize dependencies
                 db_manager = DatabaseManager()
                 model_provider = LiteLLMProvider(provider_config)
-                knowledge_manager = KnowledgeManager(
+                KnowledgeManager(
                     db_manager=db_manager,
                     model_provider=model_provider,
-                    config=knowledge_config
+                    config=knowledge_config,
                 )
 
                 # Mock status data
@@ -424,7 +456,7 @@ def status(
                             "indexed_documents": indexed_documents,
                             "pending_documents": pending_documents,
                             "total_size_mb": total_size_mb,
-                            "last_sync": None
+                            "last_sync": None,
                         }
                     }
                     console.print(json.dumps(status_data, indent=2))
@@ -435,21 +467,21 @@ def status(
                         total_documents=total_documents,
                         indexed_documents=indexed_documents,
                         pending_documents=pending_documents,
-                        total_size_mb=total_size_mb
+                        total_size_mb=total_size_mb,
                     )
 
             except Exception as e:
                 if json_output:
-                    error_data = {
-                        "error": str(e),
-                        "error_type": type(e).__name__
-                    }
+                    error_data = {"error": str(e), "error_type": type(e).__name__}
                     console.print(json.dumps(error_data, indent=2))
                 else:
-                    console.print(f"[red]❌ Error getting knowledge status: {str(e)}[/red]")
+                    console.print(
+                        f"[red]❌ Error getting knowledge status: {str(e)}[/red]"
+                    )
                 raise
 
     import asyncio
+
     asyncio.run(_show_status())
 
 
@@ -458,7 +490,7 @@ def _display_knowledge_status(
     total_documents: int,
     indexed_documents: int,
     pending_documents: int,
-    total_size_mb: float
+    total_size_mb: float,
 ):
     """Display knowledge base status in formatted way"""
 
@@ -468,7 +500,7 @@ def _display_knowledge_status(
         f"[bold]Total Documents:[/bold] {total_documents}",
         f"[bold]Indexed Documents:[/bold] {indexed_documents}",
         f"[bold]Pending Documents:[/bold] {pending_documents}",
-        f"[bold]Total Size:[/bold] {total_size_mb:.2f} MB"
+        f"[bold]Total Size:[/bold] {total_size_mb:.2f} MB",
     ]
 
     content = "\n".join(content_lines)
@@ -476,7 +508,7 @@ def _display_knowledge_status(
     panel = Panel(
         content,
         title="[bold green]Knowledge Base Status[/bold green]",
-        border_style="green"
+        border_style="green",
     )
 
     console.print(panel)
@@ -490,32 +522,33 @@ def search(
     ),
     json_output: bool = typer.Option(
         False, "--json", "-j", help="Output in JSON format"
-    )
+    ),
 ):
     """Search the knowledge base for documents matching the query"""
 
     @error_handler.handle_command_errors(command_name="knowledge search")
     async def _search_knowledge():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("knowledge_search") as metrics:
+        async with perf_monitor.measure_command("knowledge_search"):
             if not json_output:
-                console.print(f"[bold blue]🔍 Searching knowledge base for: {query}[/bold blue]")
+                console.print(
+                    f"[bold blue]🔍 Searching knowledge base for: {query}[/bold blue]"
+                )
 
             try:
                 # Create default configuration
                 knowledge_config = KnowledgeBaseConfig(directory="knowledge")
                 provider_config = ProviderConfig(
-                    model="text-embedding-3-small",
-                    provider="openai"
+                    model="text-embedding-3-small", provider="openai"
                 )
 
                 # Initialize dependencies
                 db_manager = DatabaseManager()
                 model_provider = LiteLLMProvider(provider_config)
-                knowledge_manager = KnowledgeManager(
+                KnowledgeManager(
                     db_manager=db_manager,
                     model_provider=model_provider,
-                    config=knowledge_config
+                    config=knowledge_config,
                 )
 
                 # Mock search results
@@ -526,7 +559,7 @@ def search(
                         "query": query,
                         "results": search_results,
                         "total_found": len(search_results),
-                        "limit": limit
+                        "limit": limit,
                     }
                     console.print(json.dumps(search_data, indent=2))
                 else:
@@ -535,20 +568,20 @@ def search(
 
             except Exception as e:
                 if json_output:
-                    error_data = {
-                        "error": str(e),
-                        "error_type": type(e).__name__
-                    }
+                    error_data = {"error": str(e), "error_type": type(e).__name__}
                     console.print(json.dumps(error_data, indent=2))
                 else:
-                    console.print(f"[red]❌ Error searching knowledge base: {str(e)}[/red]")
+                    console.print(
+                        f"[red]❌ Error searching knowledge base: {str(e)}[/red]"
+                    )
                 raise
 
     import asyncio
+
     asyncio.run(_search_knowledge())
 
 
-def _display_search_results(query: str, results: List[Dict], limit: int):
+def _display_search_results(query: str, results: list[dict], limit: int):
     """Display search results in formatted table"""
 
     if not results:

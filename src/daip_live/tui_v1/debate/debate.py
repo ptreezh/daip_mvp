@@ -4,15 +4,14 @@ Core Debate Management for newP6 TUI Debate System
 Handles debate lifecycle, participants, and rounds.
 """
 
-from typing import List, Dict, Any, Optional
-from datetime import datetime
 import logging
 import uuid
+from datetime import datetime
+from typing import Any, Optional
 
+from .argument import Argument
 from .participant import DebateParticipant
 from .round import DebateRound
-from .argument import Argument
-from .roles import RoleType
 
 logger = logging.getLogger(__name__)
 
@@ -26,22 +25,22 @@ class Debate:
         description: str = "",
         max_participants: int = 4,
         max_rounds: int = 3,
-        debate_id: Optional[str] = None
+        debate_id: Optional[str] = None,
     ):
         self.id = debate_id or str(uuid.uuid4())
         self.topic = topic
         self.description = description
         self.max_participants = max_participants
         self.max_rounds = max_rounds
-        self.participants: List[DebateParticipant] = []
-        self.rounds: List[DebateRound] = []
+        self.participants: list[DebateParticipant] = []
+        self.rounds: list[DebateRound] = []
         self.status = "preparing"  # preparing, active, paused, completed, cancelled
         self.current_round = 0
         self.is_active = False
         self.created_at = datetime.now()
         self.started_at: Optional[datetime] = None
         self.ended_at: Optional[datetime] = None
-        self.metadata: Dict[str, Any] = {}
+        self.metadata: dict[str, Any] = {}
 
     def add_participant(self, participant: DebateParticipant) -> bool:
         """Add a participant to the debate"""
@@ -50,7 +49,9 @@ class Debate:
             return False
 
         if self.status != "preparing":
-            logger.warning(f"Cannot add participants to debate {self.id} in status {self.status}")
+            logger.warning(
+                f"Cannot add participants to debate {self.id} in status {self.status}"
+            )
             return False
 
         # Check for duplicate participant IDs
@@ -65,13 +66,17 @@ class Debate:
     def remove_participant(self, participant_id: str) -> bool:
         """Remove a participant from the debate"""
         if self.status != "preparing":
-            logger.warning(f"Cannot remove participants from debate {self.id} in status {self.status}")
+            logger.warning(
+                f"Cannot remove participants from debate {self.id} in status {self.status}"  # noqa: E501
+            )
             return False
 
         for i, participant in enumerate(self.participants):
             if participant.id == participant_id:
                 del self.participants[i]
-                logger.info(f"Removed participant {participant_id} from debate {self.id}")
+                logger.info(
+                    f"Removed participant {participant_id} from debate {self.id}"
+                )
                 return True
 
         return False
@@ -93,14 +98,14 @@ class Debate:
 
         # Create first round
         first_round = DebateRound(
-            round_number=1,
-            topic=self.topic,
-            max_arguments_per_participant=1
+            round_number=1, topic=self.topic, max_arguments_per_participant=1
         )
         first_round.start()
         self.rounds.append(first_round)
 
-        logger.info(f"Started debate {self.id} with {len(self.participants)} participants")
+        logger.info(
+            f"Started debate {self.id} with {len(self.participants)} participants"
+        )
         return True
 
     def end(self) -> None:
@@ -154,7 +159,9 @@ class Debate:
     def start_next_round(self) -> bool:
         """Start the next round"""
         if not self.is_active or self.status != "active":
-            logger.warning(f"Cannot start next round for debate {self.id} - debate not active")
+            logger.warning(
+                f"Cannot start next round for debate {self.id} - debate not active"
+            )
             return False
 
         if self.current_round >= self.max_rounds:
@@ -172,7 +179,7 @@ class Debate:
         next_round = DebateRound(
             round_number=self.current_round,
             topic=self.topic,
-            max_arguments_per_participant=2
+            max_arguments_per_participant=2,
         )
         next_round.start()
         self.rounds.append(next_round)
@@ -193,16 +200,20 @@ class Debate:
                 return participant
         return None
 
-    def get_all_arguments(self) -> List[Argument]:
+    def get_all_arguments(self) -> list[Argument]:
         """Get all arguments from all rounds"""
         all_arguments = []
         for round in self.rounds:
             all_arguments.extend(round.arguments)
         return all_arguments
 
-    def get_arguments_by_participant(self, participant_id: str) -> List[Argument]:
+    def get_arguments_by_participant(self, participant_id: str) -> list[Argument]:
         """Get all arguments from a specific participant"""
-        return [arg for arg in self.get_all_arguments() if arg.participant_id == participant_id]
+        return [
+            arg
+            for arg in self.get_all_arguments()
+            if arg.participant_id == participant_id
+        ]
 
     def get_summary(self) -> str:
         """Get debate summary"""
@@ -221,7 +232,7 @@ class Debate:
             summary += "Rounds completed:\n"
             for round in self.rounds:
                 status_emoji = "✓" if round.status == "completed" else "○"
-                summary += f"  {status_emoji} Round {round.round_number}: {len(round.arguments)} arguments\n"
+                summary += f"  {status_emoji} Round {round.round_number}: {len(round.arguments)} arguments\n"  # noqa: E501
 
         if self.started_at:
             summary += f"Started: {self.started_at.strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -234,7 +245,7 @@ class Debate:
 
         return summary
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get comprehensive debate statistics"""
         stats = {
             "id": self.id,
@@ -248,15 +259,19 @@ class Debate:
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "ended_at": self.ended_at.isoformat() if self.ended_at else None
+            "ended_at": self.ended_at.isoformat() if self.ended_at else None,
         }
 
         # Duration statistics
         if self.started_at:
             if self.ended_at:
-                stats["duration_seconds"] = (self.ended_at - self.started_at).total_seconds()
+                stats["duration_seconds"] = (
+                    self.ended_at - self.started_at
+                ).total_seconds()
             else:
-                stats["duration_seconds"] = (datetime.now() - self.started_at).total_seconds()
+                stats["duration_seconds"] = (
+                    datetime.now() - self.started_at
+                ).total_seconds()
 
         # Argument statistics
         all_arguments = self.get_all_arguments()
@@ -290,7 +305,7 @@ class Debate:
 
         return stats
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert debate to dictionary"""
         return {
             "id": self.id,
@@ -307,18 +322,18 @@ class Debate:
             "started_at": self.started_at.isoformat() if self.started_at else None,
             "ended_at": self.ended_at.isoformat() if self.ended_at else None,
             "metadata": self.metadata,
-            "statistics": self.get_statistics()
+            "statistics": self.get_statistics(),
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Debate":
+    def from_dict(cls, data: dict[str, Any]) -> "Debate":
         """Create debate from dictionary"""
         debate = cls(
             topic=data["topic"],
             description=data.get("description", ""),
             max_participants=data.get("max_participants", 4),
             max_rounds=data.get("max_rounds", 3),
-            debate_id=data.get("id")
+            debate_id=data.get("id"),
         )
 
         if "status" in data:
@@ -344,7 +359,9 @@ class Debate:
 
         # Restore participants
         if "participants" in data:
-            debate.participants = [DebateParticipant.from_dict(p_data) for p_data in data["participants"]]
+            debate.participants = [
+                DebateParticipant.from_dict(p_data) for p_data in data["participants"]
+            ]
 
         # Restore rounds
         if "rounds" in data:
@@ -358,5 +375,7 @@ class Debate:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"Debate(id={self.id[:8]}..., topic='{self.topic}', status='{self.status}', "
-                f"participants={len(self.participants)}, rounds={self.current_round}/{self.max_rounds})")
+        return (
+            f"Debate(id={self.id[:8]}..., topic='{self.topic}', status='{self.status}', "  # noqa: E501
+            f"participants={len(self.participants)}, rounds={self.current_round}/{self.max_rounds})"  # noqa: E501
+        )

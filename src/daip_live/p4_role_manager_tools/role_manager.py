@@ -1,7 +1,7 @@
 import glob
 import logging
 import os
-from typing import Dict, Optional
+from typing import Optional
 
 import yaml
 from pydantic import ValidationError
@@ -19,13 +19,16 @@ class RoleManager:
         if roles_dir_path is None:
             try:
                 from daip_live.config_bridge import config_bridge
+
                 config_data = config_bridge.get_config_data()
-                roles_dir_path = config_data.get('role_manager', {}).get('roles_dir', 'roles')
+                roles_dir_path = config_data.get("role_manager", {}).get(
+                    "roles_dir", "roles"
+                )
             except Exception:
                 # Fallback to default if config is not available
-                roles_dir_path = 'roles'
+                roles_dir_path = "roles"
 
-        self._roles: Dict[str, Role] = {}
+        self._roles: dict[str, Role] = {}
         self._roles_dir_path = self._resolve_roles_path(roles_dir_path)
         self._load_roles_from_directory(self._roles_dir_path)
 
@@ -37,6 +40,7 @@ class RoleManager:
         # First try our advanced path resolver utility
         try:
             from daip_live.utils.path_resolver import get_configured_roles_path
+
             return str(get_configured_roles_path(roles_dir_path))
         except ImportError:
             # If the utility module is not available, fall back to the original logic
@@ -54,8 +58,8 @@ class RoleManager:
         # Strategy 3: Check relative to project root
         possible_roots = [
             Path(__file__).parent.parent.parent.parent,  # Project root (4 levels up)
-            Path(__file__).parent.parent.parent,         # src/daip_live (3 levels up)
-            Path.cwd(),                                  # Current working directory
+            Path(__file__).parent.parent.parent,  # src/daip_live (3 levels up)
+            Path.cwd(),  # Current working directory
         ]
 
         for root_path in possible_roots:
@@ -63,7 +67,7 @@ class RoleManager:
                 abs_roles_path = root_path / roles_dir_path
                 if abs_roles_path.exists() and abs_roles_path.is_dir():
                     return str(abs_roles_path.resolve())
-            except:
+            except Exception:
                 continue
 
         # Strategy 4: Search for roles directory in common locations
@@ -88,10 +92,12 @@ class RoleManager:
         for extension in ["*.yaml", "*.yml"]:
             for file_path in glob.glob(os.path.join(dir_path, extension)):
                 try:
-                    with open(file_path, encoding='utf-8') as f:
+                    with open(file_path, encoding="utf-8") as f:
                         role_data = yaml.safe_load(f)
                         if not isinstance(role_data, dict):
-                            log.warning(f"Skipping {file_path}: content is not a dictionary.")
+                            log.warning(
+                                f"Skipping {file_path}: content is not a dictionary."
+                            )
                             continue
 
                         role_name = os.path.splitext(os.path.basename(file_path))[0]
@@ -114,10 +120,12 @@ class RoleManager:
             # 尝试重新加载角色
             try:
                 # 确保使用绝对路径或相对于当前工作目录的路径
-                role_file_path = os.path.join(self._get_roles_dir_path(), f'{name}.yaml')
+                role_file_path = os.path.join(
+                    self._get_roles_dir_path(), f"{name}.yaml"
+                )
                 if os.path.exists(role_file_path):
                     # 从文件加载缺失的角色
-                    with open(role_file_path, encoding='utf-8') as f:
+                    with open(role_file_path, encoding="utf-8") as f:
                         role_data = yaml.safe_load(f)
                         if isinstance(role_data, dict):
                             role_data["name"] = name
@@ -128,11 +136,12 @@ class RoleManager:
                 log.warning(f"Failed to load role {name} from file: {e}")
 
             # 如果文件不存在或加载失败，创建一个默认角色
-            from daip_live.core.models import Role
-            log.warning(f"Role '{name}' not found, creating a temporary role with default configuration.")
+            log.warning(
+                f"Role '{name}' not found, creating a temporary role with default configuration."  # noqa: E501
+            )
             default_role = Role(
                 name=name,
-                persona=f"Default persona for {name}. You are an AI assistant playing this role.",
+                persona=f"Default persona for {name}. You are an AI assistant playing this role.",  # noqa: E501
                 tools=[],
                 model_configs=[
                     {
@@ -143,9 +152,9 @@ class RoleManager:
                         "top_p": 0.9,
                         "frequency_penalty": 0.1,
                         "presence_penalty": 0.2,
-                        "is_primary": True
+                        "is_primary": True,
                     }
-                ]
+                ],
             )
             self._roles[name] = default_role
             return default_role
@@ -158,7 +167,6 @@ class RoleManager:
             return self._roles_dir_path
         else:
             # 如果是相对路径，相对于项目根目录
-            import os
             # 尝试找到项目根目录（包含roles目录的那个目录）
             current_dir = os.getcwd()
             roles_path = os.path.join(current_dir, self._roles_dir_path)
@@ -168,7 +176,9 @@ class RoleManager:
                 return roles_path
 
             # 否则尝试其他可能的位置
-            root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            root_dir = os.path.dirname(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            )
             fallback_path = os.path.join(root_dir, self._roles_dir_path)
             if os.path.exists(fallback_path):
                 return fallback_path

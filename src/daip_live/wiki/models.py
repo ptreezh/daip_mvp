@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 
 def validate_tag(tag: str) -> str:
@@ -21,7 +21,7 @@ def validate_tag(tag: str) -> str:
         raise ValueError("Tag cannot be empty")
     # 移除有问题的特殊字符，但保留Unicode字符（包括中文）
     # 只移除可能导致文件系统问题的字符
-    clean_tag = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '', clean_tag)
+    clean_tag = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "", clean_tag)
     return clean_tag
 
 
@@ -38,8 +38,8 @@ class WikiPage:
     file_path: Path
     created_at: datetime
     modified_at: datetime
-    tags: List[str] = field(default_factory=list)
-    _content_history: List[Dict[str, Any]] = field(default_factory=list, init=False)
+    tags: list[str] = field(default_factory=list)
+    _content_history: list[dict[str, Any]] = field(default_factory=list, init=False)
 
     def __post_init__(self):
         """初始化后的验证和设置"""
@@ -51,7 +51,7 @@ class WikiPage:
         if not isinstance(self.file_path, Path):
             self.file_path = Path(self.file_path)
 
-        if self.file_path.suffix.lower() != '.md':
+        if self.file_path.suffix.lower() != ".md":
             raise ValueError("Wiki page must be a markdown file")
 
         # 确保tags是列表的副本（避免外部修改影响）
@@ -65,12 +65,16 @@ class WikiPage:
 
     def _record_content_change(self, change_type: str, content: str) -> None:
         """记录内容变更历史"""
-        self._content_history.append({
-            'timestamp': datetime.now(),
-            'change_type': change_type,
-            'content_length': len(content),
-            'content_preview': content[:100] + "..." if len(content) > 100 else content
-        })
+        self._content_history.append(
+            {
+                "timestamp": datetime.now(),
+                "change_type": change_type,
+                "content_length": len(content),
+                "content_preview": content[:100] + "..."
+                if len(content) > 100
+                else content,
+            }
+        )
 
     def update_content(self, content: str) -> None:
         """更新页面内容
@@ -150,17 +154,17 @@ class WikiPage:
         word_count = self.get_word_count()
         return max(1, round(word_count / words_per_minute))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
-            'title': self.title,
-            'content': self.content,
-            'file_path': str(self.file_path),
-            'created_at': self.created_at.isoformat(),
-            'modified_at': self.modified_at.isoformat(),
-            'tags': self.tags.copy(),
-            'word_count': self.get_word_count(),
-            'reading_time': self.get_reading_time()
+            "title": self.title,
+            "content": self.content,
+            "file_path": str(self.file_path),
+            "created_at": self.created_at.isoformat(),
+            "modified_at": self.modified_at.isoformat(),
+            "tags": self.tags.copy(),
+            "word_count": self.get_word_count(),
+            "reading_time": self.get_reading_time(),
         }
 
     def to_json(self) -> str:
@@ -168,19 +172,19 @@ class WikiPage:
         return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'WikiPage':
+    def from_dict(cls, data: dict[str, Any]) -> "WikiPage":
         """从字典创建WikiPage实例"""
         return cls(
-            title=data['title'],
-            content=data['content'],
-            file_path=Path(data['file_path']),
-            created_at=datetime.fromisoformat(data['created_at']),
-            modified_at=datetime.fromisoformat(data['modified_at']),
-            tags=data.get('tags', [])
+            title=data["title"],
+            content=data["content"],
+            file_path=Path(data["file_path"]),
+            created_at=datetime.fromisoformat(data["created_at"]),
+            modified_at=datetime.fromisoformat(data["modified_at"]),
+            tags=data.get("tags", []),
         )
 
     @classmethod
-    def from_json(cls, json_str: str) -> 'WikiPage':
+    def from_json(cls, json_str: str) -> "WikiPage":
         """从JSON字符串创建WikiPage实例"""
         data = json.loads(json_str)
         return cls.from_dict(data)
@@ -191,6 +195,8 @@ class WikiPage:
 
     def __repr__(self) -> str:
         """详细字符串表示"""
-        return (f"WikiPage(title='{self.title}', file_path='{self.file_path}', "
-                f"created_at='{self.created_at}', modified_at='{self.modified_at}', "
-                f"tags={self.tags})")
+        return (
+            f"WikiPage(title='{self.title}', file_path='{self.file_path}', "
+            f"created_at='{self.created_at}', modified_at='{self.modified_at}', "
+            f"tags={self.tags})"
+        )

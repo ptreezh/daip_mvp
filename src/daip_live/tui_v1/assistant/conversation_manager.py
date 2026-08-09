@@ -2,10 +2,10 @@
 Conversation Manager for Personal Assistant System
 """
 
-from typing import List, Dict, Any, Optional
-from datetime import datetime
 import uuid
-import json
+from datetime import datetime
+from typing import Optional
+
 
 class Message:
     def __init__(self, role: str, content: str, message_id: str = None):
@@ -19,15 +19,16 @@ class Message:
             "id": self.id,
             "role": self.role,
             "content": self.content,
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
         }
+
 
 class Conversation:
     def __init__(self, title: str, conversation_id: str = None, context: str = ""):
         self.id = conversation_id or str(uuid.uuid4())
         self.title = title
         self.context = context
-        self.messages: List[Message] = []
+        self.messages: list[Message] = []
         self.created_at = datetime.now()
         self.updated_at = self.created_at
 
@@ -44,12 +45,13 @@ class Conversation:
             "context": self.context,
             "messages": [msg.to_dict() for msg in self.messages],
             "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat()
+            "updated_at": self.updated_at.isoformat(),
         }
+
 
 class ConversationManager:
     def __init__(self):
-        self.conversations: Dict[str, Conversation] = {}
+        self.conversations: dict[str, Conversation] = {}
         self.current_conversation: Optional[str] = None
 
     def start_conversation(self, title: str, context: str = "") -> str:
@@ -58,7 +60,9 @@ class ConversationManager:
         self.current_conversation = conversation.id
         return conversation.id
 
-    def add_message(self, conversation_id: str, role: str, content: str) -> Optional[str]:
+    def add_message(
+        self, conversation_id: str, role: str, content: str
+    ) -> Optional[str]:
         if conversation_id in self.conversations:
             return self.conversations[conversation_id].add_message(role, content)
         return None
@@ -66,7 +70,7 @@ class ConversationManager:
     def get_conversation(self, conversation_id: str) -> Optional[Conversation]:
         return self.conversations.get(conversation_id)
 
-    def list_conversations(self) -> List[Conversation]:
+    def list_conversations(self) -> list[Conversation]:
         return list(self.conversations.values())
 
     def delete_conversation(self, conversation_id: str) -> bool:
@@ -88,4 +92,4 @@ class ConversationManager:
         # Generate simple summary
         first_message = conversation.messages[0].content[:50]
         message_count = len(conversation.messages)
-        return f"Conversation '{conversation.title}': {first_message}... ({message_count} messages)"
+        return f"Conversation '{conversation.title}': {first_message}... ({message_count} messages)"  # noqa: E501

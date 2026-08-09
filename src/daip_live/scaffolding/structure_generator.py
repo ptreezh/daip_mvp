@@ -4,24 +4,18 @@
 """
 
 import re
-import asyncio
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union, Callable
-from datetime import datetime
+from typing import Any, Optional
 
-from .models import (
-    ProjectStructure,
-    ProjectFile,
-    ValidationError,
-    GenerationError
-)
+from .models import GenerationError, ProjectFile, ProjectStructure, ValidationError
 
 
 class TemplateType(Enum):
     """模板类型枚举"""
+
     BASIC = "basic"
     WEB_APP = "web_app"
     API = "api"
@@ -33,16 +27,17 @@ class TemplateType(Enum):
 @dataclass
 class TemplateConfig:
     """模板配置"""
+
     name: str
     type: TemplateType
     description: str = ""
-    file_patterns: List[str] = field(default_factory=list)
-    directory_structure: Dict[str, List[str]] = field(default_factory=dict)
-    file_templates: Dict[str, str] = field(default_factory=dict)
-    variables: Dict[str, Any] = field(default_factory=dict)
-    dependencies: List[str] = field(default_factory=list)
+    file_patterns: list[str] = field(default_factory=list)
+    directory_structure: dict[str, list[str]] = field(default_factory=dict)
+    file_templates: dict[str, str] = field(default_factory=dict)
+    variables: dict[str, Any] = field(default_factory=dict)
+    dependencies: list[str] = field(default_factory=list)
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """验证模板配置"""
         errors = []
 
@@ -68,6 +63,7 @@ class TemplateConfig:
 @dataclass
 class GenerationStrategy:
     """生成策略"""
+
     name: str
     description: str = ""
     complexity_threshold: float = 0.5
@@ -88,24 +84,29 @@ class GenerationStrategy:
 @dataclass
 class StructureGeneratorConfig:
     """结构生成器配置"""
-    default_strategy: GenerationStrategy = field(default_factory=lambda: GenerationStrategy("default"))
-    strategies: List[GenerationStrategy] = field(default_factory=list)
+
+    default_strategy: GenerationStrategy = field(
+        default_factory=lambda: GenerationStrategy("default")
+    )
+    strategies: list[GenerationStrategy] = field(default_factory=list)
     max_files: int = 1000
     max_directory_depth: int = 10
     enable_ai_generation: bool = False
-    ai_model_config: Dict[str, Any] = field(default_factory=dict)
+    ai_model_config: dict[str, Any] = field(default_factory=dict)
 
     def get_strategy_for_complexity(self, complexity: float) -> GenerationStrategy:
         """根据复杂度选择最适合的策略"""
         # 首先尝试找到匹配复杂度阈值的策略
         suitable_strategies = [
-            s for s in self.strategies
-            if complexity >= s.complexity_threshold
+            s for s in self.strategies if complexity >= s.complexity_threshold
         ]
 
         if suitable_strategies:
             # 选择复杂度阈值最接近的策略
-            return min(suitable_strategies, key=lambda s: abs(s.complexity_threshold - complexity))
+            return min(
+                suitable_strategies,
+                key=lambda s: abs(s.complexity_threshold - complexity),
+            )
 
         return self.default_strategy
 
@@ -116,10 +117,10 @@ class TemplateRenderer:
     def __init__(self):
         self.default_context = {
             "date": datetime.now().strftime("%Y-%m-%d"),
-            "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "datetime": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-    def render_template(self, template: str, context: Dict[str, Any]) -> str:
+    def render_template(self, template: str, context: dict[str, Any]) -> str:
         """渲染模板"""
         # 合并默认上下文
         full_context = {**self.default_context, **context}
@@ -137,8 +138,9 @@ class TemplateRenderer:
 
         return result
 
-    def _replace_variables(self, template: str, context: Dict[str, Any]) -> str:
+    def _replace_variables(self, template: str, context: dict[str, Any]) -> str:
         """替换变量"""
+
         def replace_var(match):
             var_name = match.group(1)
             value = context.get(var_name, match.group(0))  # 保持原样如果找不到变量
@@ -147,11 +149,11 @@ class TemplateRenderer:
                 return str(value)
             return str(value)
 
-        return re.sub(r'\{([^}]+)\}', replace_var, template)
+        return re.sub(r"\{([^}]+)\}", replace_var, template)
 
-    def _process_conditionals(self, template: str, context: Dict[str, Any]) -> str:
+    def _process_conditionals(self, template: str, context: dict[str, Any]) -> str:
         """处理条件渲染"""
-        pattern = r'\{#if\s+([^#]+)#\}(.*?)\{#endif#\}'
+        pattern = r"\{#if\s+([^#]+)#\}(.*?)\{#endif#\}"
 
         def replace_conditional(match):
             condition = match.group(1).strip()
@@ -165,9 +167,9 @@ class TemplateRenderer:
 
         return re.sub(pattern, replace_conditional, template, flags=re.DOTALL)
 
-    def _process_loops(self, template: str, context: Dict[str, Any]) -> str:
+    def _process_loops(self, template: str, context: dict[str, Any]) -> str:
         """处理循环渲染"""
-        pattern = r'\{#for\s+(\w+)\s+in\s+(\w+)\#\}(.*?)\{#endfor#\}'
+        pattern = r"\{#for\s+(\w+)\s+in\s+(\w+)\#\}(.*?)\{#endfor#\}"
 
         def replace_loop(match):
             item_var = match.group(1)
@@ -188,7 +190,7 @@ class TemplateRenderer:
 
         return re.sub(pattern, replace_loop, template, flags=re.DOTALL)
 
-    def _evaluate_condition(self, condition: str, context: Dict[str, Any]) -> bool:
+    def _evaluate_condition(self, condition: str, context: dict[str, Any]) -> bool:
         """评估条件"""
         # 简单的条件评估
         condition = condition.strip()
@@ -209,7 +211,7 @@ class TemplateEngine:
     """模板引擎"""
 
     def __init__(self):
-        self.templates: Dict[str, TemplateConfig] = {}
+        self.templates: dict[str, TemplateConfig] = {}
         self.renderer = TemplateRenderer()
         self.default_template_type = TemplateType.BASIC
 
@@ -225,14 +227,17 @@ class TemplateEngine:
         """获取模板"""
         return self.templates.get(name)
 
-    def get_templates_by_type(self, template_type: TemplateType) -> List[TemplateConfig]:
+    def get_templates_by_type(
+        self, template_type: TemplateType
+    ) -> list[TemplateConfig]:
         """按类型获取模板"""
         return [
-            config for config in self.templates.values()
-            if config.type == template_type
+            config for config in self.templates.values() if config.type == template_type
         ]
 
-    def apply_template(self, template_name: str, context: Dict[str, Any], output_path: str) -> ProjectStructure:
+    def apply_template(
+        self, template_name: str, context: dict[str, Any], output_path: str
+    ) -> ProjectStructure:
         """应用模板生成项目结构"""
         template = self.get_template(template_name)
         if not template:
@@ -247,20 +252,18 @@ class TemplateEngine:
 
                 # 获取文件模板内容
                 template_content = template.file_templates.get(file_name, "")
-                rendered_content = self.renderer.render_template(template_content, context)
-
-                file = ProjectFile(
-                    path=file_path,
-                    content=rendered_content
+                rendered_content = self.renderer.render_template(
+                    template_content, context
                 )
+
+                file = ProjectFile(path=file_path, content=rendered_content)
                 files.append(file)
 
         return ProjectStructure(
-            description=f"Generated using template: {template_name}",
-            files=files
+            description=f"Generated using template: {template_name}", files=files
         )
 
-    def render_template(self, template: str, context: Dict[str, Any]) -> str:
+    def render_template(self, template: str, context: dict[str, Any]) -> str:
         """渲染单个模板"""
         return self.renderer.render_template(template, context)
 
@@ -279,7 +282,7 @@ class TemplateEngine:
             ".yaml": "yaml",
             ".yml": "yaml",
             ".xml": "xml",
-            ".txt": "text"
+            ".txt": "text",
         }
 
         return type_mapping.get(extension, "unknown")
@@ -296,9 +299,7 @@ class ProjectStructureGenerator:
         self._initialize_default_templates()
 
     async def generate_structure(
-        self,
-        analysis: Dict[str, Any],
-        context: Dict[str, Any]
+        self, analysis: dict[str, Any], context: dict[str, Any]
     ) -> ProjectStructure:
         """生成项目结构"""
         # 验证请求
@@ -330,9 +331,9 @@ class ProjectStructureGenerator:
 
     async def _generate_with_ai(
         self,
-        analysis: Dict[str, Any],
-        context: Dict[str, Any],
-        strategy: GenerationStrategy
+        analysis: dict[str, Any],
+        context: dict[str, Any],
+        strategy: GenerationStrategy,
     ) -> ProjectStructure:
         """使用AI生成结构"""
         # 这里应该调用实际的AI服务
@@ -344,36 +345,41 @@ class ProjectStructureGenerator:
 
         # 根据项目类型和特性生成文件
         if "web" in project_type or "api" in project_type:
-            files.append(ProjectFile(
-                path="src/main.py",
-                content="# AI generated main application\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get(\"/\")\ndef read_root():\n    return {\"message\": \"Hello World\"}\n"
-            ))
-            files.append(ProjectFile(
-                path="requirements.txt",
-                content="fastapi>=0.68.0\nuvicorn>=0.15.0\n"
-            ))
+            files.append(
+                ProjectFile(
+                    path="src/main.py",
+                    content='# AI generated main application\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get("/")\ndef read_root():\n    return {"message": "Hello World"}\n',  # noqa: E501
+                )
+            )
+            files.append(
+                ProjectFile(
+                    path="requirements.txt",
+                    content="fastapi>=0.68.0\nuvicorn>=0.15.0\n",
+                )
+            )
 
         if "auth" in features:
-            files.append(ProjectFile(
-                path="src/auth.py",
-                content="# AI generated authentication module\nclass AuthManager:\n    def __init__(self):\n        pass\n"
-            ))
+            files.append(
+                ProjectFile(
+                    path="src/auth.py",
+                    content="# AI generated authentication module\nclass AuthManager:\n    def __init__(self):\n        pass\n",  # noqa: E501
+                )
+            )
 
         if "database" in features:
-            files.append(ProjectFile(
-                path="src/database.py",
-                content="# AI generated database module\nclass DatabaseManager:\n    def __init__(self):\n        pass\n"
-            ))
+            files.append(
+                ProjectFile(
+                    path="src/database.py",
+                    content="# AI generated database module\nclass DatabaseManager:\n    def __init__(self):\n        pass\n",  # noqa: E501
+                )
+            )
 
         return ProjectStructure(
-            description=f"AI generated {project_type} project",
-            files=files
+            description=f"AI generated {project_type} project", files=files
         )
 
     async def _generate_with_template(
-        self,
-        analysis: Dict[str, Any],
-        context: Dict[str, Any]
+        self, analysis: dict[str, Any], context: dict[str, Any]
     ) -> ProjectStructure:
         """使用模板生成结构"""
         template_type = self.get_recommended_template_type(analysis)
@@ -389,26 +395,36 @@ class ProjectStructureGenerator:
         template = templates[-1]
         return self.template_engine.apply_template(template.name, context, "./output")
 
-    def get_recommended_template_type(self, analysis: Dict[str, Any]) -> TemplateType:
+    def get_recommended_template_type(self, analysis: dict[str, Any]) -> TemplateType:
         """根据分析结果推荐模板类型"""
-        content = analysis.get("content", "").lower()
+        analysis.get("content", "").lower()
         keywords = analysis.get("keywords", [])
         project_type = analysis.get("project_type", "")
 
         # 根据关键词和项目类型推荐
-        if any(keyword in ["web", "frontend", "backend", "html", "css", "javascript"] for keyword in keywords):
+        if any(
+            keyword in ["web", "frontend", "backend", "html", "css", "javascript"]
+            for keyword in keywords
+        ):
             return TemplateType.WEB_APP
 
-        if any(keyword in ["api", "rest", "graphql", "endpoint"] for keyword in keywords):
+        if any(
+            keyword in ["api", "rest", "graphql", "endpoint"] for keyword in keywords
+        ):
             return TemplateType.API
 
-        if any(keyword in ["cli", "command", "tool", "utility"] for keyword in keywords):
+        if any(
+            keyword in ["cli", "command", "tool", "utility"] for keyword in keywords
+        ):
             return TemplateType.CLI
 
         if any(keyword in ["library", "package", "module"] for keyword in keywords):
             return TemplateType.LIBRARY
 
-        if any(keyword in ["microservice", "service", "distributed"] for keyword in keywords):
+        if any(
+            keyword in ["microservice", "service", "distributed"]
+            for keyword in keywords
+        ):
             return TemplateType.MICROSERVICE
 
         # 根据项目类型判断
@@ -426,18 +442,16 @@ class ProjectStructureGenerator:
         return TemplateType.BASIC
 
     def validate_generation_request(
-        self,
-        analysis: Dict[str, Any],
-        context: Dict[str, Any]
-    ) -> List[str]:
+        self, analysis: dict[str, Any], context: dict[str, Any]
+    ) -> list[str]:
         """验证生成请求"""
         errors = []
 
         # 验证分析结果
         required_analysis_fields = ["content", "complexity"]
-        for field in required_analysis_fields:
-            if field not in analysis:
-                errors.append(f"缺少必需的分析字段: {field}")
+        for field_name in required_analysis_fields:
+            if field_name not in analysis:
+                errors.append(f"缺少必需的分析字段: {field_name}")
 
         if analysis.get("complexity", 0) < 0 or analysis.get("complexity", 0) > 1:
             errors.append("复杂度值必须在0-1之间")
@@ -454,14 +468,14 @@ class ProjectStructureGenerator:
         complexity = analysis.get("complexity", 0)
         estimated_files = int(10 * complexity)  # 简单估算：复杂度 * 基础文件数
         if estimated_files > self.config.max_files:
-            errors.append(f"预估文件数量({estimated_files})超过限制({self.config.max_files})")
+            errors.append(
+                f"预估文件数量({estimated_files})超过限制({self.config.max_files})"
+            )
 
         return errors
 
     async def create_custom_template(
-        self,
-        analysis: Dict[str, Any],
-        context: Dict[str, Any]
+        self, analysis: dict[str, Any], context: dict[str, Any]
     ) -> TemplateConfig:
         """创建自定义模板"""
         project_name = context.get("project_name", "project")
@@ -469,17 +483,13 @@ class ProjectStructureGenerator:
         features = analysis.get("features", [])
 
         # 基础目录结构
-        directory_structure = {
-            "src": ["main.py"],
-            "tests": [],
-            "docs": ["README.md"]
-        }
+        directory_structure = {"src": ["main.py"], "tests": [], "docs": ["README.md"]}
 
         # 基础文件模板
         file_templates = {
             "main.py": f"""
 # {project_name}
-# Generated on {datetime.now().strftime('%Y-%m-%d')}
+# Generated on {datetime.now().strftime("%Y-%m-%d")}
 
 def main():
     \"\"\"
@@ -512,7 +522,7 @@ python src/main.py
 {#for feature in features#}
 - {feature}
 {#endfor#}
-"""
+""",
         }
 
         # 根据项目类型添加特定文件
@@ -573,7 +583,7 @@ class Database:
             description=f"Custom template for {project_name}",
             directory_structure=directory_structure,
             file_templates=file_templates,
-            variables={"project_name": project_name}
+            variables={"project_name": project_name},
         )
 
         return template_config
@@ -588,7 +598,7 @@ class Database:
             directory_structure={
                 "src": ["main.py"],
                 "tests": [],
-                "docs": ["README.md"]
+                "docs": ["README.md"],
             },
             file_templates={
                 "main.py": """
@@ -620,8 +630,8 @@ pip install -r requirements.txt
 ```bash
 python src/main.py
 ```
-"""
-            }
+""",
+            },
         )
 
         # Web应用模板
@@ -633,7 +643,7 @@ python src/main.py
                 "src": ["app.py", "routes.py", "templates/"],
                 "static": ["css/style.css"],
                 "tests": [],
-                "docs": ["README.md"]
+                "docs": ["README.md"],
             },
             file_templates={
                 "app.py": """
@@ -668,8 +678,8 @@ body {
     margin: 0 auto;
 }
 """,
-                "requirements.txt": "Flask>=2.0.0\nJinja2>=3.0.0\n"
-            }
+                "requirements.txt": "Flask>=2.0.0\nJinja2>=3.0.0\n",
+            },
         )
 
         # CLI应用模板
@@ -680,7 +690,7 @@ body {
             directory_structure={
                 "src": ["main.py", "commands/"],
                 "tests": [],
-                "docs": ["README.md"]
+                "docs": ["README.md"],
             },
             file_templates={
                 "main.py": """
@@ -714,8 +724,8 @@ pip install -e .
 ```bash
 {project_name} --help
 ```
-"""
-            }
+""",
+            },
         )
 
         self.template_engine.add_template(basic_template)

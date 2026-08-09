@@ -4,11 +4,10 @@ Assistant Profile Management for Personal Assistant System
 Handles assistant personality, preferences, and profile management.
 """
 
-from typing import Dict, Any, Optional, List
-from datetime import datetime
-import uuid
-import json
 import logging
+import uuid
+from datetime import datetime
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,9 +20,9 @@ class AssistantProfile:
         name: str,
         personality: str = "helpful and professional",
         specialization: str = "general assistance",
-        preferences: Optional[Dict[str, Any]] = None,
+        preferences: Optional[dict[str, Any]] = None,
         description: str = "",
-        profile_id: Optional[str] = None
+        profile_id: Optional[str] = None,
     ):
         self.id = profile_id or str(uuid.uuid4())
         self.name = name
@@ -61,7 +60,7 @@ class AssistantProfile:
         self.description = description
         self.updated_at = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert profile to dictionary"""
         return {
             "id": self.id,
@@ -72,11 +71,11 @@ class AssistantProfile:
             "description": self.description,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
-            "is_active": self.is_active
+            "is_active": self.is_active,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "AssistantProfile":
+    def from_dict(cls, data: dict[str, Any]) -> "AssistantProfile":
         """Create profile from dictionary"""
         profile = cls(
             name=data["name"],
@@ -84,7 +83,7 @@ class AssistantProfile:
             specialization=data.get("specialization", "general assistance"),
             preferences=data.get("preferences", {}),
             description=data.get("description", ""),
-            profile_id=data.get("id")
+            profile_id=data.get("id"),
         )
 
         if "created_at" in data:
@@ -104,5 +103,7 @@ class AssistantProfile:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"AssistantProfile(id={self.id[:8]}..., name='{self.name}', "
-                f"specialization='{self.specialization}')")
+        return (
+            f"AssistantProfile(id={self.id[:8]}..., name='{self.name}', "
+            f"specialization='{self.specialization}')"
+        )

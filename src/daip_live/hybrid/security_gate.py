@@ -11,9 +11,10 @@ from typing import Optional
 
 class RiskLevel(Enum):
     """Risk classification for delegation decisions."""
-    LOW = "LOW"         # Can be delegated to cloud
-    MEDIUM = "MEDIUM"   # Auto-sanitize, local execution
-    HIGH = "HIGH"       # Human confirmation required
+
+    LOW = "LOW"  # Can be delegated to cloud
+    MEDIUM = "MEDIUM"  # Auto-sanitize, local execution
+    HIGH = "HIGH"  # Human confirmation required
 
 
 class SecurityGate:
@@ -31,9 +32,9 @@ class SecurityGate:
 
     # Patterns that indicate MEDIUM risk
     MEDIUM_RISK_PATTERNS = [
-        r"file:///.*",           # Local file paths
-        r"~[/\\].*",             # Home directory paths
-        r"[A-Z]:[/\\].*",         # Windows drive paths
+        r"file:///.*",  # Local file paths
+        r"~[/\\].*",  # Home directory paths
+        r"[A-Z]:[/\\].*",  # Windows drive paths
     ]
 
     @classmethod
@@ -84,12 +85,7 @@ class SecurityGate:
 class SecurityRule:
     """Security rule configuration."""
 
-    def __init__(
-        self,
-        pattern: str,
-        risk_level: RiskLevel,
-        description: str = ""
-    ):
+    def __init__(self, pattern: str, risk_level: RiskLevel, description: str = ""):
         self.pattern = re.compile(pattern, re.IGNORECASE)
         self.risk_level = risk_level
         self.description = description
@@ -102,11 +98,11 @@ class SecurityRulesConfig:
         SecurityRule(
             pattern=r"password|api[_-]?key|secret",
             risk_level=RiskLevel.HIGH,
-            description="Credentials and secrets"
+            description="Credentials and secrets",
         ),
         SecurityRule(
             pattern=r"file:///.*|~[/\\].*|[A-Z]:[/\\].*",
             risk_level=RiskLevel.MEDIUM,
-            description="Local file paths"
+            description="Local file paths",
         ),
     ]

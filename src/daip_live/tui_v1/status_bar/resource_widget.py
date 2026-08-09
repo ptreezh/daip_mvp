@@ -4,11 +4,12 @@ System Resource Widget for newP6 TUI Status Bar
 Displays system resource usage (CPU, Memory, etc.).
 """
 
-from typing import Optional
 import logging
+from typing import Optional
 
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
@@ -39,7 +40,7 @@ class SystemResourceWidget(StatusWidget):
                 memory_total_gb = memory.total / (1024**3)
 
                 # Format resource information
-                resource_text = f"CPU {cpu_percent:.1f}% | Mem {memory_percent:.1f}% ({memory_used_gb:.1f}GB/{memory_total_gb:.1f}GB)"
+                resource_text = f"CPU {cpu_percent:.1f}% | Mem {memory_percent:.1f}% ({memory_used_gb:.1f}GB/{memory_total_gb:.1f}GB)"  # noqa: E501
                 self.update_value(resource_text)
             else:
                 # Fallback when psutil is not available
@@ -63,10 +64,10 @@ class SystemResourceWidget(StatusWidget):
             if PSUTIL_AVAILABLE:
                 memory = psutil.virtual_memory()
                 return {
-                    'percent': memory.percent,
-                    'used_gb': memory.used / (1024**3),
-                    'total_gb': memory.total / (1024**3),
-                    'available_gb': memory.available / (1024**3)
+                    "percent": memory.percent,
+                    "used_gb": memory.used / (1024**3),
+                    "total_gb": memory.total / (1024**3),
+                    "available_gb": memory.available / (1024**3),
                 }
         except Exception as e:
             logger.error(f"Error getting memory usage: {e}")

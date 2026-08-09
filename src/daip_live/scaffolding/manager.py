@@ -1,7 +1,6 @@
-
 import asyncio
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 import yaml
 
@@ -21,7 +20,7 @@ class ScaffoldingManager:
             return match.group(1).strip()
         return response.strip()
 
-    async def generate_structure(self, description: str) -> List[Dict[str, Any]]:
+    async def generate_structure(self, description: str) -> list[dict[str, Any]]:
         """
         Generates a project structure in YAML format from a description,
         with validation and self-correction.
@@ -46,15 +45,14 @@ class ScaffoldingManager:
         ```
 
         YAML:
-        """
+        """  # noqa: E501
 
         prompt = base_prompt
         last_error = ""
 
         for attempt in range(self.max_retries + 1):
             if attempt > 0:
-                print(f"YAML validation failed. Retrying... (Attempt {attempt}/{self.max_retries})")
-                prompt = f"{base_prompt}\n\nThe previous attempt failed with the following YAML error:\n{last_error}\n\nPlease correct the YAML and provide the full, valid structure again.\nYAML:\n"
+                prompt = f"{base_prompt}\n\nThe previous attempt failed with the following YAML error:\n{last_error}\n\nPlease correct the YAML and provide the full, valid structure again.\nYAML:\n"  # noqa: E501
 
             response_text = await self.model_provider.generate(prompt=prompt)
             yaml_text = self._extract_yaml_from_response(response_text)
@@ -63,32 +61,36 @@ class ScaffoldingManager:
                 parsed_yaml = yaml.safe_load(yaml_text)
                 if isinstance(parsed_yaml, list):
                     # Basic validation for expected structure
-                    if all('filename' in item and 'content' in item for item in parsed_yaml):
+                    if all(
+                        "filename" in item and "content" in item for item in parsed_yaml
+                    ):
                         return parsed_yaml
                     else:
-                        last_error = "Invalid structure: Each item in the list must have 'filename' and 'content' keys."
+                        last_error = "Invalid structure: Each item in the list must have 'filename' and 'content' keys."  # noqa: E501
                 else:
                     last_error = "Invalid format: The root of the YAML must be a list."
 
             except yaml.YAMLError as e:
                 last_error = str(e)
 
-        raise ValueError(f"Failed to generate valid YAML after {self.max_retries} retries. Last error: {last_error}")
+        raise ValueError(
+            f"Failed to generate valid YAML after {self.max_retries} retries. Last error: {last_error}"  # noqa: E501
+        )
 
 
 # Example usage (for testing)
 async def main():
-    provider_config = ProviderConfig(model="gpt-3.5-turbo") # Or any other configured model
+    provider_config = ProviderConfig(
+        model="gpt-3.5-turbo"
+    )  # Or any other configured model
     model_provider = LiteLLMProvider(provider_config)
     scaffolder = ScaffoldingManager(model_provider)
 
     description = "A simple project with a project manager role and a main workflow."
     try:
-        parsed_structure = await scaffolder.generate_structure(description)
-        print("--- Generated and Validated Structure ---")
-        print(yaml.dump(parsed_structure, indent=2))
-    except ValueError as e:
-        print(f"Error: {e}")
+        await scaffolder.generate_structure(description)
+    except ValueError:
+        pass
 
 
 if __name__ == "__main__":

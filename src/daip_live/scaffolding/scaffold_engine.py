@@ -4,27 +4,28 @@
 """
 
 import asyncio
-import time
 import re
+import time
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Callable, Any, Union
-from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
 
+from .config_manager import ScaffoldConfig
+from .error_handler import ErrorHandler
 from .models import (
+    InputType,
     ProjectFile,
     ProjectStructure,
-    ScaffoldResult,
     ScaffoldCommand,
-    InputType,
-    ValidationError
+    ScaffoldResult,
+    ValidationError,
 )
-from .config_manager import ScaffoldConfig
-from .error_handler import ErrorHandler, ErrorSeverity, ErrorCategory
 
 
 class GenerationPhase(Enum):
     """生成阶段"""
+
     INITIALIZATION = "initialization"
     CONTENT_ANALYSIS = "content_analysis"
     STRUCTURE_GENERATION = "structure_generation"
@@ -36,6 +37,7 @@ class GenerationPhase(Enum):
 @dataclass
 class GenerationRequest:
     """生成请求"""
+
     description: str
     input_type: InputType = InputType.TEXT
     file_path: Optional[str] = None
@@ -43,10 +45,10 @@ class GenerationRequest:
     auto_confirm: bool = False
     dry_run: bool = False
     overwrite_existing: bool = True
-    options: Dict[str, Any] = field(default_factory=dict)
-    context: Optional[Dict[str, Any]] = None
+    options: dict[str, Any] = field(default_factory=dict)
+    context: Optional[dict[str, Any]] = None
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """验证请求有效性"""
         errors = []
 
@@ -63,26 +65,27 @@ class GenerationRequest:
         return errors
 
     @classmethod
-    def from_command(cls, command: ScaffoldCommand, **kwargs) -> 'GenerationRequest':
+    def from_command(cls, command: ScaffoldCommand, **kwargs) -> "GenerationRequest":
         """从命令创建请求"""
         return cls(
             description=command.description,
             input_type=command.input_type,
             file_path=command.file_path,
             auto_confirm=command.auto_confirm,
-            **kwargs
+            **kwargs,
         )
 
 
 @dataclass
 class GenerationContext:
     """生成上下文"""
+
     request: GenerationRequest
     phase: GenerationPhase = GenerationPhase.INITIALIZATION
-    created_files: List[ProjectFile] = field(default_factory=list)
-    errors: List[Exception] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_files: list[ProjectFile] = field(default_factory=list)
+    errors: list[Exception] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     start_time: float = field(default_factory=time.time)
 
     def advance_phase(self, new_phase: GenerationPhase) -> None:
@@ -125,54 +128,52 @@ class GenerationContext:
 @dataclass
 class GenerationResult:
     """生成结果"""
+
     success: bool
     project_structure: Optional[ProjectStructure] = None
-    errors: List[Exception] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[Exception] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     duration: Optional[float] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def success(
         cls,
         project_structure: ProjectStructure,
         duration: float,
-        warnings: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> 'GenerationResult':
+        warnings: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> "GenerationResult":
         """创建成功结果"""
         return cls(
             success=True,
             project_structure=project_structure,
             warnings=warnings or [],
             duration=duration,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
     @classmethod
     def failure(
         cls,
-        errors: List[Exception],
+        errors: list[Exception],
         duration: float,
-        warnings: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> 'GenerationResult':
+        warnings: Optional[list[str]] = None,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> "GenerationResult":
         """创建失败结果"""
         return cls(
             success=False,
             errors=errors,
             warnings=warnings or [],
             duration=duration,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
     def to_scaffold_result(self) -> ScaffoldResult:
         """转换为脚手架结果"""
         if self.success:
-            return ScaffoldResult.success(
-                self.project_structure,
-                self.warnings
-            )
+            return ScaffoldResult.success(self.project_structure, self.warnings)
         else:
             error_messages = [str(error) for error in self.errors]
             return ScaffoldResult.failure(error_messages, self.warnings)
@@ -184,8 +185,8 @@ class RecoveryStrategy:
     def __init__(
         self,
         max_retries: int = 3,
-        fallback_actions: Optional[List[str]] = None,
-        retry_condition: Optional[Callable] = None
+        fallback_actions: Optional[list[str]] = None,
+        retry_condition: Optional[Callable] = None,
     ):
         self.max_retries = max_retries
         self.fallback_actions = fallback_actions or []
@@ -203,7 +204,9 @@ class ScaffoldEngine:
         self,
         config: Optional[ScaffoldConfig] = None,
         error_handler: Optional[ErrorHandler] = None,
-        progress_callback: Optional[Callable[[GenerationPhase, float, str], None]] = None
+        progress_callback: Optional[
+            Callable[[GenerationPhase, float, str], None]
+        ] = None,
     ):
         """初始化脚手架引擎
 
@@ -215,25 +218,27 @@ class ScaffoldEngine:
         self.config = config or ScaffoldConfig()
         self.error_handler = error_handler or ErrorHandler()
         self.progress_callback = progress_callback
-        self.recovery_strategies: Dict[str, RecoveryStrategy] = {}
+        self.recovery_strategies: dict[str, RecoveryStrategy] = {}
 
         # 配置默认恢复策略
         self._configure_default_recovery_strategies()
 
     def _configure_default_recovery_strategies(self) -> None:
         """配置默认恢复策略"""
-        self.recovery_strategies.update({
-            "ConnectionError": RecoveryStrategy(max_retries=2),
-            "TimeoutError": RecoveryStrategy(max_retries=1),
-            "ValidationError": RecoveryStrategy(max_retries=0),  # 不重试验证错误
-        })
+        self.recovery_strategies.update(
+            {
+                "ConnectionError": RecoveryStrategy(max_retries=2),
+                "TimeoutError": RecoveryStrategy(max_retries=1),
+                "ValidationError": RecoveryStrategy(max_retries=0),  # 不重试验证错误
+            }
+        )
 
     def configure_recovery_strategy(
         self,
         error_type: str,
         max_retries: int = 3,
         fallback_action: Optional[str] = None,
-        fallback_actions: Optional[List[str]] = None
+        fallback_actions: Optional[list[str]] = None,
     ) -> None:
         """配置错误恢复策略
 
@@ -249,11 +254,12 @@ class ScaffoldEngine:
             actions.append(fallback_action)
 
         self.recovery_strategies[error_type] = RecoveryStrategy(
-            max_retries=max_retries,
-            fallback_actions=actions
+            max_retries=max_retries, fallback_actions=actions
         )
 
-    def _report_progress(self, phase: GenerationPhase, progress: float, message: str) -> None:
+    def _report_progress(
+        self, phase: GenerationPhase, progress: float, message: str
+    ) -> None:
         """报告进度"""
         if self.progress_callback:
             self.progress_callback(phase, progress, message)
@@ -276,22 +282,21 @@ class ScaffoldEngine:
             validation_errors = request.validate()
             if validation_errors:
                 return GenerationResult.failure(
-                    [ValidationError(validation_errors)],
-                    time.time() - start_time
+                    [ValidationError(validation_errors)], time.time() - start_time
                 )
 
             # 分析内容（带重试）
             analysis = await self._execute_with_retry(
-                lambda: self._analyze_content(request),
-                "ConnectionError"
+                lambda: self._analyze_content(request), "ConnectionError"
             )
             context.set_metadata("analysis", analysis)
 
             # 生成结构（带重试）
-            self._report_progress(GenerationPhase.STRUCTURE_GENERATION, 0.4, "生成项目结构")
+            self._report_progress(
+                GenerationPhase.STRUCTURE_GENERATION, 0.4, "生成项目结构"
+            )
             structure = await self._execute_with_retry(
-                lambda: self._generate_structure(request, analysis),
-                "ConnectionError"
+                lambda: self._generate_structure(request, analysis), "ConnectionError"
             )
 
             # 创建文件
@@ -310,17 +315,11 @@ class ScaffoldEngine:
 
             if context.has_errors():
                 return GenerationResult.failure(
-                    context.errors,
-                    duration,
-                    context.warnings,
-                    context.metadata
+                    context.errors, duration, context.warnings, context.metadata
                 )
             else:
                 return GenerationResult.success(
-                    structure,
-                    duration,
-                    context.warnings,
-                    context.metadata
+                    structure, duration, context.warnings, context.metadata
                 )
 
         except asyncio.CancelledError as e:
@@ -331,7 +330,7 @@ class ScaffoldEngine:
             self.error_handler.handle_error(e)
             return GenerationResult.failure([e], duration)
 
-    async def _analyze_content(self, request: GenerationRequest) -> Dict[str, Any]:
+    async def _analyze_content(self, request: GenerationRequest) -> dict[str, Any]:
         """分析内容
 
         Args:
@@ -345,7 +344,7 @@ class ScaffoldEngine:
         # 如果是文件输入，读取文件内容
         if request.input_type == InputType.FILE and request.file_path:
             try:
-                with open(request.file_path, 'r', encoding='utf-8') as f:
+                with open(request.file_path, encoding="utf-8") as f:
                     content = f.read()
             except Exception as e:
                 raise ValidationError(f"无法读取文件 {request.file_path}: {str(e)}")
@@ -360,28 +359,74 @@ class ScaffoldEngine:
             "keywords": keywords,
             "project_type": project_type,
             "features": features,
-            "complexity": self._estimate_complexity(content, keywords)
+            "complexity": self._estimate_complexity(content, keywords),
         }
 
-    def _extract_keywords(self, content: str) -> List[str]:
+    def _extract_keywords(self, content: str) -> list[str]:
         """提取关键词"""
         # 常见的技术关键词
         tech_keywords = [
-            'react', 'vue', 'angular', 'svelte', 'next', 'nuxt',
-            'express', 'django', 'flask', 'fastapi', 'spring', 'laravel',
-            'mysql', 'postgresql', 'mongodb', 'redis', 'sqlite',
-            'docker', 'kubernetes', 'aws', 'azure', 'gcp',
-            'python', 'javascript', 'typescript', 'java', 'go', 'rust',
-            'html', 'css', 'scss', 'tailwind', 'bootstrap',
-            'api', 'rest', 'graphql', 'websocket',
-            'auth', 'login', 'user', 'session', 'token',
-            'dashboard', 'admin', 'cms', 'blog', 'ecommerce',
-            'test', 'testing', 'jest', 'pytest', 'unit',
-            'ci', 'cd', 'github', 'git', 'deploy'
+            "react",
+            "vue",
+            "angular",
+            "svelte",
+            "next",
+            "nuxt",
+            "express",
+            "django",
+            "flask",
+            "fastapi",
+            "spring",
+            "laravel",
+            "mysql",
+            "postgresql",
+            "mongodb",
+            "redis",
+            "sqlite",
+            "docker",
+            "kubernetes",
+            "aws",
+            "azure",
+            "gcp",
+            "python",
+            "javascript",
+            "typescript",
+            "java",
+            "go",
+            "rust",
+            "html",
+            "css",
+            "scss",
+            "tailwind",
+            "bootstrap",
+            "api",
+            "rest",
+            "graphql",
+            "websocket",
+            "auth",
+            "login",
+            "user",
+            "session",
+            "token",
+            "dashboard",
+            "admin",
+            "cms",
+            "blog",
+            "ecommerce",
+            "test",
+            "testing",
+            "jest",
+            "pytest",
+            "unit",
+            "ci",
+            "cd",
+            "github",
+            "git",
+            "deploy",
         ]
 
         # 提取包含关键词的词
-        words = re.findall(r'\b\w+\b', content.lower())
+        words = re.findall(r"\b\w+\b", content.lower())
         extracted = []
         for keyword in tech_keywords:
             if keyword in words:
@@ -389,34 +434,36 @@ class ScaffoldEngine:
 
         return list(set(extracted))
 
-    def _infer_project_type(self, keywords: List[str]) -> str:
+    def _infer_project_type(self, keywords: list[str]) -> str:
         """推断项目类型"""
-        if any(kw in keywords for kw in ['react', 'vue', 'angular', 'html', 'css']):
-            return 'web_app'
-        elif any(kw in keywords for kw in ['express', 'django', 'flask', 'fastapi', 'api']):
-            return 'api_service'
-        elif any(kw in keywords for kw in ['docker', 'kubernetes']):
-            return 'containerized_app'
-        elif any(kw in keywords for kw in ['python', 'java', 'typescript']):
-            return 'library'
-        elif any(kw in keywords for kw in ['test', 'testing']):
-            return 'test_project'
+        if any(kw in keywords for kw in ["react", "vue", "angular", "html", "css"]):
+            return "web_app"
+        elif any(
+            kw in keywords for kw in ["express", "django", "flask", "fastapi", "api"]
+        ):
+            return "api_service"
+        elif any(kw in keywords for kw in ["docker", "kubernetes"]):
+            return "containerized_app"
+        elif any(kw in keywords for kw in ["python", "java", "typescript"]):
+            return "library"
+        elif any(kw in keywords for kw in ["test", "testing"]):
+            return "test_project"
         else:
-            return 'general'
+            return "general"
 
-    def _extract_features(self, content: str, keywords: List[str]) -> List[str]:
+    def _extract_features(self, content: str, keywords: list[str]) -> list[str]:
         """提取功能特性"""
         features = []
 
         # 常见功能特性映射
         feature_keywords = {
-            'authentication': ['auth', 'login', 'user', 'session', 'token'],
-            'database': ['mysql', 'postgresql', 'mongodb', 'redis', 'sqlite'],
-            'api': ['api', 'rest', 'graphql'],
-            'frontend': ['react', 'vue', 'angular', 'html', 'css'],
-            'backend': ['express', 'django', 'flask', 'fastapi'],
-            'testing': ['test', 'testing', 'jest', 'pytest'],
-            'deployment': ['deploy', 'docker', 'kubernetes', 'ci', 'cd']
+            "authentication": ["auth", "login", "user", "session", "token"],
+            "database": ["mysql", "postgresql", "mongodb", "redis", "sqlite"],
+            "api": ["api", "rest", "graphql"],
+            "frontend": ["react", "vue", "angular", "html", "css"],
+            "backend": ["express", "django", "flask", "fastapi"],
+            "testing": ["test", "testing", "jest", "pytest"],
+            "deployment": ["deploy", "docker", "kubernetes", "ci", "cd"],
         }
 
         for feature, feature_keywords in feature_keywords.items():
@@ -425,19 +472,17 @@ class ScaffoldEngine:
 
         return features
 
-    def _estimate_complexity(self, content: str, keywords: List[str]) -> str:
+    def _estimate_complexity(self, content: str, keywords: list[str]) -> str:
         """估算项目复杂度"""
         if len(keywords) > 10:
-            return 'high'
+            return "high"
         elif len(keywords) > 5:
-            return 'medium'
+            return "medium"
         else:
-            return 'low'
+            return "low"
 
     async def _generate_structure(
-        self,
-        request: GenerationRequest,
-        analysis: Dict[str, Any]
+        self, request: GenerationRequest, analysis: dict[str, Any]
     ) -> ProjectStructure:
         """生成项目结构
 
@@ -448,53 +493,56 @@ class ScaffoldEngine:
         Returns:
             ProjectStructure: 项目结构
         """
-        project_type = analysis.get('project_type', 'general')
-        keywords = analysis.get('keywords', [])
-        features = analysis.get('features', [])
+        project_type = analysis.get("project_type", "general")
+        keywords = analysis.get("keywords", [])
+        features = analysis.get("features", [])
 
         files = self._generate_file_structure(
-            project_type,
-            keywords,
-            features,
-            request.options
+            project_type, keywords, features, request.options
         )
 
         return ProjectStructure(
             files=files,
-            description=analysis.get('content', ''),
-            generated_at=time.time()
+            description=analysis.get("content", ""),
+            generated_at=time.time(),
         )
 
     def _generate_file_structure(
         self,
         project_type: str,
-        keywords: List[str],
-        features: List[str],
-        options: Dict[str, Any]
-    ) -> List[ProjectFile]:
+        keywords: list[str],
+        features: list[str],
+        options: dict[str, Any],
+    ) -> list[ProjectFile]:
         """生成文件结构"""
         files = []
 
         # 根据项目类型生成基础文件
-        if project_type == 'web_app':
+        if project_type == "web_app":
             files.extend(self._generate_web_app_files(keywords, options))
-        elif project_type == 'api_service':
+        elif project_type == "api_service":
             files.extend(self._generate_api_files(keywords, options))
         else:
             files.extend(self._generate_general_files(keywords, options))
 
         return files
 
-    def _generate_web_app_files(self, keywords: List[str], options: Dict[str, Any]) -> List[ProjectFile]:
+    def _generate_web_app_files(
+        self, keywords: list[str], options: dict[str, Any]
+    ) -> list[ProjectFile]:
         """生成Web应用文件"""
         files = []
 
         # 根据技术栈选择
-        if any(kw in keywords for kw in ['react', 'next']):
-            files.append(ProjectFile("package.json", self._get_package_json_content("react")))
+        if any(kw in keywords for kw in ["react", "next"]):
+            files.append(
+                ProjectFile("package.json", self._get_package_json_content("react"))
+            )
             files.append(ProjectFile("src/App.js", self._get_react_app_content()))
-        elif any(kw in keywords for kw in ['vue', 'nuxt']):
-            files.append(ProjectFile("package.json", self._get_package_json_content("vue")))
+        elif any(kw in keywords for kw in ["vue", "nuxt"]):
+            files.append(
+                ProjectFile("package.json", self._get_package_json_content("vue"))
+            )
             files.append(ProjectFile("src/App.vue", self._get_vue_app_content()))
         else:
             files.append(ProjectFile("index.html", self._get_basic_html_content()))
@@ -502,21 +550,29 @@ class ScaffoldEngine:
 
         return files
 
-    def _generate_api_files(self, keywords: List[str], options: Dict[str, Any]) -> List[ProjectFile]:
+    def _generate_api_files(
+        self, keywords: list[str], options: dict[str, Any]
+    ) -> list[ProjectFile]:
         """生成API服务文件"""
         files = []
 
         # 根据后端框架选择
-        if any(kw in keywords for kw in ['express']):
-            files.append(ProjectFile("package.json", self._get_package_json_content("express")))
+        if any(kw in keywords for kw in ["express"]):
+            files.append(
+                ProjectFile("package.json", self._get_package_json_content("express"))
+            )
             files.append(ProjectFile("server.js", self._get_express_server_content()))
-        elif any(kw in keywords for kw in ['fastapi']):
-            files.append(ProjectFile("requirements.txt", self._get_fastapi_requirements()))
+        elif any(kw in keywords for kw in ["fastapi"]):
+            files.append(
+                ProjectFile("requirements.txt", self._get_fastapi_requirements())
+            )
             files.append(ProjectFile("main.py", self._get_fastapi_content()))
 
         return files
 
-    def _generate_general_files(self, keywords: List[str], options: Dict[str, Any]) -> List[ProjectFile]:
+    def _generate_general_files(
+        self, keywords: list[str], options: dict[str, Any]
+    ) -> list[ProjectFile]:
         """生成通用文件"""
         files = []
 
@@ -524,17 +580,19 @@ class ScaffoldEngine:
         files.append(ProjectFile("README.md", "# Project\n\nProject description."))
 
         # 基础配置文件
-        if any(kw in keywords for kw in ['python']):
+        if any(kw in keywords for kw in ["python"]):
             files.append(ProjectFile("requirements.txt", "# Add dependencies here"))
-        elif any(kw in keywords for kw in ['javascript', 'typescript']):
-            files.append(ProjectFile("package.json", '{"name": "project", "version": "1.0.0"}'))
+        elif any(kw in keywords for kw in ["javascript", "typescript"]):
+            files.append(
+                ProjectFile("package.json", '{"name": "project", "version": "1.0.0"}')
+            )
 
         return files
 
     def _get_package_json_content(self, framework: str) -> str:
         """获取package.json内容"""
         templates = {
-            "react": '''
+            "react": """
 {
   "name": "react-app",
   "version": "1.0.0",
@@ -547,8 +605,8 @@ class ScaffoldEngine:
     "build": "react-scripts build"
   }
 }
-'''.strip(),
-            "vue": '''
+""".strip(),
+            "vue": """
 {
   "name": "vue-app",
   "version": "1.0.0",
@@ -560,8 +618,8 @@ class ScaffoldEngine:
     "build": "vue-cli-service build"
   }
 }
-'''.strip(),
-            "express": '''
+""".strip(),
+            "express": """
 {
   "name": "express-app",
   "version": "1.0.0",
@@ -572,14 +630,14 @@ class ScaffoldEngine:
     "start": "node server.js"
   }
 }
-'''.strip()
+""".strip(),
         }
 
         return templates.get(framework, '{"name": "project", "version": "1.0.0"}')
 
     def _get_react_app_content(self) -> str:
         """获取React应用内容"""
-        return '''
+        return """
 import React from 'react';
 
 function App() {
@@ -591,11 +649,11 @@ function App() {
 }
 
 export default App;
-'''.strip()
+""".strip()
 
     def _get_vue_app_content(self) -> str:
         """获取Vue应用内容"""
-        return '''
+        return """
 <template>
   <div class="app">
     <h1>Vue App</h1>
@@ -607,11 +665,11 @@ export default {
   name: 'App'
 }
 </script>
-'''.strip()
+""".strip()
 
     def _get_basic_html_content(self) -> str:
         """获取基础HTML内容"""
-        return '''
+        return """
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -623,11 +681,11 @@ export default {
     <h1>Hello World</h1>
 </body>
 </html>
-'''.strip()
+""".strip()
 
     def _get_basic_css_content(self) -> str:
         """获取基础CSS内容"""
-        return '''
+        return """
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -636,11 +694,11 @@ body {
 h1 {
     color: #333;
 }
-'''.strip()
+""".strip()
 
     def _get_express_server_content(self) -> str:
         """获取Express服务器内容"""
-        return '''
+        return """
 const express = require('express');
 const app = express();
 const port = 3000;
@@ -652,7 +710,7 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-'''.strip()
+""".strip()
 
     def _get_fastapi_requirements(self) -> str:
         """获取FastAPI依赖"""
@@ -660,7 +718,7 @@ app.listen(port, () => {
 
     def _get_fastapi_content(self) -> str:
         """获取FastAPI内容"""
-        return '''
+        return """
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -672,13 +730,11 @@ def read_root():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-'''.strip()
+""".strip()
 
     async def _create_files(
-        self,
-        structure: ProjectStructure,
-        request: GenerationRequest
-    ) -> List[Exception]:
+        self, structure: ProjectStructure, request: GenerationRequest
+    ) -> list[Exception]:
         """创建文件
 
         Args:
@@ -709,7 +765,7 @@ if __name__ == "__main__":
                 file_path.parent.mkdir(parents=True, exist_ok=True)
 
                 # 写入文件
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.write(project_file.content)
 
             except Exception as e:
@@ -718,9 +774,7 @@ if __name__ == "__main__":
         return errors
 
     async def _validate_result(
-        self,
-        structure: ProjectStructure,
-        context: GenerationContext
+        self, structure: ProjectStructure, context: GenerationContext
     ) -> None:
         """验证结果
 
@@ -737,11 +791,7 @@ if __name__ == "__main__":
             if len(file.content) == 0:
                 context.add_warning(f"文件 {file.path} 为空")
 
-    async def _execute_with_retry(
-        self,
-        operation: Callable,
-        error_type: str
-    ) -> Any:
+    async def _execute_with_retry(self, operation: Callable, error_type: str) -> Any:
         """使用重试机制执行操作"""
         strategy = self.recovery_strategies.get(error_type, RecoveryStrategy())
 
@@ -763,15 +813,11 @@ if __name__ == "__main__":
                     raise
 
                 # 等待一段时间后重试
-                await asyncio.sleep(0.1 * (2 ** attempt))
+                await asyncio.sleep(0.1 * (2**attempt))
 
         raise Exception("All retry attempts failed")
 
-    async def _execute_with_recovery(
-        self,
-        operation: Callable,
-        error_type: str
-    ) -> Any:
+    async def _execute_with_recovery(self, operation: Callable, error_type: str) -> Any:
         """使用恢复策略执行操作"""
         strategy = self.recovery_strategies.get(error_type, RecoveryStrategy())
 
@@ -793,7 +839,7 @@ if __name__ == "__main__":
                     raise
 
                 # 等待一段时间后重试
-                await asyncio.sleep(0.1 * (2 ** attempt))
+                await asyncio.sleep(0.1 * (2**attempt))
 
         # 执行回退操作
         for action in strategy.fallback_actions:
@@ -812,6 +858,5 @@ if __name__ == "__main__":
         ]
 
         return ProjectStructure(
-            files=default_files,
-            description="Default template project"
+            files=default_files, description="Default template project"
         )

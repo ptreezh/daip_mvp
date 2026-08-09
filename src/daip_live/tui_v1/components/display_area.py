@@ -8,9 +8,8 @@ and display functionality with RichLog-like behavior.
 Based on newP6 specification requirements for display management.
 """
 
-from typing import Any, Dict, Optional, List
-from textual.widgets import Static
-from textual.containers import Vertical
+from typing import Any, Optional
+
 from textual.widgets import RichLog
 
 from .base import TUIComponent
@@ -38,7 +37,7 @@ class DisplayAreaComponent(TUIComponent):
         max_lines: int = 10000,
         auto_scroll: bool = True,
         wrap: bool = True,
-        show_line_numbers: bool = False
+        show_line_numbers: bool = False,
     ):
         """
         Initialize the display area component.
@@ -49,7 +48,7 @@ class DisplayAreaComponent(TUIComponent):
             auto_scroll: Whether to auto-scroll to new content
             wrap: Whether to wrap long lines
             show_line_numbers: Whether to show line numbers
-        """
+        """  # noqa: E501
         super().__init__(component_id)
 
         # Display configuration
@@ -62,7 +61,7 @@ class DisplayAreaComponent(TUIComponent):
             line_count=0,
             search_text="",
             search_results=[],
-            current_search_index=0
+            current_search_index=0,
         )
 
         # RichLog widget for rendering
@@ -78,13 +77,13 @@ class DisplayAreaComponent(TUIComponent):
         # Create or get RichLog widget
         if self._rich_log is None:
             self._rich_log = RichLog(
-                auto_scroll=self.state.get('auto_scroll', True),
-                max_lines=self.state.get('max_lines', 10000),
-                wrap=self.state.get('wrap', True)
+                auto_scroll=self.state.get("auto_scroll", True),
+                max_lines=self.state.get("max_lines", 10000),
+                wrap=self.state.get("wrap", True),
             )
 
         # Configure based on state
-        if self.state.get('show_line_numbers'):
+        if self.state.get("show_line_numbers"):
             # Configure line numbers (RichLog supports this via styles)
             pass
 
@@ -107,13 +106,13 @@ class DisplayAreaComponent(TUIComponent):
         super().update_state(**kwargs)
 
         # Update RichLog widget if it exists
-        if hasattr(self, '_rich_log') and self._rich_log:
-            if 'auto_scroll' in kwargs:
-                self._rich_log.auto_scroll = kwargs['auto_scroll']
-            if 'max_lines' in kwargs:
-                self._rich_log.max_lines = kwargs['max_lines']
-            if 'wrap' in kwargs:
-                self._rich_log.wrap = kwargs['wrap']
+        if hasattr(self, "_rich_log") and self._rich_log:
+            if "auto_scroll" in kwargs:
+                self._rich_log.auto_scroll = kwargs["auto_scroll"]
+            if "max_lines" in kwargs:
+                self._rich_log.max_lines = kwargs["max_lines"]
+            if "wrap" in kwargs:
+                self._rich_log.wrap = kwargs["wrap"]
 
     def handle_event(self, event: Any) -> None:
         """
@@ -127,25 +126,25 @@ class DisplayAreaComponent(TUIComponent):
             if event is None:
                 return
 
-            if hasattr(event, 'event_type') and event.event_type is not None:
-                if hasattr(event.event_type, 'value'):
+            if hasattr(event, "event_type") and event.event_type is not None:
+                if hasattr(event.event_type, "value"):
                     event_type_value = event.event_type.value
                 else:
                     return
 
-                if event_type_value == 'content_update':
-                    content = ''
-                    if hasattr(event, 'data') and event.data is not None:
-                        content = event.data.get('content', '')
+                if event_type_value == "content_update":
+                    content = ""
+                    if hasattr(event, "data") and event.data is not None:
+                        content = event.data.get("content", "")
                     self.write(content)
-                elif event_type_value == 'clear_display':
+                elif event_type_value == "clear_display":
                     self.clear()
-                elif event_type_value == 'search':
-                    search_text = ''
-                    if hasattr(event, 'data') and event.data is not None:
-                        search_text = event.data.get('text', '')
+                elif event_type_value == "search":
+                    search_text = ""
+                    if hasattr(event, "data") and event.data is not None:
+                        search_text = event.data.get("text", "")
                     self.search(search_text)
-                elif event_type_value == 'scroll_to_bottom':
+                elif event_type_value == "scroll_to_bottom":
                     self.scroll_to_bottom()
         except Exception:
             # Silently handle errors to maintain system stability
@@ -162,23 +161,20 @@ class DisplayAreaComponent(TUIComponent):
             return
 
         # Add to buffer
-        buffer = self.state.get('content_buffer', [])
+        buffer = self.state.get("content_buffer", [])
         buffer.append(content)
 
         # Maintain max lines limit
-        max_lines = self.state.get('max_lines', 10000)
+        max_lines = self.state.get("max_lines", 10000)
         while len(buffer) > max_lines:
             buffer.pop(0)
 
         # Update line count
-        line_count = sum(content.count('\n') + 1 for content in buffer)
-        self.update_state(
-            content_buffer=buffer,
-            line_count=line_count
-        )
+        line_count = sum(content.count("\n") + 1 for content in buffer)
+        self.update_state(content_buffer=buffer, line_count=line_count)
 
         # Write to RichLog if available
-        if hasattr(self, '_rich_log') and self._rich_log:
+        if hasattr(self, "_rich_log") and self._rich_log:
             self._rich_log.write(content)
 
     def write_line(self, line: str) -> None:
@@ -188,11 +184,11 @@ class DisplayAreaComponent(TUIComponent):
         Args:
             line: The line to write
         """
-        self.write(line + '\n')
+        self.write(line + "\n")
 
     def clear(self) -> None:
         """Clear the display area."""
-        if hasattr(self, '_rich_log') and self._rich_log:
+        if hasattr(self, "_rich_log") and self._rich_log:
             self._rich_log.clear()
 
         self.update_state(
@@ -200,20 +196,20 @@ class DisplayAreaComponent(TUIComponent):
             line_count=0,
             search_text="",
             search_results=[],
-            current_search_index=0
+            current_search_index=0,
         )
 
     def scroll_to_bottom(self) -> None:
         """Scroll the display area to the bottom."""
-        if hasattr(self, '_rich_log') and self._rich_log:
+        if hasattr(self, "_rich_log") and self._rich_log:
             self._rich_log.scroll_end(animate=False)
 
     def scroll_to_top(self) -> None:
         """Scroll the display area to the top."""
-        if hasattr(self, '_rich_log') and self._rich_log:
+        if hasattr(self, "_rich_log") and self._rich_log:
             self._rich_log.scroll_home(animate=False)
 
-    def search(self, text: str) -> List[int]:
+    def search(self, text: str) -> list[int]:
         """
         Search for text in the display area.
 
@@ -224,29 +220,25 @@ class DisplayAreaComponent(TUIComponent):
             List[int]: Line numbers where text was found
         """
         if not text:
-            self.update_state(
-                search_text="",
-                search_results=[],
-                current_search_index=0
-            )
+            self.update_state(search_text="", search_results=[], current_search_index=0)
             return []
 
-        buffer = self.state.get('content_buffer', [])
+        buffer = self.state.get("content_buffer", [])
         search_results = []
 
         for i, content in enumerate(buffer):
-            lines = content.split('\n')
+            lines = content.split("\n")
             for j, line in enumerate(lines):
                 if text.lower() in line.lower():
                     # Calculate overall line number
-                    line_number = sum(content[:i].count('\n') for content in buffer[:i])
+                    line_number = sum(content[:i].count("\n") for content in buffer[:i])
                     line_number += j
                     search_results.append(line_number)
 
         self.update_state(
             search_text=text,
             search_results=search_results,
-            current_search_index=0 if search_results else -1
+            current_search_index=0 if search_results else -1,
         )
 
         return search_results
@@ -261,15 +253,15 @@ class DisplayAreaComponent(TUIComponent):
         Returns:
             Optional[int]: Current search result line number, or None if no results
         """
-        search_results = self.state.get('search_results', [])
+        search_results = self.state.get("search_results", [])
         if not search_results:
             return None
 
-        current_index = self.state.get('current_search_index', -1)
+        current_index = self.state.get("current_search_index", -1)
 
-        if direction == 'next':
+        if direction == "next":
             current_index = (current_index + 1) % len(search_results)
-        elif direction == 'previous':
+        elif direction == "previous":
             current_index = (current_index - 1) % len(search_results)
 
         self.update_state(current_search_index=current_index)
@@ -282,8 +274,8 @@ class DisplayAreaComponent(TUIComponent):
         Returns:
             str: All content joined together
         """
-        buffer = self.state.get('content_buffer', [])
-        return ''.join(buffer)
+        buffer = self.state.get("content_buffer", [])
+        return "".join(buffer)
 
     def get_line_count(self) -> int:
         """
@@ -292,7 +284,7 @@ class DisplayAreaComponent(TUIComponent):
         Returns:
             int: Number of lines
         """
-        return self.state.get('line_count', 0)
+        return self.state.get("line_count", 0)
 
     def set_max_lines(self, max_lines: int) -> None:
         """
@@ -303,7 +295,7 @@ class DisplayAreaComponent(TUIComponent):
         """
         self.update_state(max_lines=max_lines)
 
-        if hasattr(self, '_rich_log') and self._rich_log:
+        if hasattr(self, "_rich_log") and self._rich_log:
             self._rich_log.max_lines = max_lines
 
     def set_auto_scroll(self, auto_scroll: bool) -> None:
@@ -315,13 +307,13 @@ class DisplayAreaComponent(TUIComponent):
         """
         self.update_state(auto_scroll=auto_scroll)
 
-        if hasattr(self, '_rich_log') and self._rich_log:
+        if hasattr(self, "_rich_log") and self._rich_log:
             self._rich_log.auto_scroll = auto_scroll
 
     def _restore_buffered_content(self) -> None:
         """Restore any buffered content to the RichLog widget."""
-        if hasattr(self, '_rich_log') and self._rich_log:
-            buffer = self.state.get('content_buffer', [])
+        if hasattr(self, "_rich_log") and self._rich_log:
+            buffer = self.state.get("content_buffer", [])
             for content in buffer:
                 self._rich_log.write(content)
 

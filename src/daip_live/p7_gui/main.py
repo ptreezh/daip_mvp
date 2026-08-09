@@ -16,11 +16,15 @@ open http://localhost:8000/docs
 
 import asyncio
 import time
-from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
 
-from fastapi import Depends, FastAPI, HTTPException, WebSocket, WebSocketDisconnect, status
-from pydantic import BaseModel, Field
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    WebSocket,
+    WebSocketDisconnect,
+)
 
 from daip_live.agent_engine.executor import AgentExecutor
 from daip_live.config import create_config_yaml_if_not_exists
@@ -32,17 +36,16 @@ from daip_live.memory.session_manager import SessionManager
 from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p4_role_manager_tools.tool_manager import ToolManager
-from daip_live.persistence.database import DatabaseManager
 from daip_live.p7_gui.api_docs import (
     API_TAGS,
-    OPENAPI_SPEC,
-    SessionCreateRequest,
-    HealthCheckResponse,
-    RoleInfoResponse,
-    KnowledgeStatusResponse,
     ErrorResponse,
-    register_api_docs
+    HealthCheckResponse,
+    KnowledgeStatusResponse,
+    RoleInfoResponse,
+    SessionCreateRequest,
+    register_api_docs,
 )
+from daip_live.persistence.database import DatabaseManager
 
 # ============================================================================
 # Application Configuration
@@ -58,7 +61,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
-    tags=API_TAGS
+    tags=API_TAGS,
 )
 
 # Apply OpenAPI enhancements
@@ -66,22 +69,41 @@ register_api_docs(app)
 
 # --- Dependency Injection System ---
 
+
 def get_config():
     create_config_yaml_if_not_exists()
     # Use config bridge to get configuration data
     return config_bridge.get_config_data()
 
+
 def get_db_manager(cfg=Depends(get_config)) -> DatabaseManager:
-    return DatabaseManager(db_path=cfg.get('database', {}).get('path', 'daip_live.db'))
+    return DatabaseManager(db_path=cfg.get("database", {}).get("path", "daip_live.db"))
+
 
 def get_session_manager(db_manager=Depends(get_db_manager)) -> SessionManager:
     return SessionManager(db_manager=db_manager)
 
-def get_agent_executor(session_id: str, cfg=Depends(get_config), db_manager=Depends(get_db_manager), session_manager=Depends(get_session_manager)) -> AgentExecutor:
-    model_provider = LiteLLMProvider(ProviderConfig(model=cfg.get('llm_provider', {}).get('default_model', 'gpt-3.5-turbo')))
+
+def get_agent_executor(
+    session_id: str,
+    cfg=Depends(get_config),
+    db_manager=Depends(get_db_manager),
+    session_manager=Depends(get_session_manager),
+) -> AgentExecutor:
+    model_provider = LiteLLMProvider(
+        ProviderConfig(
+            model=cfg.get("llm_provider", {}).get("default_model", "gpt-3.5-turbo")
+        )
+    )
     tool_manager = ToolManager()
-    knowledge_manager = KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=KnowledgeBaseConfig(**cfg.get('knowledge_base') or {}))
-    memory_service = MemoryService(model_provider)  # Pass model_provider to MemoryService
+    knowledge_manager = KnowledgeManager(
+        db_manager=db_manager,
+        model_provider=model_provider,
+        config=KnowledgeBaseConfig(**cfg.get("knowledge_base") or {}),
+    )
+    memory_service = MemoryService(
+        model_provider
+    )  # Pass model_provider to MemoryService
     user_input_queue = asyncio.Queue()
 
     return AgentExecutor(
@@ -93,29 +115,45 @@ def get_agent_executor(session_id: str, cfg=Depends(get_config), db_manager=Depe
         user_input_queue=user_input_queue,
     )
 
+
 def get_role_manager(cfg=Depends(get_config)) -> RoleManager:
     """Dependency injection for RoleManager."""
-    return RoleManager(roles_dir_path=cfg.get('role_manager', {}).get('roles_dir', 'roles/'))
+    return RoleManager(
+        roles_dir_path=cfg.get("role_manager", {}).get("roles_dir", "roles/")
+    )
 
-def get_knowledge_manager(cfg=Depends(get_config), db_manager=Depends(get_db_manager)) -> KnowledgeManager:
+
+def get_knowledge_manager(
+    cfg=Depends(get_config), db_manager=Depends(get_db_manager)
+) -> KnowledgeManager:
     """Dependency injection for KnowledgeManager."""
-    model_provider = LiteLLMProvider(ProviderConfig(model=cfg.get('llm_provider', {}).get('default_model', 'gpt-3.5-turbo')))
-    return KnowledgeManager(db_manager=db_manager, model_provider=model_provider, config=KnowledgeBaseConfig(**cfg.get('knowledge_base') or {}))
+    model_provider = LiteLLMProvider(
+        ProviderConfig(
+            model=cfg.get("llm_provider", {}).get("default_model", "gpt-3.5-turbo")
+        )
+    )
+    return KnowledgeManager(
+        db_manager=db_manager,
+        model_provider=model_provider,
+        config=KnowledgeBaseConfig(**cfg.get("knowledge_base") or {}),
+    )
+
 
 # ============================================================================
 # API Endpoint Definitions
 # ============================================================================
+
 
 @app.post(
     "/api/sessions",
     response_model=Session,
     tags=["sessions"],
     summary="Create a new session",
-    description="Creates a new session with the specified goal and configuration. Returns the created session with its unique identifier."
+    description="Creates a new session with the specified goal and configuration. Returns the created session with its unique identifier.",  # noqa: E501
 )
 def create_session(
     request: SessionCreateRequest,
-    session_manager: SessionManager = Depends(get_session_manager)
+    session_manager: SessionManager = Depends(get_session_manager),
 ):
     """Create a new session for agent execution.
 
@@ -132,7 +170,7 @@ def create_session(
     session = session_manager.create_session(
         goal=request.goal,
         session_type=request.session_type or "workflow",
-        participant_ids=request.participant_ids or ["agent", "user"]
+        participant_ids=request.participant_ids or ["agent", "user"],
     )
     session_manager.save_session(session)
     return session
@@ -140,10 +178,10 @@ def create_session(
 
 @app.get(
     "/api/sessions",
-    response_model=List[Session],
+    response_model=list[Session],
     tags=["sessions"],
     summary="List all sessions",
-    description="Retrieves a list of all existing sessions with their metadata."
+    description="Retrieves a list of all existing sessions with their metadata.",
 )
 def list_sessions(session_manager: SessionManager = Depends(get_session_manager)):
     """List all available sessions.
@@ -163,13 +201,10 @@ def list_sessions(session_manager: SessionManager = Depends(get_session_manager)
     tags=["sessions"],
     summary="Get a specific session",
     description="Retrieves details of a specific session by ID.",
-    responses={
-        404: {"description": "Session not found", "model": ErrorResponse}
-    }
+    responses={404: {"description": "Session not found", "model": ErrorResponse}},
 )
 def get_session(
-    session_id: str,
-    session_manager: SessionManager = Depends(get_session_manager)
+    session_id: str, session_manager: SessionManager = Depends(get_session_manager)
 ):
     """Get a specific session by ID.
 
@@ -190,8 +225,8 @@ def get_session(
             detail=ErrorResponse(
                 error="SESSION_NOT_FOUND",
                 message=f"Session '{session_id}' does not exist",
-                timestamp=datetime.now(timezone.utc)
-            ).model_dump(mode='json')
+                timestamp=datetime.now(timezone.utc),
+            ).model_dump(mode="json"),
         )
     return session
 
@@ -201,13 +236,10 @@ def get_session(
     tags=["sessions"],
     summary="Delete a session",
     description="Deletes a specific session by ID. This operation cannot be undone.",
-    responses={
-        404: {"description": "Session not found", "model": ErrorResponse}
-    }
+    responses={404: {"description": "Session not found", "model": ErrorResponse}},
 )
 def delete_session(
-    session_id: str,
-    session_manager: SessionManager = Depends(get_session_manager)
+    session_id: str, session_manager: SessionManager = Depends(get_session_manager)
 ):
     """Delete a specific session by ID.
 
@@ -228,8 +260,8 @@ def delete_session(
             detail=ErrorResponse(
                 error="SESSION_NOT_FOUND",
                 message=f"Session '{session_id}' does not exist",
-                timestamp=datetime.now(timezone.utc)
-            ).model_dump(mode='json')
+                timestamp=datetime.now(timezone.utc),
+            ).model_dump(mode="json"),
         )
 
     session_manager.delete_session(session_id)
@@ -241,7 +273,7 @@ def delete_session(
     response_model=HealthCheckResponse,
     tags=["health"],
     summary="Health check",
-    description="Returns the current health status of the system including uptime and component status."
+    description="Returns the current health status of the system including uptime and component status.",  # noqa: E501
 )
 def health_check():
     """System health check endpoint.
@@ -258,17 +290,17 @@ def health_check():
         components={
             "database": "healthy",
             "knowledge_base": "healthy",
-            "model_provider": "healthy"
-        }
+            "model_provider": "healthy",
+        },
     )
 
 
 @app.get(
     "/api/roles",
-    response_model=List[RoleInfoResponse],
+    response_model=list[RoleInfoResponse],
     tags=["roles"],
     summary="List available roles",
-    description="Retrieves a list of all available agent roles with their configurations and capabilities."
+    description="Retrieves a list of all available agent roles with their configurations and capabilities.",  # noqa: E501
 )
 def list_roles(role_manager: RoleManager = Depends(get_role_manager)):
     """List all available roles.
@@ -287,11 +319,11 @@ def list_roles(role_manager: RoleManager = Depends(get_role_manager)):
                 description=role_data.get("description", "No description available"),
                 system_prompt=role_data.get("system_prompt", ""),
                 model=role_data.get("model"),
-                capabilities=role_data.get("capabilities", [])
+                capabilities=role_data.get("capabilities", []),
             )
             for role_name, role_data in roles.items()
         ]
-    except Exception as e:
+    except Exception:
         # Graceful degradation on error
         return []
 
@@ -301,9 +333,11 @@ def list_roles(role_manager: RoleManager = Depends(get_role_manager)):
     response_model=KnowledgeStatusResponse,
     tags=["knowledge"],
     summary="Get knowledge base status",
-    description="Retrieves the current status and statistics of the knowledge base including document count and index size."
+    description="Retrieves the current status and statistics of the knowledge base including document count and index size.",  # noqa: E501
 )
-def get_knowledge_status(knowledge_manager: KnowledgeManager = Depends(get_knowledge_manager)):
+def get_knowledge_status(
+    knowledge_manager: KnowledgeManager = Depends(get_knowledge_manager),
+):
     """Get knowledge base status and statistics.
 
     Args:
@@ -315,7 +349,7 @@ def get_knowledge_status(knowledge_manager: KnowledgeManager = Depends(get_knowl
     try:
         # Try to get document count if available
         doc_count = 0
-        if hasattr(knowledge_manager, 'get_document_count'):
+        if hasattr(knowledge_manager, "get_document_count"):
             try:
                 doc_count = knowledge_manager.get_document_count()
             except Exception:
@@ -324,7 +358,7 @@ def get_knowledge_status(knowledge_manager: KnowledgeManager = Depends(get_knowl
         # Get index info if available
         index_size = None
         embedding_dim = None
-        if hasattr(knowledge_manager, 'index'):
+        if hasattr(knowledge_manager, "index"):
             try:
                 index_size = knowledge_manager.index.ntotal
             except Exception:
@@ -335,26 +369,26 @@ def get_knowledge_status(knowledge_manager: KnowledgeManager = Depends(get_knowl
             last_sync=datetime.now(timezone.utc),
             total_documents=doc_count,
             index_size=index_size,
-            embedding_dimension=embedding_dim
+            embedding_dimension=embedding_dim,
         )
-    except Exception as e:
+    except Exception:
         # Return error status on exception
         return KnowledgeStatusResponse(
-            status="error",
-            last_sync=datetime.now(timezone.utc),
-            total_documents=0
+            status="error", last_sync=datetime.now(timezone.utc), total_documents=0
         )
+
 
 # ============================================================================
 # WebSocket Endpoint
 # ============================================================================
+
 
 @app.websocket("/ws/sessions/{session_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
     session_id: str,
     agent_executor: AgentExecutor = Depends(get_agent_executor),
-    session_manager: SessionManager = Depends(get_session_manager)
+    session_manager: SessionManager = Depends(get_session_manager),
 ):
     """WebSocket endpoint for real-time agent communication.
 

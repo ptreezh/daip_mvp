@@ -5,18 +5,17 @@ High-level knowledge base abstraction with advanced features like
 categorization, backup/restore, and analytics.
 """
 
-from typing import List, Dict, Any, Optional, Set
 import json
-import shutil
 import logging
-from pathlib import Path
-from datetime import datetime, timedelta
 import zipfile
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
 
-from .document import Document, DocumentStatus, DocumentType
-from .vector_store import VectorStore, SearchResult
+from .document import Document
 from .knowledge_manager import KnowledgeManager
+from .vector_store import SearchResult
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ class KnowledgeBase:
         description: str = "",
         embedding_dimension: int = 768,
         auto_categorize: bool = True,
-        enable_analytics: bool = True
+        enable_analytics: bool = True,
     ):
         self.name = name
         self.description = description
@@ -43,7 +42,7 @@ class KnowledgeBase:
         # Initialize knowledge manager
         self.manager = KnowledgeManager(
             data_dir=str(self.storage_path / "data"),
-            embedding_dimension=embedding_dimension
+            embedding_dimension=embedding_dimension,
         )
 
         # Categories and tags
@@ -52,11 +51,11 @@ class KnowledgeBase:
         self.analytics_file = self.storage_path / "analytics.json"
 
         # Load or initialize categories and tags
-        self.categories: Dict[str, Dict[str, Any]] = self._load_categories()
-        self.tags: Dict[str, Dict[str, Any]] = self._load_tags()
+        self.categories: dict[str, dict[str, Any]] = self._load_categories()
+        self.tags: dict[str, dict[str, Any]] = self._load_tags()
 
         # Analytics data
-        self.analytics: Dict[str, Any] = self._load_analytics()
+        self.analytics: dict[str, Any] = self._load_analytics()
 
         # Backup settings
         self.backup_dir = self.storage_path / "backups"
@@ -86,7 +85,9 @@ class KnowledgeBase:
                     self._record_document_addition(document)
 
                 self.updated_at = datetime.now()
-                logger.info(f"Added document '{document.title}' to knowledge base '{self.name}'")
+                logger.info(
+                    f"Added document '{document.title}' to knowledge base '{self.name}'"
+                )
 
             return doc_id
 
@@ -94,7 +95,7 @@ class KnowledgeBase:
             logger.error(f"Error adding document to knowledge base: {e}")
             return None
 
-    def add_documents_batch(self, documents: List[Document]) -> List[str]:
+    def add_documents_batch(self, documents: list[Document]) -> list[str]:
         """Add multiple documents in batch"""
         added_ids = []
         for document in documents:
@@ -102,18 +103,20 @@ class KnowledgeBase:
             if doc_id:
                 added_ids.append(doc_id)
 
-        logger.info(f"Added {len(added_ids)}/{len(documents)} documents to knowledge base '{self.name}'")
+        logger.info(
+            f"Added {len(added_ids)}/{len(documents)} documents to knowledge base '{self.name}'"  # noqa: E501
+        )
         return added_ids
 
     def search(
         self,
         query: str,
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None,
-        categories: Optional[List[str]] = None,
-        tags: Optional[List[str]] = None,
-        search_type: str = "hybrid"
-    ) -> List[SearchResult]:
+        filters: Optional[dict[str, Any]] = None,
+        categories: Optional[list[str]] = None,
+        tags: Optional[list[str]] = None,
+        search_type: str = "hybrid",
+    ) -> list[SearchResult]:
         """Search the knowledge base with advanced filtering"""
         try:
             # Build filters
@@ -142,7 +145,7 @@ class KnowledgeBase:
         """Get a document by ID"""
         return self.manager.get_document(document_id)
 
-    def get_all_documents(self) -> List[Document]:
+    def get_all_documents(self) -> list[Document]:
         """Get all documents in the knowledge base"""
         return self.manager.get_all_documents()
 
@@ -158,7 +161,7 @@ class KnowledgeBase:
             logger.error(f"Error deleting document: {e}")
             return False
 
-    def update_document(self, document_id: str, updates: Dict[str, Any]) -> bool:
+    def update_document(self, document_id: str, updates: dict[str, Any]) -> bool:
         """Update a document"""
         try:
             success = self.manager.update_document(document_id, updates)
@@ -180,7 +183,7 @@ class KnowledgeBase:
             logger.error(f"Error updating document: {e}")
             return False
 
-    def get_categories(self) -> Dict[str, int]:
+    def get_categories(self) -> dict[str, int]:
         """Get all categories and their document counts"""
         return self.manager.get_categories()
 
@@ -189,7 +192,7 @@ class KnowledgeBase:
         name: str,
         description: str = "",
         color: str = "#007acc",
-        parent: Optional[str] = None
+        parent: Optional[str] = None,
     ) -> bool:
         """Add a new category"""
         try:
@@ -202,7 +205,7 @@ class KnowledgeBase:
                 "color": color,
                 "parent": parent,
                 "created_at": datetime.now().isoformat(),
-                "document_count": 0
+                "document_count": 0,
             }
 
             self._save_categories()
@@ -238,7 +241,7 @@ class KnowledgeBase:
             logger.error(f"Error removing category: {e}")
             return False
 
-    def get_tags(self) -> Dict[str, int]:
+    def get_tags(self) -> dict[str, int]:
         """Get all tags and their usage counts"""
         tag_counts = defaultdict(int)
         for document in self.get_all_documents():
@@ -258,7 +261,7 @@ class KnowledgeBase:
                 "description": description,
                 "color": color,
                 "created_at": datetime.now().isoformat(),
-                "usage_count": 0
+                "usage_count": 0,
             }
 
             self._save_tags()
@@ -294,10 +297,8 @@ class KnowledgeBase:
             return False
 
     def get_analytics(
-        self,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None
-    ) -> Dict[str, Any]:
+        self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None
+    ) -> dict[str, Any]:
         """Get knowledge base analytics"""
         try:
             # Basic statistics
@@ -305,7 +306,9 @@ class KnowledgeBase:
 
             # Document trends
             documents = self.get_all_documents()
-            doc_trends = self._calculate_document_trends(documents, start_date, end_date)
+            doc_trends = self._calculate_document_trends(
+                documents, start_date, end_date
+            )
 
             # Category analytics
             category_analytics = self._calculate_category_analytics()
@@ -321,13 +324,13 @@ class KnowledgeBase:
                     "name": self.name,
                     "description": self.description,
                     "created_at": self.created_at.isoformat(),
-                    "updated_at": self.updated_at.isoformat()
+                    "updated_at": self.updated_at.isoformat(),
                 },
                 "basic_stats": stats,
                 "document_trends": doc_trends,
                 "category_analytics": category_analytics,
                 "tag_analytics": tag_analytics,
-                "search_analytics": search_analytics
+                "search_analytics": search_analytics,
             }
 
         except Exception as e:
@@ -343,10 +346,10 @@ class KnowledgeBase:
 
             backup_path = Path(backup_path)
 
-            with zipfile.ZipFile(backup_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            with zipfile.ZipFile(backup_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                 # Add knowledge base data
                 for file_path in self.storage_path.rglob("*"):
-                    if file_path.is_file() and not file_path.name.startswith('.'):
+                    if file_path.is_file() and not file_path.name.startswith("."):
                         arcname = file_path.relative_to(self.storage_path)
                         zipf.write(file_path, arcname)
 
@@ -356,7 +359,7 @@ class KnowledgeBase:
                     "created_at": datetime.now().isoformat(),
                     "knowledge_base_name": self.name,
                     "description": self.description,
-                    "document_count": len(self.get_all_documents())
+                    "document_count": len(self.get_all_documents()),
                 }
 
                 zipf.writestr("backup_metadata.json", json.dumps(metadata, indent=2))
@@ -377,14 +380,17 @@ class KnowledgeBase:
                 return False
 
             # Create backup of current state
-            current_backup = self.backup_dir / f"{self.name}_pre_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+            current_backup = (
+                self.backup_dir
+                / f"{self.name}_pre_restore_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"  # noqa: E501
+            )
             self.create_backup(str(current_backup))
 
             # Clear current data
             self.clear()
 
             # Extract backup
-            with zipfile.ZipFile(backup_path, 'r') as zipf:
+            with zipfile.ZipFile(backup_path, "r") as zipf:
                 zipf.extractall(self.storage_path)
 
             # Reload data
@@ -410,11 +416,13 @@ class KnowledgeBase:
         """Get total document count"""
         return len(self.manager)
 
-    def get_recent_documents(self, limit: int = 10) -> List[Document]:
+    def get_recent_documents(self, limit: int = 10) -> list[Document]:
         """Get recently added documents"""
         return self.manager.get_recent_documents(limit)
 
-    def get_similar_documents(self, document_id: str, limit: int = 5) -> List[SearchResult]:
+    def get_similar_documents(
+        self, document_id: str, limit: int = 5
+    ) -> list[SearchResult]:
         """Get documents similar to a given document"""
         return self.manager.search_engine.get_similar_documents(document_id, limit)
 
@@ -428,26 +436,65 @@ class KnowledgeBase:
 
             # Simple keyword-based categorization
             category_keywords = {
-                "Technical": ["code", "programming", "software", "development", "api", "algorithm"],
-                "Research": ["study", "research", "analysis", "findings", "methodology", "results"],
-                "Documentation": ["guide", "manual", "documentation", "tutorial", "howto", "instructions"],
-                "Business": ["business", "strategy", "market", "revenue", "customer", "product"],
+                "Technical": [
+                    "code",
+                    "programming",
+                    "software",
+                    "development",
+                    "api",
+                    "algorithm",
+                ],
+                "Research": [
+                    "study",
+                    "research",
+                    "analysis",
+                    "findings",
+                    "methodology",
+                    "results",
+                ],
+                "Documentation": [
+                    "guide",
+                    "manual",
+                    "documentation",
+                    "tutorial",
+                    "howto",
+                    "instructions",
+                ],
+                "Business": [
+                    "business",
+                    "strategy",
+                    "market",
+                    "revenue",
+                    "customer",
+                    "product",
+                ],
                 "Design": ["design", "ui", "ux", "interface", "prototype", "wireframe"],
-                "Data": ["data", "database", "analytics", "statistics", "metrics", "report"]
+                "Data": [
+                    "data",
+                    "database",
+                    "analytics",
+                    "statistics",
+                    "metrics",
+                    "report",
+                ],
             }
 
             best_category = "General"
             best_score = 0
 
             for category, keywords in category_keywords.items():
-                score = sum(1 for keyword in keywords if keyword in content or keyword in title)
+                score = sum(
+                    1 for keyword in keywords if keyword in content or keyword in title
+                )
                 if score > best_score:
                     best_score = score
                     best_category = category
 
             if best_score > 0:
                 document.update_metadata("category", best_category)
-                logger.debug(f"Auto-categorized document '{document.title}' as '{best_category}'")
+                logger.debug(
+                    f"Auto-categorized document '{document.title}' as '{best_category}'"
+                )
 
         except Exception as e:
             logger.error(f"Error auto-categorizing document: {e}")
@@ -459,7 +506,8 @@ class KnowledgeBase:
             category = document.metadata.get("category")
             if category and category in self.categories:
                 self.categories[category]["document_count"] = sum(
-                    1 for doc in self.get_all_documents()
+                    1
+                    for doc in self.get_all_documents()
                     if doc.metadata.get("category") == category
                 )
 
@@ -467,8 +515,7 @@ class KnowledgeBase:
             for tag in document.tags:
                 if tag in self.tags:
                     self.tags[tag]["usage_count"] = sum(
-                        1 for doc in self.get_all_documents()
-                        if tag in doc.tags
+                        1 for doc in self.get_all_documents() if tag in doc.tags
                     )
 
             self._save_categories()
@@ -477,11 +524,11 @@ class KnowledgeBase:
         except Exception as e:
             logger.error(f"Error updating document metadata: {e}")
 
-    def _load_categories(self) -> Dict[str, Dict[str, Any]]:
+    def _load_categories(self) -> dict[str, dict[str, Any]]:
         """Load categories from file"""
         try:
             if self.categories_file.exists():
-                with open(self.categories_file, 'r') as f:
+                with open(self.categories_file) as f:
                     return json.load(f)
         except Exception as e:
             logger.error(f"Error loading categories: {e}")
@@ -491,16 +538,16 @@ class KnowledgeBase:
     def _save_categories(self) -> None:
         """Save categories to file"""
         try:
-            with open(self.categories_file, 'w') as f:
+            with open(self.categories_file, "w") as f:
                 json.dump(self.categories, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving categories: {e}")
 
-    def _load_tags(self) -> Dict[str, Dict[str, Any]]:
+    def _load_tags(self) -> dict[str, dict[str, Any]]:
         """Load tags from file"""
         try:
             if self.tags_file.exists():
-                with open(self.tags_file, 'r') as f:
+                with open(self.tags_file) as f:
                     return json.load(f)
         except Exception as e:
             logger.error(f"Error loading tags: {e}")
@@ -510,16 +557,16 @@ class KnowledgeBase:
     def _save_tags(self) -> None:
         """Save tags to file"""
         try:
-            with open(self.tags_file, 'w') as f:
+            with open(self.tags_file, "w") as f:
                 json.dump(self.tags, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving tags: {e}")
 
-    def _load_analytics(self) -> Dict[str, Any]:
+    def _load_analytics(self) -> dict[str, Any]:
         """Load analytics from file"""
         try:
             if self.analytics_file.exists():
-                with open(self.analytics_file, 'r') as f:
+                with open(self.analytics_file) as f:
                     return json.load(f)
         except Exception as e:
             logger.error(f"Error loading analytics: {e}")
@@ -528,13 +575,13 @@ class KnowledgeBase:
             "documents_added": 0,
             "documents_deleted": 0,
             "searches_performed": 0,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
         }
 
     def _save_analytics(self) -> None:
         """Save analytics to file"""
         try:
-            with open(self.analytics_file, 'w') as f:
+            with open(self.analytics_file, "w") as f:
                 json.dump(self.analytics, f, indent=2)
         except Exception as e:
             logger.error(f"Error saving analytics: {e}")
@@ -545,7 +592,7 @@ class KnowledgeBase:
         self.analytics["last_document_added"] = {
             "title": document.title,
             "type": document.document_type.value,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         self._save_analytics()
 
@@ -554,7 +601,7 @@ class KnowledgeBase:
         self.analytics["documents_deleted"] += 1
         self.analytics["last_document_deleted"] = {
             "document_id": document_id,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         self._save_analytics()
 
@@ -566,11 +613,7 @@ class KnowledgeBase:
         self._save_analytics()
 
     def _record_search(
-        self,
-        query: str,
-        result_count: int,
-        filters: Dict[str, Any],
-        search_type: str
+        self, query: str, result_count: int, filters: dict[str, Any], search_type: str
     ) -> None:
         """Record search in analytics"""
         self.analytics["searches_performed"] += 1
@@ -579,16 +622,16 @@ class KnowledgeBase:
             "result_count": result_count,
             "filters": filters,
             "search_type": search_type,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         self._save_analytics()
 
     def _calculate_document_trends(
         self,
-        documents: List[Document],
+        documents: list[Document],
         start_date: Optional[datetime],
-        end_date: Optional[datetime]
-    ) -> Dict[str, Any]:
+        end_date: Optional[datetime],
+    ) -> dict[str, Any]:
         """Calculate document addition trends"""
         # Group documents by creation date
         daily_counts = defaultdict(int)
@@ -608,15 +651,16 @@ class KnowledgeBase:
         return {
             "daily_additions": dict(daily_counts),
             "type_distribution": dict(type_counts),
-            "total_documents": len(documents)
+            "total_documents": len(documents),
         }
 
-    def _calculate_category_analytics(self) -> Dict[str, Any]:
+    def _calculate_category_analytics(self) -> dict[str, Any]:
         """Calculate category analytics"""
         category_stats = {}
         for category_name, category_info in self.categories.items():
             category_docs = [
-                doc for doc in self.get_all_documents()
+                doc
+                for doc in self.get_all_documents()
                 if doc.metadata.get("category") == category_name
             ]
 
@@ -625,25 +669,22 @@ class KnowledgeBase:
                 "description": category_info.get("description", ""),
                 "color": category_info.get("color", "#007acc"),
                 "created_at": category_info.get("created_at"),
-                "total_words": sum(doc.get_word_count() for doc in category_docs)
+                "total_words": sum(doc.get_word_count() for doc in category_docs),
             }
 
         return category_stats
 
-    def _calculate_tag_analytics(self) -> Dict[str, Any]:
+    def _calculate_tag_analytics(self) -> dict[str, Any]:
         """Calculate tag analytics"""
         tag_stats = {}
         for tag_name, tag_info in self.tags.items():
-            tag_docs = [
-                doc for doc in self.get_all_documents()
-                if tag_name in doc.tags
-            ]
+            tag_docs = [doc for doc in self.get_all_documents() if tag_name in doc.tags]
 
             tag_stats[tag_name] = {
                 "usage_count": len(tag_docs),
                 "description": tag_info.get("description", ""),
                 "color": tag_info.get("color", "#28a745"),
-                "created_at": tag_info.get("created_at")
+                "created_at": tag_info.get("created_at"),
             }
 
         return tag_stats
@@ -663,5 +704,7 @@ class KnowledgeBase:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"KnowledgeBase(name='{self.name}', documents={len(self.manager)}, "
-                f"storage_path='{self.storage_path}')")
+        return (
+            f"KnowledgeBase(name='{self.name}', documents={len(self.manager)}, "
+            f"storage_path='{self.storage_path}')"
+        )

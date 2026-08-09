@@ -1,13 +1,13 @@
 """
 Skill execution caching system with TTL support and LRU eviction.
 """
+
 import hashlib
 import json
 import time
 from collections import OrderedDict
-from typing import Optional, Dict, Any, List
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from typing import Any, Optional
 
 from .base import SkillInput, SkillOutput
 
@@ -15,6 +15,7 @@ from .base import SkillInput, SkillOutput
 @dataclass
 class CacheEntry:
     """Represents a cached skill execution result."""
+
     output: SkillOutput
     skill_name: str
     timestamp: float
@@ -31,6 +32,7 @@ class CacheEntry:
 @dataclass
 class CacheStatistics:
     """Statistics about cache performance."""
+
     hits: int = 0
     misses: int = 0
     evictions: int = 0
@@ -59,7 +61,7 @@ class SkillCache:
         self,
         max_size: int = 100,
         default_ttl: Optional[float] = None,
-        enabled: bool = True
+        enabled: bool = True,
     ):
         """
         Initialize the skill cache.
@@ -68,7 +70,7 @@ class SkillCache:
             max_size: Maximum number of entries in the cache (LRU eviction)
             default_ttl: Default time-to-live for cache entries in seconds (None = no expiration)
             enabled: Whether caching is enabled
-        """
+        """  # noqa: E501
         self._cache: OrderedDict[str, CacheEntry] = OrderedDict()
         self._max_size = max_size
         self._default_ttl = default_ttl
@@ -109,17 +111,19 @@ class SkillCache:
         """
         # Create a deterministic string representation of the input
         input_dict = {
-            'data': input.data,
-            'context': input.context,
-            'metadata': input.metadata
+            "data": input.data,
+            "context": input.context,
+            "metadata": input.metadata,
         }
         input_str = json.dumps(input_dict, sort_keys=True)
         key_string = f"{skill_name}:{input_str}"
 
         # Generate MD5 hash for efficient storage
-        return hashlib.md5(key_string.encode('utf-8')).hexdigest()
+        return hashlib.md5(key_string.encode("utf-8")).hexdigest()
 
-    def get(self, skill_name: str, input: SkillInput, ttl: Optional[float] = None) -> Optional[SkillOutput]:
+    def get(
+        self, skill_name: str, input: SkillInput, ttl: Optional[float] = None
+    ) -> Optional[SkillOutput]:
         """
         Retrieve a cached result.
 
@@ -160,7 +164,13 @@ class SkillCache:
         self._stats.misses += 1
         return None
 
-    def put(self, skill_name: str, input: SkillInput, output: SkillOutput, ttl: Optional[float] = None) -> None:
+    def put(
+        self,
+        skill_name: str,
+        input: SkillInput,
+        output: SkillOutput,
+        ttl: Optional[float] = None,
+    ) -> None:
         """
         Store a result in the cache.
 
@@ -182,7 +192,7 @@ class SkillCache:
             skill_name=skill_name,
             timestamp=current_time,
             access_count=0,
-            last_access=current_time
+            last_access=current_time,
         )
 
         # If the key already exists, replace it (move to end)
@@ -209,7 +219,7 @@ class SkillCache:
 
         Returns:
             Number of entries invalidated
-        """
+        """  # noqa: E501
         if not self._enabled:
             return 0
 
@@ -267,7 +277,7 @@ class SkillCache:
 
         return len(keys_to_remove)
 
-    def get_entries_by_skill(self, skill_name: str) -> List[Dict[str, Any]]:
+    def get_entries_by_skill(self, skill_name: str) -> list[dict[str, Any]]:
         """
         Get all cached entries for a specific skill.
 
@@ -285,13 +295,15 @@ class SkillCache:
 
         for cache_key, entry in self._cache.items():
             if cache_key.startswith(skill_hash_prefix):
-                entries.append({
-                    'cache_key': cache_key,
-                    'timestamp': entry.timestamp,
-                    'last_access': entry.last_access,
-                    'access_count': entry.access_count,
-                    'is_expired': entry.is_expired(self._default_ttl)
-                })
+                entries.append(
+                    {
+                        "cache_key": cache_key,
+                        "timestamp": entry.timestamp,
+                        "last_access": entry.last_access,
+                        "access_count": entry.access_count,
+                        "is_expired": entry.is_expired(self._default_ttl),
+                    }
+                )
 
         return entries
 

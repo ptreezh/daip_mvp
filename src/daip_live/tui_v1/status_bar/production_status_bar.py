@@ -15,30 +15,30 @@ This module provides comprehensive status bar capabilities including:
 """
 
 import asyncio
-import time
-import psutil
+import json
+import logging
 import platform
 import socket
-import threading
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional, Set, Callable, Union
-from dataclasses import dataclass, field
-from enum import Enum
-import logging
-import json
 import sqlite3
-from pathlib import Path
-import weakref
-from collections import deque, defaultdict
-import aiofiles
-import aiohttp
+import time
+import uuid
+from collections import defaultdict, deque
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Optional
+
+import aiohttp
+import psutil
 
 logger = logging.getLogger(__name__)
 
 
 class AlertSeverity(Enum):
     """Alert severity levels"""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -47,6 +47,7 @@ class AlertSeverity(Enum):
 
 class ConnectionStatus(Enum):
     """Network connection status"""
+
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     CONNECTING = "connecting"
@@ -55,6 +56,7 @@ class ConnectionStatus(Enum):
 
 class WidgetType(Enum):
     """Widget types for status bar"""
+
     SYSTEM_INFO = "system_info"
     NETWORK_STATUS = "network_status"
     SERVICE_HEALTH = "service_health"
@@ -69,6 +71,7 @@ class WidgetType(Enum):
 @dataclass
 class Alert:
     """System alert with metadata"""
+
     id: str
     severity: AlertSeverity
     title: str
@@ -77,10 +80,10 @@ class Alert:
     source: str
     acknowledged: bool = False
     resolved: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    actions: List[Dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    actions: list[dict[str, Any]] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "severity": self.severity.value,
@@ -91,13 +94,14 @@ class Alert:
             "acknowledged": self.acknowledged,
             "resolved": self.resolved,
             "metadata": self.metadata,
-            "actions": self.actions
+            "actions": self.actions,
         }
 
 
 @dataclass
 class SystemMetrics:
     """System performance metrics"""
+
     cpu_percent: float = 0.0
     cpu_count: int = 0
     memory_percent: float = 0.0
@@ -110,7 +114,7 @@ class SystemMetrics:
     network_recv_mb: float = 0.0
     process_count: int = 0
     uptime_seconds: float = 0.0
-    load_average: List[float] = field(default_factory=list)
+    load_average: list[float] = field(default_factory=list)
     temperature_celsius: Optional[float] = None
     gpu_percent: Optional[float] = None
     gpu_memory_percent: Optional[float] = None
@@ -119,12 +123,13 @@ class SystemMetrics:
 @dataclass
 class NetworkMetrics:
     """Network connectivity metrics"""
+
     status: ConnectionStatus = ConnectionStatus.DISCONNECTED
     latency_ms: Optional[float] = None
     bandwidth_mbps: Optional[float] = None
     packet_loss: float = 0.0
     active_connections: int = 0
-    dns_servers: List[str] = field(default_factory=list)
+    dns_servers: list[str] = field(default_factory=list)
     public_ip: Optional[str] = None
     local_ip: Optional[str] = None
     last_check: Optional[datetime] = None
@@ -133,6 +138,7 @@ class NetworkMetrics:
 @dataclass
 class WidgetData:
     """Widget data with metadata"""
+
     widget_type: WidgetType
     title: str
     content: Any
@@ -141,7 +147,7 @@ class WidgetData:
     refresh_interval_seconds: int = 5
     enabled: bool = True
     priority: int = 0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class StatusWidget:
@@ -156,7 +162,7 @@ class StatusWidget:
         self.enabled = True
         self.error_count = 0
         self.max_errors = 3
-        self.callbacks: List[Callable] = []
+        self.callbacks: list[Callable] = []
 
     async def update(self) -> Optional[WidgetData]:
         """Update widget data"""
@@ -172,7 +178,9 @@ class StatusWidget:
             logger.error(f"Widget {self.widget_id} update error: {e}")
             if self.error_count >= self.max_errors:
                 self.enabled = False
-                logger.warning(f"Widget {self.widget_id} disabled due to repeated errors")
+                logger.warning(
+                    f"Widget {self.widget_id} disabled due to repeated errors"
+                )
 
         return None
 
@@ -218,7 +226,7 @@ class SystemInfoWidget(StatusWidget):
                 "os": f"{system} {machine}",
                 "processor": processor,
                 "uptime": f"{days}d {hours}h {minutes}m",
-                "python_version": platform.python_version()
+                "python_version": platform.python_version(),
             }
 
             return WidgetData(
@@ -226,7 +234,7 @@ class SystemInfoWidget(StatusWidget):
                 title=self.title,
                 content=content,
                 last_updated=datetime.now(),
-                refresh_interval=self.refresh_interval
+                refresh_interval=self.refresh_interval,
             )
 
         except Exception as e:
@@ -255,7 +263,7 @@ class ResourceUsageWidget(StatusWidget):
             memory_total_gb = memory.total / (1024**3)
 
             # Disk metrics
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
             disk_percent = disk.percent
             disk_used_gb = disk.used / (1024**3)
             disk_total_gb = disk.total / (1024**3)
@@ -263,8 +271,12 @@ class ResourceUsageWidget(StatusWidget):
             # Network metrics
             network = psutil.net_io_counters()
             if self.last_network_stats:
-                sent_mb = (network.bytes_sent - self.last_network_stats.bytes_sent) / (1024**2)
-                recv_mb = (network.bytes_recv - self.last_network_stats.bytes_recv) / (1024**2)
+                sent_mb = (network.bytes_sent - self.last_network_stats.bytes_sent) / (
+                    1024**2
+                )
+                recv_mb = (network.bytes_recv - self.last_network_stats.bytes_recv) / (
+                    1024**2
+                )
             else:
                 sent_mb = recv_mb = 0.0
             self.last_network_stats = network
@@ -282,7 +294,7 @@ class ResourceUsageWidget(StatusWidget):
                         if entries:
                             temp_celsius = entries[0].current
                             break
-            except:
+            except Exception:
                 pass
 
             # Get GPU metrics if available
@@ -290,6 +302,7 @@ class ResourceUsageWidget(StatusWidget):
             gpu_memory_percent = None
             try:
                 import GPUtil
+
                 gpus = GPUtil.getGPUs()
                 if gpus:
                     gpu = gpus[0]  # Use first GPU
@@ -313,14 +326,14 @@ class ResourceUsageWidget(StatusWidget):
                 uptime_seconds=time.time() - self.boot_time,
                 temperature_celsius=temp_celsius,
                 gpu_percent=gpu_percent,
-                gpu_memory_percent=gpu_memory_percent
+                gpu_memory_percent=gpu_memory_percent,
             )
 
             # Determine status based on resource usage
             status = "normal"
-            if cpu_percent > 80 or memory_percent > 80 or disk_percent > 90:
+            if cpu_percent > 80 or memory.percent > 80 or disk_percent > 90:
                 status = "critical"
-            elif cpu_percent > 60 or memory_percent > 60 or disk_percent > 75:
+            elif cpu_percent > 60 or memory.percent > 60 or disk_percent > 75:
                 status = "warning"
 
             return WidgetData(
@@ -329,7 +342,7 @@ class ResourceUsageWidget(StatusWidget):
                 content=metrics.__dict__,
                 status=status,
                 last_updated=datetime.now(),
-                refresh_interval=self.refresh_interval
+                refresh_interval=self.refresh_interval,
             )
 
         except Exception as e:
@@ -357,7 +370,7 @@ class NetworkStatusWidget(StatusWidget):
                 s.connect(("8.8.8.8", 80))
                 metrics.local_ip = s.getsockname()[0]
                 s.close()
-            except:
+            except Exception:
                 metrics.local_ip = "Unknown"
 
             # Test connectivity
@@ -371,43 +384,50 @@ class NetworkStatusWidget(StatusWidget):
                     latencies.append(latency)
                     sock.close()
                     connected = True
-                except:
+                except Exception:
                     pass
 
             if connected:
                 metrics.status = ConnectionStatus.CONNECTED
-                metrics.latency_ms = sum(latencies) / len(latencies) if latencies else None
+                metrics.latency_ms = (
+                    sum(latencies) / len(latencies) if latencies else None
+                )
             else:
                 metrics.status = ConnectionStatus.DISCONNECTED
 
             # Get active connections
             try:
                 connections = psutil.net_connections()
-                metrics.active_connections = len([c for c in connections if c.status == 'ESTABLISHED'])
-            except:
+                metrics.active_connections = len(
+                    [c for c in connections if c.status == "ESTABLISHED"]
+                )
+            except Exception:
                 pass
 
             # Get DNS servers
             try:
-                import socket
                 dns_servers = []
-                with open('/etc/resolv.conf', 'r') as f:
+                with open("/etc/resolv.conf") as f:
                     for line in f:
-                        if line.startswith('nameserver'):
+                        if line.startswith("nameserver"):
                             dns_servers.append(line.split()[1])
                 metrics.dns_servers = dns_servers[:3]  # Limit to first 3
-            except:
+            except Exception:
                 metrics.dns_servers = []
 
             # Get public IP (cached to avoid frequent requests)
-            if not self.last_bandwidth_check or \
-               (datetime.now() - self.last_bandwidth_check).total_seconds() > 300:  # 5 minutes
+            if (
+                not self.last_bandwidth_check
+                or (datetime.now() - self.last_bandwidth_check).total_seconds() > 300
+            ):  # 5 minutes
                 try:
-                    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
-                        async with session.get('https://api.ipify.org') as response:
+                    async with aiohttp.ClientSession(
+                        timeout=aiohttp.ClientTimeout(total=5)
+                    ) as session:
+                        async with session.get("https://api.ipify.org") as response:
                             if response.status == 200:
                                 metrics.public_ip = await response.text()
-                except:
+                except Exception:
                     pass
                 self.last_bandwidth_check = datetime.now()
 
@@ -421,7 +441,7 @@ class NetworkStatusWidget(StatusWidget):
                 content=metrics.__dict__,
                 status=metrics.status.value,
                 last_updated=datetime.now(),
-                refresh_interval=self.refresh_interval
+                refresh_interval=self.refresh_interval,
             )
 
         except Exception as e:
@@ -444,7 +464,7 @@ class ServiceHealthWidget(StatusWidget):
                 title=self.title,
                 content={"message": "No service manager available"},
                 status="unknown",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
         try:
@@ -459,7 +479,7 @@ class ServiceHealthWidget(StatusWidget):
                 "total_services": total_count,
                 "healthy_services": healthy_count,
                 "unhealthy_services": total_count - healthy_count,
-                "services": services_status["services"]
+                "services": services_status["services"],
             }
 
             # Determine overall status
@@ -475,7 +495,7 @@ class ServiceHealthWidget(StatusWidget):
                 content=content,
                 status=status,
                 last_updated=datetime.now(),
-                refresh_interval=self.refresh_interval
+                refresh_interval=self.refresh_interval,
             )
 
         except Exception as e:
@@ -498,7 +518,7 @@ class TimeClockWidget(StatusWidget):
                 "date": now.strftime("%Y-%m-%d"),
                 "day_of_week": now.strftime("%A"),
                 "iso_format": now.isoformat(),
-                "timestamp": now.timestamp()
+                "timestamp": now.timestamp(),
             }
 
             return WidgetData(
@@ -506,7 +526,7 @@ class TimeClockWidget(StatusWidget):
                 title=self.title,
                 content=content,
                 last_updated=datetime.now(),
-                refresh_interval=self.refresh_interval
+                refresh_interval=self.refresh_interval,
             )
 
         except Exception as e:
@@ -520,7 +540,7 @@ class NotificationWidget(StatusWidget):
     def __init__(self):
         super().__init__("notifications", "Notifications", refresh_interval=5)
         self.alerts: deque[Alert] = deque(maxlen=100)
-        self.alert_callbacks: List[Callable] = []
+        self.alert_callbacks: list[Callable] = []
 
     def add_alert(self, alert: Alert) -> None:
         """Add a new alert"""
@@ -555,7 +575,9 @@ class NotificationWidget(StatusWidget):
                 "alert_counts": dict(severity_counts),
                 "recent_alerts": recent_alerts[:10],  # Limit to 10 most recent
                 "total_alerts": len(self.alerts),
-                "unacknowledged_count": sum(1 for a in self.alerts if not a.acknowledged and not a.resolved)
+                "unacknowledged_count": sum(
+                    1 for a in self.alerts if not a.acknowledged and not a.resolved
+                ),
             }
 
             # Determine status based on critical alerts
@@ -573,7 +595,7 @@ class NotificationWidget(StatusWidget):
                 content=content,
                 status=status,
                 last_updated=datetime.now(),
-                refresh_interval=self.refresh_interval
+                refresh_interval=self.refresh_interval,
             )
 
         except Exception as e:
@@ -585,24 +607,26 @@ class ProductionStatusBar:
     """Production-grade real-time status bar"""
 
     def __init__(self, storage_path: Optional[str] = None, service_manager=None):
-        self.storage_path = Path(storage_path) if storage_path else Path("data/status_bar.db")
+        self.storage_path = (
+            Path(storage_path) if storage_path else Path("data/status_bar.db")
+        )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Widgets
-        self.widgets: Dict[str, StatusWidget] = {}
-        self.widget_order: List[str] = []
+        self.widgets: dict[str, StatusWidget] = {}
+        self.widget_order: list[str] = []
 
         # Alerts and notifications
         self.alerts: deque[Alert] = deque(maxlen=1000)
-        self.alert_callbacks: List[Callable] = []
+        self.alert_callbacks: list[Callable] = []
 
         # Metrics and history
-        self.metrics_history: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self.metrics_history: dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
         self.performance_metrics = {
             "update_count": 0,
             "error_count": 0,
             "average_update_time_ms": 0.0,
-            "last_update": None
+            "last_update": None,
         }
 
         # Background tasks
@@ -611,7 +635,9 @@ class ProductionStatusBar:
         self._shutdown_event = asyncio.Event()
 
         # Threading
-        self.thread_pool = ThreadPoolExecutor(max_workers=2, thread_name_prefix="status_bar")
+        self.thread_pool = ThreadPoolExecutor(
+            max_workers=2, thread_name_prefix="status_bar"
+        )
 
         # Database
         self._init_database()
@@ -662,10 +688,18 @@ class ProductionStatusBar:
                 """)
 
                 # Indexes
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_history_timestamp ON status_history (timestamp)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_history_widget ON status_history (widget_id)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_alerts_timestamp ON alerts (timestamp)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON metrics (timestamp)")
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_history_timestamp ON status_history (timestamp)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_history_widget ON status_history (widget_id)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_alerts_timestamp ON alerts (timestamp)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON metrics (timestamp)"  # noqa: E501
+                )
 
                 conn.commit()
         except Exception as e:
@@ -703,7 +737,7 @@ class ProductionStatusBar:
             "network_status",
             "service_health",
             "time_clock",
-            "notifications"
+            "notifications",
         ]
 
     def register_widget(self, widget: StatusWidget) -> None:
@@ -721,8 +755,14 @@ class ProductionStatusBar:
             return True
         return False
 
-    def add_alert(self, severity: AlertSeverity, title: str, message: str,
-                 source: str = "system", metadata: Optional[Dict[str, Any]] = None) -> str:
+    def add_alert(
+        self,
+        severity: AlertSeverity,
+        title: str,
+        message: str,
+        source: str = "system",
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> str:
         """Add a new alert"""
         alert = Alert(
             id=str(uuid.uuid4()),
@@ -731,7 +771,7 @@ class ProductionStatusBar:
             message=message,
             timestamp=datetime.now(),
             source=source,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         self.alerts.append(alert)
@@ -781,7 +821,7 @@ class ProductionStatusBar:
             return self.widgets[widget_id].data
         return None
 
-    def get_all_widget_data(self) -> Dict[str, WidgetData]:
+    def get_all_widget_data(self) -> dict[str, WidgetData]:
         """Get all widget data"""
         return {
             widget_id: widget.data
@@ -789,10 +829,13 @@ class ProductionStatusBar:
             if widget.data is not None
         }
 
-    def get_recent_alerts(self, limit: int = 50,
-                         severity: Optional[AlertSeverity] = None,
-                         acknowledged: Optional[bool] = None,
-                         resolved: Optional[bool] = None) -> List[Alert]:
+    def get_recent_alerts(
+        self,
+        limit: int = 50,
+        severity: Optional[AlertSeverity] = None,
+        acknowledged: Optional[bool] = None,
+        resolved: Optional[bool] = None,
+    ) -> list[Alert]:
         """Get recent alerts with filtering"""
         filtered_alerts = []
 
@@ -855,7 +898,9 @@ class ProductionStatusBar:
                 self.performance_metrics["last_update"] = datetime.now()
 
                 # Calculate average update time
-                total_time = self.performance_metrics.get("total_update_time", 0.0) + update_time
+                total_time = (
+                    self.performance_metrics.get("total_update_time", 0.0) + update_time
+                )
                 count = self.performance_metrics["update_count"]
                 self.performance_metrics["average_update_time_ms"] = total_time / count
                 self.performance_metrics["total_update_time"] = total_time
@@ -897,20 +942,32 @@ class ProductionStatusBar:
         """Update metrics history for a widget"""
         try:
             # Store timestamp
-            self.metrics_history[f"{widget_id}_timestamp"].append(data.last_updated.timestamp())
+            self.metrics_history[f"{widget_id}_timestamp"].append(
+                data.last_updated.timestamp()
+            )
 
             # Extract numeric metrics based on widget type
             if widget_id == "resource_usage" and data.content:
                 content = data.content
-                self.metrics_history[f"{widget_id}_cpu"].append(content.get("cpu_percent", 0))
-                self.metrics_history[f"{widget_id}_memory"].append(content.get("memory_percent", 0))
-                self.metrics_history[f"{widget_id}_disk"].append(content.get("disk_percent", 0))
+                self.metrics_history[f"{widget_id}_cpu"].append(
+                    content.get("cpu_percent", 0)
+                )
+                self.metrics_history[f"{widget_id}_memory"].append(
+                    content.get("memory_percent", 0)
+                )
+                self.metrics_history[f"{widget_id}_disk"].append(
+                    content.get("disk_percent", 0)
+                )
 
             elif widget_id == "network_status" and data.content:
                 content = data.content
                 if content.get("latency_ms"):
-                    self.metrics_history[f"{widget_id}_latency"].append(content["latency_ms"])
-                self.metrics_history[f"{widget_id}_connections"].append(content.get("active_connections", 0))
+                    self.metrics_history[f"{widget_id}_latency"].append(
+                        content["latency_ms"]
+                    )
+                self.metrics_history[f"{widget_id}_connections"].append(
+                    content.get("active_connections", 0)
+                )
 
         except Exception as e:
             logger.error(f"Failed to update metrics history: {e}")
@@ -922,7 +979,7 @@ class ProductionStatusBar:
         original_count = len(self.alerts)
         self.alerts = deque(
             (alert for alert in self.alerts if alert.timestamp > cutoff_time),
-            maxlen=1000
+            maxlen=1000,
         )
 
         if len(self.alerts) < original_count:
@@ -947,8 +1004,12 @@ class ProductionStatusBar:
                     if widget.data and widget.data.content:
                         # Save widget data
                         conn.execute(
-                            "INSERT INTO status_history (widget_id, widget_data, timestamp) VALUES (?, ?, ?)",
-                            (widget_id, json.dumps(widget.data.__dict__), widget.data.last_updated.isoformat())
+                            "INSERT INTO status_history (widget_id, widget_data, timestamp) VALUES (?, ?, ?)",  # noqa: E501
+                            (
+                                widget_id,
+                                json.dumps(widget.data.__dict__),
+                                widget.data.last_updated.isoformat(),
+                            ),
                         )
 
                         # Save specific metrics
@@ -966,20 +1027,30 @@ class ProductionStatusBar:
             if widget_id == "resource_usage" and data.content:
                 content = data.content
                 conn.execute(
-                    "INSERT INTO metrics (widget_id, metric_name, metric_value, timestamp) VALUES (?, ?, ?, ?)",
-                    (widget_id, "cpu_percent", content.get("cpu_percent", 0), timestamp)
+                    "INSERT INTO metrics (widget_id, metric_name, metric_value, timestamp) VALUES (?, ?, ?, ?)",  # noqa: E501
+                    (
+                        widget_id,
+                        "cpu_percent",
+                        content.get("cpu_percent", 0),
+                        timestamp,
+                    ),
                 )
                 conn.execute(
-                    "INSERT INTO metrics (widget_id, metric_name, metric_value, timestamp) VALUES (?, ?, ?, ?)",
-                    (widget_id, "memory_percent", content.get("memory_percent", 0), timestamp)
+                    "INSERT INTO metrics (widget_id, metric_name, metric_value, timestamp) VALUES (?, ?, ?, ?)",  # noqa: E501
+                    (
+                        widget_id,
+                        "memory_percent",
+                        content.get("memory_percent", 0),
+                        timestamp,
+                    ),
                 )
 
             elif widget_id == "network_status" and data.content:
                 content = data.content
                 if content.get("latency_ms"):
                     conn.execute(
-                        "INSERT INTO metrics (widget_id, metric_name, metric_value, timestamp) VALUES (?, ?, ?, ?)",
-                        (widget_id, "latency_ms", content["latency_ms"], timestamp)
+                        "INSERT INTO metrics (widget_id, metric_name, metric_value, timestamp) VALUES (?, ?, ?, ?)",  # noqa: E501
+                        (widget_id, "latency_ms", content["latency_ms"], timestamp),
                     )
 
         except Exception as e:
@@ -990,7 +1061,7 @@ class ProductionStatusBar:
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT INTO alerts (id, severity, title, message, source, timestamp, acknowledged, resolved, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO alerts (id, severity, title, message, source, timestamp, acknowledged, resolved, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",  # noqa: E501
                     (
                         alert.id,
                         alert.severity.value,
@@ -1000,8 +1071,8 @@ class ProductionStatusBar:
                         alert.timestamp.isoformat(),
                         alert.acknowledged,
                         alert.resolved,
-                        json.dumps(alert.metadata)
-                    )
+                        json.dumps(alert.metadata),
+                    ),
                 )
                 conn.commit()
         except Exception as e:
@@ -1013,23 +1084,25 @@ class ProductionStatusBar:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
                     "UPDATE alerts SET acknowledged = ?, resolved = ? WHERE id = ?",
-                    (alert.acknowledged, alert.resolved, alert.id)
+                    (alert.acknowledged, alert.resolved, alert.id),
                 )
                 conn.commit()
         except Exception as e:
             logger.error(f"Failed to update alert: {e}")
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics"""
         return {
             "performance_metrics": self.performance_metrics.copy(),
             "widget_count": len(self.widgets),
             "enabled_widgets": sum(1 for w in self.widgets.values() if w.enabled),
             "alert_count": len(self.alerts),
-            "unacknowledged_alerts": sum(1 for a in self.alerts if not a.acknowledged and not a.resolved),
+            "unacknowledged_alerts": sum(
+                1 for a in self.alerts if not a.acknowledged and not a.resolved
+            ),
             "metrics_history_sizes": {
                 key: len(history) for key, history in self.metrics_history.items()
-            }
+            },
         }
 
     def export_data(self, file_path: str, format: str = "json") -> bool:
@@ -1040,10 +1113,10 @@ class ProductionStatusBar:
                 "widgets": self.get_all_widget_data(),
                 "alerts": [alert.to_dict() for alert in self.alerts],
                 "performance_metrics": self.performance_metrics,
-                "widget_order": self.widget_order
+                "widget_order": self.widget_order,
             }
 
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 if format.lower() == "json":
                     json.dump(export_data, f, indent=2, ensure_ascii=False)
                 else:

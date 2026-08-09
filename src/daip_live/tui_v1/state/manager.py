@@ -9,11 +9,11 @@ Based on newP6 specification requirements for state management.
 """
 
 import asyncio
+import copy
 import time
 import uuid
-from typing import Any, Dict, Callable, List, Optional
 from collections import deque
-import copy
+from typing import Any, Callable
 
 
 class TUIStateManager:
@@ -40,14 +40,16 @@ class TUIStateManager:
         Args:
             max_history: Maximum number of historical states to keep
         """
-        self._state: Dict[str, Any] = {}
-        self._subscribers: Dict[str, List[tuple]] = {}  # key -> list of (callback_id, callback)
+        self._state: dict[str, Any] = {}
+        self._subscribers: dict[
+            str, list[tuple]
+        ] = {}  # key -> list of (callback_id, callback)
         self._history: deque = deque(maxlen=max_history)
         self._max_history = max_history
         self._subscription_id_counter = 0
         self._performance_start_time = None
 
-    def update_state(self, updates: Dict[str, Any]) -> None:
+    def update_state(self, updates: dict[str, Any]) -> None:
         """
         Update the state and notify subscribers.
 
@@ -118,7 +120,7 @@ class TUIStateManager:
                     return True
         return False
 
-    def get_state(self) -> Dict[str, Any]:
+    def get_state(self) -> dict[str, Any]:
         """
         Get a copy of the current state.
 
@@ -127,7 +129,7 @@ class TUIStateManager:
         """
         return copy.deepcopy(self._state)
 
-    def get_history(self) -> List[Dict[str, Any]]:
+    def get_history(self) -> list[dict[str, Any]]:
         """
         Get the state history.
 
@@ -155,11 +157,13 @@ class TUIStateManager:
 
         # Clear future history after the rollback point
         history_list = list(self._history)
-        self._history = deque(history_list[:history_index + 1], maxlen=self._max_history)
+        self._history = deque(
+            history_list[: history_index + 1], maxlen=self._max_history
+        )
 
         return True
 
-    async def update_state_async(self, updates: Dict[str, Any]) -> None:
+    async def update_state_async(self, updates: dict[str, Any]) -> None:
         """
         Asynchronously update state and notify subscribers.
 
@@ -179,7 +183,7 @@ class TUIStateManager:
         # Notify subscribers asynchronously
         await self._notify_subscribers_async(changes)
 
-    def persist_state(self) -> Dict[str, Any]:
+    def persist_state(self) -> dict[str, Any]:
         """
         Persist the current state for later restoration.
 
@@ -187,25 +191,25 @@ class TUIStateManager:
             Dict[str, Any]: Serializable state data
         """
         return {
-            'state': copy.deepcopy(self._state),
-            'history': list(self._history),
-            'subscribers': len(self._subscribers)
+            "state": copy.deepcopy(self._state),
+            "history": list(self._history),
+            "subscribers": len(self._subscribers),
         }
 
-    def restore_state(self, persisted_data: Dict[str, Any]) -> None:
+    def restore_state(self, persisted_data: dict[str, Any]) -> None:
         """
         Restore state from persisted data.
 
         Args:
             persisted_data: Data from persist_state() call
         """
-        if 'state' in persisted_data:
-            self._state = copy.deepcopy(persisted_data['state'])
+        if "state" in persisted_data:
+            self._state = copy.deepcopy(persisted_data["state"])
 
-        if 'history' in persisted_data:
-            self._history = deque(persisted_data['history'], maxlen=self._max_history)
+        if "history" in persisted_data:
+            self._history = deque(persisted_data["history"], maxlen=self._max_history)
 
-    def _notify_subscribers(self, changes: Dict[str, tuple]) -> None:
+    def _notify_subscribers(self, changes: dict[str, tuple]) -> None:
         """
         Notify subscribers of state changes.
 
@@ -217,11 +221,11 @@ class TUIStateManager:
                 for _, callback in self._subscribers[key]:
                     try:
                         callback(key, old_value, new_value)
-                    except Exception as e:
+                    except Exception:
                         # Log error but don't stop other notifications
-                        print(f"Error in state subscription callback: {e}")
+                        pass
 
-    async def _notify_subscribers_async(self, changes: Dict[str, tuple]) -> None:
+    async def _notify_subscribers_async(self, changes: dict[str, tuple]) -> None:
         """
         Asynchronously notify subscribers of state changes.
 
@@ -240,7 +244,7 @@ class TUIStateManager:
         if async_tasks:
             await asyncio.gather(*async_tasks, return_exceptions=True)
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """
         Get performance metrics for the last state update.
 
@@ -248,13 +252,13 @@ class TUIStateManager:
             Dict[str, Any]: Performance metrics
         """
         metrics = {
-            'subscribers_count': sum(len(subs) for subs in self._subscribers.values()),
-            'state_size': len(self._state),
-            'history_size': len(self._history),
+            "subscribers_count": sum(len(subs) for subs in self._subscribers.values()),
+            "state_size": len(self._state),
+            "history_size": len(self._history),
         }
 
         if self._performance_start_time:
             latency_ms = (time.perf_counter() - self._performance_start_time) * 1000
-            metrics['last_update_latency_ms'] = latency_ms
+            metrics["last_update_latency_ms"] = latency_ms
 
         return metrics

@@ -22,14 +22,14 @@ files:
   - path: workflows/development.yaml
     content: |
       name: Standard Development Workflow
-      steps: [...] 
+      steps: [...]
 ---
 
 User Project Description:
-"""
+"""  # noqa: E501
 
 CORRECTION_PROMPT_TEMPLATE = """
-Your previous YAML output was invalid and could not be parsed. 
+Your previous YAML output was invalid and could not be parsed.
 Error: {error}
 Please correct the YAML syntax and provide the full, valid YAML document again.
 Original Description: {description}
@@ -38,6 +38,7 @@ Previous Invalid Output:
 {invalid_yaml}
 ---
 """
+
 
 class Scaffolder:
     """Generates project structure from a natural language description."""
@@ -80,7 +81,7 @@ class Scaffolder:
             print("[bold blue]Scaffolding complete![/bold blue]")
 
     async def generate_from_description(self, description: str) -> dict:
-        """Generates file configurations by calling the LLM, with a self-correction loop."""
+        """Generates file configurations by calling the LLM, with a self-correction loop."""  # noqa: E501
         prompt = SCAFFOLD_META_PROMPT + "\n" + description
         last_error = None
 
@@ -90,15 +91,21 @@ class Scaffolder:
             try:
                 parsed_output = yaml.safe_load(generated_yaml_str)
                 if not isinstance(parsed_output, dict) or "files" not in parsed_output:
-                    raise ValueError("Root object must be a dictionary with a 'files' key.")
+                    raise ValueError(
+                        "Root object must be a dictionary with a 'files' key."
+                    )
                 return parsed_output
             except (yaml.YAMLError, ValueError) as e:
                 last_error = e
-                print(f"Attempt {attempt + 1} failed: Invalid YAML from LLM. Retrying...")
+                print(
+                    f"Attempt {attempt + 1} failed: Invalid YAML from LLM. Retrying..."
+                )
                 prompt = CORRECTION_PROMPT_TEMPLATE.format(
                     error=str(e),
                     description=description,
-                    invalid_yaml=generated_yaml_str
+                    invalid_yaml=generated_yaml_str,
                 )
 
-        raise ValueError(f"Failed to generate valid YAML after {self.max_retries} retries.") from last_error
+        raise ValueError(
+            f"Failed to generate valid YAML after {self.max_retries} retries."
+        ) from last_error

@@ -4,7 +4,7 @@ Base Service Adapter for newP6 TUI
 Provides base functionality for all service adapters.
 """
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Any, Optional
 
 
@@ -37,15 +37,19 @@ class BaseServiceAdapter(ABC):
 
     def emit_event(self, event_type: str, data: Any = None) -> None:
         """Emit an event if event system is available"""
-        if self.event_system and hasattr(self.event_system, 'publish'):
+        if self.event_system and hasattr(self.event_system, "publish"):
             # Create a simple event object
-            event = type('Event', (), {
-                'event_type': type('EventType', (), {'value': event_type})(),
-                'data': data
-            })()
+            event = type(
+                "Event",
+                (),
+                {
+                    "event_type": type("EventType", (), {"value": event_type})(),
+                    "data": data,
+                },
+            )()
             self.event_system.publish(event)
 
     def update_state(self, updates: dict) -> None:
         """Update state if state manager is available"""
-        if self.state_manager and hasattr(self.state_manager, 'update_state'):
+        if self.state_manager and hasattr(self.state_manager, "update_state"):
             self.state_manager.update_state(updates)

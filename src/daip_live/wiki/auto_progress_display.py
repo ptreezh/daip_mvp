@@ -3,11 +3,9 @@
 在TUI和非TUI环境下自动提供进度显示
 """
 
-import asyncio
 import sys
-from typing import Optional, Callable
-import threading
 import time
+from typing import Callable, Optional
 
 from .simple_collaboration_engine import CollaborationProgress
 
@@ -26,12 +24,13 @@ class AutoProgressDisplay:
         # 检查是否在支持ANSI转义序列的终端中
         try:
             # 如果有stderr且是TTY，可能是TUI环境
-            if hasattr(sys.stderr, 'isatty') and sys.stderr.isatty():
+            if hasattr(sys.stderr, "isatty") and sys.stderr.isatty():
                 # 进一步检查是否有环境变量表明在TUI中
                 import os
-                if os.getenv('TERM') and os.getenv('TERM') != 'dumb':
+
+                if os.getenv("TERM") and os.getenv("TERM") != "dumb":
                     return True
-        except:
+        except Exception:
             pass
         return False
 
@@ -59,43 +58,36 @@ class AutoProgressDisplay:
         percentage = progress.get_progress_percentage()
         bar_width = 40
         filled = int(bar_width * percentage / 100)
-        bar = "█" * filled + "░" * (bar_width - filled)
+        "█" * filled + "░" * (bar_width - filled)
 
         # 计算耗时
-        elapsed = time.time() - self.start_time
+        time.time() - self.start_time
 
         # 构建显示行 - 移除百分比显示
         if progress.current_role:
-            display_line = f"\r[{bar}] {progress.current_action} ({progress.current_role}) | {elapsed:.1f}s"
+            pass
         else:
-            display_line = f"\r[{bar}] {progress.current_action} | {elapsed:.1f}s"
+            pass
 
         # 输出到stderr，避免干扰正常输出
-        print(display_line, end="", file=sys.stderr, flush=True)
 
         # 如果完成，添加换行
         if progress.is_complete:
-            print(file=sys.stderr)
+            pass
 
     def show_completion_summary(self, progress: CollaborationProgress):
         """显示完成摘要"""
         if progress.is_complete:
-            elapsed = progress.to_dict()['elapsed_seconds'] if hasattr(progress, 'to_dict') else 0
-
-            print(f"\n🎉 协作创建完成！", file=sys.stderr)
-            print(f"⏱️  总用时: {elapsed:.1f}秒", file=sys.stderr)
-            print(f"📊 生成内容: {len(progress.generated_content)}条", file=sys.stderr)
+            progress.to_dict()["elapsed_seconds"] if hasattr(progress, "to_dict") else 0
 
             if progress.generated_content:
-                participating_roles = list(set(item['role'] for item in progress.generated_content))
-                print(f"👥 参与角色: {', '.join(participating_roles)}", file=sys.stderr)
+                list({item["role"] for item in progress.generated_content})
 
     def show_error_summary(self, progress: CollaborationProgress):
         """显示错误摘要"""
         if progress.errors:
-            print(f"\n⚠️  协作过程中发生 {len(progress.errors)} 个错误:", file=sys.stderr)
             for i, error in enumerate(progress.errors[-3:], 1):  # 只显示最后3个错误
-                print(f"  {i}. {error['error']}", file=sys.stderr)
+                pass
 
 
 class EnhancedCollaborationEngine:
@@ -111,7 +103,7 @@ class EnhancedCollaborationEngine:
         topic: str,
         roles: Optional[list] = None,
         rounds: int = 1,
-        custom_display: Optional[Callable] = None
+        custom_display: Optional[Callable] = None,
     ):
         """创建协作维基页面，自动显示进度"""
 
@@ -135,11 +127,18 @@ class EnhancedCollaborationEngine:
 
         try:
             # 执行协作创建
-            page, content = await self.base_engine.create_collaborative_wiki(title, topic, roles, rounds)
+            page, content = await self.base_engine.create_collaborative_wiki(
+                title, topic, roles, rounds
+            )
 
             # 显示完成摘要
-            if hasattr(self.base_engine, 'current_progress') and self.base_engine.current_progress:
-                self.auto_display.show_completion_summary(self.base_engine.current_progress)
+            if (
+                hasattr(self.base_engine, "current_progress")
+                and self.base_engine.current_progress
+            ):
+                self.auto_display.show_completion_summary(
+                    self.base_engine.current_progress
+                )
                 self.auto_display.show_error_summary(self.base_engine.current_progress)
 
             return page, content

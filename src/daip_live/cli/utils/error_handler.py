@@ -6,13 +6,18 @@
 import asyncio
 import functools
 import logging
-from typing import Any, Callable, Optional, Dict
-from rich.console import Console
+from typing import Any, Callable, Optional
+
 import typer
+from rich.console import Console
 
 from .error_types import (
-    CLIError, ErrorCategory, ErrorSeverity,
-    NetworkError, DatabaseError, ValidationError
+    CLIError,
+    DatabaseError,  # noqa: F401  # re-export
+    ErrorCategory,
+    ErrorSeverity,
+    NetworkError,  # noqa: F401  # re-export：调用方/测试依赖本模块导出这些异常
+    ValidationError,  # noqa: F401  # re-export
 )
 
 
@@ -23,18 +28,19 @@ class ErrorHandler:
         self.console = Console()
         self.logger = logging.getLogger(__name__)
         self.error_stats = {
-            'total_errors': 0,
-            'errors_by_category': {},
-            'errors_by_severity': {}
+            "total_errors": 0,
+            "errors_by_category": {},
+            "errors_by_severity": {},
         }
 
     def handle_command_errors(
         self,
         command_name: Optional[str] = None,
         reraise: bool = False,
-        show_traceback: bool = False
+        show_traceback: bool = False,
     ):
         """命令错误处理装饰器"""
+
         def decorator(func: Callable) -> Callable:
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
@@ -65,7 +71,7 @@ class ErrorHandler:
         kwargs: dict,
         command_name: str,
         reraise: bool,
-        show_traceback: bool
+        show_traceback: bool,
     ) -> Any:
         """异步错误处理"""
         try:
@@ -88,7 +94,7 @@ class ErrorHandler:
         kwargs: dict,
         command_name: str,
         reraise: bool,
-        show_traceback: bool
+        show_traceback: bool,
     ) -> Any:
         """同步错误处理"""
         try:
@@ -133,10 +139,7 @@ class ErrorHandler:
             raise typer.Exit(1)
 
     async def _process_cli_error(
-        self,
-        error: CLIError,
-        command_name: str,
-        show_traceback: bool
+        self, error: CLIError, command_name: str, show_traceback: bool
     ):
         """处理CLI错误"""
         # 记录错误统计
@@ -145,20 +148,14 @@ class ErrorHandler:
         # 日志记录
         self.logger.error(
             f"CLI Error in {command_name}: {error.message}",
-            extra={
-                'error_details': error.to_dict(),
-                'command_name': command_name
-            }
+            extra={"error_details": error.to_dict(), "command_name": command_name},
         )
 
         # 用户友好输出
         await self._display_error_to_user(error, show_traceback)
 
     def _process_cli_error_sync(
-        self,
-        error: CLIError,
-        command_name: str,
-        show_traceback: bool
+        self, error: CLIError, command_name: str, show_traceback: bool
     ):
         """同步处理CLI错误"""
         # 记录错误统计
@@ -167,20 +164,14 @@ class ErrorHandler:
         # 日志记录
         self.logger.error(
             f"CLI Error in {command_name}: {error.message}",
-            extra={
-                'error_details': error.to_dict(),
-                'command_name': command_name
-            }
+            extra={"error_details": error.to_dict(), "command_name": command_name},
         )
 
         # 用户友好输出
         self._display_error_to_user_sync(error, show_traceback)
 
     async def _process_unexpected_error(
-        self,
-        error: Exception,
-        command_name: str,
-        show_traceback: bool
+        self, error: Exception, command_name: str, show_traceback: bool
     ):
         """处理意外错误"""
         # 包装为CLI错误
@@ -189,19 +180,13 @@ class ErrorHandler:
             category=ErrorCategory.SYSTEM,
             severity=ErrorSeverity.HIGH,
             original_exception=error,
-            details={
-                'error_type': type(error).__name__,
-                'command_name': command_name
-            }
+            details={"error_type": type(error).__name__, "command_name": command_name},
         )
 
         await self._process_cli_error(cli_error, command_name, show_traceback)
 
     def _process_unexpected_error_sync(
-        self,
-        error: Exception,
-        command_name: str,
-        show_traceback: bool
+        self, error: Exception, command_name: str, show_traceback: bool
     ):
         """同步处理意外错误"""
         cli_error = CLIError(
@@ -209,26 +194,19 @@ class ErrorHandler:
             category=ErrorCategory.SYSTEM,
             severity=ErrorSeverity.HIGH,
             original_exception=error,
-            details={
-                'error_type': type(error).__name__,
-                'command_name': command_name
-            }
+            details={"error_type": type(error).__name__, "command_name": command_name},
         )
 
         self._process_cli_error_sync(cli_error, command_name, show_traceback)
 
-    async def _display_error_to_user(
-        self,
-        error: CLIError,
-        show_traceback: bool
-    ):
+    async def _display_error_to_user(self, error: CLIError, show_traceback: bool):
         """向用户显示错误"""
         # 根据严重程度选择显示样式
         severity_styles = {
-            'low': "yellow",
-            'medium': "orange3",
-            'high': "red",
-            'critical': "bright_red"
+            "low": "yellow",
+            "medium": "orange3",
+            "high": "red",
+            "critical": "bright_red",
         }
 
         style = severity_styles.get(error.severity.value, "red")
@@ -251,27 +229,24 @@ class ErrorHandler:
         if show_traceback and error.original_exception:
             self.console.print("\n[dim]Detailed error information:[/dim]")
             import traceback
-            traceback_str = ''.join(
+
+            traceback_str = "".join(
                 traceback.format_exception(
                     type(error.original_exception),
                     error.original_exception,
-                    error.original_exception.__traceback__
+                    error.original_exception.__traceback__,
                 )
             )
             self.console.print(traceback_str, style="dim")
 
-    def _display_error_to_user_sync(
-        self,
-        error: CLIError,
-        show_traceback: bool
-    ):
+    def _display_error_to_user_sync(self, error: CLIError, show_traceback: bool):
         """同步向用户显示错误"""
         # 根据严重程度选择显示样式
         severity_styles = {
-            'low': "yellow",
-            'medium': "orange3",
-            'high': "red",
-            'critical': "bright_red"
+            "low": "yellow",
+            "medium": "orange3",
+            "high": "red",
+            "critical": "bright_red",
         }
 
         style = severity_styles.get(error.severity.value, "red")
@@ -294,11 +269,12 @@ class ErrorHandler:
         if show_traceback and error.original_exception:
             self.console.print("\n[dim]Detailed error information:[/dim]")
             import traceback
-            traceback_str = ''.join(
+
+            traceback_str = "".join(
                 traceback.format_exception(
                     type(error.original_exception),
                     error.original_exception,
-                    error.original_exception.__traceback__
+                    error.original_exception.__traceback__,
                 )
             )
             self.console.print(traceback_str, style="dim")
@@ -306,36 +282,38 @@ class ErrorHandler:
     def _get_suggestion_for_error(self, error_category: ErrorCategory) -> Optional[str]:
         """根据错误类型提供建议"""
         suggestions = {
-            ErrorCategory.NETWORK: "Please check your internet connection and try again.",
-            ErrorCategory.DATABASE: "Please check if the database is running and accessible.",
-            ErrorCategory.VALIDATION: "Please check your input parameters and try again.",
-            ErrorCategory.USER_INPUT: "Please check the command syntax and required arguments.",
+            ErrorCategory.NETWORK: "Please check your internet connection and try again.",  # noqa: E501
+            ErrorCategory.DATABASE: "Please check if the database is running and accessible.",  # noqa: E501
+            ErrorCategory.VALIDATION: "Please check your input parameters and try again.",  # noqa: E501
+            ErrorCategory.USER_INPUT: "Please check the command syntax and required arguments.",  # noqa: E501
         }
 
         return suggestions.get(error_category)
 
     def _record_error_stats(self, error: CLIError):
         """记录错误统计"""
-        self.error_stats['total_errors'] += 1
+        self.error_stats["total_errors"] += 1
 
         # 按类别统计
         category = error.category.value
-        self.error_stats['errors_by_category'][category] = \
-            self.error_stats['errors_by_category'].get(category, 0) + 1
+        self.error_stats["errors_by_category"][category] = (
+            self.error_stats["errors_by_category"].get(category, 0) + 1
+        )
 
         # 按严重程度统计
         severity = error.severity.value
-        self.error_stats['errors_by_severity'][severity] = \
-            self.error_stats['errors_by_severity'].get(severity, 0) + 1
+        self.error_stats["errors_by_severity"][severity] = (
+            self.error_stats["errors_by_severity"].get(severity, 0) + 1
+        )
 
-    def get_error_stats(self) -> Dict[str, Any]:
+    def get_error_stats(self) -> dict[str, Any]:
         """获取错误统计信息"""
         return self.error_stats.copy()
 
     def reset_error_stats(self):
         """重置错误统计"""
         self.error_stats = {
-            'total_errors': 0,
-            'errors_by_category': {},
-            'errors_by_severity': {}
+            "total_errors": 0,
+            "errors_by_category": {},
+            "errors_by_severity": {},
         }

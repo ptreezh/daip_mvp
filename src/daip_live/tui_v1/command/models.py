@@ -5,17 +5,18 @@ Defines data structures for command parsing and handling.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
+from typing import Any, Optional
 
 
 @dataclass
 class Command:
     """Represents a parsed command with all its components"""
+
     raw: str
     command: str
     action: Optional[str] = None
-    args: List[str] = None
-    options: Dict[str, Any] = None
+    args: list[str] = None
+    options: dict[str, Any] = None
 
     def __post_init__(self):
         if self.args is None:
@@ -42,6 +43,7 @@ class Command:
 @dataclass
 class CommandResult:
     """Represents the result of command execution"""
+
     success: bool
     message: str
     data: Any = None
@@ -60,12 +62,13 @@ class CommandResult:
 @dataclass
 class CommandInfo:
     """Information about a registered command"""
+
     command: str
     description: str
     usage: str
     handler_class: str
     requires_args: bool = False
-    allowed_options: List[str] = None
+    allowed_options: list[str] = None
 
     def __post_init__(self):
         if self.allowed_options is None:

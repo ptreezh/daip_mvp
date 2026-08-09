@@ -3,8 +3,9 @@
 实现每个角色的独立会话管理，包括个人历史、立场记忆和论点追踪
 """
 
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
+from typing import Any
+
 from daip_live.p4_role_manager_tools.role_model_config import RoleModelConfig
 
 
@@ -18,31 +19,35 @@ class RoleDebateSession:
     system_prompt: str = ""
 
     # 角色个人历史记录
-    personal_history: List[Dict[str, Any]] = field(default_factory=list)
+    personal_history: list[dict[str, Any]] = field(default_factory=list)
 
     # 立场记忆系统
-    stance_memory: Dict[str, Any] = field(default_factory=dict)
+    stance_memory: dict[str, Any] = field(default_factory=dict)
 
     # 论点追踪系统
-    argument_tracker: Dict[int, Dict[str, Dict[str, Any]]] = field(default_factory=dict)
+    argument_tracker: dict[int, dict[str, dict[str, Any]]] = field(default_factory=dict)
 
     # 轮次记忆系统
-    round_memories: Dict[int, Dict[str, Any]] = field(default_factory=dict)
+    round_memories: dict[int, dict[str, Any]] = field(default_factory=dict)
 
     def add_personal_history(self, round_num: int, content: str, opponent_summary: str):
         """添加个人历史记录"""
-        self.personal_history.append({
-            "round": round_num,
-            "content": content,
-            "opponent_summary": opponent_summary,
-            "timestamp": self._get_timestamp()
-        })
+        self.personal_history.append(
+            {
+                "round": round_num,
+                "content": content,
+                "opponent_summary": opponent_summary,
+                "timestamp": self._get_timestamp(),
+            }
+        )
 
     def update_stance_memory(self, key: str, value: Any):
         """更新立场记忆"""
         self.stance_memory[key] = value
 
-    def track_argument(self, round_num: int, argument_type: str, content: str, strength: float = 0.5):
+    def track_argument(
+        self, round_num: int, argument_type: str, content: str, strength: float = 0.5
+    ):
         """追踪论点"""
         if round_num not in self.argument_tracker:
             self.argument_tracker[round_num] = {}
@@ -50,16 +55,22 @@ class RoleDebateSession:
         self.argument_tracker[round_num][argument_type] = {
             "content": content,
             "strength": strength,
-            "timestamp": self._get_timestamp()
+            "timestamp": self._get_timestamp(),
         }
 
-    def add_round_memory(self, round_num: int, summary: str, key_points: List[str], opponent_arguments: List[str]):
+    def add_round_memory(
+        self,
+        round_num: int,
+        summary: str,
+        key_points: list[str],
+        opponent_arguments: list[str],
+    ):
         """添加轮次记忆"""
         self.round_memories[round_num] = {
             "summary": summary,
             "key_points": key_points,
             "opponent_arguments": opponent_arguments,
-            "timestamp": self._get_timestamp()
+            "timestamp": self._get_timestamp(),
         }
 
     def get_context_summary(self, current_round: int) -> str:
@@ -121,20 +132,24 @@ Your Assigned Model: {self.model_config.model_name}"""
             opponent_summaries = []
             for hist in self.personal_history:
                 if hist.get("opponent_summary"):
-                    opponent_summaries.append(f"Round {hist['round']}: {hist['opponent_summary']}")
+                    opponent_summaries.append(
+                        f"Round {hist['round']}: {hist['opponent_summary']}"
+                    )
 
             if opponent_summaries:
-                prompt += "\n\nOpponent Arguments Summary:\n" + "\n".join(opponent_summaries)
+                prompt += "\n\nOpponent Arguments Summary:\n" + "\n".join(
+                    opponent_summaries
+                )
 
-        prompt += "\n\nWhat is your argument for this round? Please maintain your role consistency."
+        prompt += "\n\nWhat is your argument for this round? Please maintain your role consistency."  # noqa: E501
 
         return prompt
 
-    def get_recent_arguments(self, last_n_rounds: int = 2) -> List[Dict[str, Any]]:
+    def get_recent_arguments(self, last_n_rounds: int = 2) -> list[dict[str, Any]]:
         """获取最近几轮的论点"""
         return self.personal_history[-last_n_rounds:]
 
-    def get_stance_evolution(self) -> Dict[str, Any]:
+    def get_stance_evolution(self) -> dict[str, Any]:
         """获取立场演化"""
         evolution = {}
         for key, value in self.stance_memory.items():
@@ -142,7 +157,7 @@ Your Assigned Model: {self.model_config.model_name}"""
                 evolution[key] = value
         return evolution
 
-    def get_argument_strength_analysis(self) -> Dict[str, float]:
+    def get_argument_strength_analysis(self) -> dict[str, float]:
         """获取论点强度分析"""
         strength_analysis = {}
         for round_num, arguments in self.argument_tracker.items():
@@ -160,7 +175,7 @@ Your Assigned Model: {self.model_config.model_name}"""
         if not preserve_stance:
             self.stance_memory.clear()
 
-    def merge_with_session(self, other_session: 'RoleDebateSession') -> bool:
+    def merge_with_session(self, other_session: "RoleDebateSession") -> bool:
         """与另一个会话合并（用于角色切换后的状态恢复）"""
         if self.role_name != other_session.role_name:
             return False
@@ -185,9 +200,10 @@ Your Assigned Model: {self.model_config.model_name}"""
     def _get_timestamp(self) -> str:
         """获取时间戳"""
         import datetime
+
         return datetime.datetime.now().isoformat()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典格式"""
         return {
             "role_name": self.role_name,
@@ -197,17 +213,19 @@ Your Assigned Model: {self.model_config.model_name}"""
             "personal_history": self.personal_history,
             "stance_memory": self.stance_memory,
             "argument_tracker": self.argument_tracker,
-            "round_memories": self.round_memories
+            "round_memories": self.round_memories,
         }
 
     def __str__(self) -> str:
         """字符串表示"""
-        return f"RoleDebateSession(role={self.role_name}, model={self.model_config.model_name}, history_entries={len(self.personal_history)})"
+        return f"RoleDebateSession(role={self.role_name}, model={self.model_config.model_name}, history_entries={len(self.personal_history)})"  # noqa: E501
 
     def __repr__(self) -> str:
         """详细字符串表示"""
-        return (f"RoleDebateSession(role_name='{self.role_name}', "
-                f"role_persona='{self.role_persona[:50]}...', "
-                f"model_config={self.model_config.model_name}, "
-                f"history_count={len(self.personal_history)}, "
-                f"stance_keys={list(self.stance_memory.keys())})")
+        return (
+            f"RoleDebateSession(role_name='{self.role_name}', "
+            f"role_persona='{self.role_persona[:50]}...', "
+            f"model_config={self.model_config.model_name}, "
+            f"history_count={len(self.personal_history)}, "
+            f"stance_keys={list(self.stance_memory.keys())})"
+        )

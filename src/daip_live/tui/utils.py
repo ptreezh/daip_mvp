@@ -2,12 +2,12 @@
 
 import os
 import time
-from typing import List, Optional, Callable
-from textual.app import ComposeResult
+from typing import Optional
 
 
 class FocusMode:
     """焦点模式枚举"""
+
     INPUT = "input"
     OUTPUT = "output"
 
@@ -53,38 +53,39 @@ class TUIUtils:
         unsafe_chars = '<>:"/\\|?*'
         safe_name = filename
         for char in unsafe_chars:
-            safe_name = safe_name.replace(char, '_')
+            safe_name = safe_name.replace(char, "_")
         return safe_name
 
     @staticmethod
     def parse_time_range(time_str: str) -> Optional[tuple]:
         """解析时间范围字符串"""
         try:
-            if 'ago' in time_str:
+            if "ago" in time_str:
                 # 相对时间，如 "1 hour ago", "2 days ago"
-                return ('relative', time_str)
+                return ("relative", time_str)
             elif time_str.isdigit():
                 # Unix时间戳
-                return ('timestamp', int(time_str))
+                return ("timestamp", int(time_str))
             else:
                 # 尝试解析为日期时间
                 from datetime import datetime
-                return ('datetime', datetime.fromisoformat(time_str))
-        except:
+
+                return ("datetime", datetime.fromisoformat(time_str))
+        except Exception:
             return None
 
     @staticmethod
     def get_status_color(status: str) -> str:
         """根据状态获取颜色"""
         status_colors = {
-            'active': 'green',
-            'inactive': 'yellow',
-            'error': 'red',
-            'completed': 'blue',
-            'pending': 'cyan',
-            'cancelled': 'dim'
+            "active": "green",
+            "inactive": "yellow",
+            "error": "red",
+            "completed": "blue",
+            "pending": "cyan",
+            "cancelled": "dim",
         }
-        return status_colors.get(status.lower(), 'white')
+        return status_colors.get(status.lower(), "white")
 
     @staticmethod
     def calculate_similarity(text1: str, text2: str) -> float:
@@ -112,31 +113,32 @@ class TUIUtils:
     def get_emoji_for_type(content_type: str) -> str:
         """根据内容类型获取对应的emoji"""
         emoji_map = {
-            'debate': '🏛️',
-            'chat': '💬',
-            'task': '📋',
-            'file': '📁',
-            'document': '📄',
-            'code': '💻',
-            'image': '🖼️',
-            'video': '🎬',
-            'audio': '🎵',
-            'link': '🔗',
-            'warning': '⚠️',
-            'error': '❌',
-            'success': '✅',
-            'info': 'ℹ️',
-            'help': '❓'
+            "debate": "🏛️",
+            "chat": "💬",
+            "task": "📋",
+            "file": "📁",
+            "document": "📄",
+            "code": "💻",
+            "image": "🖼️",
+            "video": "🎬",
+            "audio": "🎵",
+            "link": "🔗",
+            "warning": "⚠️",
+            "error": "❌",
+            "success": "✅",
+            "info": "ℹ️",
+            "help": "❓",
         }
-        return emoji_map.get(content_type.lower(), '📝')
+        return emoji_map.get(content_type.lower(), "📝")
 
     @staticmethod
-    def parse_args(command: str) -> List[str]:
+    def parse_args(command: str) -> list[str]:
         """解析命令参数，支持引号"""
         import shlex
+
         try:
             return shlex.split(command)
-        except:
+        except Exception:
             # 如果解析失败，使用简单分割
             return command.split()
 
@@ -144,13 +146,16 @@ class TUIUtils:
     def validate_url(url: str) -> bool:
         """验证URL格式"""
         import re
+
         url_pattern = re.compile(
-            r'^https?://'  # http:// or https://
-            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
-            r'localhost|'  # localhost...
-            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-            r'(?::\d+)?'  # optional port
-            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+            r"^https?://"  # http:// or https://
+            r"(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|"  # domain...
+            r"localhost|"  # localhost...
+            r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"  # ...or ip
+            r"(?::\d+)?"  # optional port
+            r"(?:/?|[/?]\S+)$",
+            re.IGNORECASE,
+        )
         return url_pattern.match(url) is not None
 
 
@@ -159,8 +164,10 @@ class HistoryManager:
 
     def __init__(self, max_history: int = 100, history_file: str = None):
         self.max_history = max_history
-        self.history_file = history_file or os.path.join(os.path.expanduser("~"), ".daip_tui_history")
-        self.history: List[str] = []
+        self.history_file = history_file or os.path.join(
+            os.path.expanduser("~"), ".daip_tui_history"
+        )
+        self.history: list[str] = []
         self.load_history()
 
     def add(self, command: str):
@@ -188,7 +195,7 @@ class HistoryManager:
             return self.history[-1]
         return ""
 
-    def search(self, query: str) -> List[str]:
+    def search(self, query: str) -> list[str]:
         """搜索历史命令"""
         query_lower = query.lower()
         return [cmd for cmd in self.history if query_lower in cmd.lower()]
@@ -197,17 +204,19 @@ class HistoryManager:
         """加载历史记录"""
         try:
             if os.path.exists(self.history_file):
-                with open(self.history_file, 'r', encoding='utf-8') as f:
-                    self.history = [line.strip() for line in f.readlines() if line.strip()]
+                with open(self.history_file, encoding="utf-8") as f:
+                    self.history = [
+                        line.strip() for line in f.readlines() if line.strip()
+                    ]
         except Exception:
             self.history = []
 
     def save_history(self):
         """保存历史记录"""
         try:
-            with open(self.history_file, 'w', encoding='utf-8') as f:
+            with open(self.history_file, "w", encoding="utf-8") as f:
                 for cmd in self.history:
-                    f.write(cmd + '\n')
+                    f.write(cmd + "\n")
         except Exception:
             pass  # 静默失败，不影响主要功能
 
@@ -217,46 +226,50 @@ class PerformanceMonitor:
 
     def __init__(self):
         self.metrics = {
-            'response_times': [],
-            'command_counts': {},
-            'error_counts': {},
-            'start_time': time.time()
+            "response_times": [],
+            "command_counts": {},
+            "error_counts": {},
+            "start_time": time.time(),
         }
 
     def record_response_time(self, duration: float):
         """记录响应时间"""
-        self.metrics['response_times'].append(duration)
+        self.metrics["response_times"].append(duration)
         # 只保留最近100次记录
-        if len(self.metrics['response_times']) > 100:
-            self.metrics['response_times'].pop(0)
+        if len(self.metrics["response_times"]) > 100:
+            self.metrics["response_times"].pop(0)
 
     def record_command(self, command: str):
         """记录命令执行"""
-        self.metrics['command_counts'][command] = self.metrics['command_counts'].get(command, 0) + 1
+        self.metrics["command_counts"][command] = (
+            self.metrics["command_counts"].get(command, 0) + 1
+        )
 
     def record_error(self, error_type: str):
         """记录错误"""
-        self.metrics['error_counts'][error_type] = self.metrics['error_counts'].get(error_type, 0) + 1
+        self.metrics["error_counts"][error_type] = (
+            self.metrics["error_counts"].get(error_type, 0) + 1
+        )
 
     def get_average_response_time(self) -> float:
         """获取平均响应时间"""
-        if not self.metrics['response_times']:
+        if not self.metrics["response_times"]:
             return 0.0
-        return sum(self.metrics['response_times']) / len(self.metrics['response_times'])
+        return sum(self.metrics["response_times"]) / len(self.metrics["response_times"])
 
     def get_uptime(self) -> float:
         """获取运行时间"""
-        return time.time() - self.metrics['start_time']
+        return time.time() - self.metrics["start_time"]
 
     def get_stats_summary(self) -> dict:
         """获取统计摘要"""
         return {
-            'uptime': self.get_uptime(),
-            'avg_response_time': self.get_average_response_time(),
-            'total_commands': sum(self.metrics['command_counts'].values()),
-            'total_errors': sum(self.metrics['error_counts'].values()),
-            'command_counts': dict(self.metrics['command_counts']),
-            'error_counts': dict(self.metrics['error_counts'])
+            "uptime": self.get_uptime(),
+            "avg_response_time": self.get_average_response_time(),
+            "total_commands": sum(self.metrics["command_counts"].values()),
+            "total_errors": sum(self.metrics["error_counts"].values()),
+            "command_counts": dict(self.metrics["command_counts"]),
+            "error_counts": dict(self.metrics["error_counts"]),
         }
 
 
@@ -264,26 +277,29 @@ class ConfigManager:
     """配置管理器"""
 
     def __init__(self, config_file: str = None):
-        self.config_file = config_file or os.path.join(os.path.expanduser("~"), ".daip_tui_config.json")
+        self.config_file = config_file or os.path.join(
+            os.path.expanduser("~"), ".daip_tui_config.json"
+        )
         self.config = self.load_config()
 
     def load_config(self) -> dict:
         """加载配置"""
         default_config = {
-            'theme': 'default',
-            'auto_save': True,
-            'max_history': 100,
-            'show_timestamps': True,
-            'enable_animations': True,
-            'confirm_dangerous_operations': True,
-            'auto_backup': False,
-            'language': 'zh'
+            "theme": "default",
+            "auto_save": True,
+            "max_history": 100,
+            "show_timestamps": True,
+            "enable_animations": True,
+            "confirm_dangerous_operations": True,
+            "auto_backup": False,
+            "language": "zh",
         }
 
         try:
             if os.path.exists(self.config_file):
                 import json
-                with open(self.config_file, 'r', encoding='utf-8') as f:
+
+                with open(self.config_file, encoding="utf-8") as f:
                     loaded_config = json.load(f)
                 # 合并默认配置和加载的配置
                 default_config.update(loaded_config)
@@ -296,7 +312,8 @@ class ConfigManager:
         """保存配置"""
         try:
             import json
-            with open(self.config_file, 'w', encoding='utf-8') as f:
+
+            with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(self.config, f, indent=2, ensure_ascii=False)
         except Exception:
             pass
@@ -315,39 +332,39 @@ class ThemeManager:
     """主题管理器"""
 
     THEMES = {
-        'default': {
-            'background': '#000000',
-            'foreground': '#ffffff',
-            'accent': '#00ff00',
-            'error': '#ff0000',
-            'warning': '#ffff00',
-            'info': '#00ffff'
+        "default": {
+            "background": "#000000",
+            "foreground": "#ffffff",
+            "accent": "#00ff00",
+            "error": "#ff0000",
+            "warning": "#ffff00",
+            "info": "#00ffff",
         },
-        'dark': {
-            'background': '#1a1a1a',
-            'foreground': '#ffffff',
-            'accent': '#0088ff',
-            'error': '#ff4444',
-            'warning': '#ffaa00',
-            'info': '#00aaff'
+        "dark": {
+            "background": "#1a1a1a",
+            "foreground": "#ffffff",
+            "accent": "#0088ff",
+            "error": "#ff4444",
+            "warning": "#ffaa00",
+            "info": "#00aaff",
         },
-        'light': {
-            'background': '#ffffff',
-            'foreground': '#000000',
-            'accent': '#0066cc',
-            'error': '#cc0000',
-            'warning': '#ff8800',
-            'info': '#0088cc'
-        }
+        "light": {
+            "background": "#ffffff",
+            "foreground": "#000000",
+            "accent": "#0066cc",
+            "error": "#cc0000",
+            "warning": "#ff8800",
+            "info": "#0088cc",
+        },
     }
 
     @classmethod
     def get_theme(cls, theme_name: str) -> dict:
         """获取主题"""
-        return cls.THEMES.get(theme_name, cls.THEMES['default'])
+        return cls.THEMES.get(theme_name, cls.THEMES["default"])
 
     @classmethod
-    def list_themes(cls) -> List[str]:
+    def list_themes(cls) -> list[str]:
         """列出所有可用主题"""
         return list(cls.THEMES.keys())
 
@@ -356,17 +373,20 @@ class Logger:
     """简单日志记录器"""
 
     def __init__(self, log_file: str = None):
-        self.log_file = log_file or os.path.join(os.path.expanduser("~"), ".daip_tui.log")
+        self.log_file = log_file or os.path.join(
+            os.path.expanduser("~"), ".daip_tui.log"
+        )
 
     def log(self, level: str, message: str):
         """记录日志"""
         import datetime
+
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_entry = f"[{timestamp}] [{level}] {message}"
 
         try:
-            with open(self.log_file, 'a', encoding='utf-8') as f:
-                f.write(log_entry + '\n')
+            with open(self.log_file, "a", encoding="utf-8") as f:
+                f.write(log_entry + "\n")
         except Exception:
             pass  # 静默失败
 

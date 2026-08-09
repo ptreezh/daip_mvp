@@ -8,9 +8,10 @@ command input functionality with auto-completion support.
 Based on newP6 specification requirements for input management.
 """
 
-from typing import Any, Dict, Optional, List, Callable
-from textual.widgets import Input, Static
+from typing import Any, Callable, Optional
+
 from textual.containers import Vertical
+from textual.widgets import Input
 
 from .base import TUIComponent
 
@@ -36,7 +37,7 @@ class InputAreaComponent(TUIComponent):
         placeholder: str = "Enter command...",
         multiline: bool = False,
         max_length: Optional[int] = None,
-        auto_complete: bool = True
+        auto_complete: bool = True,
     ):
         """
         Initialize the input area component.
@@ -47,7 +48,7 @@ class InputAreaComponent(TUIComponent):
             multiline: Whether to support multi-line input
             max_length: Maximum input length
             auto_complete: Whether to enable auto-completion
-        """
+        """  # noqa: E501
         super().__init__(component_id)
 
         # Input configuration
@@ -60,7 +61,7 @@ class InputAreaComponent(TUIComponent):
             suggestions=[],
             history=[],
             history_index=-1,
-            is_focused=False
+            is_focused=False,
         )
 
         # Auto-completion suggestions (can be populated dynamically)
@@ -75,13 +76,13 @@ class InputAreaComponent(TUIComponent):
         """
         # Create input widget
         input_widget = Input(
-            placeholder=self.state.get('placeholder', 'Enter command...'),
+            placeholder=self.state.get("placeholder", "Enter command..."),
             password=False,
-            max_length=self.state.get('max_length')
+            max_length=self.state.get("max_length"),
         )
 
         # For multi-line support, create a container
-        if self.state.get('multiline', False):
+        if self.state.get("multiline", False):
             container = Vertical()
             container.add(input_widget)
             container.id = self.component_id
@@ -111,18 +112,18 @@ class InputAreaComponent(TUIComponent):
             event: The event to handle
         """
         # Handle input-specific events
-        if hasattr(event, 'event_type'):
-            if event.event_type.value == 'input_focus':
+        if hasattr(event, "event_type"):
+            if event.event_type.value == "input_focus":
                 self.update_state(is_focused=True)
-            elif event.event_type.value == 'input_blur':
+            elif event.event_type.value == "input_blur":
                 self.update_state(is_focused=False)
-            elif event.event_type.value == 'input_change':
-                self.update_state(input_text=event.data.get('text', ''))
+            elif event.event_type.value == "input_change":
+                self.update_state(input_text=event.data.get("text", ""))
                 # Trigger auto-completion if enabled
-                if self.state.get('auto_complete'):
-                    self._update_suggestions(event.data.get('text', ''))
+                if self.state.get("auto_complete"):
+                    self._update_suggestions(event.data.get("text", ""))
 
-    def set_suggestions_callback(self, callback: Callable[[str], List[str]]) -> None:
+    def set_suggestions_callback(self, callback: Callable[[str], list[str]]) -> None:
         """
         Set the callback function for generating auto-completion suggestions.
 
@@ -144,10 +145,9 @@ class InputAreaComponent(TUIComponent):
             suggestions = self._suggestions_callback(input_text)
         else:
             # Default basic suggestions
-            basic_commands = ['help', 'quit', 'clear', 'status']
+            basic_commands = ["help", "quit", "clear", "status"]
             suggestions = [
-                cmd for cmd in basic_commands
-                if cmd.startswith(input_text.lower())
+                cmd for cmd in basic_commands if cmd.startswith(input_text.lower())
             ]
 
         self.update_state(suggestions=suggestions)
@@ -159,7 +159,7 @@ class InputAreaComponent(TUIComponent):
         Returns:
             str: Current input text
         """
-        return self.state.get('input_text', '')
+        return self.state.get("input_text", "")
 
     def set_input_text(self, text: str) -> None:
         """
@@ -174,14 +174,14 @@ class InputAreaComponent(TUIComponent):
         """Clear the input text."""
         self.update_state(input_text="", suggestions=[])
 
-    def get_suggestions(self) -> List[str]:
+    def get_suggestions(self) -> list[str]:
         """
         Get current auto-completion suggestions.
 
         Returns:
             List[str]: Current suggestions
         """
-        return self.state.get('suggestions', [])
+        return self.state.get("suggestions", [])
 
     def add_to_history(self, command: str) -> None:
         """
@@ -190,7 +190,7 @@ class InputAreaComponent(TUIComponent):
         Args:
             command: The command to add
         """
-        history = self.state.get('history', [])
+        history = self.state.get("history", [])
         if command and command not in history:
             history.append(command)
             # Keep history size manageable
@@ -208,15 +208,15 @@ class InputAreaComponent(TUIComponent):
         Returns:
             Optional[str]: The selected command, or None if no history
         """
-        history = self.state.get('history', [])
+        history = self.state.get("history", [])
         if not history:
             return None
 
-        current_index = self.state.get('history_index', -1)
+        current_index = self.state.get("history_index", -1)
 
-        if direction == 'up' and current_index > 0:
+        if direction == "up" and current_index > 0:
             current_index -= 1
-        elif direction == 'down' and current_index < len(history) - 1:
+        elif direction == "down" and current_index < len(history) - 1:
             current_index += 1
 
         if current_index >= 0 and current_index < len(history):
@@ -233,7 +233,7 @@ class InputAreaComponent(TUIComponent):
         Returns:
             bool: True if focused, False otherwise
         """
-        return self.state.get('is_focused', False)
+        return self.state.get("is_focused", False)
 
     def set_placeholder(self, placeholder: str) -> None:
         """

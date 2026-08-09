@@ -4,15 +4,15 @@ Status Bar Module for newP6 TUI
 Provides real-time status bar functionality with widgets and auto-updates.
 """
 
-from .status_bar import StatusBar
-from .status_widget import StatusWidget
-from .status_updater import StatusUpdater
+from .connection_widget import ConnectionStatusWidget
 
 # Import specific widgets
 from .model_widget import ModelStatusWidget
-from .session_widget import SessionWidget
-from .connection_widget import ConnectionStatusWidget
 from .resource_widget import SystemResourceWidget
+from .session_widget import SessionWidget
+from .status_bar import StatusBar
+from .status_updater import StatusUpdater
+from .status_widget import StatusWidget
 
 # Export main classes
 __all__ = [
@@ -22,5 +22,5 @@ __all__ = [
     "ModelStatusWidget",
     "SessionWidget",
     "ConnectionStatusWidget",
-    "SystemResourceWidget"
+    "SystemResourceWidget",
 ]

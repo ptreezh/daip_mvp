@@ -13,42 +13,43 @@ This module provides comprehensive memory capabilities including:
 """
 
 import asyncio
-import uuid
+import hashlib
 import json
+import logging
+import pickle
 import sqlite3
-import numpy as np
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional, Set, Tuple, Union
+import threading
+import uuid
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-import logging
-import hashlib
-import pickle
-import threading
-from collections import defaultdict, deque
+from typing import Any, Optional
+
 import faiss
-# import sentence_transformers  # Using mock implementation instead
-from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
-import spacy
-from abc import ABC, abstractmethod
+import numpy as np
+
+# import sentence_transformers  # Using mock implementation instead
 
 logger = logging.getLogger(__name__)
 
 
 class MemoryType(Enum):
     """Types of memory storage"""
-    SHORT_TERM = "short_term"      # Working memory, temporary context
-    LONG_TERM = "long_term"        # Persistent knowledge
-    EPISODIC = "episodic"         # Personal experiences
-    SEMANTIC = "semantic"         # General knowledge
-    PROCEDURAL = "procedural"     # Skills and procedures
-    WORKING = "working"           # Current active processing
+
+    SHORT_TERM = "short_term"  # Working memory, temporary context
+    LONG_TERM = "long_term"  # Persistent knowledge
+    EPISODIC = "episodic"  # Personal experiences
+    SEMANTIC = "semantic"  # General knowledge
+    PROCEDURAL = "procedural"  # Skills and procedures
+    WORKING = "working"  # Current active processing
 
 
 class MemoryStrength(Enum):
     """Memory strength levels for forgetting curves"""
+
     VERY_WEAK = 1
     WEAK = 2
     NORMAL = 3
@@ -58,21 +59,23 @@ class MemoryStrength(Enum):
 
 class MemoryConsolidationLevel(Enum):
     """Memory consolidation levels"""
-    ENCODING = "encoding"         # Initial encoding
+
+    ENCODING = "encoding"  # Initial encoding
     CONSOLIDATION = "consolidation"  # Being consolidated
-    STABLE = "stable"            # Stable long-term memory
-    REINFORCED = "reinforced"    # Reinforced through recall
+    STABLE = "stable"  # Stable long-term memory
+    REINFORCED = "reinforced"  # Reinforced through recall
 
 
 @dataclass
 class MemoryMetadata:
     """Metadata for memory entries"""
+
     created_at: datetime = field(default_factory=datetime.now)
     last_accessed: datetime = field(default_factory=datetime.now)
     access_count: int = 0
     importance_score: float = 0.5
     emotional_weight: float = 0.0
-    context_tags: List[str] = field(default_factory=list)
+    context_tags: list[str] = field(default_factory=list)
     source: Optional[str] = None
     confidence: float = 1.0
     version: int = 1
@@ -82,6 +85,7 @@ class MemoryMetadata:
 @dataclass
 class MemoryMetrics:
     """Memory access and performance metrics"""
+
     retrieval_count: int = 0
     retrieval_success_rate: float = 1.0
     average_retrieval_time_ms: float = 0.0
@@ -94,28 +98,32 @@ class MemoryMetrics:
 @dataclass
 class MemoryFragment:
     """A fragment of memory with rich metadata"""
+
     id: str
     content: str
     memory_type: MemoryType
     embedding: Optional[np.ndarray] = None
     metadata: MemoryMetadata = field(default_factory=MemoryMetadata)
     metrics: MemoryMetrics = field(default_factory=MemoryMetrics)
-    related_memories: Set[str] = field(default_factory=set)
+    related_memories: set[str] = field(default_factory=set)
     strength: MemoryStrength = MemoryStrength.NORMAL
     consolidation_level: MemoryConsolidationLevel = MemoryConsolidationLevel.ENCODING
-    context_vector: Optional[Dict[str, float]] = field(default_factory=dict)
-    temporal_context: Optional[Dict[str, Any]] = field(default_factory=dict)
-    spatial_context: Optional[Dict[str, Any]] = field(default_factory=dict)
+    context_vector: Optional[dict[str, float]] = field(default_factory=dict)
+    temporal_context: Optional[dict[str, Any]] = field(default_factory=dict)
+    spatial_context: Optional[dict[str, Any]] = field(default_factory=dict)
 
-    def calculate_relevance_score(self, query_embedding: np.ndarray,
-                                 context_weights: Dict[str, float] = None) -> float:
+    def calculate_relevance_score(
+        self, query_embedding: np.ndarray, context_weights: dict[str, float] = None
+    ) -> float:
         """Calculate relevance score for retrieval"""
         if self.embedding is None or query_embedding is None:
             return 0.0
 
         # Semantic similarity
-        semantic_similarity = float(np.dot(self.embedding, query_embedding) /
-                                   (np.linalg.norm(self.embedding) * np.linalg.norm(query_embedding)))
+        semantic_similarity = float(
+            np.dot(self.embedding, query_embedding)
+            / (np.linalg.norm(self.embedding) * np.linalg.norm(query_embedding))
+        )
 
         # Strength weighting
         strength_weight = self.strength.value / 5.0
@@ -133,18 +141,20 @@ class MemoryFragment:
         # Context matching
         context_weight = 1.0
         if context_weights and self.context_vector:
-            context_overlap = sum(min(context_weights.get(k, 0), v)
-                                for k, v in self.context_vector.items())
+            context_overlap = sum(
+                min(context_weights.get(k, 0), v)
+                for k, v in self.context_vector.items()
+            )
             context_weight = min(context_overlap + 0.5, 1.0)
 
         # Combine weights
         total_score = (
-            semantic_similarity * 0.3 +
-            strength_weight * 0.2 +
-            recency_weight * 0.15 +
-            importance_weight * 0.15 +
-            frequency_weight * 0.1 +
-            context_weight * 0.1
+            semantic_similarity * 0.3
+            + strength_weight * 0.2
+            + recency_weight * 0.15
+            + importance_weight * 0.15
+            + frequency_weight * 0.1
+            + context_weight * 0.1
         )
 
         return float(total_score)
@@ -153,8 +163,9 @@ class MemoryFragment:
         """Update access metrics"""
         self.metadata.last_accessed = datetime.now()
         self.metrics.retrieval_count += 1
-        self.metadata.importance_score = max(0.0, min(1.0,
-            self.metadata.importance_score + importance_adjustment))
+        self.metadata.importance_score = max(
+            0.0, min(1.0, self.metadata.importance_score + importance_adjustment)
+        )
 
         # Potentially strengthen memory
         if self.metrics.retrieval_count % 5 == 0:
@@ -175,7 +186,9 @@ class MemoryIndex:
 
     def _build_index(self) -> None:
         """Build FAISS index for similarity search"""
-        self.faiss_index = faiss.IndexFlatIP(self.embedding_dim)  # Inner product for cosine similarity
+        self.faiss_index = faiss.IndexFlatIP(
+            self.embedding_dim
+        )  # Inner product for cosine similarity
 
     def add_memory(self, memory_id: str, embedding: np.ndarray) -> None:
         """Add memory to index"""
@@ -190,7 +203,9 @@ class MemoryIndex:
         self.id_to_index[memory_id] = index
         self.index_to_id[index] = memory_id
 
-    def search_similar(self, query_embedding: np.ndarray, k: int = 10) -> List[Tuple[str, float]]:
+    def search_similar(
+        self, query_embedding: np.ndarray, k: int = 10
+    ) -> list[tuple[str, float]]:
         """Search for similar memories"""
         if self.faiss_index.ntotal == 0 or query_embedding is None:
             return []
@@ -232,20 +247,20 @@ class MemoryConsolidator:
     def calculate_consolidation_need(self, memory: MemoryFragment) -> float:
         """Calculate how much consolidation is needed"""
         factors = {
-            'age': self._calculate_age_factor(memory),
-            'access_frequency': self._calculate_frequency_factor(memory),
-            'importance': memory.metadata.importance_score,
-            'strength': memory.strength.value / 5.0,
-            'emotional_weight': memory.metadata.emotional_weight
+            "age": self._calculate_age_factor(memory),
+            "access_frequency": self._calculate_frequency_factor(memory),
+            "importance": memory.metadata.importance_score,
+            "strength": memory.strength.value / 5.0,
+            "emotional_weight": memory.metadata.emotional_weight,
         }
 
         # Weighted combination
         consolidation_need = (
-            factors['age'] * 0.3 +
-            factors['access_frequency'] * 0.25 +
-            factors['importance'] * 0.2 +
-            factors['strength'] * 0.15 +
-            factors['emotional_weight'] * 0.1
+            factors["age"] * 0.3
+            + factors["access_frequency"] * 0.25
+            + factors["importance"] * 0.2
+            + factors["strength"] * 0.15
+            + factors["emotional_weight"] * 0.1
         )
 
         return consolidation_need
@@ -267,13 +282,17 @@ class MemoryConsolidator:
 
         # Base forgetting rate
         time_since_last_access = (datetime.now() - memory.metadata.last_accessed).days
-        forgetting_rate = self.forgetting_rate_base * np.exp(-time_since_last_access / 7.0)
+        forgetting_rate = self.forgetting_rate_base * np.exp(
+            -time_since_last_access / 7.0
+        )
 
         # Adjust by strength and importance
         strength_multiplier = 1.0 - (memory.strength.value / 5.0) * 0.8
         importance_multiplier = 1.0 - memory.metadata.importance_score * 0.5
 
-        forgetting_probability = forgetting_rate * strength_multiplier * importance_multiplier
+        forgetting_probability = (
+            forgetting_rate * strength_multiplier * importance_multiplier
+        )
         return max(0.0, min(1.0, forgetting_probability))
 
     def should_consolidate(self, memory: MemoryFragment) -> bool:
@@ -298,18 +317,19 @@ class MemoryKnowledgeGraph:
             content=memory.content[:100],  # Preview
             importance=memory.metadata.importance_score,
             created_at=memory.metadata.created_at.isoformat(),
-            strength=memory.strength.value
+            strength=memory.strength.value,
         )
 
-    def add_relationship(self, memory1_id: str, memory2_id: str,
-                        relation_type: str, weight: float = 1.0) -> None:
+    def add_relationship(
+        self, memory1_id: str, memory2_id: str, relation_type: str, weight: float = 1.0
+    ) -> None:
         """Add relationship between memories"""
-        self.graph.add_edge(memory1_id, memory2_id,
-                           type=relation_type, weight=weight)
+        self.graph.add_edge(memory1_id, memory2_id, type=relation_type, weight=weight)
         self.relation_index[relation_type].add((memory1_id, memory2_id))
 
-    def find_related_memories(self, memory_id: str,
-                             max_depth: int = 2) -> List[Tuple[str, float]]:
+    def find_related_memories(
+        self, memory_id: str, max_depth: int = 2
+    ) -> list[tuple[str, float]]:
         """Find related memories using graph traversal"""
         if memory_id not in self.graph:
             return []
@@ -332,37 +352,43 @@ class MemoryKnowledgeGraph:
             # Explore neighbors
             for neighbor in self.graph.neighbors(current_id):
                 if neighbor not in visited:
-                    edge_weight = self.graph[current_id][neighbor].get('weight', 1.0)
+                    edge_weight = self.graph[current_id][neighbor].get("weight", 1.0)
                     new_weight = weight * edge_weight * 0.8  # Decay with depth
                     queue.append((neighbor, depth + 1, new_weight))
 
         return sorted(related, key=lambda x: x[1], reverse=True)
 
-    def get_central_memories(self, top_k: int = 10) -> List[Tuple[str, float]]:
+    def get_central_memories(self, top_k: int = 10) -> list[tuple[str, float]]:
         """Get most central memories in the knowledge graph"""
         centrality_scores = nx.betweenness_centrality(self.graph)
-        sorted_memories = sorted(centrality_scores.items(),
-                               key=lambda x: x[1], reverse=True)
+        sorted_memories = sorted(
+            centrality_scores.items(), key=lambda x: x[1], reverse=True
+        )
         return sorted_memories[:top_k]
 
 
 class MemoryManager:
     """Production-level Memory Manager with comprehensive functionality"""
 
-    def __init__(self, storage_path: Optional[str] = None,
-                 embedding_model: str = "all-MiniLM-L6-v2"):
-        self.storage_path = Path(storage_path) if storage_path else Path("data/memory.db")
+    def __init__(
+        self,
+        storage_path: Optional[str] = None,
+        embedding_model: str = "all-MiniLM-L6-v2",
+    ):
+        self.storage_path = (
+            Path(storage_path) if storage_path else Path("data/memory.db")
+        )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Initialize components (mock implementation)
         self.embedding_dim = 384  # Default embedding dimension
-        # self.embedding_model = sentence_transformers.SentenceTransformer(embedding_model)
+        # self.embedding_model = sentence_transformers.SentenceTransformer(embedding_model)  # noqa: E501
         # self.embedding_dim = self.embedding_model.get_sentence_embedding_dimension()
 
         # Memory storage
-        self.memories: Dict[str, MemoryFragment] = {}
+        self.memories: dict[str, MemoryFragment] = {}
         self.short_term_memory = deque(maxlen=50)  # Recent memories
-        self.working_memory = deque(maxlen=20)    # Active context
+        self.working_memory = deque(maxlen=20)  # Active context
 
         # Indexing and search
         self.memory_index = MemoryIndex(self.embedding_dim)
@@ -432,11 +458,21 @@ class MemoryManager:
             """)
 
             # Indexes for performance
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_type ON memories (memory_type)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_strength ON memories (strength)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_created ON memories (created_at)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_memory_relationships_type ON memory_relationships (relation_type)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_memory_access_timestamp ON memory_access_log (timestamp)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_type ON memories (memory_type)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_strength ON memories (strength)"  # noqa: E501
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_created ON memories (created_at)"  # noqa: E501
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memory_relationships_type ON memory_relationships (relation_type)"  # noqa: E501
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memory_access_timestamp ON memory_access_log (timestamp)"  # noqa: E501
+            )
 
             conn.commit()
 
@@ -449,7 +485,7 @@ class MemoryManager:
                            strength, consolidation_level, context_vector, temporal_context,
                            spatial_context
                     FROM memories
-                """)
+                """)  # noqa: E501
 
                 for row in cursor.fetchall():
                     try:
@@ -465,28 +501,40 @@ class MemoryManager:
                         # Deserialize metadata
                         metadata_dict = json.loads(row[4])
                         metadata = MemoryMetadata(
-                            created_at=datetime.fromisoformat(metadata_dict['created_at']),
-                            last_accessed=datetime.fromisoformat(metadata_dict['last_accessed']),
-                            access_count=metadata_dict['access_count'],
-                            importance_score=metadata_dict['importance_score'],
-                            emotional_weight=metadata_dict['emotional_weight'],
-                            context_tags=metadata_dict['context_tags'],
-                            source=metadata_dict['source'],
-                            confidence=metadata_dict['confidence'],
-                            version=metadata_dict['version'],
-                            checksum=metadata_dict['checksum']
+                            created_at=datetime.fromisoformat(
+                                metadata_dict["created_at"]
+                            ),
+                            last_accessed=datetime.fromisoformat(
+                                metadata_dict["last_accessed"]
+                            ),
+                            access_count=metadata_dict["access_count"],
+                            importance_score=metadata_dict["importance_score"],
+                            emotional_weight=metadata_dict["emotional_weight"],
+                            context_tags=metadata_dict["context_tags"],
+                            source=metadata_dict["source"],
+                            confidence=metadata_dict["confidence"],
+                            version=metadata_dict["version"],
+                            checksum=metadata_dict["checksum"],
                         )
 
                         # Deserialize metrics
                         metrics_dict = json.loads(row[5])
                         metrics = MemoryMetrics(
-                            retrieval_count=metrics_dict['retrieval_count'],
-                            retrieval_success_rate=metrics_dict['retrieval_success_rate'],
-                            average_retrieval_time_ms=metrics_dict['average_retrieval_time_ms'],
-                            consolidation_score=metrics_dict['consolidation_score'],
-                            forgetting_rate=metrics_dict['forgetting_rate'],
-                            last_consolidation=datetime.fromisoformat(metrics_dict['last_consolidation']) if metrics_dict['last_consolidation'] else None,
-                            memory_efficiency=metrics_dict['memory_efficiency']
+                            retrieval_count=metrics_dict["retrieval_count"],
+                            retrieval_success_rate=metrics_dict[
+                                "retrieval_success_rate"
+                            ],
+                            average_retrieval_time_ms=metrics_dict[
+                                "average_retrieval_time_ms"
+                            ],
+                            consolidation_score=metrics_dict["consolidation_score"],
+                            forgetting_rate=metrics_dict["forgetting_rate"],
+                            last_consolidation=datetime.fromisoformat(
+                                metrics_dict["last_consolidation"]
+                            )
+                            if metrics_dict["last_consolidation"]
+                            else None,
+                            memory_efficiency=metrics_dict["memory_efficiency"],
                         )
 
                         # Deserialize other fields
@@ -508,7 +556,7 @@ class MemoryManager:
                             consolidation_level=consolidation_level,
                             context_vector=context_vector,
                             temporal_context=temporal_context,
-                            spatial_context=spatial_context
+                            spatial_context=spatial_context,
                         )
 
                         self.memories[memory_id] = memory
@@ -534,7 +582,9 @@ class MemoryManager:
                 """)
 
                 for row in cursor.fetchall():
-                    self.knowledge_graph.add_relationship(row[0], row[1], row[2], row[3])
+                    self.knowledge_graph.add_relationship(
+                        row[0], row[1], row[2], row[3]
+                    )
 
             logger.info(f"Loaded {len(self.memories)} memories from database")
 
@@ -545,45 +595,56 @@ class MemoryManager:
         """Save memory to database"""
         try:
             with sqlite3.connect(self.storage_path) as conn:
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT OR REPLACE INTO memories
                     (id, content, memory_type, embedding, metadata, metrics,
                      strength, consolidation_level, context_vector, temporal_context,
                      spatial_context, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    memory.id,
-                    memory.content,
-                    memory.memory_type.value,
-                    pickle.dumps(memory.embedding) if memory.embedding is not None else None,
-                    json.dumps({
-                        'created_at': memory.metadata.created_at.isoformat(),
-                        'last_accessed': memory.metadata.last_accessed.isoformat(),
-                        'access_count': memory.metadata.access_count,
-                        'importance_score': memory.metadata.importance_score,
-                        'emotional_weight': memory.metadata.emotional_weight,
-                        'context_tags': memory.metadata.context_tags,
-                        'source': memory.metadata.source,
-                        'confidence': memory.metadata.confidence,
-                        'version': memory.metadata.version,
-                        'checksum': memory.metadata.checksum
-                    }),
-                    json.dumps({
-                        'retrieval_count': memory.metrics.retrieval_count,
-                        'retrieval_success_rate': memory.metrics.retrieval_success_rate,
-                        'average_retrieval_time_ms': memory.metrics.average_retrieval_time_ms,
-                        'consolidation_score': memory.metrics.consolidation_score,
-                        'forgetting_rate': memory.metrics.forgetting_rate,
-                        'last_consolidation': memory.metrics.last_consolidation.isoformat() if memory.metrics.last_consolidation else None,
-                        'memory_efficiency': memory.metrics.memory_efficiency
-                    }),
-                    memory.strength.value,
-                    memory.consolidation_level.value,
-                    json.dumps(memory.context_vector),
-                    json.dumps(memory.temporal_context),
-                    json.dumps(memory.spatial_context),
-                    datetime.now().isoformat()
-                ))
+                """,
+                    (
+                        memory.id,
+                        memory.content,
+                        memory.memory_type.value,
+                        pickle.dumps(memory.embedding)
+                        if memory.embedding is not None
+                        else None,
+                        json.dumps(
+                            {
+                                "created_at": memory.metadata.created_at.isoformat(),
+                                "last_accessed": memory.metadata.last_accessed.isoformat(),  # noqa: E501
+                                "access_count": memory.metadata.access_count,
+                                "importance_score": memory.metadata.importance_score,
+                                "emotional_weight": memory.metadata.emotional_weight,
+                                "context_tags": memory.metadata.context_tags,
+                                "source": memory.metadata.source,
+                                "confidence": memory.metadata.confidence,
+                                "version": memory.metadata.version,
+                                "checksum": memory.metadata.checksum,
+                            }
+                        ),
+                        json.dumps(
+                            {
+                                "retrieval_count": memory.metrics.retrieval_count,
+                                "retrieval_success_rate": memory.metrics.retrieval_success_rate,  # noqa: E501
+                                "average_retrieval_time_ms": memory.metrics.average_retrieval_time_ms,  # noqa: E501
+                                "consolidation_score": memory.metrics.consolidation_score,  # noqa: E501
+                                "forgetting_rate": memory.metrics.forgetting_rate,
+                                "last_consolidation": memory.metrics.last_consolidation.isoformat()  # noqa: E501
+                                if memory.metrics.last_consolidation
+                                else None,
+                                "memory_efficiency": memory.metrics.memory_efficiency,
+                            }
+                        ),
+                        memory.strength.value,
+                        memory.consolidation_level.value,
+                        json.dumps(memory.context_vector),
+                        json.dumps(memory.temporal_context),
+                        json.dumps(memory.spatial_context),
+                        datetime.now().isoformat(),
+                    ),
+                )
                 conn.commit()
 
         except Exception as e:
@@ -595,12 +656,12 @@ class MemoryManager:
         memory_type: MemoryType = MemoryType.LONG_TERM,
         importance_score: float = 0.5,
         emotional_weight: float = 0.0,
-        context_tags: Optional[List[str]] = None,
+        context_tags: Optional[list[str]] = None,
         source: Optional[str] = None,
-        context_vector: Optional[Dict[str, float]] = None,
-        temporal_context: Optional[Dict[str, Any]] = None,
-        spatial_context: Optional[Dict[str, Any]] = None,
-        related_memories: Optional[List[str]] = None
+        context_vector: Optional[dict[str, float]] = None,
+        temporal_context: Optional[dict[str, Any]] = None,
+        spatial_context: Optional[dict[str, Any]] = None,
+        related_memories: Optional[list[str]] = None,
     ) -> str:
         """Store a new memory with comprehensive metadata"""
         start_time = datetime.now()
@@ -622,11 +683,11 @@ class MemoryManager:
                 emotional_weight=emotional_weight,
                 context_tags=context_tags or [],
                 source=source,
-                checksum=checksum
+                checksum=checksum,
             ),
             context_vector=context_vector or {},
             temporal_context=temporal_context or {},
-            spatial_context=spatial_context or {}
+            spatial_context=spatial_context or {},
         )
 
         # Store memory
@@ -672,11 +733,11 @@ class MemoryManager:
         self,
         query: str,
         memory_type: Optional[MemoryType] = None,
-        context_weights: Optional[Dict[str, float]] = None,
+        context_weights: Optional[dict[str, float]] = None,
         max_results: int = 10,
         min_relevance: float = 0.1,
-        include_related: bool = True
-    ) -> List[Tuple[MemoryFragment, float]]:
+        include_related: bool = True,
+    ) -> list[tuple[MemoryFragment, float]]:
         """Retrieve memories based on semantic similarity and context"""
         start_time = datetime.now()
 
@@ -684,7 +745,9 @@ class MemoryManager:
         query_embedding = self.embedding_model.encode([query])[0]
 
         # Search in index
-        similar_memories = self.memory_index.search_similar(query_embedding, max_results * 2)
+        similar_memories = self.memory_index.search_similar(
+            query_embedding, max_results * 2
+        )
 
         results = []
 
@@ -700,7 +763,9 @@ class MemoryManager:
                     continue
 
                 # Calculate comprehensive relevance score
-                relevance_score = memory.calculate_relevance_score(query_embedding, context_weights)
+                relevance_score = memory.calculate_relevance_score(
+                    query_embedding, context_weights
+                )
 
                 # Filter by minimum relevance
                 if relevance_score < min_relevance:
@@ -754,8 +819,8 @@ class MemoryManager:
         content: Optional[str] = None,
         importance_score: Optional[float] = None,
         emotional_weight: Optional[float] = None,
-        context_tags: Optional[List[str]] = None,
-        context_vector: Optional[Dict[str, float]] = None
+        context_tags: Optional[list[str]] = None,
+        context_vector: Optional[dict[str, float]] = None,
     ) -> bool:
         """Update existing memory"""
         with self._lock:
@@ -806,7 +871,7 @@ class MemoryManager:
             if memory_id not in self.memories:
                 return False
 
-            memory = self.memories[memory_id]
+            self.memories[memory_id]
 
             # Remove from all data structures
             del self.memories[memory_id]
@@ -828,9 +893,14 @@ class MemoryManager:
             try:
                 with sqlite3.connect(self.storage_path) as conn:
                     conn.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
-                    conn.execute("DELETE FROM memory_relationships WHERE memory1_id = ? OR memory2_id = ?",
-                               (memory_id, memory_id))
-                    conn.execute("DELETE FROM memory_access_log WHERE memory_id = ?", (memory_id,))
+                    conn.execute(
+                        "DELETE FROM memory_relationships WHERE memory1_id = ? OR memory2_id = ?",  # noqa: E501
+                        (memory_id, memory_id),
+                    )
+                    conn.execute(
+                        "DELETE FROM memory_access_log WHERE memory_id = ?",
+                        (memory_id,),
+                    )
                     conn.commit()
             except Exception as e:
                 logger.error(f"Failed to delete memory {memory_id} from database: {e}")
@@ -854,20 +924,31 @@ class MemoryManager:
                 # Increase consolidation level
                 if memory.consolidation_level == MemoryConsolidationLevel.ENCODING:
                     memory.consolidation_level = MemoryConsolidationLevel.CONSOLIDATION
-                elif memory.consolidation_level == MemoryConsolidationLevel.CONSOLIDATION:
+                elif (
+                    memory.consolidation_level == MemoryConsolidationLevel.CONSOLIDATION
+                ):
                     # Check if should become stable
-                    consolidation_need = self.consolidator.calculate_consolidation_need(memory)
+                    consolidation_need = self.consolidator.calculate_consolidation_need(
+                        memory
+                    )
                     if consolidation_need >= 0.8:
                         memory.consolidation_level = MemoryConsolidationLevel.STABLE
 
                 # Potentially strengthen memory
-                forgetting_prob = self.consolidator.calculate_forgetting_probability(memory)
-                if forgetting_prob < 0.1 and memory.strength.value < MemoryStrength.VERY_STRONG.value:
+                forgetting_prob = self.consolidator.calculate_forgetting_probability(
+                    memory
+                )
+                if (
+                    forgetting_prob < 0.1
+                    and memory.strength.value < MemoryStrength.VERY_STRONG.value
+                ):
                     memory.strength = MemoryStrength(memory.strength.value + 1)
 
                 # Update metrics
                 memory.metrics.last_consolidation = datetime.now()
-                memory.metrics.consolidation_score = self.consolidator.calculate_consolidation_need(memory)
+                memory.metrics.consolidation_score = (
+                    self.consolidator.calculate_consolidation_need(memory)
+                )
                 memory.metrics.forgetting_rate = forgetting_prob
 
                 self._save_memory(memory)
@@ -885,7 +966,9 @@ class MemoryManager:
 
             for memory in self.memories.values():
                 if memory.consolidation_level != MemoryConsolidationLevel.STABLE:
-                    forgetting_prob = self.consolidator.calculate_forgetting_probability(memory)
+                    forgetting_prob = (
+                        self.consolidator.calculate_forgetting_probability(memory)
+                    )
 
                     # Probabilistic forgetting
                     if np.random.random() < forgetting_prob:
@@ -899,7 +982,7 @@ class MemoryManager:
         logger.info(f"Forgot {forgotten_count} memories")
         return forgotten_count
 
-    async def get_memory_statistics(self) -> Dict[str, Any]:
+    async def get_memory_statistics(self) -> dict[str, Any]:
         """Get comprehensive memory statistics"""
         with self._lock:
             total_memories = len(self.memories)
@@ -936,21 +1019,23 @@ class MemoryManager:
                 "type_distribution": dict(type_counts),
                 "strength_distribution": dict(strength_counts),
                 "consolidation_distribution": dict(consolidation_counts),
-                "average_importance": np.mean(importance_scores) if importance_scores else 0,
+                "average_importance": np.mean(importance_scores)
+                if importance_scores
+                else 0,
                 "average_access_count": np.mean(access_counts) if access_counts else 0,
                 "average_age_days": np.mean(ages) if ages else 0,
                 "average_access_time_ms": avg_access_time,
-                "cache_hit_rate": self.cache_hit_rate
+                "cache_hit_rate": self.cache_hit_rate,
             }
 
     async def search_memories_advanced(
         self,
         query: str,
-        filters: Optional[Dict[str, Any]] = None,
-        temporal_range: Optional[Tuple[datetime, datetime]] = None,
-        spatial_constraints: Optional[Dict[str, Any]] = None,
-        max_results: int = 10
-    ) -> List[Tuple[MemoryFragment, float]]:
+        filters: Optional[dict[str, Any]] = None,
+        temporal_range: Optional[tuple[datetime, datetime]] = None,
+        spatial_constraints: Optional[dict[str, Any]] = None,
+        max_results: int = 10,
+    ) -> list[tuple[MemoryFragment, float]]:
         """Advanced memory search with multiple filters"""
         # Basic semantic search first
         base_results = await self.retrieve_memory(query, max_results=max_results * 2)
@@ -963,19 +1048,21 @@ class MemoryManager:
 
         for memory, relevance_score in base_results:
             # Type filter
-            if filters and 'memory_type' in filters:
-                if memory.memory_type != filters['memory_type']:
+            if filters and "memory_type" in filters:
+                if memory.memory_type != filters["memory_type"]:
                     continue
 
             # Importance filter
-            if filters and 'min_importance' in filters:
-                if memory.metadata.importance_score < filters['min_importance']:
+            if filters and "min_importance" in filters:
+                if memory.metadata.importance_score < filters["min_importance"]:
                     continue
 
             # Tag filter
-            if filters and 'required_tags' in filters:
-                if not any(tag in memory.metadata.context_tags
-                          for tag in filters['required_tags']):
+            if filters and "required_tags" in filters:
+                if not any(
+                    tag in memory.metadata.context_tags
+                    for tag in filters["required_tags"]
+                ):
                     continue
 
             # Temporal filter
@@ -987,8 +1074,11 @@ class MemoryManager:
             # Spatial filter
             if spatial_constraints and memory.spatial_context:
                 # Example spatial constraint matching
-                if 'location' in spatial_constraints:
-                    if memory.spatial_context.get('location') != spatial_constraints['location']:
+                if "location" in spatial_constraints:
+                    if (
+                        memory.spatial_context.get("location")
+                        != spatial_constraints["location"]
+                    ):
                         continue
 
             filtered_results.append((memory, relevance_score))
@@ -998,9 +1088,9 @@ class MemoryManager:
     async def export_memories(
         self,
         file_path: str,
-        memory_types: Optional[List[MemoryType]] = None,
-        date_range: Optional[Tuple[datetime, datetime]] = None,
-        include_embeddings: bool = False
+        memory_types: Optional[list[MemoryType]] = None,
+        date_range: Optional[tuple[datetime, datetime]] = None,
+        include_embeddings: bool = False,
     ) -> int:
         """Export memories to file"""
         exported_count = 0
@@ -1021,29 +1111,29 @@ class MemoryManager:
 
                     # Prepare export data
                     export_data = {
-                        'id': memory.id,
-                        'content': memory.content,
-                        'memory_type': memory.memory_type.value,
-                        'metadata': {
-                            'created_at': memory.metadata.created_at.isoformat(),
-                            'importance_score': memory.metadata.importance_score,
-                            'context_tags': memory.metadata.context_tags,
-                            'source': memory.metadata.source
+                        "id": memory.id,
+                        "content": memory.content,
+                        "memory_type": memory.memory_type.value,
+                        "metadata": {
+                            "created_at": memory.metadata.created_at.isoformat(),
+                            "importance_score": memory.metadata.importance_score,
+                            "context_tags": memory.metadata.context_tags,
+                            "source": memory.metadata.source,
                         },
-                        'metrics': {
-                            'retrieval_count': memory.metrics.retrieval_count,
-                            'consolidation_score': memory.metrics.consolidation_score
-                        }
+                        "metrics": {
+                            "retrieval_count": memory.metrics.retrieval_count,
+                            "consolidation_score": memory.metrics.consolidation_score,
+                        },
                     }
 
                     if include_embeddings and memory.embedding is not None:
-                        export_data['embedding'] = memory.embedding.tolist()
+                        export_data["embedding"] = memory.embedding.tolist()
 
                     memories_to_export.append(export_data)
                     exported_count += 1
 
             # Write to file
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(memories_to_export, f, indent=2, ensure_ascii=False)
 
             logger.info(f"Exported {exported_count} memories to {file_path}")
@@ -1054,19 +1144,24 @@ class MemoryManager:
 
         return exported_count
 
-    async def import_memories(self, file_path: str, merge_strategy: str = "skip_duplicates") -> int:
+    async def import_memories(
+        self, file_path: str, merge_strategy: str = "skip_duplicates"
+    ) -> int:
         """Import memories from file"""
         imported_count = 0
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 memories_data = json.load(f)
 
             for memory_data in memories_data:
                 # Check for duplicates
                 existing_memory = None
                 for memory in self.memories.values():
-                    if memory.metadata.checksum == hashlib.md5(memory_data['content'].encode()).hexdigest():
+                    if (
+                        memory.metadata.checksum
+                        == hashlib.md5(memory_data["content"].encode()).hexdigest()
+                    ):
                         existing_memory = memory
                         break
 
@@ -1077,30 +1172,38 @@ class MemoryManager:
                         # Update existing memory
                         await self.update_memory(
                             existing_memory.id,
-                            content=memory_data['content'],
-                            importance_score=memory_data['metadata'].get('importance_score'),
-                            context_tags=memory_data['metadata'].get('context_tags')
+                            content=memory_data["content"],
+                            importance_score=memory_data["metadata"].get(
+                                "importance_score"
+                            ),
+                            context_tags=memory_data["metadata"].get("context_tags"),
                         )
                         imported_count += 1
                         continue
 
                 # Create new memory
                 embedding = None
-                if 'embedding' in memory_data:
-                    embedding = np.array(memory_data['embedding'])
+                if "embedding" in memory_data:
+                    embedding = np.array(memory_data["embedding"])
 
                 memory = MemoryFragment(
-                    id=memory_data['id'],
-                    content=memory_data['content'],
-                    memory_type=MemoryType(memory_data['memory_type']),
+                    id=memory_data["id"],
+                    content=memory_data["content"],
+                    memory_type=MemoryType(memory_data["memory_type"]),
                     embedding=embedding,
                     metadata=MemoryMetadata(
-                        created_at=datetime.fromisoformat(memory_data['metadata']['created_at']),
-                        importance_score=memory_data['metadata'].get('importance_score', 0.5),
-                        context_tags=memory_data['metadata'].get('context_tags', []),
-                        source=memory_data['metadata'].get('source'),
-                        checksum=hashlib.md5(memory_data['content'].encode()).hexdigest()
-                    )
+                        created_at=datetime.fromisoformat(
+                            memory_data["metadata"]["created_at"]
+                        ),
+                        importance_score=memory_data["metadata"].get(
+                            "importance_score", 0.5
+                        ),
+                        context_tags=memory_data["metadata"].get("context_tags", []),
+                        source=memory_data["metadata"].get("source"),
+                        checksum=hashlib.md5(
+                            memory_data["content"].encode()
+                        ).hexdigest(),
+                    ),
                 )
 
                 with self._lock:
@@ -1125,8 +1228,8 @@ class MemoryManager:
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT INTO memory_access_log (id, memory_id, access_type) VALUES (?, ?, ?)",
-                    (str(uuid.uuid4()), memory_id, access_type)
+                    "INSERT INTO memory_access_log (id, memory_id, access_type) VALUES (?, ?, ?)",  # noqa: E501
+                    (str(uuid.uuid4()), memory_id, access_type),
                 )
                 conn.commit()
         except Exception as e:
@@ -1163,7 +1266,9 @@ class MemoryManager:
                 await self.forget_memories()
 
                 # Sleep for consolidation interval
-                await asyncio.sleep(self.consolidator.consolidation_interval_hours * 3600)
+                await asyncio.sleep(
+                    self.consolidator.consolidation_interval_hours * 3600
+                )
 
             except asyncio.CancelledError:
                 break
@@ -1192,10 +1297,12 @@ class MemoryManager:
         # Convert hash to numpy array of fixed size
         hash_int = int(text_hash, 16)
         # Generate pseudo-random but deterministic embedding
-        embedding = np.array([
-            (hash_int >> (i * 8) & 0xFF) / 255.0 - 0.5
-            for i in range(self.embedding_dim)
-        ])
+        embedding = np.array(
+            [
+                (hash_int >> (i * 8) & 0xFF) / 255.0 - 0.5
+                for i in range(self.embedding_dim)
+            ]
+        )
         # Normalize
         norm = np.linalg.norm(embedding)
         if norm > 0:

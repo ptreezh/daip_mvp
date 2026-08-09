@@ -6,23 +6,24 @@
 import asyncio
 import random
 import time
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, Callable, Any, Type
-from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
 
 from .models import (
-    ValidationError,
-    GenerationError,
+    ConfigurationError,
     FileOperationError,
+    GenerationError,
     NetworkError,
     TimeoutError,
-    ConfigurationError
+    ValidationError,
 )
 
 
 class ErrorSeverity(Enum):
     """错误严重程度"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -31,13 +32,19 @@ class ErrorSeverity(Enum):
     def __lt__(self, other):
         """支持比较操作"""
         if self.__class__ is other.__class__:
-            order = [ErrorSeverity.LOW, ErrorSeverity.MEDIUM, ErrorSeverity.HIGH, ErrorSeverity.CRITICAL]
+            order = [
+                ErrorSeverity.LOW,
+                ErrorSeverity.MEDIUM,
+                ErrorSeverity.HIGH,
+                ErrorSeverity.CRITICAL,
+            ]
             return order.index(self) < order.index(other)
         return NotImplemented
 
 
 class ErrorCategory(Enum):
     """错误类别"""
+
     VALIDATION = "validation"
     FILE_OPERATION = "file_operation"
     NETWORK = "network"
@@ -48,7 +55,7 @@ class ErrorCategory(Enum):
     USER_INPUT = "user_input"
 
     @classmethod
-    def from_exception(cls, exception: Exception) -> 'ErrorCategory':
+    def from_exception(cls, exception: Exception) -> "ErrorCategory":
         """根据异常类型获取错误类别"""
         exception_type_map = {
             ValidationError: cls.VALIDATION,
@@ -70,14 +77,15 @@ class ErrorCategory(Enum):
 @dataclass
 class ErrorContext:
     """错误上下文信息"""
+
     operation: Optional[str] = None
     component: Optional[str] = None
     user_id: Optional[str] = None
     session_id: Optional[str] = None
-    additional_data: Optional[Dict[str, Any]] = None
+    additional_data: Optional[dict[str, Any]] = None
     timestamp: datetime = field(default_factory=datetime.now)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "operation": self.operation,
@@ -85,13 +93,14 @@ class ErrorContext:
             "user_id": self.user_id,
             "session_id": self.session_id,
             "additional_data": self.additional_data or {},
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
         }
 
 
 @dataclass
 class ErrorReport:
     """错误报告"""
+
     error: Exception
     severity: ErrorSeverity = ErrorSeverity.MEDIUM
     category: ErrorCategory = ErrorCategory.SYSTEM
@@ -114,18 +123,18 @@ class ErrorReport:
         error: Exception,
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
         context: Optional[ErrorContext] = None,
-        message: Optional[str] = None
-    ) -> 'ErrorReport':
+        message: Optional[str] = None,
+    ) -> "ErrorReport":
         """从异常创建错误报告"""
         return cls(
             error=error,
             severity=severity,
             category=ErrorCategory.from_exception(error),
             context=context,
-            message=message
+            message=message,
         )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """转换为字典"""
         return {
             "error_type": type(self.error).__name__,
@@ -135,13 +144,14 @@ class ErrorReport:
             "message": self.message,
             "timestamp": self.timestamp.isoformat(),
             "context": self.context.to_dict() if self.context else None,
-            "stack_trace": self.stack_trace
+            "stack_trace": self.stack_trace,
         }
 
 
 @dataclass
 class RetryStrategy:
     """重试策略"""
+
     max_attempts: int = 3
     base_delay: float = 1.0
     max_delay: float = 60.0
@@ -168,21 +178,23 @@ class RetryStrategy:
 @dataclass
 class RecoveryStrategy:
     """恢复策略"""
+
     retry_strategy: RetryStrategy = field(default_factory=RetryStrategy)
-    fallback_actions: List[str] = field(default_factory=list)
+    fallback_actions: list[str] = field(default_factory=list)
     custom_handler: Optional[Callable] = None
 
 
 @dataclass
 class ErrorRecoveryResult:
     """错误恢复结果"""
+
     success: bool
     original_error: Exception
     recovery_action: str
     attempts: int
     total_delay: float
     final_result: Optional[Any] = None
-    recovery_details: Optional[Dict[str, Any]] = None
+    recovery_details: Optional[dict[str, Any]] = None
 
 
 class ErrorHandler:
@@ -199,10 +211,10 @@ class ErrorHandler:
             max_history: 最大错误历史记录数量
         """
         self.max_history = max_history
-        self.error_history: List[ErrorReport] = []
+        self.error_history: list[ErrorReport] = []
 
         # 默认严重程度映射
-        self.severity_mapping: Dict[Type[Exception], ErrorSeverity] = {
+        self.severity_mapping: dict[type[Exception], ErrorSeverity] = {
             ValidationError: ErrorSeverity.MEDIUM,
             ConfigurationError: ErrorSeverity.HIGH,
             NetworkError: ErrorSeverity.MEDIUM,
@@ -212,7 +224,7 @@ class ErrorHandler:
         }
 
         # 恢复策略
-        self.recovery_strategies: Dict[ErrorCategory, RecoveryStrategy] = {}
+        self.recovery_strategies: dict[ErrorCategory, RecoveryStrategy] = {}
 
         # 配置默认恢复策略
         self._configure_default_recovery_strategies()
@@ -222,31 +234,25 @@ class ErrorHandler:
         # 网络错误 - 更多的重试次数
         self.recovery_strategies[ErrorCategory.NETWORK] = RecoveryStrategy(
             retry_strategy=RetryStrategy(
-                max_attempts=5,
-                base_delay=2.0,
-                backoff_factor=2.0
+                max_attempts=5, base_delay=2.0, backoff_factor=2.0
             ),
-            fallback_actions=["use_cache", "offline_mode"]
+            fallback_actions=["use_cache", "offline_mode"],
         )
 
         # 超时错误 - 中等重试次数
         self.recovery_strategies[ErrorCategory.TIMEOUT] = RecoveryStrategy(
             retry_strategy=RetryStrategy(
-                max_attempts=2,
-                base_delay=5.0,
-                backoff_factor=1.5
+                max_attempts=2, base_delay=5.0, backoff_factor=1.5
             ),
-            fallback_actions=["increase_timeout", "alternative_endpoint"]
+            fallback_actions=["increase_timeout", "alternative_endpoint"],
         )
 
         # 文件操作错误 - 较少重试次数
         self.recovery_strategies[ErrorCategory.FILE_OPERATION] = RecoveryStrategy(
             retry_strategy=RetryStrategy(
-                max_attempts=2,
-                base_delay=0.5,
-                backoff_factor=1.0
+                max_attempts=2, base_delay=0.5, backoff_factor=1.0
             ),
-            fallback_actions=["use_alternative_location", "skip_file"]
+            fallback_actions=["use_alternative_location", "skip_file"],
         )
 
     def handle_error(
@@ -254,7 +260,7 @@ class ErrorHandler:
         error: Exception,
         context: Optional[ErrorContext] = None,
         severity: Optional[ErrorSeverity] = None,
-        message: Optional[str] = None
+        message: Optional[str] = None,
     ) -> ErrorReport:
         """处理错误并生成报告
 
@@ -277,7 +283,7 @@ class ErrorHandler:
             severity=severity,
             context=context,
             message=message,
-            stack_trace=self._get_stack_trace(error)
+            stack_trace=self._get_stack_trace(error),
         )
 
         # 添加到历史记录
@@ -305,6 +311,7 @@ class ErrorHandler:
         """获取错误堆栈跟踪"""
         try:
             import traceback
+
             return traceback.format_exc()
         except Exception:
             return None
@@ -315,9 +322,11 @@ class ErrorHandler:
 
         # 保持历史记录在限制范围内
         if len(self.error_history) > self.max_history:
-            self.error_history = self.error_history[-self.max_history:]
+            self.error_history = self.error_history[-self.max_history :]
 
-    def configure_severity_mapping(self, mapping: Dict[Type[Exception], ErrorSeverity]) -> None:
+    def configure_severity_mapping(
+        self, mapping: dict[type[Exception], ErrorSeverity]
+    ) -> None:
         """配置严重程度映射
 
         Args:
@@ -329,8 +338,8 @@ class ErrorHandler:
         self,
         category: ErrorCategory,
         retry_strategy: Optional[RetryStrategy] = None,
-        fallback_actions: Optional[List[str]] = None,
-        custom_handler: Optional[Callable] = None
+        fallback_actions: Optional[list[str]] = None,
+        custom_handler: Optional[Callable] = None,
     ) -> None:
         """配置恢复策略
 
@@ -343,7 +352,7 @@ class ErrorHandler:
         strategy = RecoveryStrategy(
             retry_strategy=retry_strategy or RetryStrategy(),
             fallback_actions=fallback_actions or [],
-            custom_handler=custom_handler
+            custom_handler=custom_handler,
         )
         self.recovery_strategies[category] = strategy
 
@@ -363,7 +372,7 @@ class ErrorHandler:
         self,
         func: Callable,
         strategy: Optional[RetryStrategy] = None,
-        retry_condition: Optional[Callable[[Exception], bool]] = None
+        retry_condition: Optional[Callable[[Exception], bool]] = None,
     ) -> Any:
         """使用指数退避重试函数
 
@@ -412,9 +421,7 @@ class ErrorHandler:
         raise last_exception
 
     async def attempt_recovery(
-        self,
-        error: Exception,
-        context: Optional[ErrorContext] = None
+        self, error: Exception, context: Optional[ErrorContext] = None
     ) -> ErrorRecoveryResult:
         """尝试从错误中恢复
 
@@ -440,8 +447,7 @@ class ErrorHandler:
                 raise error  # 重新抛出原始错误进行重试测试
 
             result = await self.retry_with_backoff(
-                retry_operation,
-                strategy.retry_strategy
+                retry_operation, strategy.retry_strategy
             )
 
             total_delay = time.time() - start_time
@@ -452,10 +458,10 @@ class ErrorHandler:
                 recovery_action="retry_with_backoff",
                 attempts=attempts,
                 total_delay=total_delay,
-                final_result=result
+                final_result=result,
             )
 
-        except Exception as final_error:
+        except Exception:
             total_delay = time.time() - start_time
 
             # 尝试回退操作
@@ -473,10 +479,10 @@ class ErrorHandler:
                 attempts=attempts,
                 total_delay=total_delay,
                 final_result=None,
-                recovery_details={"fallback_attempts": len(strategy.fallback_actions)}
+                recovery_details={"fallback_attempts": len(strategy.fallback_actions)},
             )
 
-    def get_errors_by_severity(self, severity: ErrorSeverity) -> List[ErrorReport]:
+    def get_errors_by_severity(self, severity: ErrorSeverity) -> list[ErrorReport]:
         """按严重程度获取错误
 
         Args:
@@ -487,7 +493,7 @@ class ErrorHandler:
         """
         return [report for report in self.error_history if report.severity == severity]
 
-    def get_errors_by_category(self, category: ErrorCategory) -> List[ErrorReport]:
+    def get_errors_by_category(self, category: ErrorCategory) -> list[ErrorReport]:
         """按类别获取错误
 
         Args:
@@ -499,10 +505,8 @@ class ErrorHandler:
         return [report for report in self.error_history if report.category == category]
 
     def get_errors_by_time_range(
-        self,
-        start_time: datetime,
-        end_time: datetime
-    ) -> List[ErrorReport]:
+        self, start_time: datetime, end_time: datetime
+    ) -> list[ErrorReport]:
         """按时间范围获取错误
 
         Args:
@@ -513,11 +517,12 @@ class ErrorHandler:
             List[ErrorReport]: 时间范围内的错误报告列表
         """
         return [
-            report for report in self.error_history
+            report
+            for report in self.error_history
             if start_time <= report.timestamp <= end_time
         ]
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """获取错误统计信息
 
         Returns:
@@ -529,7 +534,7 @@ class ErrorHandler:
                 "by_severity": {},
                 "by_category": {},
                 "recent_errors": [],
-                "error_rate_24h": 0.0
+                "error_rate_24h": 0.0,
             }
 
         # 按严重程度统计
@@ -553,14 +558,16 @@ class ErrorHandler:
         error_rate_24h = len(recent_errors) / 24.0  # 每小时错误数
 
         # 最近的错误
-        recent_errors = sorted(self.error_history, key=lambda x: x.timestamp, reverse=True)[:10]
+        recent_errors = sorted(
+            self.error_history, key=lambda x: x.timestamp, reverse=True
+        )[:10]
 
         return {
             "total_errors": len(self.error_history),
             "by_severity": by_severity,
             "by_category": by_category,
             "recent_errors": [error.to_dict() for error in recent_errors],
-            "error_rate_24h": error_rate_24h
+            "error_rate_24h": error_rate_24h,
         }
 
     def clear_history(self) -> None:
@@ -578,7 +585,12 @@ class ErrorHandler:
         """
         if format.lower() == "json":
             import json
-            return json.dumps([report.to_dict() for report in self.error_history], indent=2, ensure_ascii=False)
+
+            return json.dumps(
+                [report.to_dict() for report in self.error_history],
+                indent=2,
+                ensure_ascii=False,
+            )
 
         elif format.lower() == "csv":
             import csv
@@ -586,26 +598,39 @@ class ErrorHandler:
 
             output = io.StringIO()
             if self.error_history:
-                writer = csv.DictWriter(output, fieldnames=[
-                    "timestamp", "severity", "category", "error_type", "error_message"
-                ])
+                writer = csv.DictWriter(
+                    output,
+                    fieldnames=[
+                        "timestamp",
+                        "severity",
+                        "category",
+                        "error_type",
+                        "error_message",
+                    ],
+                )
                 writer.writeheader()
                 for report in self.error_history:
-                    writer.writerow({
-                        "timestamp": report.timestamp.isoformat(),
-                        "severity": report.severity.value,
-                        "category": report.category.value,
-                        "error_type": type(report.error).__name__,
-                        "error_message": report.message
-                    })
+                    writer.writerow(
+                        {
+                            "timestamp": report.timestamp.isoformat(),
+                            "severity": report.severity.value,
+                            "category": report.category.value,
+                            "error_type": type(report.error).__name__,
+                            "error_message": report.message,
+                        }
+                    )
             return output.getvalue()
 
         elif format.lower() == "txt":
             lines = []
             for report in self.error_history:
-                lines.append(f"[{report.timestamp}] {report.severity.value.upper()} {report.category.value}: {report.message}")
+                lines.append(
+                    f"[{report.timestamp}] {report.severity.value.upper()} {report.category.value}: {report.message}"  # noqa: E501
+                )
                 if report.context:
-                    lines.append(f"  Context: {report.context.operation} in {report.context.component}")
+                    lines.append(
+                        f"  Context: {report.context.operation} in {report.context.component}"  # noqa: E501
+                    )
                 lines.append("")
             return "\n".join(lines)
 

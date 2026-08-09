@@ -1,14 +1,17 @@
 """
 Models for document operations.
 """
-from typing import Optional, List, Dict, Any
+
 from datetime import datetime
-from pydantic import BaseModel, Field
 from enum import Enum
+from typing import Any, Optional
+
+from pydantic import BaseModel, Field
 
 
 class PaperSource(str, Enum):
     """Source types for academic papers."""
+
     ARXIV = "arxiv"
     PUBMED = "pubmed"
     WEB = "web"
@@ -17,16 +20,17 @@ class PaperSource(str, Enum):
 
 class PaperMetadata(BaseModel):
     """Metadata for academic papers."""
+
     title: str
-    authors: List[str] = Field(default_factory=list)
+    authors: list[str] = Field(default_factory=list)
     abstract: str = ""
     publication_date: Optional[datetime] = None
     journal: Optional[str] = None
     doi: Optional[str] = None
     arxiv_id: Optional[str] = None
     url: Optional[str] = None
-    categories: List[str] = Field(default_factory=list)
-    keywords: List[str] = Field(default_factory=list)
+    categories: list[str] = Field(default_factory=list)
+    keywords: list[str] = Field(default_factory=list)
     language: str = "en"
     source: PaperSource = PaperSource.LOCAL
     file_path: str = ""
@@ -35,6 +39,7 @@ class PaperMetadata(BaseModel):
 
 class DocumentConversionResult(BaseModel):
     """Result of document conversion operations."""
+
     source_format: str
     target_format: str
     source_path: str
@@ -43,12 +48,13 @@ class DocumentConversionResult(BaseModel):
     converted_size: int = 0
     conversion_time: float = 0.0
     error_message: Optional[str] = None
-    warnings: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    warnings: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class PPTGenerationResult(BaseModel):
     """Result of PowerPoint generation operations."""
+
     source_content: str
     presentation_title: str
     slide_count: int
@@ -56,12 +62,13 @@ class PPTGenerationResult(BaseModel):
     success: bool
     generation_time: float = 0.0
     error_message: Optional[str] = None
-    slide_titles: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    slide_titles: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class PaperDownloadResult(BaseModel):
     """Result of paper download operations."""
+
     paper_id: str
     title: str
     source: PaperSource
@@ -70,7 +77,13 @@ class PaperDownloadResult(BaseModel):
     metadata: Optional[PaperMetadata] = None
     download_time: float = 0.0
     error_message: Optional[str] = None
-    warnings: List[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
 
 
-__all__ = ['PaperMetadata', 'DocumentConversionResult', 'PPTGenerationResult', 'PaperDownloadResult', 'PaperSource']
+__all__ = [
+    "PaperMetadata",
+    "DocumentConversionResult",
+    "PPTGenerationResult",
+    "PaperDownloadResult",
+    "PaperSource",
+]

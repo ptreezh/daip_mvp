@@ -3,13 +3,13 @@
 遵循TDD原则 - 基于测试需求实现
 """
 
-import asyncio
-import time
-import json
 import csv
+import json
+import time
+from contextlib import AbstractAsyncContextManager
+from typing import Any
+
 import psutil
-from typing import Dict, Any, Optional, List, AsyncContextManager
-from pathlib import Path
 
 
 class PerformanceMonitor:
@@ -17,6 +17,7 @@ class PerformanceMonitor:
 
     class MeasurementContext:
         """测量上下文管理器"""
+
         def __init__(self, monitor, command_name):
             self.monitor = monitor
             self.command_name = command_name
@@ -31,17 +32,19 @@ class PerformanceMonitor:
             self.start_memory = self.monitor._get_memory_usage()
 
             self.metrics = {
-                'command_name': self.command_name,
-                'start_time': self.start_time,
-                'start_memory': self.start_memory,
-                'end_time': self.start_time,  # 初始值
-                'end_memory': self.start_memory,  # 初始值
-                'duration': 0.0,  # 初始值
-                'memory_delta': 0.0,  # 初始值
-                'measurement_id': f"{self.command_name}_{self.start_time}"
+                "command_name": self.command_name,
+                "start_time": self.start_time,
+                "start_memory": self.start_memory,
+                "end_time": self.start_time,  # 初始值
+                "end_memory": self.start_memory,  # 初始值
+                "duration": 0.0,  # 初始值
+                "memory_delta": 0.0,  # 初始值
+                "measurement_id": f"{self.command_name}_{self.start_time}",
             }
 
-            self.monitor.current_measurements[self.metrics['measurement_id']] = self.metrics
+            self.monitor.current_measurements[self.metrics["measurement_id"]] = (
+                self.metrics
+            )
             return self.metrics
 
         async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -50,25 +53,32 @@ class PerformanceMonitor:
             duration = self.end_time - self.start_time
             memory_delta = self.end_memory - self.start_memory
 
-            # If memory delta is 0 but end memory is exactly a round number (likely mocked),
+            # If memory delta is 0 but end memory is exactly a round number (likely mocked),  # noqa: E501
             # treat it as high memory usage for test purposes
-            if (memory_delta == 0 and
-                self.end_memory > 0 and
-                abs(self.end_memory - round(self.end_memory)) < 0.001 and  # Check if it's a round number
-                self.end_memory > self.monitor.memory_threshold / (1024 * 1024)):  # Above threshold
-                memory_delta = self.end_memory  # Use end memory as delta for test scenarios
+            if (
+                memory_delta == 0
+                and self.end_memory > 0
+                and abs(self.end_memory - round(self.end_memory))
+                < 0.001  # Check if it's a round number
+                and self.end_memory > self.monitor.memory_threshold / (1024 * 1024)
+            ):  # Above threshold
+                memory_delta = (
+                    self.end_memory
+                )  # Use end memory as delta for test scenarios
 
             # 更新测量数据
-            self.metrics.update({
-                'end_time': self.end_time,
-                'end_memory': self.end_memory,
-                'duration': duration,
-                'memory_delta': memory_delta
-            })
+            self.metrics.update(
+                {
+                    "end_time": self.end_time,
+                    "end_memory": self.end_memory,
+                    "duration": duration,
+                    "memory_delta": memory_delta,
+                }
+            )
 
             # 移除当前测量
-            if self.metrics['measurement_id'] in self.monitor.current_measurements:
-                del self.monitor.current_measurements[self.metrics['measurement_id']]
+            if self.metrics["measurement_id"] in self.monitor.current_measurements:
+                del self.monitor.current_measurements[self.metrics["measurement_id"]]
 
             # 记录命令测量数据
             self.monitor._record_command_measurement(self.command_name, self.metrics)
@@ -80,6 +90,7 @@ class PerformanceMonitor:
 
     class LimitedDict(dict):
         """限制大小的字典"""
+
         def __init__(self, max_size, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.max_size = max_size
@@ -90,7 +101,12 @@ class PerformanceMonitor:
                 return  # 忽略新设置，不添加
             super().__setitem__(key, value)
 
-    def __init__(self, max_measurements: int = 100, slow_threshold: float = 1.0, memory_threshold: int = 50 * 1024 * 1024):
+    def __init__(
+        self,
+        max_measurements: int = 100,
+        slow_threshold: float = 1.0,
+        memory_threshold: int = 50 * 1024 * 1024,
+    ):
         """初始化性能监控器
 
         Args:
@@ -102,17 +118,20 @@ class PerformanceMonitor:
         self.slow_threshold = slow_threshold
         self.memory_threshold = memory_threshold
         self.metrics = {
-            'total_commands': 0,
-            'total_duration': 0.0,
-            'avg_duration': 0.0,
-            'max_duration': 0.0,
-            'min_duration': float('inf')
+            "total_commands": 0,
+            "total_duration": 0.0,
+            "avg_duration": 0.0,
+            "max_duration": 0.0,
+            "min_duration": float("inf"),
         }
-        self.current_measurements: Dict[str, Dict[str, Any]] = {}
+        self.current_measurements: dict[str, dict[str, Any]] = {}
         self.command_measurements = self.LimitedDict(max_measurements)
         self.is_monitoring = False
 
-    def measure_command(self, command_name: str) -> AsyncContextManager[Dict[str, Any]]:
+    def measure_command(
+        self,
+        command_name: str,
+    ) -> AbstractAsyncContextManager[dict[str, Any]]:
         """命令测量上下文管理器
 
         Args:
@@ -133,7 +152,7 @@ class PerformanceMonitor:
         except Exception:
             return 0.0
 
-    def _record_command_measurement(self, command_name: str, metrics: Dict[str, Any]):
+    def _record_command_measurement(self, command_name: str, metrics: dict[str, Any]):
         """记录命令测量数据
 
         Args:
@@ -141,12 +160,12 @@ class PerformanceMonitor:
             metrics: 测量数据
         """
         self.command_measurements[command_name] = {
-            'duration': metrics['duration'],
-            'memory_delta': metrics['memory_delta'],
-            'start_time': metrics['start_time'],
-            'end_time': metrics['end_time'],
-            'start_memory': metrics['start_memory'],
-            'end_memory': metrics['end_memory']
+            "duration": metrics["duration"],
+            "memory_delta": metrics["memory_delta"],
+            "start_time": metrics["start_time"],
+            "end_time": metrics["end_time"],
+            "start_memory": metrics["start_memory"],
+            "end_memory": metrics["end_memory"],
         }
 
     def _update_overall_metrics(self, duration: float):
@@ -155,42 +174,42 @@ class PerformanceMonitor:
         Args:
             duration: 命令执行时间
         """
-        self.metrics['total_commands'] += 1
-        self.metrics['total_duration'] += duration
+        self.metrics["total_commands"] += 1
+        self.metrics["total_duration"] += duration
 
         # 更新平均时间
-        if self.metrics['total_commands'] > 0:
-            self.metrics['avg_duration'] = (
-                self.metrics['total_duration'] / self.metrics['total_commands']
+        if self.metrics["total_commands"] > 0:
+            self.metrics["avg_duration"] = (
+                self.metrics["total_duration"] / self.metrics["total_commands"]
             )
 
         # 更新最大和最小时间
-        self.metrics['max_duration'] = max(self.metrics['max_duration'], duration)
-        self.metrics['min_duration'] = min(self.metrics['min_duration'], duration)
+        self.metrics["max_duration"] = max(self.metrics["max_duration"], duration)
+        self.metrics["min_duration"] = min(self.metrics["min_duration"], duration)
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """获取性能统计信息
 
         Returns:
             包含详细性能统计的字典
         """
         stats = self.metrics.copy()
-        stats['command_details'] = self.command_measurements.copy()
+        stats["command_details"] = self.command_measurements.copy()
         return stats
 
     def reset_stats(self):
         """重置性能统计"""
         self.metrics = {
-            'total_commands': 0,
-            'total_duration': 0.0,
-            'avg_duration': 0.0,
-            'max_duration': 0.0,
-            'min_duration': float('inf')
+            "total_commands": 0,
+            "total_duration": 0.0,
+            "avg_duration": 0.0,
+            "max_duration": 0.0,
+            "min_duration": float("inf"),
         }
         self.command_measurements.clear()
         self.current_measurements.clear()
 
-    def get_current_measurements(self) -> Dict[str, Dict[str, Any]]:
+    def get_current_measurements(self) -> dict[str, dict[str, Any]]:
         """获取当前正在进行的测量
 
         Returns:
@@ -210,7 +229,7 @@ class PerformanceMonitor:
         """
         return value <= threshold
 
-    def get_slow_commands(self) -> Dict[str, Dict[str, Any]]:
+    def get_slow_commands(self) -> dict[str, dict[str, Any]]:
         """获取执行缓慢的命令
 
         Returns:
@@ -218,11 +237,11 @@ class PerformanceMonitor:
         """
         slow_commands = {}
         for cmd_name, metrics in self.command_measurements.items():
-            if metrics['duration'] > self.slow_threshold:
+            if metrics["duration"] > self.slow_threshold:
                 slow_commands[cmd_name] = metrics
         return slow_commands
 
-    def get_high_memory_commands(self) -> Dict[str, Dict[str, Any]]:
+    def get_high_memory_commands(self) -> dict[str, dict[str, Any]]:
         """获取内存使用量高的命令
 
         Returns:
@@ -232,7 +251,7 @@ class PerformanceMonitor:
         threshold_mb = self.memory_threshold / (1024 * 1024)  # 转换为MB
         for cmd_name, metrics in self.command_measurements.items():
             # Focus on memory delta primarily
-            memory_delta = abs(metrics['memory_delta'])
+            memory_delta = abs(metrics["memory_delta"])
             if memory_delta > threshold_mb:
                 high_memory_commands[cmd_name] = metrics
         return high_memory_commands
@@ -247,7 +266,7 @@ class PerformanceMonitor:
         report.append("=== Performance Report ===")
         report.append(f"Total Commands: {self.metrics['total_commands']}")
 
-        if self.metrics['total_commands'] > 0:
+        if self.metrics["total_commands"] > 0:
             report.append(f"Average Duration: {self.metrics['avg_duration']:.2f}s")
             report.append(f"Max Duration: {self.metrics['max_duration']:.2f}s")
             report.append(f"Min Duration: {self.metrics['min_duration']:.2f}s")
@@ -262,7 +281,7 @@ class PerformanceMonitor:
 
         return "\n".join(report)
 
-    def export_metrics(self, format_type: str = 'json') -> str:
+    def export_metrics(self, format_type: str = "json") -> str:
         """导出性能指标
 
         Args:
@@ -271,15 +290,16 @@ class PerformanceMonitor:
         Returns:
             格式化的指标字符串
         """
-        if format_type.lower() == 'json':
+        if format_type.lower() == "json":
             data = {
-                'metrics': self.metrics,
-                'command_measurements': self.command_measurements
+                "metrics": self.metrics,
+                "command_measurements": self.command_measurements,
             }
             return json.dumps(data, indent=2)
 
-        elif format_type.lower() == 'csv':
+        elif format_type.lower() == "csv":
             from io import StringIO
+
             output = StringIO()
             csv_writer = csv.writer(output)
 

@@ -11,7 +11,7 @@ Only the still-referenced functions are kept here.
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 from daip_live.core.exceptions import DAIPError
@@ -38,6 +38,7 @@ def _check_arxiv_dependency() -> bool:
     """Check whether the arxiv library is available."""
     try:
         import arxiv  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -91,14 +92,16 @@ def search_academic_papers(
 
         results = []
         for result in search.results():
-            results.append({
-                "title": result.title,
-                "authors": [author.name for author in result.authors],
-                "summary": result.summary,
-                "published": result.published.strftime("%Y-%m-%d"),
-                "arxiv_id": result.get_short_id(),
-                "pdf_url": result.pdf_url,
-            })
+            results.append(
+                {
+                    "title": result.title,
+                    "authors": [author.name for author in result.authors],
+                    "summary": result.summary,
+                    "published": result.published.strftime("%Y-%m-%d"),
+                    "arxiv_id": result.get_short_id(),
+                    "pdf_url": result.pdf_url,
+                }
+            )
 
         if not results:
             return f"No papers found for query: {query}"
@@ -106,12 +109,12 @@ def search_academic_papers(
         formatted_results = [f"Found {len(results)} papers for query: {query}\n"]
         for i, paper in enumerate(results, 1):
             formatted_results.append(f"""
-{i}. {paper['title']}
-   Authors: {', '.join(paper['authors'])}
-   Published: {paper['published']}
-   arXiv ID: {paper['arxiv_id']}
-   PDF: {paper['pdf_url']}
-   Summary: {paper['summary'][:200]}...
+{i}. {paper["title"]}
+   Authors: {", ".join(paper["authors"])}
+   Published: {paper["published"]}
+   arXiv ID: {paper["arxiv_id"]}
+   PDF: {paper["pdf_url"]}
+   Summary: {paper["summary"][:200]}...
 """)
 
         return "\n".join(formatted_results)
@@ -191,7 +194,7 @@ def download_paper(
         return f"""
 Successfully downloaded paper:
 Title: {paper.title}
-Authors: {', '.join(author.name for author in paper.authors)}
+Authors: {", ".join(author.name for author in paper.authors)}
 Published: {paper.published.strftime("%Y-%m-%d")}
 arXiv ID: {paper.get_short_id()}
 Saved to: {save_path_obj.absolute()}
@@ -220,7 +223,7 @@ def _is_safe_path(path: str) -> bool:
         return False
 
 
-def _parse_allowed_domains() -> List[str]:
+def _parse_allowed_domains() -> list[str]:
     env = os.getenv("MCP_ALLOWED_DOMAINS", "")
     return [d.strip() for d in env.split(",") if d.strip()]
 
@@ -234,7 +237,7 @@ def _is_http_url(url: str) -> bool:
 
 
 @tool(tool_type="write", resource_arg="url")
-def markdown_to_md(url: str, options: Optional[Dict[str, Any]] = None) -> str:
+def markdown_to_md(url: str, options: Optional[dict[str, Any]] = None) -> str:
     if not url or not url.strip():
         raise ValidationError("URL cannot be empty")
     if not _is_http_url(url):
@@ -245,8 +248,10 @@ def markdown_to_md(url: str, options: Optional[Dict[str, Any]] = None) -> str:
         raise PermissionError(f"Domain not allowed: {host}")
     out_dir = Path.cwd() / "docs" / "markdown"
     out_dir.mkdir(parents=True, exist_ok=True)
-    fn = host.replace(":", "_") + "_" + "_".join(
-        [p for p in urlparse(url).path.split("/") if p]
+    fn = (
+        host.replace(":", "_")
+        + "_"
+        + "_".join([p for p in urlparse(url).path.split("/") if p])
     )
     if not fn:
         fn = "index"

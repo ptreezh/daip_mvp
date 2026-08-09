@@ -13,34 +13,28 @@ This module provides comprehensive service management capabilities including:
 """
 
 import asyncio
-import uuid
-import time
+import base64
 import json
 import logging
-import aiohttp
-import aiofiles
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional, Set, Tuple, Union, Callable
+import sqlite3
+import ssl
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-import sqlite3
-import threading
-import ssl
-import hashlib
-import base64
-from urllib.parse import urlparse
-import backoff
-import circuitbreaker
-from concurrent.futures import ThreadPoolExecutor
-import psutil
-import weakref
+from typing import Any, Optional, Union
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
 
 class ServiceStatus(Enum):
     """Service health status"""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -50,6 +44,7 @@ class ServiceStatus(Enum):
 
 class ServiceType(Enum):
     """Types of services"""
+
     KNOWLEDGE = "knowledge"
     MODEL = "model"
     SESSION = "session"
@@ -64,6 +59,7 @@ class ServiceType(Enum):
 
 class LoadBalancingStrategy(Enum):
     """Load balancing strategies"""
+
     ROUND_ROBIN = "round_robin"
     WEIGHTED_ROUND_ROBIN = "weighted_round_robin"
     LEAST_CONNECTIONS = "least_connections"
@@ -75,6 +71,7 @@ class LoadBalancingStrategy(Enum):
 @dataclass
 class ServiceEndpoint:
     """Service endpoint configuration"""
+
     url: str
     health_check_url: Optional[str] = None
     weight: int = 1
@@ -83,14 +80,14 @@ class ServiceEndpoint:
     circuit_breaker_threshold: int = 5
     circuit_breaker_timeout_seconds: int = 60
     rate_limit_per_minute: int = 1000
-    authentication: Optional[Dict[str, Any]] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    authentication: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if not self.health_check_url:
             self.health_check_url = f"{self.url.rstrip('/')}/health"
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "url": self.url,
             "health_check_url": self.health_check_url,
@@ -101,31 +98,32 @@ class ServiceEndpoint:
             "circuit_breaker_timeout_seconds": self.circuit_breaker_timeout_seconds,
             "rate_limit_per_minute": self.rate_limit_per_minute,
             "authentication": self.authentication,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
 
 @dataclass
 class ServiceDefinition:
     """Complete service definition"""
+
     name: str
     service_type: ServiceType
     version: str
-    endpoints: List[ServiceEndpoint]
+    endpoints: list[ServiceEndpoint]
     load_balancing_strategy: LoadBalancingStrategy = LoadBalancingStrategy.ROUND_ROBIN
     health_check_interval_seconds: int = 30
     health_check_timeout_seconds: int = 10
-    retry_policy: Dict[str, Any] = field(default_factory=dict)
-    circuit_breaker_policy: Dict[str, Any] = field(default_factory=dict)
-    rate_limit_policy: Dict[str, Any] = field(default_factory=dict)
+    retry_policy: dict[str, Any] = field(default_factory=dict)
+    circuit_breaker_policy: dict[str, Any] = field(default_factory=dict)
+    rate_limit_policy: dict[str, Any] = field(default_factory=dict)
     authentication_required: bool = False
-    timeout_policy: Dict[str, Any] = field(default_factory=dict)
-    custom_headers: Dict[str, str] = field(default_factory=dict)
+    timeout_policy: dict[str, Any] = field(default_factory=dict)
+    custom_headers: dict[str, str] = field(default_factory=dict)
     environment: str = "production"
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "service_type": self.service_type.value,
@@ -142,13 +140,14 @@ class ServiceDefinition:
             "custom_headers": self.custom_headers,
             "environment": self.environment,
             "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat()
+            "updated_at": self.updated_at.isoformat(),
         }
 
 
 @dataclass
 class ServiceMetrics:
     """Service performance metrics"""
+
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
@@ -162,14 +161,15 @@ class ServiceMetrics:
     last_error_time: Optional[datetime] = None
     uptime_percentage: float = 100.0
     health_check_failures: int = 0
-    connection_pool_stats: Dict[str, Any] = field(default_factory=dict)
-    response_times: List[float] = field(default_factory=list)
+    connection_pool_stats: dict[str, Any] = field(default_factory=dict)
+    response_times: list[float] = field(default_factory=list)
 
 
 class CircuitBreakerState(Enum):
     """Circuit breaker states"""
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"         # Circuit is open, blocking calls
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Circuit is open, blocking calls
     HALF_OPEN = "half_open"  # Testing if service recovered
 
 
@@ -190,8 +190,11 @@ class CircuitBreaker:
             if self.state == CircuitBreakerState.CLOSED:
                 return True
             elif self.state == CircuitBreakerState.OPEN:
-                if self.last_failure_time and \
-                   (datetime.now() - self.last_failure_time).total_seconds() > self.timeout_seconds:
+                if (
+                    self.last_failure_time
+                    and (datetime.now() - self.last_failure_time).total_seconds()
+                    > self.timeout_seconds
+                ):
                     self.state = CircuitBreakerState.HALF_OPEN
                     return True
                 return False
@@ -227,7 +230,7 @@ class RateLimiter:
 
     def __init__(self, max_requests_per_minute: int):
         self.max_requests_per_minute = max_requests_per_minute
-        self.requests: List[datetime] = []
+        self.requests: list[datetime] = []
         self._lock = threading.Lock()
 
     def is_allowed(self) -> bool:
@@ -235,8 +238,11 @@ class RateLimiter:
         with self._lock:
             now = datetime.now()
             # Remove old requests (older than 1 minute)
-            self.requests = [req_time for req_time in self.requests
-                           if (now - req_time).total_seconds() < 60]
+            self.requests = [
+                req_time
+                for req_time in self.requests
+                if (now - req_time).total_seconds() < 60
+            ]
 
             if len(self.requests) < self.max_requests_per_minute:
                 self.requests.append(now)
@@ -256,9 +262,11 @@ class ServiceHealthChecker:
     """Health checker for services"""
 
     def __init__(self, storage_path: Optional[str] = None):
-        self.storage_path = Path(storage_path) if storage_path else Path("data/service_health.db")
+        self.storage_path = (
+            Path(storage_path) if storage_path else Path("data/service_health.db")
+        )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
-        self.health_results: Dict[str, Dict[str, Any]] = {}
+        self.health_results: dict[str, dict[str, Any]] = {}
         self._init_database()
 
     def _init_database(self) -> None:
@@ -290,14 +298,20 @@ class ServiceHealthChecker:
                 """)
 
                 # Indexes
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_health_timestamp ON health_history (timestamp)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_health_service ON health_history (service_name)")
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_health_timestamp ON health_history (timestamp)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_health_service ON health_history (service_name)"  # noqa: E501
+                )
 
                 conn.commit()
         except Exception as e:
             logger.error(f"Failed to initialize health check database: {e}")
 
-    async def check_health(self, service_name: str, endpoint: ServiceEndpoint) -> Dict[str, Any]:
+    async def check_health(
+        self, service_name: str, endpoint: ServiceEndpoint
+    ) -> dict[str, Any]:
         """Check health of a service endpoint"""
         start_time = time.time()
         result = {
@@ -306,7 +320,7 @@ class ServiceHealthChecker:
             "status": ServiceStatus.UNKNOWN,
             "response_time_ms": None,
             "error_message": None,
-            "timestamp": datetime.now()
+            "timestamp": datetime.now(),
         }
 
         try:
@@ -317,11 +331,12 @@ class ServiceHealthChecker:
 
             timeout = aiohttp.ClientTimeout(total=endpoint.health_check_timeout_seconds)
 
-            async with aiohttp.ClientSession(timeout=timeout, connector=aiohttp.TCPConnector(
-                ssl=ssl_context,
-                limit=10,
-                limit_per_host=5
-            )) as session:
+            async with aiohttp.ClientSession(
+                timeout=timeout,
+                connector=aiohttp.TCPConnector(
+                    ssl=ssl_context, limit=10, limit_per_host=5
+                ),
+            ) as session:
                 async with session.get(endpoint.health_check_url) as response:
                     response_time_ms = (time.time() - start_time) * 1000
                     result["response_time_ms"] = response_time_ms
@@ -335,7 +350,9 @@ class ServiceHealthChecker:
                                 result["status"] = ServiceStatus.DEGRADED
                             else:
                                 result["status"] = ServiceStatus.UNHEALTHY
-                                result["error_message"] = f"Health check returned status: {health_data.get('status')}"
+                                result["error_message"] = (
+                                    f"Health check returned status: {health_data.get('status')}"  # noqa: E501
+                                )
                         except (json.JSONDecodeError, KeyError):
                             # If response is not JSON, assume healthy if status is 200
                             result["status"] = ServiceStatus.HEALTHY
@@ -358,43 +375,51 @@ class ServiceHealthChecker:
 
         return result
 
-    async def _save_health_result(self, result: Dict[str, Any]) -> None:
+    async def _save_health_result(self, result: dict[str, Any]) -> None:
         """Save health result to database"""
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 # Update current health
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT OR REPLACE INTO service_health
                     (service_name, endpoint_url, status, response_time_ms, error_message, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (
-                    result["service_name"],
-                    result["endpoint_url"],
-                    result["status"].value,
-                    result["response_time_ms"],
-                    result["error_message"],
-                    result["timestamp"].isoformat()
-                ))
+                """,  # noqa: E501
+                    (
+                        result["service_name"],
+                        result["endpoint_url"],
+                        result["status"].value,
+                        result["response_time_ms"],
+                        result["error_message"],
+                        result["timestamp"].isoformat(),
+                    ),
+                )
 
                 # Add to history
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO health_history
                     (service_name, endpoint_url, status, response_time_ms, error_message, timestamp)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (
-                    result["service_name"],
-                    result["endpoint_url"],
-                    result["status"].value,
-                    result["response_time_ms"],
-                    result["error_message"],
-                    result["timestamp"].isoformat()
-                ))
+                """,  # noqa: E501
+                    (
+                        result["service_name"],
+                        result["endpoint_url"],
+                        result["status"].value,
+                        result["response_time_ms"],
+                        result["error_message"],
+                        result["timestamp"].isoformat(),
+                    ),
+                )
 
                 conn.commit()
         except Exception as e:
             logger.error(f"Failed to save health result: {e}")
 
-    def get_service_health(self, service_name: str, endpoint_url: str) -> Optional[Dict[str, Any]]:
+    def get_service_health(
+        self, service_name: str, endpoint_url: str
+    ) -> Optional[dict[str, Any]]:
         """Get latest health result for service endpoint"""
         key = f"{service_name}:{endpoint_url}"
         return self.health_results.get(key)
@@ -404,35 +429,37 @@ class ProductionServiceManager:
     """Production-grade service manager with comprehensive features"""
 
     def __init__(self, storage_path: Optional[str] = None):
-        self.storage_path = Path(storage_path) if storage_path else Path("data/services.db")
+        self.storage_path = (
+            Path(storage_path) if storage_path else Path("data/services.db")
+        )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Service registry
-        self.services: Dict[str, ServiceDefinition] = {}
-        self.service_endpoints: Dict[str, List[ServiceEndpoint]] = {}
+        self.services: dict[str, ServiceDefinition] = {}
+        self.service_endpoints: dict[str, list[ServiceEndpoint]] = {}
 
         # Health checking
         self.health_checker = ServiceHealthChecker()
 
         # Load balancing
-        self.load_balancers: Dict[str, LoadBalancer] = {}
+        self.load_balancers: dict[str, LoadBalancer] = {}
 
         # Circuit breakers and rate limiters
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
-        self.rate_limiters: Dict[str, RateLimiter] = {}
+        self.circuit_breakers: dict[str, CircuitBreaker] = {}
+        self.rate_limiters: dict[str, RateLimiter] = {}
 
         # Connection pools
-        self.connection_pools: Dict[str, aiohttp.ClientSession] = {}
+        self.connection_pools: dict[str, aiohttp.ClientSession] = {}
 
         # Metrics and monitoring
-        self.service_metrics: Dict[str, ServiceMetrics] = {}
+        self.service_metrics: dict[str, ServiceMetrics] = {}
         self.global_metrics = {
             "total_services": 0,
             "healthy_services": 0,
             "unhealthy_services": 0,
             "total_requests": 0,
             "successful_requests": 0,
-            "failed_requests": 0
+            "failed_requests": 0,
         }
 
         # Background tasks
@@ -441,7 +468,9 @@ class ProductionServiceManager:
         self._shutdown_event = asyncio.Event()
 
         # Thread pool for blocking operations
-        self.thread_pool = ThreadPoolExecutor(max_workers=4, thread_name_prefix="service_manager")
+        self.thread_pool = ThreadPoolExecutor(
+            max_workers=4, thread_name_prefix="service_manager"
+        )
 
         # Lock for thread safety
         self._lock = threading.RLock()
@@ -489,8 +518,12 @@ class ProductionServiceManager:
                 """)
 
                 # Indexes
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_events_timestamp ON service_events (timestamp)")
-                conn.execute("CREATE INDEX IF NOT EXISTS idx_events_service ON service_events (service_name)")
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_events_timestamp ON service_events (timestamp)"  # noqa: E501
+                )
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_events_service ON service_events (service_name)"  # noqa: E501
+                )
 
                 conn.commit()
         except Exception as e:
@@ -514,7 +547,7 @@ class ProductionServiceManager:
         except Exception as e:
             logger.error(f"Failed to load services: {e}")
 
-    def _service_from_dict(self, data: Dict[str, Any]) -> ServiceDefinition:
+    def _service_from_dict(self, data: dict[str, Any]) -> ServiceDefinition:
         """Create ServiceDefinition from dictionary"""
         endpoints = [ServiceEndpoint(**ep_data) for ep_data in data["endpoints"]]
         return ServiceDefinition(
@@ -522,7 +555,9 @@ class ProductionServiceManager:
             service_type=ServiceType(data["service_type"]),
             version=data["version"],
             endpoints=endpoints,
-            load_balancing_strategy=LoadBalancingStrategy(data.get("load_balancing_strategy", "round_robin")),
+            load_balancing_strategy=LoadBalancingStrategy(
+                data.get("load_balancing_strategy", "round_robin")
+            ),
             health_check_interval_seconds=data.get("health_check_interval_seconds", 30),
             health_check_timeout_seconds=data.get("health_check_timeout_seconds", 10),
             retry_policy=data.get("retry_policy", {}),
@@ -533,7 +568,7 @@ class ProductionServiceManager:
             custom_headers=data.get("custom_headers", {}),
             environment=data.get("environment", "production"),
             created_at=datetime.fromisoformat(data["created_at"]),
-            updated_at=datetime.fromisoformat(data["updated_at"])
+            updated_at=datetime.fromisoformat(data["updated_at"]),
         )
 
     def register_service(self, service: ServiceDefinition) -> bool:
@@ -544,8 +579,7 @@ class ProductionServiceManager:
 
             # Initialize load balancer
             self.load_balancers[service.name] = LoadBalancer(
-                service.endpoints,
-                service.load_balancing_strategy
+                service.endpoints, service.load_balancing_strategy
             )
 
             # Initialize circuit breakers for each endpoint
@@ -553,7 +587,7 @@ class ProductionServiceManager:
                 key = f"{service.name}:{endpoint.url}"
                 self.circuit_breakers[key] = CircuitBreaker(
                     endpoint.circuit_breaker_threshold,
-                    endpoint.circuit_breaker_timeout_seconds
+                    endpoint.circuit_breaker_timeout_seconds,
                 )
 
                 self.rate_limiters[key] = RateLimiter(endpoint.rate_limit_per_minute)
@@ -565,7 +599,9 @@ class ProductionServiceManager:
             # Save to database
             self._save_service(service)
 
-            logger.info(f"Registered service: {service.name} with {len(service.endpoints)} endpoints")
+            logger.info(
+                f"Registered service: {service.name} with {len(service.endpoints)} endpoints"  # noqa: E501
+            )
             return True
 
     def _save_service(self, service: ServiceDefinition) -> None:
@@ -573,8 +609,12 @@ class ProductionServiceManager:
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT OR REPLACE INTO services (name, service_data, updated_at) VALUES (?, ?, ?)",
-                    (service.name, json.dumps(service.to_dict()), datetime.now().isoformat())
+                    "INSERT OR REPLACE INTO services (name, service_data, updated_at) VALUES (?, ?, ?)",  # noqa: E501
+                    (
+                        service.name,
+                        json.dumps(service.to_dict()),
+                        datetime.now().isoformat(),
+                    ),
                 )
                 conn.commit()
         except Exception as e:
@@ -585,11 +625,11 @@ class ProductionServiceManager:
         service_name: str,
         method: str = "GET",
         path: str = "",
-        headers: Optional[Dict[str, str]] = None,
-        data: Optional[Union[Dict[str, Any], str]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        timeout: Optional[int] = None
-    ) -> Dict[str, Any]:
+        headers: Optional[dict[str, str]] = None,
+        data: Optional[Union[dict[str, Any], str]] = None,
+        params: Optional[dict[str, Any]] = None,
+        timeout: Optional[int] = None,
+    ) -> dict[str, Any]:
         """Make a service call with comprehensive error handling and resilience"""
         if service_name not in self.services:
             raise ValueError(f"Service '{service_name}' not found")
@@ -608,14 +648,16 @@ class ProductionServiceManager:
             "error": None,
             "response_time_ms": None,
             "status_code": None,
-            "endpoint_used": None
+            "endpoint_used": None,
         }
 
         try:
             # Get endpoint from load balancer
             endpoint = self.load_balancers[service_name].get_endpoint()
             if not endpoint:
-                raise ValueError(f"No healthy endpoints available for service '{service_name}'")
+                raise ValueError(
+                    f"No healthy endpoints available for service '{service_name}'"
+                )
 
             key = f"{service_name}:{endpoint.url}"
             circuit_breaker = self.circuit_breakers[key]
@@ -631,7 +673,11 @@ class ProductionServiceManager:
                 raise Exception(f"Rate limit exceeded. Wait {wait_time:.1f} seconds")
 
             # Build URL
-            url = f"{endpoint.url.rstrip('/')}/{path.lstrip('/')}" if path else endpoint.url
+            url = (
+                f"{endpoint.url.rstrip('/')}/{path.lstrip('/')}"
+                if path
+                else endpoint.url
+            )
 
             # Prepare headers
             request_headers = service.custom_headers.copy()
@@ -640,11 +686,15 @@ class ProductionServiceManager:
 
             # Add authentication
             if endpoint.authentication:
-                request_headers.update(self._build_auth_headers(endpoint.authentication))
+                request_headers.update(
+                    self._build_auth_headers(endpoint.authentication)
+                )
 
             # Create connection pool if not exists
             if service_name not in self.connection_pools:
-                self.connection_pools[service_name] = await self._create_connection_pool(service)
+                self.connection_pools[
+                    service_name
+                ] = await self._create_connection_pool(service)
 
             # Make request with retry
             response_data = await self._make_request_with_retry(
@@ -655,7 +705,7 @@ class ProductionServiceManager:
                 data,
                 params,
                 timeout or endpoint.timeout_seconds,
-                service.retry_policy
+                service.retry_policy,
             )
 
             # Record success
@@ -699,7 +749,9 @@ class ProductionServiceManager:
 
         return result
 
-    async def _create_connection_pool(self, service: ServiceDefinition) -> aiohttp.ClientSession:
+    async def _create_connection_pool(
+        self, service: ServiceDefinition
+    ) -> aiohttp.ClientSession:
         """Create connection pool for service"""
         # Configure SSL context
         ssl_context = ssl.create_default_context()
@@ -714,20 +766,20 @@ class ProductionServiceManager:
             ttl_dns_cache=300,
             use_dns_cache=True,
             keepalive_timeout=60,
-            enable_cleanup_closed=True
+            enable_cleanup_closed=True,
         )
 
         # Configure timeout
         timeout = aiohttp.ClientTimeout(
             total=max(ep.timeout_seconds for ep in service.endpoints),
             connect=10,
-            sock_read=30
+            sock_read=30,
         )
 
         return aiohttp.ClientSession(
             connector=connector,
             timeout=timeout,
-            headers={"User-Agent": "DAIP-ServiceManager/1.0"}
+            headers={"User-Agent": "DAIP-ServiceManager/1.0"},
         )
 
     async def _make_request_with_retry(
@@ -735,12 +787,12 @@ class ProductionServiceManager:
         session: aiohttp.ClientSession,
         method: str,
         url: str,
-        headers: Dict[str, str],
-        data: Optional[Union[Dict[str, Any], str]],
-        params: Optional[Dict[str, Any]],
+        headers: dict[str, str],
+        data: Optional[Union[dict[str, Any], str]],
+        params: Optional[dict[str, Any]],
         timeout: int,
-        retry_policy: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        retry_policy: dict[str, Any],
+    ) -> dict[str, Any]:
         """Make HTTP request with retry logic"""
         max_retries = retry_policy.get("max_retries", 3)
         backoff_factor = retry_policy.get("backoff_factor", 2)
@@ -754,12 +806,12 @@ class ProductionServiceManager:
                     headers=headers,
                     json=data if isinstance(data, dict) else None,
                     data=data if isinstance(data, str) else None,
-                    params=params
+                    params=params,
                 ) as response:
                     response_data = {
                         "status_code": response.status,
                         "headers": dict(response.headers),
-                        "data": None
+                        "data": None,
                     }
 
                     # Parse response body
@@ -777,11 +829,13 @@ class ProductionServiceManager:
                                 request_info=response.request_info,
                                 history=response.history,
                                 status=response.status,
-                                message=await response.text()
+                                message=await response.text(),
                             )
                         else:
                             # Server error, retry
-                            raise aiohttp.ServerConnectionError(f"HTTP {response.status}")
+                            raise aiohttp.ServerConnectionError(
+                                f"HTTP {response.status}"
+                            )
 
                     return response_data
 
@@ -790,12 +844,14 @@ class ProductionServiceManager:
                     raise e
 
                 # Calculate delay for next retry
-                delay = retry_delay * (backoff_factor ** attempt)
+                delay = retry_delay * (backoff_factor**attempt)
                 await asyncio.sleep(min(delay, 30))  # Cap at 30 seconds
 
-                logger.warning(f"Request failed (attempt {attempt + 1}/{max_retries + 1}), retrying in {delay:.1f}s: {e}")
+                logger.warning(
+                    f"Request failed (attempt {attempt + 1}/{max_retries + 1}), retrying in {delay:.1f}s: {e}"  # noqa: E501
+                )
 
-    def _build_auth_headers(self, auth_config: Dict[str, Any]) -> Dict[str, str]:
+    def _build_auth_headers(self, auth_config: dict[str, Any]) -> dict[str, str]:
         """Build authentication headers"""
         auth_type = auth_config.get("type", "").lower()
         headers = {}
@@ -809,7 +865,9 @@ class ProductionServiceManager:
             username = auth_config.get("username")
             password = auth_config.get("password")
             if username and password:
-                credentials = base64.b64encode(f"{username}:{password}".encode()).decode()
+                credentials = base64.b64encode(
+                    f"{username}:{password}".encode()
+                ).decode()
                 headers["Authorization"] = f"Basic {credentials}"
 
         elif auth_type == "api_key":
@@ -834,33 +892,41 @@ class ProductionServiceManager:
             n = len(sorted_times)
 
             metrics.average_response_time_ms = sum(sorted_times) / n
-            metrics.p95_response_time_ms = sorted_times[int(n * 0.95)] if n > 20 else sorted_times[-1]
-            metrics.p99_response_time_ms = sorted_times[int(n * 0.99)] if n > 100 else sorted_times[-1]
+            metrics.p95_response_time_ms = (
+                sorted_times[int(n * 0.95)] if n > 20 else sorted_times[-1]
+            )
+            metrics.p99_response_time_ms = (
+                sorted_times[int(n * 0.99)] if n > 100 else sorted_times[-1]
+            )
 
             # Calculate error rate
             if metrics.total_requests > 0:
                 metrics.error_rate = metrics.failed_requests / metrics.total_requests
 
             # Calculate throughput (requests per second over last minute)
-            recent_time = datetime.now() - timedelta(minutes=1)
+            datetime.now() - timedelta(minutes=1)
             # This would require timestamp tracking in actual implementation
 
-    async def _log_service_call(self, service_name: str, result: Dict[str, Any]) -> None:
+    async def _log_service_call(
+        self, service_name: str, result: dict[str, Any]
+    ) -> None:
         """Log service call to database"""
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT INTO service_events (service_name, event_type, event_data) VALUES (?, ?, ?)",
+                    "INSERT INTO service_events (service_name, event_type, event_data) VALUES (?, ?, ?)",  # noqa: E501
                     (
                         service_name,
                         "service_call",
-                        json.dumps({
-                            "success": result["success"],
-                            "response_time_ms": result["response_time_ms"],
-                            "endpoint_used": result["endpoint_used"],
-                            "error": result["error"]
-                        })
-                    )
+                        json.dumps(
+                            {
+                                "success": result["success"],
+                                "response_time_ms": result["response_time_ms"],
+                                "endpoint_used": result["endpoint_used"],
+                                "error": result["error"],
+                            }
+                        ),
+                    ),
                 )
                 conn.commit()
         except Exception as e:
@@ -869,7 +935,9 @@ class ProductionServiceManager:
     def _start_background_tasks(self) -> None:
         """Start background monitoring tasks"""
         self.health_check_task = asyncio.create_task(self._health_check_loop())
-        self.metrics_collection_task = asyncio.create_task(self._metrics_collection_loop())
+        self.metrics_collection_task = asyncio.create_task(
+            self._metrics_collection_loop()
+        )
 
     async def _health_check_loop(self) -> None:
         """Background health checking loop"""
@@ -927,7 +995,9 @@ class ProductionServiceManager:
         for service_name in self.services.keys():
             service_healthy = False
             for endpoint in self.service_endpoints[service_name]:
-                health_result = self.health_checker.get_service_health(service_name, endpoint.url)
+                health_result = self.health_checker.get_service_health(
+                    service_name, endpoint.url
+                )
                 if health_result and health_result["status"] == ServiceStatus.HEALTHY:
                     service_healthy = True
                     break
@@ -940,30 +1010,36 @@ class ProductionServiceManager:
         self.global_metrics["healthy_services"] = healthy_count
         self.global_metrics["unhealthy_services"] = total_count - healthy_count
 
-    async def _save_service_metrics(self, service_name: str, metrics: ServiceMetrics) -> None:
+    async def _save_service_metrics(
+        self, service_name: str, metrics: ServiceMetrics
+    ) -> None:
         """Save service metrics to database"""
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT OR REPLACE INTO service_metrics (service_name, metrics_data, last_updated) VALUES (?, ?, ?)",
+                    "INSERT OR REPLACE INTO service_metrics (service_name, metrics_data, last_updated) VALUES (?, ?, ?)",  # noqa: E501
                     (
                         service_name,
-                        json.dumps({
-                            "total_requests": metrics.total_requests,
-                            "successful_requests": metrics.successful_requests,
-                            "failed_requests": metrics.failed_requests,
-                            "average_response_time_ms": metrics.average_response_time_ms,
-                            "p95_response_time_ms": metrics.p95_response_time_ms,
-                            "p99_response_time_ms": metrics.p99_response_time_ms,
-                            "error_rate": metrics.error_rate,
-                            "circuit_breaker_trips": metrics.circuit_breaker_trips,
-                            "last_error": metrics.last_error,
-                            "last_error_time": metrics.last_error_time.isoformat() if metrics.last_error_time else None,
-                            "uptime_percentage": metrics.uptime_percentage,
-                            "health_check_failures": metrics.health_check_failures
-                        }),
-                        datetime.now().isoformat()
-                    )
+                        json.dumps(
+                            {
+                                "total_requests": metrics.total_requests,
+                                "successful_requests": metrics.successful_requests,
+                                "failed_requests": metrics.failed_requests,
+                                "average_response_time_ms": metrics.average_response_time_ms,  # noqa: E501
+                                "p95_response_time_ms": metrics.p95_response_time_ms,
+                                "p99_response_time_ms": metrics.p99_response_time_ms,
+                                "error_rate": metrics.error_rate,
+                                "circuit_breaker_trips": metrics.circuit_breaker_trips,
+                                "last_error": metrics.last_error,
+                                "last_error_time": metrics.last_error_time.isoformat()
+                                if metrics.last_error_time
+                                else None,
+                                "uptime_percentage": metrics.uptime_percentage,
+                                "health_check_failures": metrics.health_check_failures,
+                            }
+                        ),
+                        datetime.now().isoformat(),
+                    ),
                 )
                 conn.commit()
         except Exception as e:
@@ -974,18 +1050,14 @@ class ProductionServiceManager:
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT INTO service_events (service_name, event_type, event_data) VALUES (?, ?, ?)",
-                    (
-                        "global",
-                        "metrics",
-                        json.dumps(self.global_metrics)
-                    )
+                    "INSERT INTO service_events (service_name, event_type, event_data) VALUES (?, ?, ?)",  # noqa: E501
+                    ("global", "metrics", json.dumps(self.global_metrics)),
                 )
                 conn.commit()
         except Exception as e:
             logger.error(f"Failed to save global metrics: {e}")
 
-    def get_service_status(self, service_name: str) -> Optional[Dict[str, Any]]:
+    def get_service_status(self, service_name: str) -> Optional[dict[str, Any]]:
         """Get detailed status of a service"""
         if service_name not in self.services:
             return None
@@ -996,14 +1068,20 @@ class ProductionServiceManager:
         # Get endpoint health
         endpoint_health = []
         for endpoint in service.endpoints:
-            health_result = self.health_checker.get_service_health(service_name, endpoint.url)
-            circuit_breaker = self.circuit_breakers.get(f"{service_name}:{endpoint.url}")
+            health_result = self.health_checker.get_service_health(
+                service_name, endpoint.url
+            )
+            circuit_breaker = self.circuit_breakers.get(
+                f"{service_name}:{endpoint.url}"
+            )
 
             endpoint_info = {
                 "url": endpoint.url,
                 "weight": endpoint.weight,
                 "health": health_result,
-                "circuit_breaker_state": circuit_breaker.get_state().value if circuit_breaker else "unknown"
+                "circuit_breaker_state": circuit_breaker.get_state().value
+                if circuit_breaker
+                else "unknown",
             }
             endpoint_health.append(endpoint_info)
 
@@ -1011,10 +1089,10 @@ class ProductionServiceManager:
             "service": service.to_dict(),
             "metrics": metrics.__dict__ if metrics else {},
             "endpoint_health": endpoint_health,
-            "load_balancer_strategy": service.load_balancing_strategy.value
+            "load_balancer_strategy": service.load_balancing_strategy.value,
         }
 
-    def get_all_services_status(self) -> Dict[str, Any]:
+    def get_all_services_status(self) -> dict[str, Any]:
         """Get status of all services"""
         services_status = {}
         for service_name in self.services.keys():
@@ -1023,7 +1101,7 @@ class ProductionServiceManager:
         return {
             "services": services_status,
             "global_metrics": self.global_metrics,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
     async def shutdown(self) -> None:
@@ -1061,11 +1139,13 @@ class ProductionServiceManager:
 class LoadBalancer:
     """Load balancer for service endpoints"""
 
-    def __init__(self, endpoints: List[ServiceEndpoint], strategy: LoadBalancingStrategy):
+    def __init__(
+        self, endpoints: list[ServiceEndpoint], strategy: LoadBalancingStrategy
+    ):
         self.endpoints = endpoints
         self.strategy = strategy
         self.current_index = 0
-        self.endpoint_stats: Dict[str, Dict[str, Any]] = {
+        self.endpoint_stats: dict[str, dict[str, Any]] = {
             ep.url: {"connections": 0, "total_requests": 0, "response_times": []}
             for ep in endpoints
         }
@@ -1094,6 +1174,7 @@ class LoadBalancer:
 
         elif self.strategy == LoadBalancingStrategy.RANDOM:
             import random
+
             return random.choice(healthy_endpoints)
 
         elif self.strategy == LoadBalancingStrategy.RESPONSE_TIME:
@@ -1102,7 +1183,9 @@ class LoadBalancer:
         else:
             return healthy_endpoints[0]
 
-    def _weighted_round_robin(self, endpoints: List[ServiceEndpoint]) -> ServiceEndpoint:
+    def _weighted_round_robin(
+        self, endpoints: list[ServiceEndpoint]
+    ) -> ServiceEndpoint:
         """Weighted round robin selection"""
         # Simplified implementation
         total_weight = sum(ep.weight for ep in endpoints)
@@ -1120,9 +1203,9 @@ class LoadBalancer:
 
         return selected_endpoint
 
-    def _least_connections(self, endpoints: List[ServiceEndpoint]) -> ServiceEndpoint:
+    def _least_connections(self, endpoints: list[ServiceEndpoint]) -> ServiceEndpoint:
         """Select endpoint with least connections"""
-        min_connections = float('inf')
+        min_connections = float("inf")
         selected_endpoint = endpoints[0]
 
         for endpoint in endpoints:
@@ -1133,10 +1216,10 @@ class LoadBalancer:
 
         return selected_endpoint
 
-    def _response_time_based(self, endpoints: List[ServiceEndpoint]) -> ServiceEndpoint:
+    def _response_time_based(self, endpoints: list[ServiceEndpoint]) -> ServiceEndpoint:
         """Select endpoint based on response time"""
         best_endpoint = endpoints[0]
-        best_avg_time = float('inf')
+        best_avg_time = float("inf")
 
         for endpoint in endpoints:
             stats = self.endpoint_stats[endpoint.url]

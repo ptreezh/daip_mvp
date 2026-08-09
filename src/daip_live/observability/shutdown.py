@@ -5,11 +5,12 @@ This module provides graceful shutdown handling for system signals.
 
 import signal
 from enum import Enum
-from typing import Callable, List
+from typing import Callable
 
 
 class ShutdownSignal(Enum):
     """Shutdown signal types."""
+
     SIGINT = "SIGINT"
     SIGTERM = "SIGTERM"
 
@@ -25,7 +26,7 @@ class GracefulShutdown:
         """
         self.timeout = timeout
         self.is_shutting_down = False
-        self.callbacks: List[Callable[[], None]] = []
+        self.callbacks: list[Callable[[], None]] = []
 
     def register(self, callback: Callable[[], None]) -> None:
         """Register a shutdown callback.

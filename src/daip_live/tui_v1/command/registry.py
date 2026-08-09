@@ -4,14 +4,14 @@ Command Registry for newP6 TUI
 Manages registration and retrieval of command handlers.
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Any, Optional
 
 
 class CommandRegistry:
     """Registry for command handlers"""
 
     def __init__(self):
-        self._handlers: Dict[str, Any] = {}
+        self._handlers: dict[str, Any] = {}
 
     def register(self, command: str, handler) -> None:
         """Register a command handler"""
@@ -21,7 +21,7 @@ class CommandRegistry:
         """Get a registered command handler"""
         return self._handlers.get(command)
 
-    def list_commands(self) -> List[str]:
+    def list_commands(self) -> list[str]:
         """List all registered commands"""
         return list(self._handlers.keys())
 

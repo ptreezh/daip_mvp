@@ -5,20 +5,18 @@ High-level management of knowledge base operations including ingestion,
 search, synchronization, and persistence.
 """
 
-from typing import List, Dict, Any, Optional, Union
 import json
-import os
-import shutil
 import logging
-from pathlib import Path
-from datetime import datetime
-import asyncio
+import shutil
 import zipfile
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional
 
 from .document import Document, DocumentStatus
-from .vector_store import VectorStore, SearchResult
 from .ingestion import DocumentIngestor
 from .search import SearchEngine
+from .vector_store import SearchResult, VectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +30,7 @@ class KnowledgeManager:
         embedding_dimension: int = 768,
         index_type: str = "faiss",
         auto_save: bool = True,
-        max_vector_size: int = 10000
+        max_vector_size: int = 10000,
     ):
         self.data_dir = Path(data_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -45,7 +43,7 @@ class KnowledgeManager:
             dimension=embedding_dimension,
             index_type=index_type,
             persist_path=str(self.data_dir / "vector_store"),
-            max_size=max_vector_size
+            max_size=max_vector_size,
         )
         self.ingestor = DocumentIngestor()
         self.search_engine = SearchEngine(self.vector_store)
@@ -71,8 +69,12 @@ class KnowledgeManager:
                     document.set_embedding(embedding)
                     document.update_status(DocumentStatus.PROCESSED)
                 else:
-                    document.update_status(DocumentStatus.FAILED, "Failed to generate embedding")
-                    logger.error(f"Failed to generate embedding for document {document.id}")
+                    document.update_status(
+                        DocumentStatus.FAILED, "Failed to generate embedding"
+                    )
+                    logger.error(
+                        f"Failed to generate embedding for document {document.id}"
+                    )
                     return None
 
             # Add to vector store
@@ -89,7 +91,7 @@ class KnowledgeManager:
             logger.error(f"Error adding document: {e}")
             return None
 
-    def add_documents_batch(self, documents: List[Document]) -> List[str]:
+    def add_documents_batch(self, documents: list[Document]) -> list[str]:
         """Add multiple documents in batch"""
         added_ids = []
         for document in documents:
@@ -101,9 +103,7 @@ class KnowledgeManager:
         return added_ids
 
     def ingest_file(
-        self,
-        file_path: str,
-        metadata: Optional[Dict[str, Any]] = None
+        self, file_path: str, metadata: Optional[dict[str, Any]] = None
     ) -> Optional[str]:
         """Ingest and add a file to the knowledge base"""
         try:
@@ -119,10 +119,8 @@ class KnowledgeManager:
             return None
 
     def ingest_files_batch(
-        self,
-        file_paths: List[str],
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> List[str]:
+        self, file_paths: list[str], metadata: Optional[dict[str, Any]] = None
+    ) -> list[str]:
         """Ingest multiple files in batch"""
         documents = self.ingestor.ingest_files_batch(file_paths, metadata)
         return self.add_documents_batch(documents)
@@ -131,10 +129,10 @@ class KnowledgeManager:
         self,
         directory_path: str,
         recursive: bool = True,
-        metadata: Optional[Dict[str, Any]] = None,
-        include_patterns: Optional[List[str]] = None,
-        exclude_patterns: Optional[List[str]] = None
-    ) -> List[str]:
+        metadata: Optional[dict[str, Any]] = None,
+        include_patterns: Optional[list[str]] = None,
+        exclude_patterns: Optional[list[str]] = None,
+    ) -> list[str]:
         """Ingest all files from a directory"""
         documents = self.ingestor.ingest_directory(
             directory_path, recursive, metadata, include_patterns, exclude_patterns
@@ -145,10 +143,10 @@ class KnowledgeManager:
         self,
         query: str,
         top_k: int = 10,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: Optional[dict[str, Any]] = None,
         search_type: str = "hybrid",
-        include_chunks: bool = False
-    ) -> List[SearchResult]:
+        include_chunks: bool = False,
+    ) -> list[SearchResult]:
         """Search the knowledge base"""
         try:
             if search_type == "semantic":
@@ -156,10 +154,14 @@ class KnowledgeManager:
             elif search_type == "text":
                 return self.search_engine.text_search(query, top_k, filters)
             elif search_type == "hybrid":
-                return self.search_engine.hybrid_search(query, top_k, filters, include_chunks=include_chunks)
+                return self.search_engine.hybrid_search(
+                    query, top_k, filters, include_chunks=include_chunks
+                )
             else:
                 logger.warning(f"Unknown search type: {search_type}, using hybrid")
-                return self.search_engine.hybrid_search(query, top_k, filters, include_chunks=include_chunks)
+                return self.search_engine.hybrid_search(
+                    query, top_k, filters, include_chunks=include_chunks
+                )
 
         except Exception as e:
             logger.error(f"Error during search: {e}")
@@ -169,7 +171,7 @@ class KnowledgeManager:
         """Get a document by ID"""
         return self.vector_store.get_document(document_id)
 
-    def get_all_documents(self) -> List[Document]:
+    def get_all_documents(self) -> list[Document]:
         """Get all documents in the knowledge base"""
         return self.vector_store.get_all_documents()
 
@@ -185,7 +187,7 @@ class KnowledgeManager:
             logger.error(f"Error deleting document {document_id}: {e}")
             return False
 
-    def update_document(self, document_id: str, updates: Dict[str, Any]) -> bool:
+    def update_document(self, document_id: str, updates: dict[str, Any]) -> bool:
         """Update a document"""
         try:
             document = self.get_document(document_id)
@@ -223,7 +225,7 @@ class KnowledgeManager:
             logger.error(f"Error updating document {document_id}: {e}")
             return False
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get comprehensive knowledge base statistics"""
         try:
             # Vector store statistics
@@ -233,8 +235,15 @@ class KnowledgeManager:
             all_documents = self.vector_store.get_all_documents()
             doc_stats = {
                 "total_word_count": sum(doc.get_word_count() for doc in all_documents),
-                "total_character_count": sum(doc.get_character_count() for doc in all_documents),
-                "average_document_size": sum(doc.get_character_count() for doc in all_documents) / len(all_documents) if all_documents else 0
+                "total_character_count": sum(
+                    doc.get_character_count() for doc in all_documents
+                ),
+                "average_document_size": sum(
+                    doc.get_character_count() for doc in all_documents
+                )
+                / len(all_documents)
+                if all_documents
+                else 0,
             }
 
             # Status distribution
@@ -257,15 +266,15 @@ class KnowledgeManager:
                 "configuration": {
                     "embedding_dimension": self.embedding_dimension,
                     "auto_save": self.auto_save,
-                    "max_vector_size": self.max_vector_size
-                }
+                    "max_vector_size": self.max_vector_size,
+                },
             }
 
         except Exception as e:
             logger.error(f"Error getting statistics: {e}")
             return {"error": str(e)}
 
-    def get_categories(self) -> Dict[str, int]:
+    def get_categories(self) -> dict[str, int]:
         """Get document categories and their counts"""
         categories = {}
         for document in self.vector_store.get_all_documents():
@@ -273,7 +282,7 @@ class KnowledgeManager:
             categories[category] = categories.get(category, 0) + 1
         return categories
 
-    def get_recent_documents(self, limit: int = 10) -> List[Document]:
+    def get_recent_documents(self, limit: int = 10) -> list[Document]:
         """Get recently added documents"""
         all_documents = self.vector_store.get_all_documents()
         sorted_docs = sorted(all_documents, key=lambda x: x.created_at, reverse=True)
@@ -290,15 +299,17 @@ class KnowledgeManager:
                 "metadata": {
                     "exported_at": datetime.now().isoformat(),
                     "knowledge_base_id": str(self.data_dir),
-                    "version": "1.0"
+                    "version": "1.0",
                 },
-                "documents": [doc.to_dict() for doc in self.vector_store.get_all_documents()],
-                "statistics": self.get_statistics()
+                "documents": [
+                    doc.to_dict() for doc in self.vector_store.get_all_documents()
+                ],
+                "statistics": self.get_statistics(),
             }
 
-            if export_path.suffix.lower() == '.zip':
+            if export_path.suffix.lower() == ".zip":
                 # Create zip export
-                with zipfile.ZipFile(export_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+                with zipfile.ZipFile(export_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                     # Add documents as JSON
                     json_data = json.dumps(export_data, indent=2)
                     zipf.writestr("knowledge_base.json", json_data)
@@ -307,12 +318,14 @@ class KnowledgeManager:
                     if self.vector_store.persist_path:
                         for file_path in self.vector_store.persist_path.rglob("*"):
                             if file_path.is_file():
-                                arcname = file_path.relative_to(self.vector_store.persist_path)
+                                arcname = file_path.relative_to(
+                                    self.vector_store.persist_path
+                                )
                                 zipf.write(file_path, f"vector_store/{arcname}")
 
             else:
                 # JSON export
-                with open(export_path, 'w', encoding='utf-8') as f:
+                with open(export_path, "w", encoding="utf-8") as f:
                     json.dump(export_data, f, indent=2, ensure_ascii=False)
 
             logger.info(f"Exported knowledge base to {export_path}")
@@ -330,9 +343,9 @@ class KnowledgeManager:
                 logger.error(f"Import file not found: {import_path}")
                 return False
 
-            if import_path.suffix.lower() == '.zip':
+            if import_path.suffix.lower() == ".zip":
                 # Import from zip
-                with zipfile.ZipFile(import_path, 'r') as zipf:
+                with zipfile.ZipFile(import_path, "r") as zipf:
                     # Extract documents
                     if "knowledge_base.json" in zipf.namelist():
                         with zipf.open("knowledge_base.json") as f:
@@ -347,16 +360,19 @@ class KnowledgeManager:
 
                     for file_info in zipf.infolist():
                         if file_info.filename.startswith("vector_store/"):
-                            relative_path = file_info.filename[len("vector_store/"):]
+                            relative_path = file_info.filename[len("vector_store/") :]
                             if relative_path:
                                 target_path = vector_store_dir / relative_path
                                 target_path.parent.mkdir(parents=True, exist_ok=True)
-                                with zipf.open(file_info) as source, open(target_path, "wb") as target:
+                                with (
+                                    zipf.open(file_info) as source,
+                                    open(target_path, "wb") as target,
+                                ):
                                     shutil.copyfileobj(source, target)
 
             else:
                 # Import from JSON
-                with open(import_path, 'r', encoding='utf-8') as f:
+                with open(import_path, encoding="utf-8") as f:
                     import_data = json.load(f)
 
             # Import documents
@@ -383,7 +399,7 @@ class KnowledgeManager:
             logger.error(f"Error importing knowledge base: {e}")
             return False
 
-    def sync_knowledge_base(self, sync_source: Optional[str] = None) -> Dict[str, Any]:
+    def sync_knowledge_base(self, sync_source: Optional[str] = None) -> dict[str, Any]:
         """Synchronize knowledge base with external source"""
         # This is a placeholder for sync functionality
         # In a real implementation, this would sync with cloud storage, etc.
@@ -393,7 +409,7 @@ class KnowledgeManager:
                 "updated": 0,
                 "deleted": 0,
                 "errors": [],
-                "sync_time": datetime.now().isoformat()
+                "sync_time": datetime.now().isoformat(),
             }
 
             # Mock sync implementation
@@ -412,7 +428,7 @@ class KnowledgeManager:
                 "updated": 0,
                 "deleted": 0,
                 "errors": [str(e)],
-                "sync_time": datetime.now().isoformat()
+                "sync_time": datetime.now().isoformat(),
             }
 
     def save(self) -> bool:
@@ -423,7 +439,7 @@ class KnowledgeManager:
 
             # Save statistics
             stats = self.get_statistics()
-            with open(self.stats_file, 'w') as f:
+            with open(self.stats_file, "w") as f:
                 json.dump(stats, f, indent=2)
 
             # Save configuration
@@ -432,9 +448,9 @@ class KnowledgeManager:
                 "auto_save": self.auto_save,
                 "max_vector_size": self.max_vector_size,
                 "created_at": self.created_at.isoformat(),
-                "updated_at": self.updated_at.isoformat()
+                "updated_at": self.updated_at.isoformat(),
             }
-            with open(self.config_file, 'w') as f:
+            with open(self.config_file, "w") as f:
                 json.dump(config, f, indent=2)
 
             logger.info("Saved knowledge base")
@@ -452,13 +468,17 @@ class KnowledgeManager:
 
             # Load configuration
             if self.config_file.exists():
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     config = json.load(f)
                     self.embedding_dimension = config.get("embedding_dimension", 768)
                     self.auto_save = config.get("auto_save", True)
                     self.max_vector_size = config.get("max_vector_size", 10000)
-                    self.created_at = datetime.fromisoformat(config.get("created_at", datetime.now().isoformat()))
-                    self.updated_at = datetime.fromisoformat(config.get("updated_at", datetime.now().isoformat()))
+                    self.created_at = datetime.fromisoformat(
+                        config.get("created_at", datetime.now().isoformat())
+                    )
+                    self.updated_at = datetime.fromisoformat(
+                        config.get("updated_at", datetime.now().isoformat())
+                    )
 
             logger.info("Loaded knowledge base")
             return vector_store_success
@@ -485,5 +505,7 @@ class KnowledgeManager:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"KnowledgeManager(documents={len(self.vector_store)}, "
-                f"data_dir='{self.data_dir}', dimension={self.embedding_dimension})")
+        return (
+            f"KnowledgeManager(documents={len(self.vector_store)}, "
+            f"data_dir='{self.data_dir}', dimension={self.embedding_dimension})"
+        )

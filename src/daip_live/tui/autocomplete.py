@@ -1,7 +1,5 @@
 """TUI自动补全系统 - 渐进式信息披露实现"""
 
-from typing import List
-
 
 class TUIAutocomplete:
     """TUI自动补全系统，支持渐进式信息披露"""
@@ -9,7 +7,7 @@ class TUIAutocomplete:
     def __init__(self, tui_instance):
         self.tui = tui_instance
 
-    def get_command_suggestions(self, parts: List[str]) -> List[str]:
+    def get_command_suggestions(self, parts: list[str]) -> list[str]:
         """获取命令自动补全建议"""
         if not parts:
             return []
@@ -21,15 +19,16 @@ class TUIAutocomplete:
         # Case 2: Subcommand completion for specific commands
         return self._get_subcommand_suggestions(parts)
 
-    def _get_main_command_suggestions(self, prefix: str) -> List[str]:
+    def _get_main_command_suggestions(self, prefix: str) -> list[str]:
         """获取主要命令的建议"""
         suggestions = [
-            cmd for cmd, help_text in self.tui._available_commands
+            cmd
+            for cmd, help_text in self.tui._available_commands
             if cmd.startswith(prefix)
         ]
         return suggestions
 
-    def _get_subcommand_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_subcommand_suggestions(self, parts: list[str]) -> list[str]:
         """获取子命令的建议，支持渐进式信息披露"""
         command = parts[0]
 
@@ -56,14 +55,16 @@ class TUIAutocomplete:
 
         return []
 
-    def _get_debate_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_debate_suggestions(self, parts: list[str]) -> list[str]:
         """辩论命令的渐进式建议"""
         if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
             # Phase 1: Show only main subcommands
             subcommands = ["start", "history", "search"]
             if len(parts) >= 2:
                 prefix = parts[1] if len(parts) == 2 else ""
-                suggestions = [f"/debate {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                suggestions = [
+                    f"/debate {cmd}" for cmd in subcommands if cmd.startswith(prefix)
+                ]
                 return suggestions
             else:
                 return [f"/debate {cmd}" for cmd in subcommands]
@@ -85,16 +86,22 @@ class TUIAutocomplete:
                         return [
                             f"/debate start {parts[2]}",
                             f"/debate start {parts[2]} --roles <角色配置>",
-                            f"/debate start {parts[2]} --rounds <轮次数>"
+                            f"/debate start {parts[2]} --rounds <轮次数>",
                         ]
                 elif len(parts) >= 4:
                     # User is adding options, provide completion
-                    if parts[3] == "--roles" or (len(parts) == 4 and parts[3].startswith("--")):
+                    if parts[3] == "--roles" or (
+                        len(parts) == 4 and parts[3].startswith("--")
+                    ):
                         if len(parts) == 4:
                             return [f"/debate start {parts[2]} --roles <角色1,角色2>"]
                         elif len(parts) == 5 and not parts[4]:
-                            return [f"/debate start {parts[2]} --roles philosopher,engineer"]
-                    elif parts[3] == "--rounds" or (len(parts) == 4 and parts[3].startswith("--")):
+                            return [
+                                f"/debate start {parts[2]} --roles philosopher,engineer"
+                            ]
+                    elif parts[3] == "--rounds" or (
+                        len(parts) == 4 and parts[3].startswith("--")
+                    ):
                         if len(parts) == 4:
                             return [f"/debate start {parts[2]} --rounds <1-10>"]
                         elif len(parts) == 5 and not parts[4]:
@@ -117,14 +124,16 @@ class TUIAutocomplete:
 
         return []
 
-    def _get_doc_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_doc_suggestions(self, parts: list[str]) -> list[str]:
         """文档命令的渐进式建议"""
         if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
             # Phase 1: Show only main subcommands
             subcommands = ["search", "download", "list"]
             if len(parts) >= 2:
                 prefix = parts[1] if len(parts) == 2 else ""
-                suggestions = [f"/doc {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                suggestions = [
+                    f"/doc {cmd}" for cmd in subcommands if cmd.startswith(prefix)
+                ]
                 return suggestions
             else:
                 return [f"/doc {cmd}" for cmd in subcommands]
@@ -148,12 +157,15 @@ class TUIAutocomplete:
                     # User provided paper ID, now show format option
                     return [
                         f"/doc download {parts[2]}",
-                        f"/doc download {parts[2]} --format <格式>"
+                        f"/doc download {parts[2]} --format <格式>",
                     ]
                 elif len(parts) >= 4 and parts[3] == "--format":
                     if len(parts) == 4:
                         formats = ["pdf", "docx", "html", "txt"]
-                        return [f"/doc download {parts[2]} --format {fmt}" for fmt in formats]
+                        return [
+                            f"/doc download {parts[2]} --format {fmt}"
+                            for fmt in formats
+                        ]
 
             elif subcommand == "list":
                 if len(parts) == 2:
@@ -161,14 +173,16 @@ class TUIAutocomplete:
 
         return []
 
-    def _get_wiki_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_wiki_suggestions(self, parts: list[str]) -> list[str]:
         """Wiki命令的渐进式建议"""
         if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
             # Phase 1: Show only main subcommands
             subcommands = ["create", "search", "list", "export"]
             if len(parts) >= 2:
                 prefix = parts[1] if len(parts) == 2 else ""
-                suggestions = [f"/wiki {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                suggestions = [
+                    f"/wiki {cmd}" for cmd in subcommands if cmd.startswith(prefix)
+                ]
                 return suggestions
             else:
                 return [f"/wiki {cmd}" for cmd in subcommands]
@@ -196,14 +210,16 @@ class TUIAutocomplete:
 
         return []
 
-    def _get_role_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_role_suggestions(self, parts: list[str]) -> list[str]:
         """角色命令的建议"""
         if parts[0] == "/role":
             if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
                 subcommands = ["list", "view"]
                 if len(parts) >= 2:
                     prefix = parts[1] if len(parts) == 2 else ""
-                    suggestions = [f"/role {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    suggestions = [
+                        f"/role {cmd}" for cmd in subcommands if cmd.startswith(prefix)
+                    ]
                     return suggestions
                 else:
                     return [f"/role {cmd}" for cmd in subcommands]
@@ -214,56 +230,70 @@ class TUIAutocomplete:
                     prefix = parts[2] if len(parts) >= 3 else ""
                     try:
                         roles = self.tui._role_manager.list_roles()
-                        role_names = [role.name for role in roles if role.name.startswith(prefix)]
+                        role_names = [
+                            role.name for role in roles if role.name.startswith(prefix)
+                        ]
                         return [f"/role view {name}" for name in role_names]
-                    except:
+                    except Exception:
                         return []
 
         return []
 
-    def _get_knowledge_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_knowledge_suggestions(self, parts: list[str]) -> list[str]:
         """知识库命令的建议"""
         if parts[0] == "/knowledge":
             if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
                 subcommands = ["sync", "search"]
                 if len(parts) >= 2:
                     prefix = parts[1] if len(parts) == 2 else ""
-                    suggestions = [f"/knowledge {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    suggestions = [
+                        f"/knowledge {cmd}"
+                        for cmd in subcommands
+                        if cmd.startswith(prefix)
+                    ]
                     return suggestions
                 else:
                     return [f"/knowledge {cmd}" for cmd in subcommands]
 
         return []
 
-    def _get_compact_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_compact_suggestions(self, parts: list[str]) -> list[str]:
         """压缩命令的建议"""
         if parts[0] == "/compact":
             if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
                 subcommands = ["current", "full", "aggressive"]
                 if len(parts) >= 2:
                     prefix = parts[1] if len(parts) == 2 else ""
-                    suggestions = [f"/compact {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    suggestions = [
+                        f"/compact {cmd}"
+                        for cmd in subcommands
+                        if cmd.startswith(prefix)
+                    ]
                     return suggestions
                 else:
                     return [f"/compact {cmd}" for cmd in subcommands]
 
         return []
 
-    def _get_permission_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_permission_suggestions(self, parts: list[str]) -> list[str]:
         """权限命令的建议"""
         if parts[0] == "/permission":
             if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
                 subcommands = ["list", "grant", "revoke", "check", "reset"]
                 if len(parts) >= 2:
                     prefix = parts[1] if len(parts) == 2 else ""
-                    suggestions = [f"/permission {cmd}" for cmd in subcommands if cmd.startswith(prefix)]
+                    suggestions = [
+                        f"/permission {cmd}"
+                        for cmd in subcommands
+                        if cmd.startswith(prefix)
+                    ]
                     return suggestions
                 else:
                     return [f"/permission {cmd}" for cmd in subcommands]
 
         return []
 
-    def _get_model_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_model_suggestions(self, parts: list[str]) -> list[str]:
         """模型命令的建议"""
         if parts[0] == "/model":
             # No auto-completion for /model command
@@ -271,11 +301,11 @@ class TUIAutocomplete:
 
         return []
 
-    def _get_help_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_help_suggestions(self, parts: list[str]) -> list[str]:
         """帮助命令的建议"""
         return []
 
-    def _get_search_suggestions(self, parts: List[str]) -> List[str]:
+    def _get_search_suggestions(self, parts: list[str]) -> list[str]:
         """搜索命令的建议"""
         if parts[0] == "/search":
             if len(parts) == 1 or (len(parts) == 2 and not parts[1]):

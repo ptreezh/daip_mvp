@@ -2,16 +2,16 @@
 持久化任务记忆服务
 用于存储复杂任务的上下文、状态和执行历史
 """
-import json
-import uuid
+
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
 from enum import Enum
+from typing import Any, Optional
 
 
 class TaskStatus(Enum):
     """任务状态枚举"""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
@@ -22,14 +22,15 @@ class TaskStatus(Enum):
 @dataclass
 class SubTask:
     """子任务数据类"""
+
     subtask_id: str
     parent_task_id: str
     title: str
     description: str
-    dependencies: List[str]  # 依赖的子任务ID
+    dependencies: list[str]  # 依赖的子任务ID
     status: TaskStatus
     result: Optional[str] = None
-    execution_log: Optional[List[str]] = None
+    execution_log: Optional[list[str]] = None
     created_at: datetime = None
     completed_at: Optional[datetime] = None
     error_message: Optional[str] = None
@@ -44,12 +45,13 @@ class SubTask:
 @dataclass
 class TaskContext:
     """任务上下文数据类"""
+
     task_id: str
     parent_task_id: Optional[str]
     task_description: str
-    subtasks: List[SubTask]
+    subtasks: list[SubTask]
     current_subtask_index: int = 0
-    execution_history: Optional[List[Dict[str, Any]]] = None
+    execution_history: Optional[list[dict[str, Any]]] = None
     overall_progress: float = 0.0
     created_at: datetime = None
     last_updated: datetime = None
@@ -70,8 +72,8 @@ class PersistentMemoryService:
     def __init__(self):
         # 在实际应用中，这里应该是数据库连接
         # 为了演示，使用内存存储
-        self._tasks_storage: Dict[str, TaskContext] = {}
-        self._subtasks_storage: Dict[str, SubTask] = {}
+        self._tasks_storage: dict[str, TaskContext] = {}
+        self._subtasks_storage: dict[str, SubTask] = {}
 
     def save_task_context(self, context: TaskContext) -> bool:
         """
@@ -82,17 +84,16 @@ class PersistentMemoryService:
         try:
             # 更新最后更新时间
             context.last_updated = datetime.now()
-            
+
             # 存储任务上下文
             self._tasks_storage[context.task_id] = context
-            
+
             # 存储子任务
             for subtask in context.subtasks:
                 self._subtasks_storage[subtask.subtask_id] = subtask
-            
+
             return True
-        except Exception as e:
-            print(f"保存任务上下文失败: {e}")
+        except Exception:
             return False
 
     def load_task_context(self, task_id: str) -> Optional[TaskContext]:
@@ -103,8 +104,7 @@ class PersistentMemoryService:
         """
         try:
             return self._tasks_storage.get(task_id)
-        except Exception as e:
-            print(f"加载任务上下文失败: {e}")
+        except Exception:
             return None
 
     def update_task_status(self, task_id: str, status: TaskStatus) -> bool:
@@ -120,11 +120,16 @@ class PersistentMemoryService:
                 self._tasks_storage[task_id].last_updated = datetime.now()
                 return True
             return False
-        except Exception as e:
-            print(f"更新任务状态失败: {e}")
+        except Exception:
             return False
 
-    def update_subtask_status(self, subtask_id: str, status: TaskStatus, result: Optional[str] = None, error: Optional[str] = None) -> bool:
+    def update_subtask_status(
+        self,
+        subtask_id: str,
+        status: TaskStatus,
+        result: Optional[str] = None,
+        error: Optional[str] = None,
+    ) -> bool:
         """
         更新子任务状态
         :param subtask_id: 子任务ID
@@ -143,14 +148,13 @@ class PersistentMemoryService:
                     subtask.error_message = error
                 if status == TaskStatus.COMPLETED or status == TaskStatus.FAILED:
                     subtask.completed_at = datetime.now()
-                
+
                 # 更新父任务进度
                 self._update_parent_task_progress(subtask.parent_task_id)
-                
+
                 return True
             return False
-        except Exception as e:
-            print(f"更新子任务状态失败: {e}")
+        except Exception:
             return False
 
     def _update_parent_task_progress(self, parent_task_id: str) -> None:
@@ -160,20 +164,25 @@ class PersistentMemoryService:
 
         task_context = self._tasks_storage[parent_task_id]
         total_subtasks = len(task_context.subtasks)
-        
+
         if total_subtasks == 0:
             task_context.overall_progress = 0.0
             return
 
-        completed_subtasks = sum(1 for subtask in task_context.subtasks 
-                                if subtask.status == TaskStatus.COMPLETED)
-        
+        completed_subtasks = sum(
+            1
+            for subtask in task_context.subtasks
+            if subtask.status == TaskStatus.COMPLETED
+        )
+
         task_context.overall_progress = completed_subtasks / total_subtasks
 
         # 更新父任务状态
         if completed_subtasks == total_subtasks:
             task_context.status = TaskStatus.COMPLETED
-        elif any(subtask.status == TaskStatus.FAILED for subtask in task_context.subtasks):
+        elif any(
+            subtask.status == TaskStatus.FAILED for subtask in task_context.subtasks
+        ):
             task_context.status = TaskStatus.FAILED
 
     def get_subtask(self, subtask_id: str) -> Optional[SubTask]:
@@ -184,7 +193,7 @@ class PersistentMemoryService:
         """
         return self._subtasks_storage.get(subtask_id)
 
-    def add_execution_log(self, task_id: str, log: Dict[str, Any]) -> bool:
+    def add_execution_log(self, task_id: str, log: dict[str, Any]) -> bool:
         """
         添加执行日志
         :param task_id: 任务ID
@@ -197,11 +206,10 @@ class PersistentMemoryService:
                 self._tasks_storage[task_id].last_updated = datetime.now()
                 return True
             return False
-        except Exception as e:
-            print(f"添加执行日志失败: {e}")
+        except Exception:
             return False
 
-    def get_task_progress(self, task_id: str) -> Dict[str, Any]:
+    def get_task_progress(self, task_id: str) -> dict[str, Any]:
         """
         获取任务进度信息
         :param task_id: 任务ID
@@ -213,14 +221,26 @@ class PersistentMemoryService:
                 return {}
 
             total = len(task_context.subtasks)
-            completed = sum(1 for subtask in task_context.subtasks 
-                           if subtask.status == TaskStatus.COMPLETED)
-            in_progress = sum(1 for subtask in task_context.subtasks 
-                             if subtask.status == TaskStatus.IN_PROGRESS)
-            failed = sum(1 for subtask in task_context.subtasks 
-                        if subtask.status == TaskStatus.FAILED)
-            pending = sum(1 for subtask in task_context.subtasks 
-                         if subtask.status == TaskStatus.PENDING)
+            completed = sum(
+                1
+                for subtask in task_context.subtasks
+                if subtask.status == TaskStatus.COMPLETED
+            )
+            in_progress = sum(
+                1
+                for subtask in task_context.subtasks
+                if subtask.status == TaskStatus.IN_PROGRESS
+            )
+            failed = sum(
+                1
+                for subtask in task_context.subtasks
+                if subtask.status == TaskStatus.FAILED
+            )
+            pending = sum(
+                1
+                for subtask in task_context.subtasks
+                if subtask.status == TaskStatus.PENDING
+            )
 
             return {
                 "total_subtasks": total,
@@ -229,10 +249,9 @@ class PersistentMemoryService:
                 "failed": failed,
                 "pending": pending,
                 "progress_percentage": task_context.overall_progress * 100,
-                "overall_status": task_context.status.value
+                "overall_status": task_context.status.value,
             }
-        except Exception as e:
-            print(f"获取任务进度失败: {e}")
+        except Exception:
             return {}
 
 

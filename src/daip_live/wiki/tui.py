@@ -5,14 +5,13 @@ Wiki TUI界面
 """
 
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any, Optional
 
 from textual.app import App, ComposeResult
-from textual.widgets import Header, Footer, DataTable, Input, Static, Button
-from textual.containers import Horizontal, Vertical, Container
-from textual.screen import ModalScreen
 from textual.binding import Binding
-from textual import on
+from textual.containers import Container, Horizontal, Vertical
+from textual.screen import ModalScreen
+from textual.widgets import Button, DataTable, Footer, Header, Input, Static
 
 from .manager import WikiManager
 from .models import WikiPage
@@ -32,9 +31,9 @@ class NewPageScreen(ModalScreen):
             Horizontal(
                 Button("创建", id="create_button", variant="primary"),
                 Button("取消", id="cancel_button"),
-                classes="button-group"
+                classes="button-group",
             ),
-            classes="dialog"
+            classes="dialog",
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -50,9 +49,7 @@ class NewPageScreen(ModalScreen):
             tags_input = self.query_one("#tags_input", Input)
 
             success = self.app.create_page_from_dialog(
-                title=title_input,
-                content=content_input,
-                tags=tags_input
+                title=title_input, content=content_input, tags=tags_input
             )
 
             if success:
@@ -80,14 +77,14 @@ class EditPageScreen(ModalScreen):
             Input(
                 placeholder="标签 (用逗号分隔)",
                 id="tags_input",
-                value=", ".join(self.page.tags)
+                value=", ".join(self.page.tags),
             ),
             Horizontal(
                 Button("保存", id="save_button", variant="primary"),
                 Button("取消", id="cancel_button"),
-                classes="button-group"
+                classes="button-group",
             ),
-            classes="dialog"
+            classes="dialog",
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -106,7 +103,7 @@ class EditPageScreen(ModalScreen):
                 page=self.page,
                 title=title_input,
                 content=content_input,
-                tags=tags_input
+                tags=tags_input,
             )
 
             if success:
@@ -133,9 +130,9 @@ class DeleteConfirmScreen(ModalScreen):
             Horizontal(
                 Button("删除", id="delete_button", variant="error"),
                 Button("取消", id="cancel_button"),
-                classes="button-group"
+                classes="button-group",
             ),
-            classes="dialog"
+            classes="dialog",
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -164,9 +161,12 @@ class StatisticsScreen(ModalScreen):
             Static(f"总标签数: {self.statistics.total_tags}"),
             Static(f"总字数: {self.statistics.total_words}"),
             Static("最常用标签:", classes="subtitle"),
-            *[Static(f"  {tag}: {count}次") for tag, count in self.statistics.most_used_tags],
+            *[
+                Static(f"  {tag}: {count}次")
+                for tag, count in self.statistics.most_used_tags
+            ],
             Button("关闭", id="close_button"),
-            classes="dialog"
+            classes="dialog",
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -233,20 +233,20 @@ class WikiTUIApp(App):
         super().__init__()
         self.wiki_root = wiki_root
         self.wiki_manager = WikiManager(wiki_root)
-        self.current_filter_tags: List[str] = []
+        self.current_filter_tags: list[str] = []
         self.search_query: Optional[str] = None
 
         # 扩展功能属性
         self.auto_save_enabled: bool = True
-        self.custom_shortcuts: Dict[str, str] = {}
-        self.loaded_plugins: Dict[str, Any] = {}
+        self.custom_shortcuts: dict[str, str] = {}
+        self.loaded_plugins: dict[str, Any] = {}
         self.accessibility_mode: bool = False
         self.high_contrast_theme: bool = False
         self.screen_reader_support: bool = False
-        self.performance_metrics: Dict[str, Any] = {
-            'memory_usage': 0,
-            'response_time': 0,
-            'operation_count': 0
+        self.performance_metrics: dict[str, Any] = {
+            "memory_usage": 0,
+            "response_time": 0,
+            "operation_count": 0,
         }
 
     def get_page_count(self) -> int:
@@ -260,7 +260,7 @@ class WikiTUIApp(App):
             Vertical(
                 Input(placeholder="搜索页面...", id="search_input"),
                 DataTable(id="page_table"),
-                classes="main"
+                classes="main",
             )
         )
         yield Footer()
@@ -290,27 +290,26 @@ class WikiTUIApp(App):
             modified_time = page.modified_at.strftime("%Y-%m-%d %H:%M")
 
             table.add_row(
-                page.title,
-                tags_str,
-                str(word_count),
-                modified_time,
-                key=page.title
+                page.title, tags_str, str(word_count), modified_time, key=page.title
             )
 
-    def _get_filtered_pages(self) -> List[WikiPage]:
+    def _get_filtered_pages(self) -> list[WikiPage]:
         """获取过滤后的页面列表"""
         if self.search_query:
             if self.current_filter_tags:
                 return self.wiki_manager.search_advanced(
-                    self.search_query,
-                    search_type="both",
-                    tags=self.current_filter_tags
+                    self.search_query, search_type="both", tags=self.current_filter_tags
                 )
             else:
-                return self.wiki_manager.search_advanced(self.search_query, search_type="both")
+                return self.wiki_manager.search_advanced(
+                    self.search_query, search_type="both"
+                )
         elif self.current_filter_tags:
-            return [page for page in self.wiki_manager.list_all_pages()
-                   if all(page.has_tag(tag) for tag in self.current_filter_tags)]
+            return [
+                page
+                for page in self.wiki_manager.list_all_pages()
+                if all(page.has_tag(tag) for tag in self.current_filter_tags)
+            ]
         else:
             return self.wiki_manager.list_all_pages()
 
@@ -344,7 +343,7 @@ class WikiTUIApp(App):
         content_value = content.value.strip()
 
         # 处理Mock对象的value属性
-        tags_value = getattr(tags, 'value', '')
+        tags_value = getattr(tags, "value", "")
         if isinstance(tags_value, str) and tags_value:
             tags_value = [tag.strip() for tag in tags_value.split(",") if tag.strip()]
         else:
@@ -358,13 +357,15 @@ class WikiTUIApp(App):
         content_value = content.value.strip()
 
         # 处理Mock对象的value属性
-        tags_value = getattr(tags, 'value', '')
+        tags_value = getattr(tags, "value", "")
         if isinstance(tags_value, str) and tags_value:
             tags_value = [tag.strip() for tag in tags_value.split(",") if tag.strip()]
         else:
             tags_value = []
 
-        updated_page = self.wiki_manager.update_page(page.title, content_value, tags_value)
+        updated_page = self.wiki_manager.update_page(
+            page.title, content_value, tags_value
+        )
         return updated_page is not None
 
     def delete_page(self, page: WikiPage) -> bool:
@@ -398,7 +399,7 @@ class WikiTUIApp(App):
         else:
             self.refresh_page_list()
 
-    def filter_by_tags(self, tags: List[str]) -> None:
+    def filter_by_tags(self, tags: list[str]) -> None:
         """按标签过滤"""
         self.current_filter_tags = tags
         try:
@@ -415,7 +416,7 @@ class WikiTUIApp(App):
         except Exception:
             return False
 
-    def update_search_results(self, results: List[WikiPage]) -> None:
+    def update_search_results(self, results: list[WikiPage]) -> None:
         """更新搜索结果"""
         table = self.query_one("#page_table", DataTable)
         table.clear()
@@ -426,11 +427,7 @@ class WikiTUIApp(App):
             modified_time = page.modified_at.strftime("%Y-%m-%d %H:%M")
 
             table.add_row(
-                page.title,
-                tags_str,
-                str(word_count),
-                modified_time,
-                key=page.title
+                page.title, tags_str, str(word_count), modified_time, key=page.title
             )
 
     def update_page_list(self) -> None:
@@ -455,11 +452,11 @@ class WikiTUIApp(App):
                 self.open_page_viewer(page)
 
     # 扩展功能方法
-    def get_recent_pages(self, limit: int = 10) -> List[WikiPage]:
+    def get_recent_pages(self, limit: int = 10) -> list[WikiPage]:
         """获取最近修改的页面"""
         return self.wiki_manager.get_recent_pages(limit)
 
-    def batch_delete_pages(self, titles: List[str]) -> Dict[str, bool]:
+    def batch_delete_pages(self, titles: list[str]) -> dict[str, bool]:
         """批量删除页面"""
         return self.wiki_manager.batch_delete_pages(titles)
 
@@ -481,6 +478,7 @@ class WikiTUIApp(App):
         try:
             # 简化实现，复制备份文件
             import shutil
+
             if backup_dir.exists():
                 shutil.copytree(backup_dir, target_wiki_root, dirs_exist_ok=True)
                 return True
@@ -488,30 +486,31 @@ class WikiTUIApp(App):
         except Exception:
             return False
 
-    def get_tag_cloud(self) -> List[str]:
+    def get_tag_cloud(self) -> list[str]:
         """获取标签云"""
         return self.wiki_manager.get_all_tags()
 
-    def advanced_search(self, query: str, tags: Optional[List[str]] = None,
-                       search_type: str = "content") -> List[WikiPage]:
+    def advanced_search(
+        self, query: str, tags: Optional[list[str]] = None, search_type: str = "content"
+    ) -> list[WikiPage]:
         """高级搜索"""
         return self.wiki_manager.search_advanced(query, search_type, tags)
 
-    def set_custom_shortcuts(self, shortcuts: Dict[str, str]) -> None:
+    def set_custom_shortcuts(self, shortcuts: dict[str, str]) -> None:
         """设置自定义快捷键"""
         self.custom_shortcuts = shortcuts
 
-    def get_statistics_dashboard(self) -> Dict[str, Any]:
+    def get_statistics_dashboard(self) -> dict[str, Any]:
         """获取统计仪表板数据"""
         stats = self.wiki_manager.get_statistics()
         recent_pages = self.get_recent_pages(5)
 
         return {
-            'total_pages': stats.total_pages,
-            'total_tags': stats.total_tags,
-            'recent_activity': [page.title for page in recent_pages],
-            'tag_distribution': stats.most_used_tags[:5],
-            'total_words': stats.total_words
+            "total_pages": stats.total_pages,
+            "total_tags": stats.total_tags,
+            "recent_activity": [page.title for page in recent_pages],
+            "tag_distribution": stats.most_used_tags[:5],
+            "total_words": stats.total_words,
         }
 
     def show_notification(self, message: str, severity: str = "info") -> None:
@@ -524,21 +523,24 @@ class WikiTUIApp(App):
 
     def load_plugin(self, plugin: Any) -> None:
         """加载插件"""
-        if hasattr(plugin, 'name') and hasattr(plugin, 'version'):
+        if hasattr(plugin, "name") and hasattr(plugin, "version"):
             self.loaded_plugins[plugin.name] = plugin
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """获取性能指标"""
         try:
-            import psutil
             import os
 
+            import psutil
+
             process = psutil.Process(os.getpid())
-            self.performance_metrics['memory_usage'] = process.memory_info().rss / 1024 / 1024  # MB
+            self.performance_metrics["memory_usage"] = (
+                process.memory_info().rss / 1024 / 1024
+            )  # MB
         except ImportError:
             # 如果psutil不可用，使用模拟数据
-            self.performance_metrics['memory_usage'] = 50.0  # 模拟50MB
+            self.performance_metrics["memory_usage"] = 50.0  # 模拟50MB
 
-        self.performance_metrics['operation_count'] += 1
+        self.performance_metrics["operation_count"] += 1
 
         return self.performance_metrics.copy()

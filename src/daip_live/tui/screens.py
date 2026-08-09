@@ -1,11 +1,12 @@
 """TUI屏幕和对话框组件模块"""
 
-from typing import List, Optional, Callable
-from textual.screen import Screen
-from textual.containers import Vertical, Horizontal, Container
-from textual.widgets import Label, Button, Static, ListView, ListItem
+from typing import Callable
+
 from textual.app import ComposeResult
 from textual.binding import Binding
+from textual.containers import Horizontal, Vertical
+from textual.screen import Screen
+from textual.widgets import Button, Label, ListItem, ListView, Static
 
 
 class CommandHelpDialog(Screen):
@@ -209,7 +210,10 @@ class InputDialog(Screen):
             yield Label(self.title, id="title")
             yield Static(self.prompt, id="prompt")
             # Note: 这里需要添加输入框，但为了简化暂时用静态文本代替
-            yield Static(f"默认值: {self.default_text}" if self.default_text else "请输入值", id="input_display")
+            yield Static(
+                f"默认值: {self.default_text}" if self.default_text else "请输入值",
+                id="input_display",
+            )
             with Horizontal(id="button_container"):
                 yield Button("确定", id="ok_button", variant="primary")
                 yield Button("取消", id="cancel_button")
@@ -228,7 +232,7 @@ class ProgressDialog(Screen):
 
     BINDINGS = [Binding("escape", "dismiss", "取消")]
 
-    def __init__(self, title: str, steps: List[str]):
+    def __init__(self, title: str, steps: list[str]):
         super().__init__()
         self.title = title
         self.steps = steps
@@ -239,7 +243,9 @@ class ProgressDialog(Screen):
             yield Label(self.title, id="title")
             yield Static("步骤 0/0", id="progress_text")
             for i, step in enumerate(self.steps):
-                yield Static(f"{'✓' if i < self.current_step else '○'} {step}", id=f"step_{i}")
+                yield Static(
+                    f"{'✓' if i < self.current_step else '○'} {step}", id=f"step_{i}"
+                )
 
     def update_progress(self, current_step: int):
         """更新进度"""
@@ -262,7 +268,7 @@ class MultiSelectDialog(Screen):
 
     BINDINGS = [Binding("escape", "dismiss", "取消")]
 
-    def __init__(self, title: str, items: List[str], on_select=None):
+    def __init__(self, title: str, items: list[str], on_select=None):
         super().__init__()
         self.title = title
         self.items = items

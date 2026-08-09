@@ -1,28 +1,33 @@
 """
 辩论核心功能
 """
-import asyncio
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
+
 import time
+from dataclasses import dataclass
+from typing import Any
+
 
 @dataclass
 class DebateConfig:
     """辩论配置"""
+
     topic: str
-    roles: List[str]
+    roles: list[str]
     rounds: int = 1
     max_turns_per_role: int = 10
+
 
 @dataclass
 class DebateResult:
     """辩论结果"""
+
     session_id: str
     topic: str
-    turns: List[Dict[str, Any]]
+    turns: list[dict[str, Any]]
     conclusion: str
-    role_performances: Dict[str, str]
+    role_performances: dict[str, str]
     execution_time: float
+
 
 class DebateCore:
     """辩论核心功能"""
@@ -37,13 +42,15 @@ class DebateCore:
 
         # 产生事件流（简化版）
         events = []
-        events.append({
-            "type": "start",
-            "session_id": session_id,
-            "topic": self.config.topic,
-            "roles": self.config.roles,
-            "rounds": self.config.rounds
-        })
+        events.append(
+            {
+                "type": "start",
+                "session_id": session_id,
+                "topic": self.config.topic,
+                "roles": self.config.roles,
+                "rounds": self.config.rounds,
+            }
+        )
 
         # 模拟辩论过程
         for round_num in range(1, self.config.rounds + 1):
@@ -52,7 +59,7 @@ class DebateCore:
                     "type": "turn_start",
                     "round": round_num,
                     "role": role,
-                    "timestamp": time.time()
+                    "timestamp": time.time(),
                 }
                 events.append(turn)
 
@@ -63,7 +70,7 @@ class DebateCore:
                     "round": round_num,
                     "role": role,
                     "content": content,
-                    "timestamp": time.time()
+                    "timestamp": time.time(),
                 }
                 events.append(speech)
 
@@ -73,17 +80,19 @@ class DebateCore:
             session_id=session_id,
             topic=self.config.topic,
             turns=events,
-            conclusion=f"辩论 '{self.config.topic}' 已完成，共进行了 {self.config.rounds} 轮",
-            role_performances={role: "表现良好" for role in self.config.roles},
-            execution_time=end_time - self.start_time
+            conclusion=f"辩论 '{self.config.topic}' 已完成，共进行了 {self.config.rounds} 轮",  # noqa: E501
+            role_performances=dict.fromkeys(self.config.roles, "表现良好"),
+            execution_time=end_time - self.start_time,
         )
 
-        events.append({
-            "type": "complete",
-            "session_id": session_id,
-            "conclusion": result.conclusion,
-            "execution_time": result.execution_time
-        })
+        events.append(
+            {
+                "type": "complete",
+                "session_id": session_id,
+                "conclusion": result.conclusion,
+                "execution_time": result.execution_time,
+            }
+        )
 
         return result
 
@@ -96,5 +105,5 @@ class DebateCore:
             "type": "complete",
             "session_id": result.session_id,
             "conclusion": result.conclusion,
-            "role_performances": result.role_performances
+            "role_performances": result.role_performances,
         }

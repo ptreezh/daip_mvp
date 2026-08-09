@@ -3,28 +3,26 @@
 提供项目结构预览和用户确认功能
 """
 
+import logging
 import os
-import time
-import asyncio
-from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-import logging
+from typing import Any, Optional
 
-from .models import ProjectFile, ProjectStructure, ValidationError
 from .file_creation_service import (
-    FileCreationService,
-    FileCreationConfig,
     FileConflictResolution,
-    ValidationRule
+    FileCreationConfig,
+    FileCreationService,
 )
+from .models import ProjectFile, ProjectStructure, ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class PreviewAction(Enum):
     """预览动作"""
+
     CREATE = "create"
     OVERWRITE = "overwrite"
     BACKUP = "backup"
@@ -34,6 +32,7 @@ class PreviewAction(Enum):
 
 class ConfirmationResult(Enum):
     """确认结果"""
+
     CONFIRMED = "confirmed"
     CANCELLED = "cancelled"
     MODIFIED = "modified"
@@ -42,11 +41,12 @@ class ConfirmationResult(Enum):
 @dataclass
 class FilePreview:
     """文件预览信息"""
+
     file: ProjectFile
     action: PreviewAction
     exists: bool = False
-    conflicts: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    conflicts: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         if self.conflicts is None:
@@ -58,8 +58,9 @@ class FilePreview:
 @dataclass
 class PreviewSummary:
     """预览摘要"""
-    files: List[FilePreview]
-    directories: List[str]
+
+    files: list[FilePreview]
+    directories: list[str]
     total_files: int
     total_size: int
     conflicts: int
@@ -70,10 +71,11 @@ class PreviewSummary:
 @dataclass
 class ConfirmationResponse:
     """确认响应"""
+
     result: ConfirmationResult
-    selected_files: List[ProjectFile] = field(default_factory=list)
-    rejected_files: List[ProjectFile] = field(default_factory=list)
-    modifications: Dict[str, Any] = field(default_factory=dict)
+    selected_files: list[ProjectFile] = field(default_factory=list)
+    rejected_files: list[ProjectFile] = field(default_factory=list)
+    modifications: dict[str, Any] = field(default_factory=dict)
     message: str = ""
 
 
@@ -90,7 +92,7 @@ class PreviewConfirmationService:
         self,
         structure: ProjectStructure,
         target_dir: str,
-        config: Optional[FileCreationConfig] = None
+        config: Optional[FileCreationConfig] = None,
     ) -> PreviewSummary:
         """生成项目结构预览"""
         if not structure or not structure.files:
@@ -115,7 +117,7 @@ class PreviewConfirmationService:
                 default_file_mode=self.config.default_file_mode,
                 default_dir_mode=self.config.default_dir_mode,
                 dry_run=self.config.dry_run,
-                atomic_writes=self.config.atomic_writes
+                atomic_writes=self.config.atomic_writes,
             )
         else:
             effective_config = config
@@ -129,7 +131,9 @@ class PreviewConfirmationService:
         # 验证每个文件并生成预览
         for file in structure.files:
             try:
-                preview = await self._generate_file_preview(file, target_dir, effective_config)
+                preview = await self._generate_file_preview(
+                    file, target_dir, effective_config
+                )
                 files_preview.append(preview)
 
                 # 统计信息
@@ -138,7 +142,11 @@ class PreviewConfirmationService:
 
                 if preview.exists:
                     conflicts += 1
-                    if preview.action in [PreviewAction.OVERWRITE, PreviewAction.BACKUP, PreviewAction.MERGE]:
+                    if preview.action in [
+                        PreviewAction.OVERWRITE,
+                        PreviewAction.BACKUP,
+                        PreviewAction.MERGE,
+                    ]:
                         modified_files += 1
                 else:
                     new_files += 1
@@ -149,19 +157,16 @@ class PreviewConfirmationService:
 
         return PreviewSummary(
             files=files_preview,
-            directories=sorted(list(directories)),
+            directories=sorted(directories),
             total_files=len(files_preview),
             total_size=total_size,
             conflicts=conflicts,
             new_files=new_files,
-            modified_files=modified_files
+            modified_files=modified_files,
         )
 
     async def _generate_file_preview(
-        self,
-        file: ProjectFile,
-        target_dir: str,
-        config: FileCreationConfig
+        self, file: ProjectFile, target_dir: str, config: FileCreationConfig
     ) -> FilePreview:
         """生成单个文件预览"""
         if not file.path:
@@ -191,34 +196,35 @@ class PreviewConfirmationService:
         conflicts.extend(path_conflicts)
 
         # 添加元数据
-        metadata.update({
-            'size': file.size or len(file.content.encode('utf-8')),
-            'type': Path(file.path).suffix.lower() or 'unknown',
-            'full_path': full_path,
-            'relative_path': file.path
-        })
+        metadata.update(
+            {
+                "size": file.size or len(file.content.encode("utf-8")),
+                "type": Path(file.path).suffix.lower() or "unknown",
+                "full_path": full_path,
+                "relative_path": file.path,
+            }
+        )
 
         if exists:
             stat = os.stat(full_path)
-            metadata.update({
-                'existing_size': stat.st_size,
-                'modified_time': stat.st_mtime,
-                'created_time': stat.st_ctime
-            })
+            metadata.update(
+                {
+                    "existing_size": stat.st_size,
+                    "modified_time": stat.st_mtime,
+                    "created_time": stat.st_ctime,
+                }
+            )
 
         return FilePreview(
             file=file,
             action=action,
             exists=exists,
             conflicts=conflicts,
-            metadata=metadata
+            metadata=metadata,
         )
 
     def _determine_action_for_existing_file(
-        self,
-        full_path: str,
-        file: ProjectFile,
-        config: FileCreationConfig
+        self, full_path: str, file: ProjectFile, config: FileCreationConfig
     ) -> PreviewAction:
         """确定对已存在文件的动作"""
         if config.conflict_resolution == FileConflictResolution.SKIP:
@@ -237,18 +243,15 @@ class PreviewConfirmationService:
     def _files_have_same_content(self, existing_path: str, new_content: str) -> bool:
         """检查文件内容是否相同"""
         try:
-            with open(existing_path, 'r', encoding='utf-8') as f:
+            with open(existing_path, encoding="utf-8") as f:
                 existing_content = f.read()
             return existing_content == new_content
         except Exception:
             return False
 
     def _check_path_conflicts(
-        self,
-        file: ProjectFile,
-        target_dir: str,
-        config: FileCreationConfig
-    ) -> List[str]:
+        self, file: ProjectFile, target_dir: str, config: FileCreationConfig
+    ) -> list[str]:
         """检查路径冲突"""
         conflicts = []
 
@@ -265,7 +268,9 @@ class PreviewConfirmationService:
 
         # 检查目录限制
         if config.allowed_directories:
-            path_parts = [part for part in file.path.replace('\\', '/').split('/') if part]
+            path_parts = [
+                part for part in file.path.replace("\\", "/").split("/") if part
+            ]
             if len(path_parts) >= 2:
                 parent_dir = path_parts[-2]
                 if parent_dir not in config.allowed_directories:
@@ -273,14 +278,14 @@ class PreviewConfirmationService:
 
         return conflicts
 
-    def _extract_directories(self, file_path: str) -> List[str]:
+    def _extract_directories(self, file_path: str) -> list[str]:
         """提取文件路径中的目录"""
         path_parts = Path(file_path).parts
         directories = []
 
         for i in range(len(path_parts) - 1):  # 排除文件名
             if path_parts[i]:
-                directories.append(os.path.join(*path_parts[:i+1]))
+                directories.append(os.path.join(*path_parts[: i + 1]))
 
         return directories
 
@@ -288,7 +293,7 @@ class PreviewConfirmationService:
         self,
         structure: ProjectStructure,
         target_dir: str,
-        config: Optional[FileCreationConfig] = None
+        config: Optional[FileCreationConfig] = None,
     ) -> ConfirmationResponse:
         """交互式确认"""
         try:
@@ -306,43 +311,24 @@ class PreviewConfirmationService:
         except Exception as e:
             logger.error(f"交互式确认失败: {e}")
             return ConfirmationResponse(
-                result=ConfirmationResult.CANCELLED,
-                message=f"确认过程出错: {e}"
+                result=ConfirmationResult.CANCELLED, message=f"确认过程出错: {e}"
             )
 
     def _display_preview(self, preview: PreviewSummary) -> None:
         """显示预览信息"""
-        print("\n" + "=" * 60)
-        print("📋 项目结构预览")
-        print("=" * 60)
-
-        print(f"\n📊 摘要信息:")
-        print(f"  📁 总文件数: {preview.total_files}")
-        print(f"  📦 总大小: {preview._format_size(preview.total_size)}")
-        print(f"  📂 目录数: {len(preview.directories)}")
-        print(f"  ⚠️  冲突数: {preview.conflicts}")
-        print(f"  🆕 新文件: {preview.new_files}")
-        print(f"  ✏️  修改文件: {preview.modified_files}")
 
         if preview.directories:
-            print(f"\n📂 目录结构:")
             for directory in preview.directories:
-                print(f"  📁 {directory}")
+                pass
 
-        print(f"\n📄 文件列表:")
         for i, file_preview in enumerate(preview.files, 1):
-            status_icon = self._get_status_icon(file_preview)
-            action_text = self._get_action_text(file_preview.action)
-            size = file_preview.metadata.get('size', 0)
-
-            print(f"  {i:2d}. {status_icon} {file_preview.file.path}")
-            print(f"      {action_text} ({size} bytes)")
+            self._get_status_icon(file_preview)
+            self._get_action_text(file_preview.action)
+            file_preview.metadata.get("size", 0)
 
             if file_preview.conflicts:
                 for conflict in file_preview.conflicts:
-                    print(f"      ⚠️  {conflict}")
-
-        print("=" * 60)
+                    pass
 
     def _get_status_icon(self, preview: FilePreview) -> str:
         """获取状态图标"""
@@ -367,58 +353,54 @@ class PreviewConfirmationService:
             PreviewAction.OVERWRITE: "覆盖",
             PreviewAction.BACKUP: "备份后创建",
             PreviewAction.SKIP: "跳过",
-            PreviewAction.MERGE: "合并"
+            PreviewAction.MERGE: "合并",
         }
         return action_map.get(action, "未知操作")
 
-    async def _get_user_confirmation(self, preview: PreviewSummary) -> ConfirmationResponse:
+    async def _get_user_confirmation(
+        self, preview: PreviewSummary
+    ) -> ConfirmationResponse:
         """获取用户确认"""
         try:
             while True:
-                print(f"\n🤔 确认操作? (y/n/s/v/h)")
-                print("  y - 确认创建所有文件")
-                print("  n - 取消操作")
-                print("  s - 选择性创建文件")
-                print("  v - 查看详细信息")
-                print("  h - 显示帮助")
-
                 choice = input("请选择: ").lower().strip()
 
-                if choice == 'y' or choice == 'yes':
+                if choice == "y" or choice == "yes":
                     return ConfirmationResponse(
                         result=ConfirmationResult.CONFIRMED,
-                        selected_files=[f.file for f in preview.files if f.action != PreviewAction.SKIP],
-                        message="用户确认创建所有文件"
+                        selected_files=[
+                            f.file
+                            for f in preview.files
+                            if f.action != PreviewAction.SKIP
+                        ],
+                        message="用户确认创建所有文件",
                     )
-                elif choice == 'n' or choice == 'no':
+                elif choice == "n" or choice == "no":
                     return ConfirmationResponse(
-                        result=ConfirmationResult.CANCELLED,
-                        message="用户取消操作"
+                        result=ConfirmationResult.CANCELLED, message="用户取消操作"
                     )
-                elif choice == 's' or choice == 'select':
+                elif choice == "s" or choice == "select":
                     return await self._selective_confirmation(preview)
-                elif choice == 'v' or choice == 'view':
+                elif choice == "v" or choice == "view":
                     self._display_detailed_preview(preview)
-                elif choice == 'h' or choice == 'help':
+                elif choice == "h" or choice == "help":
                     self._display_help()
                 else:
-                    print("❌ 无效选择，请重试")
+                    pass
 
         except KeyboardInterrupt:
-            print("\n\n⚠️  操作被用户中断")
             return ConfirmationResponse(
-                result=ConfirmationResult.CANCELLED,
-                message="用户中断操作"
+                result=ConfirmationResult.CANCELLED, message="用户中断操作"
             )
 
-    async def _selective_confirmation(self, preview: PreviewSummary) -> ConfirmationResponse:
+    async def _selective_confirmation(
+        self, preview: PreviewSummary
+    ) -> ConfirmationResponse:
         """选择性确认"""
-        print(f"\n📝 选择要创建的文件 (输入文件编号，用空格分隔，直接回车结束):")
 
         # 显示文件列表
         for i, file_preview in enumerate(preview.files, 1):
-            status_icon = self._get_status_icon(file_preview)
-            print(f"  {i:2d}. {status_icon} {file_preview.file.path}")
+            self._get_status_icon(file_preview)
 
         selected_indices = []
         try:
@@ -434,17 +416,15 @@ class PreviewConfirmationService:
                         if 1 <= idx <= len(preview.files):
                             indices.append(idx - 1)  # 转换为0-based索引
                         else:
-                            print(f"⚠️  编号 {idx} 超出范围")
+                            pass
                     except ValueError:
-                        print(f"⚠️  '{part}' 不是有效的编号")
+                        pass
 
                 selected_indices.extend(indices)
-                print(f"✅ 已选择 {len(indices)} 个文件")
 
         except KeyboardInterrupt:
             return ConfirmationResponse(
-                result=ConfirmationResult.CANCELLED,
-                message="用户中断选择"
+                result=ConfirmationResult.CANCELLED, message="用户中断选择"
             )
 
         # 构建响应
@@ -462,55 +442,37 @@ class PreviewConfirmationService:
                 result=ConfirmationResult.MODIFIED,
                 selected_files=selected_files,
                 rejected_files=rejected_files,
-                message=f"用户选择了 {len(selected_files)} 个文件"
+                message=f"用户选择了 {len(selected_files)} 个文件",
             )
         else:
             return ConfirmationResponse(
-                result=ConfirmationResult.CANCELLED,
-                message="用户未选择任何文件"
+                result=ConfirmationResult.CANCELLED, message="用户未选择任何文件"
             )
 
     def _display_detailed_preview(self, preview: PreviewSummary) -> None:
         """显示详细预览"""
-        print(f"\n📋 详细预览信息:")
-        print("-" * 60)
 
         for i, file_preview in enumerate(preview.files, 1):
-            print(f"\n{i:2d}. {file_preview.file.path}")
-            print(f"    动作: {self._get_action_text(file_preview.action)}")
-            print(f"    存在: {'是' if file_preview.exists else '否'}")
-            print(f"    大小: {file_preview.metadata.get('size', 0)} bytes")
-            print(f"    类型: {file_preview.metadata.get('type', 'unknown')}")
-
             if file_preview.conflicts:
-                print(f"    冲突:")
                 for conflict in file_preview.conflicts:
-                    print(f"      - {conflict}")
+                    pass
 
             # 显示文件内容预览 (如果不太大的话)
             content = file_preview.file.content
             if content and len(content) <= 200:
-                print(f"    内容预览: {repr(content[:100])}{'...' if len(content) > 100 else ''}")
+                pass
             elif content:
-                print(f"    内容长度: {len(content)} 字符")
+                pass
 
     def _display_help(self) -> None:
         """显示帮助信息"""
-        print(f"\n❓ 帮助信息:")
-        print("-" * 40)
-        print("y/yes  - 确认操作，创建所有文件")
-        print("n/no   - 取消操作，不创建任何文件")
-        print("s/select - 选择性创建文件")
-        print("v/view - 查看文件详细信息")
-        print("h/help - 显示此帮助信息")
-        print("Ctrl+C - 中断操作")
 
     async def auto_confirmation(
         self,
         structure: ProjectStructure,
         target_dir: str,
         auto_confirm: bool = True,
-        config: Optional[FileCreationConfig] = None
+        config: Optional[FileCreationConfig] = None,
     ) -> ConfirmationResponse:
         """自动确认"""
         try:
@@ -519,27 +481,27 @@ class PreviewConfirmationService:
             if auto_confirm:
                 return ConfirmationResponse(
                     result=ConfirmationResult.CONFIRMED,
-                    selected_files=[f.file for f in preview.files if f.action != PreviewAction.SKIP],
-                    message="自动确认创建所有文件"
+                    selected_files=[
+                        f.file for f in preview.files if f.action != PreviewAction.SKIP
+                    ],
+                    message="自动确认创建所有文件",
                 )
             else:
                 return ConfirmationResponse(
-                    result=ConfirmationResult.CANCELLED,
-                    message="自动取消操作"
+                    result=ConfirmationResult.CANCELLED, message="自动取消操作"
                 )
 
         except Exception as e:
             logger.error(f"自动确认失败: {e}")
             return ConfirmationResponse(
-                result=ConfirmationResult.CANCELLED,
-                message=f"自动确认失败: {e}"
+                result=ConfirmationResult.CANCELLED, message=f"自动确认失败: {e}"
             )
 
 
 # 添加格式化大小的方法到PreviewSummary
 def _format_size(size_bytes: int) -> str:
     """格式化文件大小"""
-    for unit in ['B', 'KB', 'MB', 'GB']:
+    for unit in ["B", "KB", "MB", "GB"]:
         if size_bytes < 1024:
             return f"{size_bytes:.1f} {unit}"
         size_bytes /= 1024

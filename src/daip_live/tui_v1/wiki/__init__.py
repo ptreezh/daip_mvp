@@ -9,11 +9,11 @@ This module provides comprehensive knowledge management capabilities including:
 """
 
 from .document import Document, DocumentStatus, DocumentType
-from .vector_store import VectorStore, SearchResult
 from .ingestion import DocumentIngestor
-from .search import SearchEngine
-from .knowledge_manager import KnowledgeManager
 from .knowledge_base import KnowledgeBase
+from .knowledge_manager import KnowledgeManager
+from .search import SearchEngine
+from .vector_store import SearchResult, VectorStore
 
 __all__ = [
     "Document",
@@ -24,5 +24,5 @@ __all__ = [
     "DocumentIngestor",
     "SearchEngine",
     "KnowledgeManager",
-    "KnowledgeBase"
+    "KnowledgeBase",
 ]

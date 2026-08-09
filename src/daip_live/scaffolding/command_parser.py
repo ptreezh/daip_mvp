@@ -5,13 +5,14 @@
 
 import re
 import shlex
-from typing import List, Optional, Tuple
+from typing import Optional
+
 from .models import (
+    ErrorMessages,
     InputType,
     ScaffoldCommand,
+    ValidationConstants,
     ValidationError,
-    ErrorMessages,
-    ValidationConstants
 )
 
 
@@ -24,21 +25,21 @@ class ScaffoldCommandParser:
 
     # 定义命令行选项映射
     OPTION_PATTERNS = {
-        'file': [
-            re.compile(r'^--file\s+(.+)$'),
-            re.compile(r'^-f\s+(.+)$'),
-            re.compile(r'^--from-file\s+(.+)$'),
+        "file": [
+            re.compile(r"^--file\s+(.+)$"),
+            re.compile(r"^-f\s+(.+)$"),
+            re.compile(r"^--from-file\s+(.+)$"),
         ],
-        'yes': [
-            re.compile(r'^--yes$'),
-            re.compile(r'^-y$'),
-            re.compile(r'^--auto-confirm$'),
+        "yes": [
+            re.compile(r"^--yes$"),
+            re.compile(r"^-y$"),
+            re.compile(r"^--auto-confirm$"),
         ],
-        'help': [
-            re.compile(r'^--help$'),
-            re.compile(r'^-h$'),
-            re.compile(r'^help$'),
-        ]
+        "help": [
+            re.compile(r"^--help$"),
+            re.compile(r"^-h$"),
+            re.compile(r"^help$"),
+        ],
     }
 
     def __init__(self):
@@ -70,10 +71,7 @@ class ScaffoldCommandParser:
 
         if not command_str or not command_str.strip():
             # 空命令，返回文本输入命令
-            return ScaffoldCommand(
-                input_type=InputType.TEXT,
-                description=""
-            )
+            return ScaffoldCommand(input_type=InputType.TEXT, description="")
 
         # 清理输入
         command_str = command_str.strip()
@@ -97,7 +95,7 @@ class ScaffoldCommandParser:
             token = tokens[i].lower()
 
             # 处理文件选项
-            if token in ['--file', '-f', '--from-file']:
+            if token in ["--file", "-f", "--from-file"]:
                 if i + 1 < len(tokens):
                     self._file_path = tokens[i + 1]
                     self._input_type = InputType.FILE
@@ -107,7 +105,7 @@ class ScaffoldCommandParser:
                 continue
 
             # 处理确认选项
-            elif token in ['--yes', '-y', '--auto-confirm']:
+            elif token in ["--yes", "-y", "--auto-confirm"]:
                 self._auto_confirm = True
                 i += 1
                 continue
@@ -127,26 +125,26 @@ class ScaffoldCommandParser:
             input_type=self._input_type,
             description=self._description,
             file_path=self._file_path,
-            auto_confirm=self._auto_confirm
+            auto_confirm=self._auto_confirm,
         )
 
         return command
 
     def _is_help_command(self, command_str: str) -> bool:
         """检查是否为帮助命令"""
-        for pattern in self.OPTION_PATTERNS['help']:
+        for pattern in self.OPTION_PATTERNS["help"]:
             if pattern.match(command_str.strip().lower()):
                 return True
         return False
 
-    def _match_file_option(self, tokens: List[str], index: int) -> bool:
+    def _match_file_option(self, tokens: list[str], index: int) -> bool:
         """匹配并处理文件选项"""
         if index >= len(tokens):
             return False
 
         token = tokens[index].lower()
 
-        for pattern in self.OPTION_PATTERNS['file']:
+        for pattern in self.OPTION_PATTERNS["file"]:
             match = pattern.match(token)
             if match:
                 # 如果模式已经包含值（如--file=value）
@@ -155,28 +153,30 @@ class ScaffoldCommandParser:
                     return True
                 else:
                     # 检查是否是标志格式（如--file, -f）
-                    if token in ['--file', '-f', '--from-file']:
+                    if token in ["--file", "-f", "--from-file"]:
                         # 下一个token是值
                         if index + 1 < len(tokens):
                             self._file_path = tokens[index + 1]
                             self._input_type = InputType.FILE
                             return True
                         else:
-                            raise ValidationError([f"文件选项需要指定文件路径: {token}"])
+                            raise ValidationError(
+                                [f"文件选项需要指定文件路径: {token}"]
+                            )
                     else:
                         # 处理直接跟在标志后面的值
                         return False
 
         return False
 
-    def _match_yes_option(self, tokens: List[str], index: int) -> bool:
+    def _match_yes_option(self, tokens: list[str], index: int) -> bool:
         """匹配并处理确认选项"""
         if index >= len(tokens):
             return False
 
         token = tokens[index].lower()
 
-        for pattern in self.OPTION_PATTERNS['yes']:
+        for pattern in self.OPTION_PATTERNS["yes"]:
             if pattern.match(token):
                 self._auto_confirm = True
                 return True
@@ -206,12 +206,12 @@ class ScaffoldCommandParser:
             elif len(command.description) < ValidationConstants.MIN_DESCRIPTION_LENGTH:
                 errors.append(
                     f"{ErrorMessages.DESCRIPTION_TOO_SHORT} "
-                    f"(当前: {len(command.description)}, 需要: {ValidationConstants.MIN_DESCRIPTION_LENGTH})"
+                    f"(当前: {len(command.description)}, 需要: {ValidationConstants.MIN_DESCRIPTION_LENGTH})"  # noqa: E501
                 )
             elif len(command.description) > ValidationConstants.MAX_DESCRIPTION_LENGTH:
                 errors.append(
                     f"{ErrorMessages.DESCRIPTION_TOO_LONG} "
-                    f"(当前: {len(command.description)}, 最大: {ValidationConstants.MAX_DESCRIPTION_LENGTH})"
+                    f"(当前: {len(command.description)}, 最大: {ValidationConstants.MAX_DESCRIPTION_LENGTH})"  # noqa: E501
                 )
 
         elif command.input_type == InputType.FILE:
@@ -280,7 +280,7 @@ class ScaffoldCommandParser:
     def get_command_summary(self, command: ScaffoldCommand) -> str:
         """获取命令摘要信息"""
         if command.input_type == InputType.TEXT:
-            source = f"文本描述: {command.description[:50]}{'...' if len(command.description) > 50 else ''}"
+            source = f"文本描述: {command.description[:50]}{'...' if len(command.description) > 50 else ''}"  # noqa: E501
         else:
             source = f"文件: {command.file_path}"
 
@@ -288,7 +288,7 @@ class ScaffoldCommandParser:
 脚手架命令摘要:
 - 输入类型: {command.input_type.value}
 - 内容来源: {source}
-- 自动确认: {'是' if command.auto_confirm else '否'}
+- 自动确认: {"是" if command.auto_confirm else "否"}
         """.strip()
 
         return summary
@@ -298,7 +298,7 @@ class CommandSuggestion:
     """命令建议生成器"""
 
     @staticmethod
-    def suggest_completions(partial_input: str) -> List[str]:
+    def suggest_completions(partial_input: str) -> list[str]:
         """根据部分输入提供建议"""
         suggestions = []
 
@@ -321,13 +321,13 @@ class CommandSuggestion:
         return suggestions
 
     @staticmethod
-    def get_example_commands() -> List[str]:
+    def get_example_commands() -> list[str]:
         """获取示例命令"""
         return [
             '/scaffold "创建一个包含用户认证的Web应用"',
-            '/scaffold --file project_desc.txt',
-            '/scaffold -f desc.md --yes',
-            '/scaffold -h'
+            "/scaffold --file project_desc.txt",
+            "/scaffold -f desc.md --yes",
+            "/scaffold -h",
         ]
 
 
@@ -335,7 +335,7 @@ class CommandHistory:
     """命令历史管理器"""
 
     def __init__(self, max_history: int = 100):
-        self._history: List[str] = []
+        self._history: list[str] = []
         self._max_history = max_history
 
     def add_command(self, command: str) -> None:
@@ -359,7 +359,7 @@ class CommandHistory:
             return self._history[current_index - 1]
         return None
 
-    def get_recent_commands(self, count: int = 10) -> List[str]:
+    def get_recent_commands(self, count: int = 10) -> list[str]:
         """获取最近的命令"""
         return self._history[-count:]
 

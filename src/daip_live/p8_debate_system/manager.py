@@ -1,9 +1,17 @@
-from typing import AsyncGenerator, List, Optional
+from collections.abc import AsyncGenerator
+from typing import Optional
 
 from daip_live.core.models import (
-    AgentEvent, AgentState, DebateCompleteEvent, DebateRoundStartEvent, 
-    DebateStartEvent, DebateTurnCompleteEvent, DebateTurnStartEvent, 
-    DialogueTurn, Role, Session, ThoughtEvent, TokenUsageEvent
+    AgentEvent,
+    AgentState,
+    DebateCompleteEvent,
+    DebateRoundStartEvent,
+    DebateStartEvent,
+    DebateTurnCompleteEvent,
+    DebateTurnStartEvent,
+    DialogueTurn,
+    ThoughtEvent,
+    TokenUsageEvent,
 )
 from daip_live.memory.session_manager import SessionManager
 from daip_live.model_provider.provider import LiteLLMProvider
@@ -24,10 +32,7 @@ class DebateManager:
         self.model_provider = model_provider
 
     async def run_debate(
-        self,
-        topic: str,
-        roles_names: List[str],
-        num_rounds: int
+        self, topic: str, roles_names: list[str], num_rounds: int
     ) -> AsyncGenerator[AgentEvent, None]:
         """Runs a full debate and yields events for real-time status updates."""
         session = self.session_manager.create_session(
@@ -43,7 +48,7 @@ class DebateManager:
             topic=topic,
             roles=roles_names,
             rounds=num_rounds,
-            session_id=session.session_id
+            session_id=session.session_id,
         )
 
         # Run debate rounds
@@ -52,7 +57,7 @@ class DebateManager:
             yield DebateRoundStartEvent(
                 round_number=round_num,
                 total_rounds=num_rounds,
-                session_id=session.session_id
+                session_id=session.session_id,
             )
 
             for role in roles:
@@ -60,13 +65,17 @@ class DebateManager:
                 yield DebateTurnStartEvent(
                     participant=role.name,
                     round_number=round_num,
-                    session_id=session.session_id
+                    session_id=session.session_id,
                 )
 
-                yield ThoughtEvent(content=f"{role.name} is preparing their response...")
+                yield ThoughtEvent(
+                    content=f"{role.name} is preparing their response..."
+                )
 
                 # Generate response
-                response_content, token_info = await self._generate_response(topic, role.persona, session.history)
+                response_content, token_info = await self._generate_response(
+                    topic, role.persona, session.history
+                )
                 turn = DialogueTurn(participant_id=role.name, content=response_content)
                 session.history.append(turn)
 
@@ -76,7 +85,7 @@ class DebateManager:
                         "prompt_tokens": token_info.get("prompt_tokens", 0),
                         "completion_tokens": token_info.get("completion_tokens", 0),
                         "total_tokens": token_info.get("total_tokens", 0),
-                        "session_id": session.session_id
+                        "session_id": session.session_id,
                     }
                     yield TokenUsageEvent(usage_info=usage_info)
 
@@ -85,7 +94,7 @@ class DebateManager:
                     participant=role.name,
                     round_number=round_num,
                     content_preview=response_content,  # Show complete response
-                    session_id=session.session_id
+                    session_id=session.session_id,
                 )
 
         # Generate summary
@@ -99,7 +108,7 @@ class DebateManager:
                 "prompt_tokens": token_info.get("prompt_tokens", 0),
                 "completion_tokens": token_info.get("completion_tokens", 0),
                 "total_tokens": token_info.get("total_tokens", 0),
-                "session_id": session.session_id
+                "session_id": session.session_id,
             }
             yield TokenUsageEvent(usage_info=usage_info)
 
@@ -108,24 +117,27 @@ class DebateManager:
 
         # Emit debate complete event
         yield DebateCompleteEvent(
-            session_id=session.session_id,
-            summary=summary_content
+            session_id=session.session_id, summary=summary_content
         )
 
-    def _format_history(self, history: List[DialogueTurn]) -> str:
+    def _format_history(self, history: list[DialogueTurn]) -> str:
         """Format debate history for prompt generation."""
         return "\n".join([f"{turn.participant_id}: {turn.content}" for turn in history])
 
-    async def _generate_response(self, topic: str, persona: str, history: List[DialogueTurn]) -> tuple[str, Optional[dict]]:
+    async def _generate_response(
+        self, topic: str, persona: str, history: list[DialogueTurn]
+    ) -> tuple[str, Optional[dict]]:
         """Generate a response from a role given the topic and history."""
         history_str = self._format_history(history)
-        prompt = f"Debate Topic: {topic}\n\nYour Persona: {persona}\n\nConversation History:\n{history_str}\n\nBased on the history and your persona, what is your next argument?"
+        prompt = f"Debate Topic: {topic}\n\nYour Persona: {persona}\n\nConversation History:\n{history_str}\n\nBased on the history and your persona, what is your next argument?"  # noqa: E501
         response_content, token_info = await self.model_provider.generate(prompt)
         return response_content, token_info
 
-    async def _generate_summary(self, history: List[DialogueTurn]) -> tuple[str, Optional[dict]]:
+    async def _generate_summary(
+        self, history: list[DialogueTurn]
+    ) -> tuple[str, Optional[dict]]:
         """Generate a summary of the debate."""
         history_str = self._format_history(history)
-        summary_prompt = f"Please provide a neutral summary of the following debate, identifying key arguments, points of contention, and any potential consensus.\n\nDebate History:\n{history_str}"
+        summary_prompt = f"Please provide a neutral summary of the following debate, identifying key arguments, points of contention, and any potential consensus.\n\nDebate History:\n{history_str}"  # noqa: E501
         summary_content, token_info = await self.model_provider.generate(summary_prompt)
         return summary_content, token_info

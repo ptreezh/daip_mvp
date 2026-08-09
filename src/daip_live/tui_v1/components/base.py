@@ -9,10 +9,10 @@ Based on newP6 specification requirements for component architecture.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
-    from textual.widgets import Widget
+    pass
 
 
 class TUIComponent(ABC):
@@ -43,10 +43,10 @@ class TUIComponent(ABC):
             component_id: Optional unique identifier for this component
         """
         self._mounted = False
-        self._state: Dict[str, Any] = {}
+        self._state: dict[str, Any] = {}
         self._component_id = component_id or self.__class__.__name__
-        self._parent: Optional['TUIComponent'] = None
-        self._children: list['TUIComponent'] = []
+        self._parent: Optional[TUIComponent] = None
+        self._children: list[TUIComponent] = []
 
     @abstractmethod
     def render(self):
@@ -89,7 +89,7 @@ class TUIComponent(ABC):
         pass
 
     # Component hierarchy and lifecycle methods
-    def add_child(self, child: 'TUIComponent') -> None:
+    def add_child(self, child: "TUIComponent") -> None:
         """
         Add a child component to this component.
 
@@ -100,7 +100,7 @@ class TUIComponent(ABC):
             child._parent = self
             self._children.append(child)
 
-    def remove_child(self, child: 'TUIComponent') -> None:
+    def remove_child(self, child: "TUIComponent") -> None:
         """
         Remove a child component from this component.
 
@@ -111,7 +111,7 @@ class TUIComponent(ABC):
             child._parent = None
             self._children.remove(child)
 
-    def get_children(self) -> list['TUIComponent']:
+    def get_children(self) -> list["TUIComponent"]:
         """Get a copy of the children list."""
         return self._children.copy()
 
@@ -127,12 +127,12 @@ class TUIComponent(ABC):
         return self._component_id
 
     @property
-    def parent(self) -> Optional['TUIComponent']:
+    def parent(self) -> Optional["TUIComponent"]:
         """Get the parent component."""
         return self._parent
 
     @property
-    def state(self) -> Dict[str, Any]:
+    def state(self) -> dict[str, Any]:
         """Get a copy of the component's internal state."""
         return self._state.copy()
 
@@ -142,4 +142,4 @@ class TUIComponent(ABC):
 
     # String representation for debugging
     def __repr__(self) -> str:
-        return f"<{self.__class__.__name__}(id='{self._component_id}', mounted={self._mounted})>"
+        return f"<{self.__class__.__name__}(id='{self._component_id}', mounted={self._mounted})>"  # noqa: E501

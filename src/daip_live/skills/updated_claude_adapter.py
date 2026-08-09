@@ -1,36 +1,43 @@
 """
-Updated Claude Skill Adapter to handle both the traditional manifest.json/tools.json 
+Updated Claude Skill Adapter to handle both the traditional manifest.json/tools.json
 format and the newer SKILL.md format used by Claude Code Skills
 """
-import asyncio
+
 import json
-import yaml
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Optional
+
+import yaml
 from pydantic import BaseModel, Field
 
-from daip_live.skills.base import Skill, SkillInput, SkillOutput, SkillMetadata
+from daip_live.skills.base import Skill, SkillInput, SkillMetadata, SkillOutput
 from daip_live.skills.manager import SkillManager
 
 
 class ClaudeSkillDefinition(BaseModel):
     """Claude Skill Definition - Supports both traditional and new format"""
+
     name: str
     version: str = "1.0"
     description: str
     manifest_version: str = "1.0"
     author: Optional[str] = None
-    api: Optional[Dict[str, Any]] = None
-    tags: List[str] = Field(default_factory=list)
-    tools: List[Dict[str, Any]] = Field(default_factory=list)  # tools.json content
+    api: Optional[dict[str, Any]] = None
+    tags: list[str] = Field(default_factory=list)
+    tools: list[dict[str, Any]] = Field(default_factory=list)  # tools.json content
     skill_content: Optional[str] = None  # Content from SKILL.md
 
 
 class ClaudeSkillAdapter(Skill):
     """Claude Skill Adapter - Handles both traditional and new format"""
-    
-    def __init__(self, skill_name: str, manifest_data: Optional[Dict] = None, 
-                 skill_content: Optional[str] = None, skill_manager: SkillManager = None):
+
+    def __init__(
+        self,
+        skill_name: str,
+        manifest_data: Optional[dict] = None,
+        skill_content: Optional[str] = None,
+        skill_manager: SkillManager = None,
+    ):
         # Create metadata based on available data
         description = "Claude Skill"
         if manifest_data:
@@ -46,17 +53,19 @@ class ClaudeSkillAdapter(Skill):
                         frontmatter = yaml.safe_load(yaml_content)
                         if frontmatter and isinstance(frontmatter, dict):
                             description = frontmatter.get("description", description)
-            except:
+            except Exception:
                 pass  # If YAML parsing fails, use default description
 
         metadata = SkillMetadata(
             name=skill_name,
             description=description,
             version=manifest_data.get("version", "1.0") if manifest_data else "1.0",
-            author=manifest_data.get("author", "Claude Community") if manifest_data else "Claude Community",
-            tags=manifest_data.get("tags", ["claude"]) if manifest_data else ["claude"]
+            author=manifest_data.get("author", "Claude Community")
+            if manifest_data
+            else "Claude Community",
+            tags=manifest_data.get("tags", ["claude"]) if manifest_data else ["claude"],
         )
-        
+
         super().__init__(metadata)
         self.manifest_data = manifest_data
         self.skill_content = skill_content
@@ -76,7 +85,7 @@ class ClaudeSkillAdapter(Skill):
                 result=f"[模拟技能执行] {self.metadata.name}: {input.data[:100]}...",
                 confidence=0.8,
                 execution_time=0.1,
-                metadata={"skill_type": "claude_adapter"}
+                metadata={"skill_type": "claude_adapter"},
             )
 
     def _execute_skill_md(self, input: SkillInput) -> SkillOutput:
@@ -91,7 +100,7 @@ Skill Content Preview:
 {self.skill_content[:200]}...
 
 Note: This skill uses the newer SKILL.md format. In production, this would apply the skill instructions to the input.
-            """.strip()
+            """.strip()  # noqa: E501
 
             return SkillOutput(
                 result=result,
@@ -100,15 +109,17 @@ Note: This skill uses the newer SKILL.md format. In production, this would apply
                 metadata={
                     "skill_type": "claude_skill_md",
                     "input_length": len(input.data),
-                    "content_length": len(self.skill_content) if self.skill_content else 0
-                }
+                    "content_length": len(self.skill_content)
+                    if self.skill_content
+                    else 0,
+                },
             )
         except Exception as e:
             return SkillOutput(
                 result=f"Error executing skill: {str(e)}",
                 confidence=0.0,
                 execution_time=0.1,
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
     def _execute_traditional_format(self, input: SkillInput) -> SkillOutput:
@@ -116,13 +127,15 @@ Note: This skill uses the newer SKILL.md format. In production, this would apply
         try:
             tool_info = []
             for tool in self.tools:
-                tool_info.append(f"  - {tool.get('name', 'unnamed')}: {tool.get('description', 'No description')}")
+                tool_info.append(
+                    f"  - {tool.get('name', 'unnamed')}: {tool.get('description', 'No description')}"  # noqa: E501
+                )
 
             result_text = f"""
 Claude Skill (Traditional Format): {self.metadata.name}
 Description: {self.metadata.description}
 Version: {self.metadata.version}
-Tags: {', '.join(self.metadata.tags)}
+Tags: {", ".join(self.metadata.tags)}
 
 Available Tools:
 {chr(10).join(tool_info)}
@@ -130,7 +143,7 @@ Available Tools:
 Input received: {input.data[:100]}...
 
 Note: This is a Claude Skills format adapter. In production, this would call the actual Claude skill endpoints.
-            """.strip()
+            """.strip()  # noqa: E501
 
             return SkillOutput(
                 result=result_text,
@@ -140,33 +153,32 @@ Note: This is a Claude Skills format adapter. In production, this would call the
                     "skill_type": "claude_adapter",
                     "input_length": len(input.data),
                     "tools_count": len(self.tools),
-                    "claude_format": True
-                }
+                    "claude_format": True,
+                },
             )
         except Exception as e:
             return SkillOutput(
                 result=f"Error executing skill: {str(e)}",
                 confidence=0.0,
                 execution_time=0.1,
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
 
 class ClaudeSkillAdapterManager:
     """Enhanced Claude Skill Adapter Manager - Supports both formats"""
-    
+
     def __init__(self, skill_manager: SkillManager):
         self.skill_manager = skill_manager
-        self._claude_skills: Dict[str, ClaudeSkillDefinition] = {}
-        self._skill_adapters: Dict[str, Any] = {}
+        self._claude_skills: dict[str, ClaudeSkillDefinition] = {}
+        self._skill_adapters: dict[str, Any] = {}
 
-    async def load_claude_skills_from_directory(self, directory_path: str) -> List[str]:
+    async def load_claude_skills_from_directory(self, directory_path: str) -> list[str]:
         """Load Claude Skills from directory - supports both formats"""
         skills_dir = Path(directory_path)
         loaded_skills = []
 
         if not skills_dir.exists():
-            print(f"⚠️  Claude Skills 目录不存在: {directory_path}")
             return loaded_skills
 
         for skill_dir in skills_dir.iterdir():
@@ -174,44 +186,56 @@ class ClaudeSkillAdapterManager:
                 # Check for traditional format (manifest.json + tools.json)
                 manifest_file = skill_dir / "manifest.json"
                 tools_file = skill_dir / "tools.json"
-                
+
                 if manifest_file.exists() and tools_file.exists():
                     # Traditional format
-                    loaded_skills.extend(await self._load_traditional_format_skill(skill_dir, manifest_file, tools_file))
+                    loaded_skills.extend(
+                        await self._load_traditional_format_skill(
+                            skill_dir, manifest_file, tools_file
+                        )
+                    )
                 else:
                     # Check for new format (SKILL.md files)
                     skill_md_files = list(skill_dir.glob("SKILL.md"))
                     if not skill_md_files:
-                        skill_md_files = list(skill_dir.glob("*.md"))  # Look for any markdown file
-                        
+                        skill_md_files = list(
+                            skill_dir.glob("*.md")
+                        )  # Look for any markdown file
+
                     for skill_md in skill_md_files:
-                        loaded_skills.extend(await self._load_new_format_skill(skill_dir, skill_md))
+                        loaded_skills.extend(
+                            await self._load_new_format_skill(skill_dir, skill_md)
+                        )
 
         return loaded_skills
 
-    async def _load_traditional_format_skill(self, skill_dir: Path, manifest_file: Path, tools_file: Path) -> List[str]:
+    async def _load_traditional_format_skill(
+        self, skill_dir: Path, manifest_file: Path, tools_file: Path
+    ) -> list[str]:
         """Load traditional format skill (manifest.json + tools.json)"""
         loaded_skills = []
-        
+
         try:
             # Read manifest.json
-            with open(manifest_file, 'r', encoding='utf-8') as f:
+            with open(manifest_file, encoding="utf-8") as f:
                 manifest_data = json.load(f)
 
             # Read tools.json
-            with open(tools_file, 'r', encoding='utf-8') as f:
+            with open(tools_file, encoding="utf-8") as f:
                 tools_data = json.load(f)
 
             # Create Claude skill definition
             skill_def = ClaudeSkillDefinition(
                 name=manifest_data.get("name", skill_dir.name),
                 version=manifest_data.get("version", "1.0"),
-                description=manifest_data.get("description", f"Skill from {skill_dir.name}"),
+                description=manifest_data.get(
+                    "description", f"Skill from {skill_dir.name}"
+                ),
                 manifest_version=manifest_data.get("manifest_version", "1.0"),
                 author=manifest_data.get("author"),
                 api=manifest_data.get("api"),
                 tags=manifest_data.get("tags", []),
-                tools=tools_data.get("tools", [])
+                tools=tools_data.get("tools", []),
             )
 
             self._claude_skills[skill_def.name] = skill_def
@@ -220,31 +244,38 @@ class ClaudeSkillAdapterManager:
             adapter = ClaudeSkillAdapter(
                 skill_name=skill_def.name,
                 manifest_data=manifest_data,
-                skill_manager=self.skill_manager
+                skill_manager=self.skill_manager,
             )
-            
+
             self.skill_manager.register_skill(adapter)
             self._skill_adapters[skill_def.name] = adapter
-            print(f"✅ 成功加载传统格式 Claude Skill: {skill_def.name}")
             loaded_skills.append(skill_def.name)
 
-        except Exception as e:
-            print(f"❌ 加载传统格式 Claude Skill {skill_dir.name} 失败: {e}")
+        except Exception:
+            pass
 
         return loaded_skills
 
-    async def _load_new_format_skill(self, skill_dir: Path, skill_md_file: Path) -> List[str]:
+    async def _load_new_format_skill(
+        self, skill_dir: Path, skill_md_file: Path
+    ) -> list[str]:
         """Load new format skill (SKILL.md)"""
         loaded_skills = []
-        
+
         try:
             # Read the SKILL.md file
-            with open(skill_md_file, 'r', encoding='utf-8') as f:
+            with open(skill_md_file, encoding="utf-8") as f:
                 skill_content = f.read()
 
             # Extract skill name from directory name or filename
-            skill_name = skill_dir.name if skill_dir.name != skill_md_file.stem else skill_md_file.stem
-            skill_name = f"{skill_name}_{skill_md_file.stem}".replace("SKILL", "").strip("_")
+            skill_name = (
+                skill_dir.name
+                if skill_dir.name != skill_md_file.stem
+                else skill_md_file.stem
+            )
+            skill_name = f"{skill_name}_{skill_md_file.stem}".replace(
+                "SKILL", ""
+            ).strip("_")
 
             # If there's YAML frontmatter, extract metadata
             description = f"Skill from {skill_name}"
@@ -258,14 +289,12 @@ class ClaudeSkillAdapterManager:
                         if frontmatter and isinstance(frontmatter, dict):
                             description = frontmatter.get("description", description)
                             skill_name = frontmatter.get("name", skill_name)
-                except:
+                except Exception:
                     pass  # If YAML parsing fails, use default values
 
             # Create Claude skill definition for new format
             skill_def = ClaudeSkillDefinition(
-                name=skill_name,
-                description=description,
-                skill_content=skill_content
+                name=skill_name, description=description, skill_content=skill_content
             )
 
             self._claude_skills[skill_name] = skill_def
@@ -274,16 +303,15 @@ class ClaudeSkillAdapterManager:
             adapter = ClaudeSkillAdapter(
                 skill_name=skill_name,
                 skill_content=skill_content,
-                skill_manager=self.skill_manager
+                skill_manager=self.skill_manager,
             )
-            
+
             self.skill_manager.register_skill(adapter)
             self._skill_adapters[skill_name] = adapter
-            print(f"✅ 成功加载新格式 Claude Skill: {skill_name}")
             loaded_skills.append(skill_name)
 
-        except Exception as e:
-            print(f"❌ 加载新格式 Claude Skill {skill_md_file.name} 失败: {e}")
+        except Exception:
+            pass
 
         return loaded_skills
 
@@ -291,7 +319,7 @@ class ClaudeSkillAdapterManager:
         """Get Claude Skill by name"""
         return self._claude_skills.get(name)
 
-    def list_claude_skills(self) -> List[ClaudeSkillDefinition]:
+    def list_claude_skills(self) -> list[ClaudeSkillDefinition]:
         """List all Claude Skills"""
         return list(self._claude_skills.values())
 
@@ -299,7 +327,9 @@ class ClaudeSkillAdapterManager:
         """Check if there are Claude Skills"""
         return len(self._claude_skills) > 0
 
-    async def execute_skill(self, skill_name: str, parameters: Dict[str, Any] = None) -> str:
+    async def execute_skill(
+        self, skill_name: str, parameters: dict[str, Any] = None
+    ) -> str:
         """Execute a Claude skill by name - for compatibility with TUI"""
         if parameters is None:
             parameters = {}
@@ -308,7 +338,9 @@ class ClaudeSkillAdapterManager:
         if skill_name in self._skill_adapters:
             adapter = self._skill_adapters[skill_name]
             # Create a basic input from the parameters
-            input_data = parameters.get("input", parameters.get("content", str(parameters)))
+            input_data = parameters.get(
+                "input", parameters.get("content", str(parameters))
+            )
             skill_input = SkillInput(data=input_data, context=parameters)
 
             # Execute the skill
@@ -317,7 +349,7 @@ class ClaudeSkillAdapterManager:
         else:
             # If the skill doesn't exist, return error message
             available_skills = list(self._skill_adapters.keys())
-            return f"技能 '{skill_name}' 未找到。可用技能: {', '.join(available_skills) if available_skills else '无可用技能'}"
+            return f"技能 '{skill_name}' 未找到。可用技能: {', '.join(available_skills) if available_skills else '无可用技能'}"  # noqa: E501
 
     def execute_claude_skill(self, skill_name: str, input_text: str) -> str:
         """Execute a Claude skill - direct method for backward compatibility"""

@@ -4,64 +4,58 @@
 基于KISS/YAGNI原则设计的核心权限管理系统
 """
 
-from .user_response_collector import (
-    UserResponseCollector,
-    ResponseProcessor,
-    UserResponseTimeoutError,
-    UserResponseValidationError,
-    ResponseCollectorConfig
-)
-
-from .tui_interface import (
-    PermissionTUIInterface,
-    PermissionUITheme,
-    PermissionUITimeout,
-    PermissionUIDisplay,
-    PermissionUIError,
-    PermissionUITimeoutError,
-    PermissionUIValidationError
-)
-
 from .permission_manager import (
+    PermissionCheckError,
     PermissionManager,
     PermissionManagerError,
-    PermissionCheckError,
     PermissionRequestError,
-    SimplePermissionManager
+    SimplePermissionManager,
 )
-
 from .rule_manager import (
     PermissionRuleManager,
+    PermissionRuleManagerFactory,
     PermissionRuleManagerInterface,
-    PermissionRuleManagerFactory
+)
+from .tui_interface import (
+    PermissionTUIInterface,
+    PermissionUIDisplay,
+    PermissionUIError,
+    PermissionUITheme,
+    PermissionUITimeout,
+    PermissionUITimeoutError,
+    PermissionUIValidationError,
+)
+from .user_response_collector import (
+    ResponseCollectorConfig,
+    ResponseProcessor,
+    UserResponseCollector,
+    UserResponseTimeoutError,
+    UserResponseValidationError,
 )
 
 __all__ = [
     # 用户响应收集器
-    'UserResponseCollector',
-    'ResponseProcessor',
-    'UserResponseTimeoutError',
-    'UserResponseValidationError',
-    'ResponseCollectorConfig',
-    
+    "UserResponseCollector",
+    "ResponseProcessor",
+    "UserResponseTimeoutError",
+    "UserResponseValidationError",
+    "ResponseCollectorConfig",
     # TUI界面
-    'PermissionTUIInterface',
-    'PermissionUITheme',
-    'PermissionUITimeout',
-    'PermissionUIDisplay',
-    'PermissionUIError',
-    'PermissionUITimeoutError',
-    'PermissionUIValidationError',
-    
+    "PermissionTUIInterface",
+    "PermissionUITheme",
+    "PermissionUITimeout",
+    "PermissionUIDisplay",
+    "PermissionUIError",
+    "PermissionUITimeoutError",
+    "PermissionUIValidationError",
     # 权限管理器
-    'PermissionManager',
-    'PermissionManagerError',
-    'PermissionCheckError',
-    'PermissionRequestError',
-    'SimplePermissionManager',
-    
+    "PermissionManager",
+    "PermissionManagerError",
+    "PermissionCheckError",
+    "PermissionRequestError",
+    "SimplePermissionManager",
     # 权限规则管理器
-    'PermissionRuleManager',
-    'PermissionRuleManagerInterface',
-    'PermissionRuleManagerFactory',
+    "PermissionRuleManager",
+    "PermissionRuleManagerInterface",
+    "PermissionRuleManagerFactory",
 ]

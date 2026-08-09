@@ -9,14 +9,14 @@ Based on newP6 specification requirements for event-driven communication.
 """
 
 import asyncio
+import copy
+import heapq
 import time
 import uuid
-import heapq
-from typing import Any, Callable, Dict, List, Optional, Set
 from collections import defaultdict, deque
-import copy
+from typing import Any, Callable, Optional
 
-from .types import Event, EventType, EventPriority
+from .types import Event, EventType
 
 
 class TUIEventSystem:
@@ -38,16 +38,16 @@ class TUIEventSystem:
 
     def __init__(self):
         """Initialize the event system."""
-        self._subscriptions: Dict[EventType, List[Dict]] = defaultdict(list)
-        self._subscription_ids: Set[str] = set()
-        self._event_queue: List[tuple] = []  # Priority queue
+        self._subscriptions: dict[EventType, list[dict]] = defaultdict(list)
+        self._subscription_ids: set[str] = set()
+        self._event_queue: list[tuple] = []  # Priority queue
         self._statistics = {
-            'total_events_published': 0,
-            'total_subscriptions': 0,
-            'total_events_processed': 0,
-            'total_errors': 0,
-            'events_by_type': defaultdict(int),
-            'processing_times': deque(maxlen=100)  # Keep last 100 processing times
+            "total_events_published": 0,
+            "total_subscriptions": 0,
+            "total_events_processed": 0,
+            "total_errors": 0,
+            "events_by_type": defaultdict(int),
+            "processing_times": deque(maxlen=100),  # Keep last 100 processing times
         }
         self._processing = False
         self._pending_processing = False
@@ -58,7 +58,7 @@ class TUIEventSystem:
         event_type: EventType,
         handler: Callable[[Event], Any],
         filter_func: Optional[Callable[[Event], bool]] = None,
-        target_component: Optional[str] = None
+        target_component: Optional[str] = None,
     ) -> str:
         """
         Subscribe to events of a specific type.
@@ -74,11 +74,11 @@ class TUIEventSystem:
         """
         subscription_id = str(uuid.uuid4())
         subscription = {
-            'id': subscription_id,
-            'handler': handler,
-            'filter_func': filter_func,
-            'target_component': target_component,
-            'event_type': event_type
+            "id": subscription_id,
+            "handler": handler,
+            "filter_func": filter_func,
+            "target_component": target_component,
+            "event_type": event_type,
         }
 
         self._subscriptions[event_type].append(subscription)
@@ -86,7 +86,7 @@ class TUIEventSystem:
         self._subscription_id_counter += 1
 
         # Update statistics
-        self._statistics['total_subscriptions'] += 1
+        self._statistics["total_subscriptions"] += 1
 
         return subscription_id
 
@@ -106,7 +106,7 @@ class TUIEventSystem:
         # Find and remove the subscription
         for event_type, subscriptions in self._subscriptions.items():
             for i, sub in enumerate(subscriptions):
-                if sub['id'] == subscription_id:
+                if sub["id"] == subscription_id:
                     subscriptions.pop(i)
                     self._subscription_ids.discard(subscription_id)
                     return True
@@ -121,8 +121,8 @@ class TUIEventSystem:
             event: The event to publish
         """
         # Update statistics
-        self._statistics['total_events_published'] += 1
-        self._statistics['events_by_type'][event.event_type] += 1
+        self._statistics["total_events_published"] += 1
+        self._statistics["events_by_type"][event.event_type] += 1
 
         # Add to priority queue (lower number = higher priority)
         priority_value = event.priority.value
@@ -140,8 +140,8 @@ class TUIEventSystem:
             event: The event to publish
         """
         # Update statistics
-        self._statistics['total_events_published'] += 1
-        self._statistics['events_by_type'][event.event_type] += 1
+        self._statistics["total_events_published"] += 1
+        self._statistics["events_by_type"][event.event_type] += 1
 
         # Add to priority queue
         priority_value = event.priority.value
@@ -197,19 +197,19 @@ class TUIEventSystem:
         for subscription in subscriptions:
             try:
                 # Apply filters
-                if subscription.get('filter_func'):
-                    if not subscription['filter_func'](event):
+                if subscription.get("filter_func"):
+                    if not subscription["filter_func"](event):
                         continue
 
                 # Apply target component filter
-                if subscription.get('target_component'):
-                    if event.target != subscription['target_component']:
+                if subscription.get("target_component"):
+                    if event.target != subscription["target_component"]:
                         continue
 
                 # Call handler
-                handler = subscription['handler']
+                handler = subscription["handler"]
                 if asyncio.iscoroutinefunction(handler):
-                    # For async handlers, we need to handle them specially in sync context
+                    # For async handlers, we need to handle them specially in sync context  # noqa: E501
                     # Create a new event loop or use existing one
                     try:
                         loop = asyncio.get_event_loop()
@@ -227,15 +227,16 @@ class TUIEventSystem:
 
                 processed_count += 1
 
-            except Exception as e:
+            except Exception:
                 # Log error but continue processing other handlers
-                print(f"Error in event handler: {e}")
-                self._statistics['total_errors'] += 1
+                self._statistics["total_errors"] += 1
 
         # Update statistics
         processing_time = time.perf_counter() - start_time
-        self._statistics['total_events_processed'] += 1
-        self._statistics['processing_times'].append(processing_time * 1000)  # Convert to ms
+        self._statistics["total_events_processed"] += 1
+        self._statistics["processing_times"].append(
+            processing_time * 1000
+        )  # Convert to ms
 
     async def _dispatch_event_async(self, event: Event) -> None:
         """
@@ -257,48 +258,45 @@ class TUIEventSystem:
         for subscription in subscriptions:
             try:
                 # Apply filters
-                if subscription.get('filter_func'):
-                    if not subscription['filter_func'](event):
+                if subscription.get("filter_func"):
+                    if not subscription["filter_func"](event):
                         continue
 
                 # Apply target component filter
-                if subscription.get('target_component'):
-                    if event.target != subscription['target_component']:
+                if subscription.get("target_component"):
+                    if event.target != subscription["target_component"]:
                         continue
 
-                handler = subscription['handler']
+                handler = subscription["handler"]
                 if asyncio.iscoroutinefunction(handler):
                     async_tasks.append(handler(event))
                 else:
                     sync_handlers.append(handler)
 
-            except Exception as e:
-                print(f"Error preparing event handler: {e}")
-                self._statistics['total_errors'] += 1
+            except Exception:
+                self._statistics["total_errors"] += 1
 
         # Execute async handlers concurrently
         if async_tasks:
             try:
                 await asyncio.gather(*async_tasks, return_exceptions=True)
-            except Exception as e:
-                print(f"Error in async event handlers: {e}")
-                self._statistics['total_errors'] += 1
+            except Exception:
+                self._statistics["total_errors"] += 1
 
         # Execute sync handlers
         for handler in sync_handlers:
             try:
                 handler(event)
                 processed_count += 1
-            except Exception as e:
-                print(f"Error in sync event handler: {e}")
-                self._statistics['total_errors'] += 1
+            except Exception:
+                self._statistics["total_errors"] += 1
 
         # Update statistics
         processing_time = time.perf_counter() - start_time
-        self._statistics['total_events_processed'] += 1
-        self._statistics['processing_times'].append(processing_time * 1000)
+        self._statistics["total_events_processed"] += 1
+        self._statistics["processing_times"].append(processing_time * 1000)
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get event system statistics.
 
@@ -308,29 +306,31 @@ class TUIEventSystem:
         stats = copy.deepcopy(self._statistics)
 
         # Add calculated metrics
-        if stats['processing_times']:
-            stats['average_processing_time_ms'] = sum(stats['processing_times']) / len(stats['processing_times'])
-            stats['max_processing_time_ms'] = max(stats['processing_times'])
-            stats['min_processing_time_ms'] = min(stats['processing_times'])
+        if stats["processing_times"]:
+            stats["average_processing_time_ms"] = sum(stats["processing_times"]) / len(
+                stats["processing_times"]
+            )
+            stats["max_processing_time_ms"] = max(stats["processing_times"])
+            stats["min_processing_time_ms"] = min(stats["processing_times"])
         else:
-            stats['average_processing_time_ms'] = 0
-            stats['max_processing_time_ms'] = 0
-            stats['min_processing_time_ms'] = 0
+            stats["average_processing_time_ms"] = 0
+            stats["max_processing_time_ms"] = 0
+            stats["min_processing_time_ms"] = 0
 
         # Add active subscriptions count
-        stats['active_subscriptions'] = len(self._subscription_ids)
+        stats["active_subscriptions"] = len(self._subscription_ids)
 
         return stats
 
     def clear_statistics(self) -> None:
         """Clear all statistics."""
         self._statistics = {
-            'total_events_published': 0,
-            'total_subscriptions': 0,
-            'total_events_processed': 0,
-            'total_errors': 0,
-            'events_by_type': defaultdict(int),
-            'processing_times': deque(maxlen=100)
+            "total_events_published": 0,
+            "total_subscriptions": 0,
+            "total_events_processed": 0,
+            "total_errors": 0,
+            "events_by_type": defaultdict(int),
+            "processing_times": deque(maxlen=100),
         }
 
     def dispatch_event(self, event: Event) -> None:

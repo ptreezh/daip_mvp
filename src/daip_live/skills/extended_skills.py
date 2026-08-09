@@ -1,27 +1,27 @@
 """
 扩展技能库 - 包含多种类型的内置技能
 """
-from typing import List
-from ..skills.base import Skill, SkillInput, SkillOutput, SkillMetadata
+
+from ..skills.base import Skill, SkillInput, SkillMetadata, SkillOutput
 
 
 class SearchSkill(Skill):
     """搜索技能 - 模拟搜索功能，实际应用中会连接搜索API"""
-    
+
     def __init__(self):
         metadata = SkillMetadata(
             name="search",
             description="执行内容搜索功能",
             version="1.0",
             author="DAIP-LIVE",
-            tags=["search", "query", "information"]
+            tags=["search", "query", "information"],
         )
         super().__init__(metadata)
 
     def execute(self, input: SkillInput) -> SkillOutput:
         """执行搜索"""
         query = input.data
-        
+
         # 模拟搜索结果
         result = f"""
 搜索结果:
@@ -38,35 +38,35 @@ class SearchSkill(Skill):
             metadata={
                 "query": query,
                 "skill_name": self.metadata.name,
-                "result_count": 5
-            }
+                "result_count": 5,
+            },
         )
 
 
 class WritingSkill(Skill):
     """写作技能 - 辅助写作和内容生成"""
-    
+
     def __init__(self):
         metadata = SkillMetadata(
             name="writing",
             description="辅助写作和内容生成",
             version="1.0",
             author="DAIP-LIVE",
-            tags=["writing", "generation", "content"]
+            tags=["writing", "generation", "content"],
         )
         super().__init__(metadata)
 
     def execute(self, input: SkillInput) -> SkillOutput:
         """执行写作辅助"""
         content = input.data
-        
+
         # 生成写作建议
         suggestions = [
             "结构优化：考虑调整段落顺序以增强逻辑性",
             "语言润色：使用更精确的词汇表达",
-            "逻辑连贯：添加过渡句以连接段落"
+            "逻辑连贯：添加过渡句以连接段落",
         ]
-        
+
         result = f"""
 写作辅助结果:
 输入内容: {content[:50]}...
@@ -84,28 +84,28 @@ class WritingSkill(Skill):
             metadata={
                 "input_length": len(content),
                 "suggestions_count": len(suggestions),
-                "skill_name": self.metadata.name
-            }
+                "skill_name": self.metadata.name,
+            },
         )
 
 
 class TranslationSkill(Skill):
     """翻译技能 - 文本翻译功能"""
-    
+
     def __init__(self):
         metadata = SkillMetadata(
             name="translation",
             description="文本翻译功能",
             version="1.0",
             author="DAIP-LIVE",
-            tags=["translation", "language", "text"]
+            tags=["translation", "language", "text"],
         )
         super().__init__(metadata)
 
     def execute(self, input: SkillInput) -> SkillOutput:
         """执行翻译（模拟）"""
         text = input.data
-        
+
         # 模拟翻译结果
         result = f"""
 翻译结果:
@@ -124,37 +124,37 @@ class TranslationSkill(Skill):
             metadata={
                 "original_length": len(text),
                 "skill_name": self.metadata.name,
-                "translation_status": "simulated"
-            }
+                "translation_status": "simulated",
+            },
         )
 
 
 class SummarizationSkill(Skill):
     """摘要技能 - 文本摘要和总结"""
-    
+
     def __init__(self):
         metadata = SkillMetadata(
             name="summarization",
             description="文本摘要和总结功能",
             version="1.0",
             author="DAIP-LIVE",
-            tags=["summarization", "summary", "text"]
+            tags=["summarization", "summary", "text"],
         )
         super().__init__(metadata)
 
     def execute(self, input: SkillInput) -> SkillOutput:
         """执行摘要"""
         text = input.data
-        
+
         # 创建摘要
         word_count = len(text.split())
         summary_points = [
             f"这是关于 {len(text.split())} 词输入的摘要",
             "主要内容点: [主要观点1]",
             "关键信息: [关键信息1]",
-            "结论: [总结性陈述]"
+            "结论: [总结性陈述]",
         ]
-        
+
         result = f"""
 摘要结果:
 原文长度: {word_count} 词
@@ -171,28 +171,28 @@ class SummarizationSkill(Skill):
             metadata={
                 "original_word_count": word_count,
                 "summary_points_count": len(summary_points),
-                "skill_name": self.metadata.name
-            }
+                "skill_name": self.metadata.name,
+            },
         )
 
 
 class CalculationSkill(Skill):
     """计算技能 - 数学计算和处理"""
-    
+
     def __init__(self):
         metadata = SkillMetadata(
             name="calculation",
             description="数学计算和数值处理",
             version="1.0",
             author="DAIP-LIVE",
-            tags=["calculation", "math", "numeric"]
+            tags=["calculation", "math", "numeric"],
         )
         super().__init__(metadata)
 
     def execute(self, input: SkillInput) -> SkillOutput:
         """执行计算"""
         expression = input.data
-        
+
         # 模拟数值计算
         result_text = f"""
 计算结果:
@@ -210,8 +210,8 @@ class CalculationSkill(Skill):
             metadata={
                 "expression": expression,
                 "skill_name": self.metadata.name,
-                "calculation_type": "simulated"
-            }
+                "calculation_type": "simulated",
+            },
         )
 
 
@@ -223,12 +223,11 @@ def register_extended_skills(skill_manager):
         WritingSkill(),
         TranslationSkill(),
         SummarizationSkill(),
-        CalculationSkill()
+        CalculationSkill(),
     ]
-    
+
     for skill in skills:
         try:
             skill_manager.register_skill(skill)
-            print(f"✅ 已注册扩展技能: {skill.metadata.name}")
-        except Exception as e:
-            print(f"❌ 注册技能失败 {skill.metadata.name}: {e}")
+        except Exception:
+            pass

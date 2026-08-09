@@ -4,10 +4,8 @@ System Command Handlers for newP6 TUI
 Implements handlers for system-level commands like help, status, clear, etc.
 """
 
-from typing import List
-
-from .base import BaseCommandHandler
 from ..models import CommandResult
+from .base import BaseCommandHandler
 
 
 class HelpCommandHandler(BaseCommandHandler):
@@ -17,7 +15,7 @@ class HelpCommandHandler(BaseCommandHandler):
         super().__init__()
         self.description = "Show available commands"
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle help command"""
         help_text = """
 🚀 DAIP-LIVE newP6 TUI - Available Commands:
@@ -91,7 +89,7 @@ class StatusCommandHandler(BaseCommandHandler):
         super().__init__()
         self.description = "Display system status"
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle status command"""
         status_text = """
 📊 System Status:
@@ -132,7 +130,7 @@ class ClearCommandHandler(BaseCommandHandler):
         super().__init__()
         self.description = "Clear the output area"
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle clear command"""
         return CommandResult.success_result("Output area cleared")
 
@@ -144,6 +142,6 @@ class QuitCommandHandler(BaseCommandHandler):
         super().__init__()
         self.description = "Exit the application"
 
-    def handle(self, args: List[str]) -> CommandResult:
+    def handle(self, args: list[str]) -> CommandResult:
         """Handle quit command"""
         return CommandResult.success_result("Goodbye! 👋")

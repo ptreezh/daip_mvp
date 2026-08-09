@@ -3,30 +3,24 @@
 提供安全、可配置的文件创建功能
 """
 
+import logging
 import os
 import shutil
 import time
-import stat
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable, Tuple
-import logging
+from typing import Any, Callable, Optional
 
-from .models import (
-    ProjectFile,
-    ProjectStructure,
-    ValidationError,
-    FileCreationError
-)
-
+from .models import ProjectFile, ProjectStructure, ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class FileOperationStatus(Enum):
     """文件操作状态枚举"""
+
     SUCCESS = "success"
     SKIPPED = "skipped"
     FAILED = "failed"
@@ -34,20 +28,21 @@ class FileOperationStatus(Enum):
     VALIDATION_FAILED = "validation_failed"
 
     @classmethod
-    def from_string(cls, value: str) -> 'FileOperationStatus':
+    def from_string(cls, value: str) -> "FileOperationStatus":
         """从字符串获取状态"""
         status_map = {
             "success": cls.SUCCESS,
             "skipped": cls.SKIPPED,
             "failed": cls.FAILED,
             "conflict": cls.CONFLICT,
-            "validation_failed": cls.VALIDATION_FAILED
+            "validation_failed": cls.VALIDATION_FAILED,
         }
         return status_map.get(value.lower(), cls.SUCCESS)
 
 
 class FileConflictResolution(Enum):
     """文件冲突解决策略枚举"""
+
     FAIL = "fail"
     SKIP = "skip"
     OVERWRITE = "overwrite"
@@ -55,14 +50,14 @@ class FileConflictResolution(Enum):
     MERGE = "merge"
 
     @classmethod
-    def from_string(cls, value: str) -> 'FileConflictResolution':
+    def from_string(cls, value: str) -> "FileConflictResolution":
         """从字符串获取策略"""
         strategy_map = {
             "fail": cls.FAIL,
             "skip": cls.SKIP,
             "overwrite": cls.OVERWRITE,
             "backup": cls.BACKUP,
-            "merge": cls.MERGE
+            "merge": cls.MERGE,
         }
         return strategy_map.get(value.lower(), cls.FAIL)
 
@@ -70,13 +65,14 @@ class FileConflictResolution(Enum):
 @dataclass
 class ValidationRule:
     """验证规则"""
+
     name: str
     validator: Callable[[ProjectFile], bool]
     description: str = ""
     condition: Optional[Callable[[ProjectFile], bool]] = None  # 条件满足时才验证
     is_enabled: bool = True
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """验证规则本身"""
         errors = []
 
@@ -102,14 +98,18 @@ class ValidationRule:
             logger.warning(f"验证规则 {self.name} 条件检查失败，默认跳过验证")
             return False
 
-    def validate_file(self, file: ProjectFile) -> Tuple[bool, Optional[str]]:
+    def validate_file(self, file: ProjectFile) -> tuple[bool, Optional[str]]:
         """验证文件"""
         try:
             if not self.should_validate(file):
                 return True, None
 
             is_valid = self.validator(file)
-            error_message = None if is_valid else f"验证规则 '{self.description or self.name}' 未通过"
+            error_message = (
+                None
+                if is_valid
+                else f"验证规则 '{self.description or self.name}' 未通过"
+            )
             return is_valid, error_message
 
         except Exception as e:
@@ -121,15 +121,16 @@ class ValidationRule:
 @dataclass
 class FileCreationConfig:
     """文件创建配置"""
+
     conflict_resolution: FileConflictResolution = FileConflictResolution.OVERWRITE
     create_directories: bool = True
     preserve_permissions: bool = False
     validation_enabled: bool = True
-    validation_rules: List[ValidationRule] = field(default_factory=list)
+    validation_rules: list[ValidationRule] = field(default_factory=list)
     max_file_size: int = 1024 * 1024  # 1MB
-    allowed_extensions: List[str] = field(default_factory=list)
-    forbidden_extensions: List[str] = field(default_factory=list)
-    allowed_directories: List[str] = field(default_factory=list)
+    allowed_extensions: list[str] = field(default_factory=list)
+    forbidden_extensions: list[str] = field(default_factory=list)
+    allowed_directories: list[str] = field(default_factory=list)
     backup_suffix: str = ".backup"
     default_file_mode: int = 0o644
     default_dir_mode: int = 0o755
@@ -159,8 +160,9 @@ class FileCreationConfig:
 @dataclass
 class DirectoryStructure:
     """目录结构"""
+
     base_path: str
-    files: List[ProjectFile] = field(default_factory=list)
+    files: list[ProjectFile] = field(default_factory=list)
     mode: int = 0o755
     created_at: float = field(default_factory=time.time)
 
@@ -176,12 +178,12 @@ class DirectoryStructure:
                 return file
         return None
 
-    def group_by_directory(self) -> Dict[str, List[ProjectFile]]:
+    def group_by_directory(self) -> dict[str, list[ProjectFile]]:
         """按目录分组文件"""
         groups = {}
         for file in self.files:
             file_path = Path(file.path)
-            directory = str(file_path.parent) if file_path.parent != Path('.') else ""
+            directory = str(file_path.parent) if file_path.parent != Path(".") else ""
 
             if directory not in groups:
                 groups[directory] = []
@@ -197,6 +199,7 @@ class DirectoryStructure:
 @dataclass
 class FileCreationResult:
     """文件创建结果"""
+
     file: ProjectFile
     status: FileOperationStatus
     bytes_written: int = 0
@@ -204,7 +207,7 @@ class FileCreationResult:
     error: Optional[str] = None
     error_code: Optional[str] = None
     existing_path: Optional[str] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     @property
     def success(self) -> bool:
@@ -222,10 +225,7 @@ class FileCreator(ABC):
 
     @abstractmethod
     async def create_file(
-        self,
-        file: ProjectFile,
-        target_dir: str,
-        config: FileCreationConfig
+        self, file: ProjectFile, target_dir: str, config: FileCreationConfig
     ) -> FileCreationResult:
         """创建文件"""
         pass
@@ -240,10 +240,7 @@ class StandardFileCreator(FileCreator):
     """标准文件创建器"""
 
     async def create_file(
-        self,
-        file: ProjectFile,
-        target_dir: str,
-        config: FileCreationConfig
+        self, file: ProjectFile, target_dir: str, config: FileCreationConfig
     ) -> FileCreationResult:
         """创建文件"""
         start_time = time.time()
@@ -261,14 +258,14 @@ class StandardFileCreator(FileCreator):
                         file=file,
                         status=FileOperationStatus.SKIPPED,
                         error="文件已存在，跳过创建",
-                        error_code="file_exists_skipped"
+                        error_code="file_exists_skipped",
                     )
                 elif config.conflict_resolution == FileConflictResolution.FAIL:
                     return FileCreationResult(
                         file=file,
                         status=FileOperationStatus.FAILED,
                         error=f"文件已存在: {full_path}",
-                        error_code="file_exists_conflict"
+                        error_code="file_exists_conflict",
                     )
                 elif config.conflict_resolution == FileConflictResolution.BACKUP:
                     # 创建备份
@@ -279,7 +276,7 @@ class StandardFileCreator(FileCreator):
                 elif config.conflict_resolution == FileConflictResolution.MERGE:
                     # 合并内容
                     try:
-                        with open(full_path, 'r', encoding='utf-8') as f:
+                        with open(full_path, encoding="utf-8") as f:
                             existing_content = f.read()
                         file.content = existing_content + "\n" + file.content
                     except Exception as e:
@@ -287,7 +284,7 @@ class StandardFileCreator(FileCreator):
                             file=file,
                             status=FileOperationStatus.FAILED,
                             error=f"合并文件失败: {e}",
-                            error_code="merge_failed"
+                            error_code="merge_failed",
                         )
 
             # 创建目录（如果需要）
@@ -296,9 +293,7 @@ class StandardFileCreator(FileCreator):
 
             # 写入文件
             bytes_written = await self._write_file_content(
-                full_path,
-                file.content,
-                config
+                full_path, file.content, config
             )
 
             # 设置权限（如果需要）
@@ -313,14 +308,14 @@ class StandardFileCreator(FileCreator):
                 path=full_path,  # 使用绝对路径
                 content=file.content,
                 size=file.size,
-                created_at=file.created_at
+                created_at=file.created_at,
             )
 
             result_kwargs = {
                 "file": file_with_full_path,
                 "status": FileOperationStatus.SUCCESS,
                 "bytes_written": bytes_written,
-                "duration": duration
+                "duration": duration,
             }
 
             if backup_path:
@@ -337,14 +332,16 @@ class StandardFileCreator(FileCreator):
                 status=FileOperationStatus.FAILED,
                 duration=duration,
                 error=str(e),
-                error_code="creation_error"
+                error_code="creation_error",
             )
 
     def supports_atomic_write(self) -> bool:
         """标准创建器支持原子写入"""
         return True
 
-    def _validate_file_path(self, file_path: str, file: 'ProjectFile', config: FileCreationConfig) -> None:
+    def _validate_file_path(
+        self, file_path: str, file: "ProjectFile", config: FileCreationConfig
+    ) -> None:
         """验证文件路径"""
         # 检查扩展名
         if config.allowed_extensions:
@@ -362,7 +359,9 @@ class StandardFileCreator(FileCreator):
             # 使用原始的相对路径进行目录检查
             # file.path 是相对路径 (如 "src/main.py")
             original_path = file.path
-            path_parts = [part for part in original_path.replace('\\', '/').split('/') if part]
+            path_parts = [
+                part for part in original_path.replace("\\", "/").split("/") if part
+            ]
 
             # 获取父目录
             if len(path_parts) >= 2:
@@ -374,10 +373,7 @@ class StandardFileCreator(FileCreator):
                 raise ValidationError(f"不允许的目录: {parent_dir}")
 
     async def _handle_existing_file(
-        self,
-        file_path: str,
-        file: ProjectFile,
-        config: FileCreationConfig
+        self, file_path: str, file: ProjectFile, config: FileCreationConfig
     ) -> FileCreationResult:
         """处理已存在的文件"""
         if config.conflict_resolution == FileConflictResolution.SKIP:
@@ -385,15 +381,12 @@ class StandardFileCreator(FileCreator):
                 file=file,
                 status=FileOperationStatus.SKIPPED,
                 error=f"文件已存在: {file_path}",
-                error_code="file_exists"
+                error_code="file_exists",
             )
 
         elif config.conflict_resolution == FileConflictResolution.OVERWRITE:
             # 覆盖时不需要额外处理，继续创建
-            return FileCreationResult(
-                file=file,
-                status=FileOperationStatus.SUCCESS
-            )
+            return FileCreationResult(file=file, status=FileOperationStatus.SUCCESS)
 
         elif config.conflict_resolution == FileConflictResolution.BACKUP:
             # 创建备份
@@ -404,7 +397,7 @@ class StandardFileCreator(FileCreator):
                 file=file,
                 status=FileOperationStatus.SUCCESS,
                 existing_path=backup_path,
-                metadata={"backup_created": True, "backup_path": backup_path}
+                metadata={"backup_created": True, "backup_path": backup_path},
             )
 
         elif config.conflict_resolution == FileConflictResolution.FAIL:
@@ -412,38 +405,35 @@ class StandardFileCreator(FileCreator):
                 file=file,
                 status=FileOperationStatus.FAILED,
                 error=f"文件已存在: {file_path}",
-                error_code="file_exists_conflict"
+                error_code="file_exists_conflict",
             )
 
         elif config.conflict_resolution == FileConflictResolution.MERGE:
             # 简化的合并处理 - 可以根据需要扩展
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     existing_content = f.read()
 
                 # 简单合并：在文件末尾添加新内容
                 merged_content = existing_content + "\n" + file.content
                 file.content = merged_content
 
-                return FileCreationResult(
-                    file=file,
-                    status=FileOperationStatus.SUCCESS
-                )
+                return FileCreationResult(file=file, status=FileOperationStatus.SUCCESS)
 
             except Exception as e:
                 return FileCreationResult(
                     file=file,
                     status=FileOperationStatus.FAILED,
                     error=f"合并文件失败: {str(e)}",
-                    error_code="merge_error"
+                    error_code="merge_error",
                 )
 
         else:
             return FileCreationResult(
                 file=file,
                 status=FileOperationStatus.FAILED,
-                error=f"未知的冲突解决策略",
-                error_code="unknown_strategy"
+                error="未知的冲突解决策略",
+                error_code="unknown_strategy",
             )
 
     def _create_backup(self, file_path: str, config: FileCreationConfig) -> str:
@@ -459,25 +449,24 @@ class StandardFileCreator(FileCreator):
         shutil.copy2(file_path, backup_path)
         return backup_path
 
-    async def _create_directories(self, file_path: str, config: FileCreationConfig) -> None:
+    async def _create_directories(
+        self, file_path: str, config: FileCreationConfig
+    ) -> None:
         """创建目录"""
         directory = os.path.dirname(file_path)
         if directory and not os.path.exists(directory):
             os.makedirs(directory, mode=config.default_dir_mode, exist_ok=True)
 
     async def _write_file_content(
-        self,
-        file_path: str,
-        content: str,
-        config: FileCreationConfig
+        self, file_path: str, content: str, config: FileCreationConfig
     ) -> int:
         """写入文件内容"""
         if config.atomic_writes:
             return await self._atomic_write(file_path, content)
         else:
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
-            return len(content.encode('utf-8'))
+            return len(content.encode("utf-8"))
 
     async def _atomic_write(self, file_path: str, content: str) -> int:
         """原子写入"""
@@ -485,13 +474,13 @@ class StandardFileCreator(FileCreator):
 
         try:
             # 写入临时文件
-            with open(temp_path, 'w', encoding='utf-8') as f:
+            with open(temp_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             # 原子重命名
             os.replace(temp_path, file_path)
 
-            return len(content.encode('utf-8'))
+            return len(content.encode("utf-8"))
 
         except Exception:
             # 清理临时文件
@@ -499,7 +488,9 @@ class StandardFileCreator(FileCreator):
                 os.remove(temp_path)
             raise
 
-    async def _set_file_permissions(self, file_path: str, config: FileCreationConfig) -> None:
+    async def _set_file_permissions(
+        self, file_path: str, config: FileCreationConfig
+    ) -> None:
         """设置文件权限"""
         try:
             os.chmod(file_path, config.default_file_mode)
@@ -521,7 +512,7 @@ class FileCreationService:
         size_rule = ValidationRule(
             name="max_file_size",
             validator=lambda file: len(file.content) <= self.config.max_file_size,
-            description=f"文件大小超过限制 ({self.config.max_file_size} 字节)"
+            description=f"文件大小超过限制 ({self.config.max_file_size} 字节)",
         )
         self.config.add_validation_rule(size_rule)
 
@@ -529,7 +520,7 @@ class FileCreationService:
         name_rule = ValidationRule(
             name="valid_filename",
             validator=lambda file: self._is_valid_filename(file.path),
-            description="文件名包含无效字符"
+            description="文件名包含无效字符",
         )
         self.config.add_validation_rule(name_rule)
 
@@ -537,19 +528,23 @@ class FileCreationService:
         if self.config.forbidden_extensions:
             forbidden_rule = ValidationRule(
                 name="forbidden_content",
-                validator=lambda file: self._check_forbidden_content(file.content, self.config.forbidden_extensions),
-                description="文件内容包含禁止的扩展名引用"
+                validator=lambda file: self._check_forbidden_content(
+                    file.content, self.config.forbidden_extensions
+                ),
+                description="文件内容包含禁止的扩展名引用",
             )
             self.config.add_validation_rule(forbidden_rule)
 
     def _is_valid_filename(self, path: str) -> bool:
         """检查文件名是否有效"""
         # 检查无效字符
-        invalid_chars = ['<', '>', ':', '"', '|', '?', '*', '\x00']
+        invalid_chars = ["<", ">", ":", '"', "|", "?", "*", "\x00"]
         filename = os.path.basename(path)
         return not any(char in filename for char in invalid_chars)
 
-    def _check_forbidden_content(self, content: str, forbidden_extensions: List[str]) -> bool:
+    def _check_forbidden_content(
+        self, content: str, forbidden_extensions: list[str]
+    ) -> bool:
         """检查内容是否包含禁止的扩展名引用"""
         content_lower = content.lower()
         for ext in forbidden_extensions:
@@ -561,7 +556,7 @@ class FileCreationService:
         self,
         file: ProjectFile,
         target_dir: str,
-        config: Optional[FileCreationConfig] = None
+        config: Optional[FileCreationConfig] = None,
     ) -> FileCreationResult:
         """创建单个文件"""
         effective_config = config or self.config
@@ -574,7 +569,7 @@ class FileCreationService:
                     file=file,
                     status=FileOperationStatus.VALIDATION_FAILED,
                     error=validation_result[1],
-                    error_code="validation_failed"
+                    error_code="validation_failed",
                 )
 
         # 干运行模式
@@ -582,7 +577,7 @@ class FileCreationService:
             return FileCreationResult(
                 file=file,
                 status=FileOperationStatus.SUCCESS,
-                bytes_written=len(file.content.encode('utf-8'))
+                bytes_written=len(file.content.encode("utf-8")),
             )
 
         return await self.creator.create_file(file, target_dir, effective_config)
@@ -591,8 +586,8 @@ class FileCreationService:
         self,
         structure: ProjectStructure,
         target_dir: str,
-        config: Optional[FileCreationConfig] = None
-    ) -> List[FileCreationResult]:
+        config: Optional[FileCreationConfig] = None,
+    ) -> list[FileCreationResult]:
         """创建项目结构"""
         effective_config = config or self.config
         results = []
@@ -601,12 +596,13 @@ class FileCreationService:
         # ProjectStructure doesn't have base_path, so use target_dir directly
         if effective_config.create_directories:
             root_path = target_dir
-            os.makedirs(root_path, mode=effective_config.default_dir_mode, exist_ok=True)
+            os.makedirs(
+                root_path, mode=effective_config.default_dir_mode, exist_ok=True
+            )
 
         # 按目录分组创建文件
         grouped_files = DirectoryStructure(
-            base_path=target_dir,
-            files=structure.files
+            base_path=target_dir, files=structure.files
         ).group_by_directory()
 
         for directory, files in grouped_files.items():
@@ -614,7 +610,9 @@ class FileCreationService:
 
             # 创建目录
             if effective_config.create_directories and directory:
-                os.makedirs(dir_path, mode=effective_config.default_dir_mode, exist_ok=True)
+                os.makedirs(
+                    dir_path, mode=effective_config.default_dir_mode, exist_ok=True
+                )
 
             # 创建文件
             for file in files:
@@ -623,7 +621,7 @@ class FileCreationService:
 
         return results
 
-    def get_creation_summary(self, results: List[FileCreationResult]) -> Dict[str, Any]:
+    def get_creation_summary(self, results: list[FileCreationResult]) -> dict[str, Any]:
         """获取创建摘要"""
         total_files = len(results)
         successful_files = sum(1 for r in results if r.success)
@@ -632,17 +630,19 @@ class FileCreationService:
         total_duration = sum(r.duration for r in results)
 
         return {
-            'total_files': total_files,
-            'successful_files': successful_files,
-            'failed_files': failed_files,
-            'total_bytes': total_bytes,
-            'total_duration': total_duration,
-            'success_rate': successful_files / total_files if total_files > 0 else 0.0,
-            'average_file_size': total_bytes / successful_files if successful_files > 0 else 0,
-            'files_by_status': {
+            "total_files": total_files,
+            "successful_files": successful_files,
+            "failed_files": failed_files,
+            "total_bytes": total_bytes,
+            "total_duration": total_duration,
+            "success_rate": successful_files / total_files if total_files > 0 else 0.0,
+            "average_file_size": total_bytes / successful_files
+            if successful_files > 0
+            else 0,
+            "files_by_status": {
                 status.value: [r for r in results if r.status == status]
                 for status in FileOperationStatus
-            }
+            },
         }
 
     def add_validation_rule(self, rule: ValidationRule) -> None:
@@ -669,7 +669,7 @@ class FileCreationService:
         if rule:
             rule.is_enabled = False
 
-    def _validate_file(self, file: ProjectFile) -> Tuple[bool, Optional[str]]:
+    def _validate_file(self, file: ProjectFile) -> tuple[bool, Optional[str]]:
         """验证文件"""
         if not self.config.validation_enabled:
             return True, None

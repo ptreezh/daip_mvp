@@ -4,10 +4,10 @@ Argument Management for newP6 TUI Debate System
 Handles debate arguments, rebuttals, and evaluation.
 """
 
-from typing import List, Optional, Dict, Any
-from datetime import datetime
 import logging
 import uuid
+from datetime import datetime
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class Argument:
         content: str,
         position: str,
         round_number: int = 1,
-        argument_id: Optional[str] = None
+        argument_id: Optional[str] = None,
     ):
         self.id = argument_id or str(uuid.uuid4())
         self.participant_id = participant_id
@@ -29,11 +29,11 @@ class Argument:
         self.position = position
         self.round_number = round_number
         self.created_at = datetime.now()
-        self.rebuttals: List["Argument"] = []
+        self.rebuttals: list[Argument] = []
         self.score: Optional[float] = None
         self.evaluation: Optional[str] = None
         self.evaluated_at: Optional[datetime] = None
-        self.metadata: Dict[str, Any] = {}
+        self.metadata: dict[str, Any] = {}
 
     def add_rebuttal(self, rebuttal: "Argument") -> None:
         """Add a rebuttal to this argument"""
@@ -65,7 +65,7 @@ class Argument:
         """Get number of rebuttals"""
         return len(self.rebuttals)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert argument to dictionary"""
         return {
             "id": self.id,
@@ -77,21 +77,23 @@ class Argument:
             "rebuttals": [r.to_dict() for r in self.rebuttals],
             "score": self.score,
             "evaluation": self.evaluation,
-            "evaluated_at": self.evaluated_at.isoformat() if self.evaluated_at else None,
+            "evaluated_at": self.evaluated_at.isoformat()
+            if self.evaluated_at
+            else None,
             "metadata": self.metadata,
             "word_count": self.get_word_count(),
-            "rebuttal_count": self.get_rebuttal_count()
+            "rebuttal_count": self.get_rebuttal_count(),
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Argument":
+    def from_dict(cls, data: dict[str, Any]) -> "Argument":
         """Create argument from dictionary"""
         argument = cls(
             participant_id=data["participant_id"],
             content=data["content"],
             position=data["position"],
             round_number=data.get("round_number", 1),
-            argument_id=data.get("id")
+            argument_id=data.get("id"),
         )
 
         if "created_at" in data:
@@ -117,5 +119,7 @@ class Argument:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"Argument(id={self.id[:8]}..., participant_id={self.participant_id}, "
-                f"position={self.position}, score={self.score})")
+        return (
+            f"Argument(id={self.id[:8]}..., participant_id={self.participant_id}, "
+            f"position={self.position}, score={self.score})"
+        )

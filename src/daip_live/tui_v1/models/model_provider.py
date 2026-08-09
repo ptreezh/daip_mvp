@@ -4,19 +4,20 @@ Model Provider for Model Switching System
 Handles AI model provider management, API interactions, and health checking.
 """
 
-from typing import Dict, Any, Optional, List
+import logging
 from datetime import datetime, timedelta
 from enum import Enum
-import asyncio
-import aiohttp
-import logging
+from typing import Any, Optional
 from urllib.parse import urljoin
+
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
 
 class ProviderType(Enum):
     """Supported provider types"""
+
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     GOOGLE = "google"
@@ -39,14 +40,14 @@ class ModelProvider:
         timeout: int = 30,
         retry_attempts: int = 3,
         rate_limit_rpm: Optional[int] = None,
-        headers: Optional[Dict[str, str]] = None,
-        supported_models: Optional[List[str]] = None,
+        headers: Optional[dict[str, str]] = None,
+        supported_models: Optional[list[str]] = None,
         description: str = "",
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[dict[str, Any]] = None,
     ):
         self.name = name
         self.provider_type = provider_type
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.timeout = timeout
         self.retry_attempts = retry_attempts
@@ -71,25 +72,31 @@ class ModelProvider:
     def _initialize_provider_settings(self) -> None:
         """Initialize provider-specific settings"""
         if self.provider_type == ProviderType.OPENAI:
-            self.headers.update({
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
-            })
+            self.headers.update(
+                {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                }
+            )
         elif self.provider_type == ProviderType.ANTHROPIC:
-            self.headers.update({
-                "x-api-key": self.api_key,
-                "Content-Type": "application/json",
-                "anthropic-version": "2023-06-01"
-            })
+            self.headers.update(
+                {
+                    "x-api-key": self.api_key,
+                    "Content-Type": "application/json",
+                    "anthropic-version": "2023-06-01",
+                }
+            )
         elif self.provider_type == ProviderType.OLLAMA:
             # Ollama typically doesn't need API key
             if "Content-Type" not in self.headers:
                 self.headers["Content-Type"] = "application/json"
         elif self.provider_type == ProviderType.HUGGINGFACE:
-            self.headers.update({
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
-            })
+            self.headers.update(
+                {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                }
+            )
 
     def is_configured(self) -> bool:
         """Check if provider is properly configured"""
@@ -109,7 +116,9 @@ class ModelProvider:
             return False
 
         # Validate URL format
-        if not (self.base_url.startswith('http://') or self.base_url.startswith('https://')):
+        if not (
+            self.base_url.startswith("http://") or self.base_url.startswith("https://")
+        ):
             return False
 
         # Validate timeout
@@ -145,7 +154,7 @@ class ModelProvider:
             self._requests_in_minute += 1
         self._last_request_time = datetime.now()
 
-    async def check_health(self) -> Dict[str, Any]:
+    async def check_health(self) -> dict[str, Any]:
         """Check provider health status"""
         try:
             start_time = datetime.now()
@@ -171,7 +180,7 @@ class ModelProvider:
                 "status": self.health_status,
                 "response_time": response_time,
                 "timestamp": end_time.isoformat(),
-                "details": health_data
+                "details": health_data,
             }
 
         except Exception as e:
@@ -180,52 +189,58 @@ class ModelProvider:
             return {
                 "status": "unhealthy",
                 "error": str(e),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
-    async def _check_openai_health(self) -> Dict[str, Any]:
+    async def _check_openai_health(self) -> dict[str, Any]:
         """Check OpenAI API health"""
         url = urljoin(self.base_url, "/models")
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=self.timeout)
+        ) as session:
             async with session.get(url, headers=self.headers) as response:
                 if response.status == 200:
                     return {"status": "healthy", "api_available": True}
                 else:
                     return {"status": "degraded", "api_status": response.status}
 
-    async def _check_anthropic_health(self) -> Dict[str, Any]:
+    async def _check_anthropic_health(self) -> dict[str, Any]:
         """Check Anthropic API health"""
         # Anthropic doesn't have a dedicated health endpoint
         # We'll make a minimal request to test connectivity
         return await self._check_generic_health()
 
-    async def _check_ollama_health(self) -> Dict[str, Any]:
+    async def _check_ollama_health(self) -> dict[str, Any]:
         """Check Ollama health"""
         url = urljoin(self.base_url, "/api/tags")
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=self.timeout)
+        ) as session:
             async with session.get(url, headers=self.headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     return {
                         "status": "healthy",
                         "available_models": len(data.get("models", [])),
-                        "api_version": data.get("version", "unknown")
+                        "api_version": data.get("version", "unknown"),
                     }
                 else:
                     return {"status": "unhealthy", "api_status": response.status}
 
-    async def _check_generic_health(self) -> Dict[str, Any]:
+    async def _check_generic_health(self) -> dict[str, Any]:
         """Generic health check for other providers"""
         # Most providers don't have dedicated health endpoints
         # We'll just check if the base URL is reachable
         try:
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=5)) as session:
+            async with aiohttp.ClientSession(
+                timeout=aiohttp.ClientTimeout(total=5)
+            ) as session:
                 async with session.get(self.base_url, headers=self.headers) as response:
                     return {"status": "reachable", "http_status": response.status}
         except Exception:
             return {"status": "unreachable"}
 
-    async def list_available_models(self) -> List[Dict[str, Any]]:
+    async def list_available_models(self) -> list[dict[str, Any]]:
         """List available models from provider"""
         if not self.can_make_request():
             logger.warning(f"Rate limit reached for {self.name}")
@@ -249,71 +264,129 @@ class ModelProvider:
             logger.error(f"Failed to list models for {self.name}: {e}")
             return []
 
-    async def _list_openai_models(self) -> List[Dict[str, Any]]:
+    async def _list_openai_models(self) -> list[dict[str, Any]]:
         """List OpenAI models"""
         url = urljoin(self.base_url, "/models")
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=self.timeout)
+        ) as session:
             async with session.get(url, headers=self.headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     models = []
                     for model in data.get("data", []):
-                        models.append({
-                            "id": model["id"],
-                            "name": model["id"],
-                            "type": self._classify_model_type(model["id"]),
-                            "provider": self.name,
-                            "created": model.get("created"),
-                            "owned_by": model.get("owned_by")
-                        })
+                        models.append(
+                            {
+                                "id": model["id"],
+                                "name": model["id"],
+                                "type": self._classify_model_type(model["id"]),
+                                "provider": self.name,
+                                "created": model.get("created"),
+                                "owned_by": model.get("owned_by"),
+                            }
+                        )
                     return models
                 else:
                     raise Exception(f"API request failed: {response.status}")
 
-    async def _list_anthropic_models(self) -> List[Dict[str, Any]]:
+    async def _list_anthropic_models(self) -> list[dict[str, Any]]:
         """List Anthropic models"""
         # Anthropic has a fixed set of models
         models = [
-            {"id": "claude-3-opus-20240229", "name": "Claude 3 Opus", "type": "chat", "provider": self.name},
-            {"id": "claude-3-sonnet-20240229", "name": "Claude 3 Sonnet", "type": "chat", "provider": self.name},
-            {"id": "claude-3-haiku-20240307", "name": "Claude 3 Haiku", "type": "chat", "provider": self.name},
-            {"id": "claude-2.1", "name": "Claude 2.1", "type": "chat", "provider": self.name},
-            {"id": "claude-2.0", "name": "Claude 2.0", "type": "chat", "provider": self.name},
-            {"id": "claude-instant-1.2", "name": "Claude Instant", "type": "chat", "provider": self.name}
+            {
+                "id": "claude-3-opus-20240229",
+                "name": "Claude 3 Opus",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "claude-3-sonnet-20240229",
+                "name": "Claude 3 Sonnet",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "claude-3-haiku-20240307",
+                "name": "Claude 3 Haiku",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "claude-2.1",
+                "name": "Claude 2.1",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "claude-2.0",
+                "name": "Claude 2.0",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "claude-instant-1.2",
+                "name": "Claude Instant",
+                "type": "chat",
+                "provider": self.name,
+            },
         ]
         return models
 
-    async def _list_ollama_models(self) -> List[Dict[str, Any]]:
+    async def _list_ollama_models(self) -> list[dict[str, Any]]:
         """List Ollama models"""
         url = urljoin(self.base_url, "/api/tags")
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=self.timeout)
+        ) as session:
             async with session.get(url, headers=self.headers) as response:
                 if response.status == 200:
                     data = await response.json()
                     models = []
                     for model in data.get("models", []):
-                        models.append({
-                            "id": model["name"],
-                            "name": model["name"],
-                            "type": "chat",  # Ollama models are typically chat models
-                            "provider": self.name,
-                            "size": model.get("size"),
-                            "modified": model.get("modified_at"),
-                            "digest": model.get("digest")
-                        })
+                        models.append(
+                            {
+                                "id": model["name"],
+                                "name": model["name"],
+                                "type": "chat",  # Ollama models are typically chat models  # noqa: E501
+                                "provider": self.name,
+                                "size": model.get("size"),
+                                "modified": model.get("modified_at"),
+                                "digest": model.get("digest"),
+                            }
+                        )
                     return models
                 else:
                     raise Exception(f"API request failed: {response.status}")
 
-    async def _list_huggingface_models(self) -> List[Dict[str, Any]]:
+    async def _list_huggingface_models(self) -> list[dict[str, Any]]:
         """List HuggingFace models"""
         # HuggingFace has too many models to list all at once
         # Return a curated list of popular models
         models = [
-            {"id": "microsoft/DialoGPT-medium", "name": "DialoGPT Medium", "type": "chat", "provider": self.name},
-            {"id": "microsoft/DialoGPT-large", "name": "DialoGPT Large", "type": "chat", "provider": self.name},
-            {"id": "facebook/blenderbot-400M-distill", "name": "BlenderBot", "type": "chat", "provider": self.name},
-            {"id": "distilbert-base-uncased", "name": "DistilBERT", "type": "embedding", "provider": self.name}
+            {
+                "id": "microsoft/DialoGPT-medium",
+                "name": "DialoGPT Medium",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "microsoft/DialoGPT-large",
+                "name": "DialoGPT Large",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "facebook/blenderbot-400M-distill",
+                "name": "BlenderBot",
+                "type": "chat",
+                "provider": self.name,
+            },
+            {
+                "id": "distilbert-base-uncased",
+                "name": "DistilBERT",
+                "type": "embedding",
+                "provider": self.name,
+            },
         ]
         return models
 
@@ -321,23 +394,30 @@ class ModelProvider:
         """Classify model type based on ID"""
         model_id_lower = model_id.lower()
 
-        if any(keyword in model_id_lower for keyword in ["gpt", "claude", "chat", "dialog", "conversation"]):
+        if any(
+            keyword in model_id_lower
+            for keyword in ["gpt", "claude", "chat", "dialog", "conversation"]
+        ):
             return "chat"
-        elif any(keyword in model_id_lower for keyword in ["embedding", "encode", "vector"]):
+        elif any(
+            keyword in model_id_lower for keyword in ["embedding", "encode", "vector"]
+        ):
             return "embedding"
-        elif any(keyword in model_id_lower for keyword in ["davinci", "text", "completion"]):
+        elif any(
+            keyword in model_id_lower for keyword in ["davinci", "text", "completion"]
+        ):
             return "completion"
         else:
             return "custom"
 
     async def chat_completion(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         model: str,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
-        **kwargs
-    ) -> Dict[str, Any]:
+        **kwargs,
+    ) -> dict[str, Any]:
         """Make a chat completion request"""
         if not self.can_make_request():
             raise Exception(f"Rate limit reached for {self.name}")
@@ -346,13 +426,21 @@ class ModelProvider:
             self._record_request()
 
             if self.provider_type == ProviderType.OPENAI:
-                return await self._openai_chat_completion(messages, model, temperature, max_tokens, **kwargs)
+                return await self._openai_chat_completion(
+                    messages, model, temperature, max_tokens, **kwargs
+                )
             elif self.provider_type == ProviderType.ANTHROPIC:
-                return await self._anthropic_chat_completion(messages, model, temperature, max_tokens, **kwargs)
+                return await self._anthropic_chat_completion(
+                    messages, model, temperature, max_tokens, **kwargs
+                )
             elif self.provider_type == ProviderType.OLLAMA:
-                return await self._ollama_chat_completion(messages, model, temperature, max_tokens, **kwargs)
+                return await self._ollama_chat_completion(
+                    messages, model, temperature, max_tokens, **kwargs
+                )
             else:
-                raise Exception(f"Chat completion not implemented for {self.provider_type}")
+                raise Exception(
+                    f"Chat completion not implemented for {self.provider_type}"
+                )
 
         except Exception as e:
             logger.error(f"Chat completion failed for {self.name}: {e}")
@@ -360,12 +448,12 @@ class ModelProvider:
 
     async def _openai_chat_completion(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         model: str,
         temperature: Optional[float],
         max_tokens: Optional[int],
-        **kwargs
-    ) -> Dict[str, Any]:
+        **kwargs,
+    ) -> dict[str, Any]:
         """OpenAI chat completion"""
         url = urljoin(self.base_url, "/chat/completions")
 
@@ -373,12 +461,16 @@ class ModelProvider:
             "model": model,
             "messages": messages,
             "temperature": temperature or 0.7,
-            "max_tokens": max_tokens or 2048
+            "max_tokens": max_tokens or 2048,
         }
         payload.update(kwargs)
 
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
-            async with session.post(url, json=payload, headers=self.headers) as response:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=self.timeout)
+        ) as session:
+            async with session.post(
+                url, json=payload, headers=self.headers
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     choice = data["choices"][0]
@@ -387,20 +479,22 @@ class ModelProvider:
                         "tokens": data.get("usage", {}).get("total_tokens", 0),
                         "model": data["model"],
                         "finish_reason": choice.get("finish_reason"),
-                        "usage": data.get("usage", {})
+                        "usage": data.get("usage", {}),
                     }
                 else:
                     error_data = await response.text()
-                    raise Exception(f"OpenAI API error: {response.status} - {error_data}")
+                    raise Exception(
+                        f"OpenAI API error: {response.status} - {error_data}"
+                    )
 
     async def _anthropic_chat_completion(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         model: str,
         temperature: Optional[float],
         max_tokens: Optional[int],
-        **kwargs
-    ) -> Dict[str, Any]:
+        **kwargs,
+    ) -> dict[str, Any]:
         """Anthropic chat completion"""
         url = urljoin(self.base_url, "/v1/messages")
 
@@ -412,15 +506,14 @@ class ModelProvider:
             if message["role"] == "system":
                 system_message = message["content"]
             else:
-                formatted_messages.append({
-                    "role": message["role"],
-                    "content": message["content"]
-                })
+                formatted_messages.append(
+                    {"role": message["role"], "content": message["content"]}
+                )
 
         payload = {
             "model": model,
             "messages": formatted_messages,
-            "max_tokens": max_tokens or 2048
+            "max_tokens": max_tokens or 2048,
         }
 
         if system_message:
@@ -431,45 +524,47 @@ class ModelProvider:
 
         payload.update(kwargs)
 
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
-            async with session.post(url, json=payload, headers=self.headers) as response:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=self.timeout)
+        ) as session:
+            async with session.post(
+                url, json=payload, headers=self.headers
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     return {
                         "content": data["content"][0]["text"],
-                        "tokens": data.get("usage", {}).get("input_tokens", 0) + data.get("usage", {}).get("output_tokens", 0),
+                        "tokens": data.get("usage", {}).get("input_tokens", 0)
+                        + data.get("usage", {}).get("output_tokens", 0),
                         "model": data["model"],
                         "stop_reason": data.get("stop_reason"),
-                        "usage": data.get("usage", {})
+                        "usage": data.get("usage", {}),
                     }
                 else:
                     error_data = await response.text()
-                    raise Exception(f"Anthropic API error: {response.status} - {error_data}")
+                    raise Exception(
+                        f"Anthropic API error: {response.status} - {error_data}"
+                    )
 
     async def _ollama_chat_completion(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         model: str,
         temperature: Optional[float],
         max_tokens: Optional[int],
-        **kwargs
-    ) -> Dict[str, Any]:
+        **kwargs,
+    ) -> dict[str, Any]:
         """Ollama chat completion"""
         url = urljoin(self.base_url, "/api/chat")
 
         # Convert messages to Ollama format
         formatted_messages = []
         for message in messages:
-            formatted_messages.append({
-                "role": message["role"],
-                "content": message["content"]
-            })
+            formatted_messages.append(
+                {"role": message["role"], "content": message["content"]}
+            )
 
-        payload = {
-            "model": model,
-            "messages": formatted_messages,
-            "stream": False
-        }
+        payload = {"model": model, "messages": formatted_messages, "stream": False}
 
         if temperature is not None:
             payload["options"] = {"temperature": temperature}
@@ -479,26 +574,34 @@ class ModelProvider:
                 payload["options"] = {}
             payload["options"]["num_predict"] = max_tokens
 
-        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
-            async with session.post(url, json=payload, headers=self.headers) as response:
+        async with aiohttp.ClientSession(
+            timeout=aiohttp.ClientTimeout(total=self.timeout)
+        ) as session:
+            async with session.post(
+                url, json=payload, headers=self.headers
+            ) as response:
                 if response.status == 200:
                     data = await response.json()
                     return {
                         "content": data["message"]["content"],
-                        "tokens": data.get("prompt_eval_count", 0) + data.get("eval_count", 0),
+                        "tokens": data.get("prompt_eval_count", 0)
+                        + data.get("eval_count", 0),
                         "model": data["model"],
                         "done": data.get("done"),
                         "usage": {
                             "prompt_tokens": data.get("prompt_eval_count", 0),
                             "completion_tokens": data.get("eval_count", 0),
-                            "total_tokens": data.get("prompt_eval_count", 0) + data.get("eval_count", 0)
-                        }
+                            "total_tokens": data.get("prompt_eval_count", 0)
+                            + data.get("eval_count", 0),
+                        },
                     }
                 else:
                     error_data = await response.text()
-                    raise Exception(f"Ollama API error: {response.status} - {error_data}")
+                    raise Exception(
+                        f"Ollama API error: {response.status} - {error_data}"
+                    )
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get provider status information"""
         return {
             "name": self.name,
@@ -506,12 +609,14 @@ class ModelProvider:
             "base_url": self.base_url,
             "is_configured": self.is_configured(),
             "health_status": self.health_status,
-            "last_health_check": self.last_health_check.isoformat() if self.last_health_check else None,
+            "last_health_check": self.last_health_check.isoformat()
+            if self.last_health_check
+            else None,
             "response_time": self.response_time,
             "rate_limit_rpm": self.rate_limit_rpm,
             "current_requests_in_minute": self._requests_in_minute,
             "supported_models_count": len(self.supported_models),
-            "created_at": self.created_at.isoformat()
+            "created_at": self.created_at.isoformat(),
         }
 
     def __str__(self) -> str:
@@ -520,5 +625,7 @@ class ModelProvider:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"ModelProvider(name='{self.name}', type={self.provider_type.value}, "
-                f"configured={self.is_configured()}, health={self.health_status})")
+        return (
+            f"ModelProvider(name='{self.name}', type={self.provider_type.value}, "
+            f"configured={self.is_configured()}, health={self.health_status})"
+        )

@@ -3,25 +3,23 @@
 遵循TDD原则 - 基于测试需求实现
 """
 
-import json
 import builtins
-from typing import List, Optional, Dict, Any
+import json
+from typing import Any, Optional
+
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
+from ...p4_role_manager_tools.role_manager import RoleManager
 from ..utils.error_handler import ErrorHandler
 from ..utils.performance_monitor import PerformanceMonitor
-from ...p4_role_manager_tools.role_manager import RoleManager
-
 
 # Create the role command app
 app = typer.Typer(
-    name="role",
-    help="Manage AI roles in the DAIP-LIVE system",
-    rich_markup_mode="rich"
+    name="role", help="Manage AI roles in the DAIP-LIVE system", rich_markup_mode="rich"
 )
 
 # Create instances
@@ -34,9 +32,7 @@ def list(
     status: Optional[str] = typer.Option(
         None, "--status", "-s", help="Filter by status (active, inactive, etc.)"
     ),
-    model: Optional[str] = typer.Option(
-        None, "--model", "-m", help="Filter by model"
-    ),
+    model: Optional[str] = typer.Option(None, "--model", "-m", help="Filter by model"),
     limit: Optional[int] = typer.Option(
         None, "--limit", "-l", help="Limit number of roles to display"
     ),
@@ -45,14 +41,14 @@ def list(
     ),
     verbose: bool = typer.Option(
         False, "--verbose", "-v", help="Show detailed role information"
-    )
+    ),
 ):
     """List all available AI roles"""
 
     @error_handler.handle_command_errors(command_name="role list")
     async def _list_roles():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("role_list") as metrics:
+        async with perf_monitor.measure_command("role_list"):
             if not json_output:
                 console.print("[bold blue]🎭 Fetching available roles...[/bold blue]")
 
@@ -66,7 +62,7 @@ def list(
                         SpinnerColumn(),
                         TextColumn("[progress.description]{task.description}"),
                         console=console,
-                        transient=True
+                        transient=True,
                     ) as progress:
                         task = progress.add_task("Getting roles...", total=None)
 
@@ -82,20 +78,24 @@ def list(
                 role_dicts = []
                 for role in roles:
                     role_dict = {
-                        'name': role.name,
-                        'persona': role.persona,
-                        'tools': role.tools,
-                        'status': 'active',  # Default status since Role model doesn't have it
-                        'model': 'default'   # Default model since Role model doesn't have it
+                        "name": role.name,
+                        "persona": role.persona,
+                        "tools": role.tools,
+                        "status": "active",  # Default status since Role model doesn't have it  # noqa: E501
+                        "model": "default",  # Default model since Role model doesn't have it  # noqa: E501
                     }
                     role_dicts.append(role_dict)
 
                 # Apply filters
                 if status:
-                    role_dicts = [r for r in role_dicts if r.get('status') == status]
+                    role_dicts = [r for r in role_dicts if r.get("status") == status]
 
                 if model:
-                    role_dicts = [r for r in role_dicts if model.lower() in r.get('model', '').lower()]
+                    role_dicts = [
+                        r
+                        for r in role_dicts
+                        if model.lower() in r.get("model", "").lower()
+                    ]
 
                 if limit:
                     role_dicts = role_dicts[:limit]
@@ -109,8 +109,8 @@ def list(
                             "filters": {
                                 "status": status,
                                 "model": model,
-                                "limit": limit
-                            }
+                                "limit": limit,
+                            },
                         }
                         console.print(json.dumps(output_data, indent=2))
                     else:
@@ -123,7 +123,9 @@ def list(
                                 filters.append(f"model: {model}")
                             if limit:
                                 filters.append(f"limit: {limit}")
-                            console.print(f"[dim]Applied filters: {', '.join(filters)}[/dim]")
+                            console.print(
+                                f"[dim]Applied filters: {', '.join(filters)}[/dim]"
+                            )
                     return
 
                 if json_output:
@@ -131,11 +133,7 @@ def list(
                     output_data = {
                         "roles": role_dicts,
                         "total_count": len(role_dicts),
-                        "filters": {
-                            "status": status,
-                            "model": model,
-                            "limit": limit
-                        }
+                        "filters": {"status": status, "model": model, "limit": limit},
                     }
                     console.print(json.dumps(output_data, indent=2))
                 else:
@@ -145,10 +143,7 @@ def list(
             except Exception as e:
                 if json_output:
                     # For JSON output, print error as JSON
-                    error_data = {
-                        "error": str(e),
-                        "error_type": type(e).__name__
-                    }
+                    error_data = {"error": str(e), "error_type": type(e).__name__}
                     console.print(json.dumps(error_data, indent=2))
                 else:
                     console.print(f"[red]❌ Error fetching roles: {str(e)}[/red]")
@@ -156,10 +151,11 @@ def list(
 
     # Run the async function
     import asyncio
+
     asyncio.run(_list_roles())
 
 
-def _display_roles_table(roles: List[Dict[str, Any]], verbose: bool = False):
+def _display_roles_table(roles: builtins.list[dict[str, Any]], verbose: bool = False):
     """Display roles in a formatted table"""
 
     table = Table(title="Available AI Roles")
@@ -176,20 +172,20 @@ def _display_roles_table(roles: List[Dict[str, Any]], verbose: bool = False):
 
     for role in roles:
         # Basic info
-        tools_str = ", ".join(role.get('tools', []))
+        tools_str = ", ".join(role.get("tools", []))
         if len(tools_str) > 20:
             tools_str = tools_str[:17] + "..."
 
         row = [
-            role.get('name', 'Unknown'),
-            role.get('model', 'Unknown'),
-            _get_status_indicator(role.get('status', 'Unknown')),
-            tools_str
+            role.get("name", "Unknown"),
+            role.get("model", "Unknown"),
+            _get_status_indicator(role.get("status", "Unknown")),
+            tools_str,
         ]
 
         # Verbose info
         if verbose:
-            persona = role.get('persona', 'Unknown')
+            persona = role.get("persona", "Unknown")
             if len(persona) > 40:
                 persona = persona[:37] + "..."
             row.append(persona)
@@ -205,11 +201,11 @@ def _display_roles_table(roles: List[Dict[str, Any]], verbose: bool = False):
 def _get_status_indicator(status: str) -> str:
     """Get status indicator with color"""
     status_colors = {
-        'active': '🟢',
-        'inactive': '🔵',
-        'disabled': '⏸️',
-        'error': '🔴',
-        'unknown': '❓'
+        "active": "🟢",
+        "inactive": "🔵",
+        "disabled": "⏸️",
+        "error": "🔴",
+        "unknown": "❓",
     }
     return f"{status_colors.get(status, '❓')} {status.title()}"
 
@@ -219,16 +215,18 @@ def show(
     role_name: str = typer.Argument(..., help="Name of the role to show"),
     json_output: bool = typer.Option(
         False, "--json", "-j", help="Output in JSON format"
-    )
+    ),
 ):
     """Show detailed information about a specific role"""
 
     @error_handler.handle_command_errors(command_name="role show")
     async def _show_role():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("role_show") as metrics:
+        async with perf_monitor.measure_command("role_show"):
             if not json_output:
-                console.print(f"[bold blue]🔍 Getting role info for: {role_name}...[/bold blue]")
+                console.print(
+                    f"[bold blue]🔍 Getting role info for: {role_name}...[/bold blue]"
+                )
 
             role_manager = RoleManager()
             role = role_manager.get_role_by_name(role_name)
@@ -239,11 +237,11 @@ def show(
 
             # Convert to dictionary format
             role_dict = {
-                'name': role.name,
-                'persona': role.persona,
-                'tools': role.tools,
-                'status': 'active',
-                'model': 'default'
+                "name": role.name,
+                "persona": role.persona,
+                "tools": role.tools,
+                "status": "active",
+                "model": "default",
             }
 
             if json_output:
@@ -253,10 +251,11 @@ def show(
                 _display_role_info(role_dict, role_name)
 
     import asyncio
+
     asyncio.run(_show_role())
 
 
-def _display_role_info(role_info: Dict[str, Any], role_name: str):
+def _display_role_info(role_info: dict[str, Any], role_name: str):
     """Display detailed role information"""
 
     # Create a panel with role details
@@ -266,15 +265,15 @@ def _display_role_info(role_info: Dict[str, Any], role_name: str):
     content_lines.append(f"[bold]Name:[/bold] {role_name}")
 
     key_mapping = {
-        'persona': 'Persona',
-        'tools': 'Tools',
-        'status': 'Status',
-        'model': 'Model'
+        "persona": "Persona",
+        "tools": "Tools",
+        "status": "Status",
+        "model": "Model",
     }
 
     for key, label in key_mapping.items():
         value = role_info.get(key)
-        if key == 'tools' and isinstance(value, builtins.list):
+        if key == "tools" and isinstance(value, builtins.list):
             value = ", ".join(value) if value else "None"
         elif value is None:
             value = "Unknown"
@@ -285,7 +284,7 @@ def _display_role_info(role_info: Dict[str, Any], role_name: str):
     panel = Panel(
         content,
         title=f"[bold green]Role Information: {role_name}[/bold green]",
-        border_style="green"
+        border_style="green",
     )
 
     console.print(panel)
@@ -294,23 +293,27 @@ def _display_role_info(role_info: Dict[str, Any], role_name: str):
 @app.command()
 def create(
     role_name: str = typer.Argument(..., help="Name of the role to create"),
-    persona: str = typer.Option(..., "--persona", "-p", help="Persona description for the role"),
+    persona: str = typer.Option(
+        ..., "--persona", "-p", help="Persona description for the role"
+    ),
     tools: Optional[str] = typer.Option(
         None, "--tools", "-t", help="Comma-separated list of tools"
     ),
     model: str = typer.Option(
         "default", "--model", "-m", help="Default model for the role"
-    )
+    ),
 ):
     """Create a new AI role"""
 
     @error_handler.handle_command_errors(command_name="role create")
     async def _create_role():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("role_create") as metrics:
-            console.print(f"[bold blue]🎭 Creating new role: {role_name}...[/bold blue]")
+        async with perf_monitor.measure_command("role_create"):
+            console.print(
+                f"[bold blue]🎭 Creating new role: {role_name}...[/bold blue]"
+            )
 
-            role_manager = RoleManager()
+            RoleManager()
 
             # Parse tools
             tools_list = []
@@ -319,14 +322,14 @@ def create(
 
             # Create role data
             role_data = {
-                'name': role_name,
-                'persona': persona,
-                'tools': tools_list,
-                'model': model,
-                'status': 'active'
+                "name": role_name,
+                "persona": persona,
+                "tools": tools_list,
+                "model": model,
+                "status": "active",
             }
 
-            # Note: This is a stub implementation since RoleManager doesn't have create_role yet
+            # Note: This is a stub implementation since RoleManager doesn't have create_role yet  # noqa: E501
             # In a full implementation, this would save the role to the roles directory
             console.print(f"[green]✅ Role '{role_name}' created successfully[/green]")
             console.print(f"[dim]Persona: {persona}[/dim]")
@@ -337,15 +340,14 @@ def create(
             return role_data
 
     import asyncio
+
     asyncio.run(_create_role())
 
 
 @app.command()
 def delete(
     role_name: str = typer.Argument(..., help="Name of the role to delete"),
-    force: bool = typer.Option(
-        False, "--force", "-f", help="Skip confirmation prompt"
-    )
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation prompt"),
 ):
     """Delete an existing AI role"""
 
@@ -353,12 +355,15 @@ def delete(
     async def _delete_role():
         if not force:
             # Ask for confirmation unless --force is used
-            if not typer.confirm(f"Are you sure you want to delete role '{role_name}'? This cannot be undone.", default=False):
+            if not typer.confirm(
+                f"Are you sure you want to delete role '{role_name}'? This cannot be undone.",  # noqa: E501
+                default=False,
+            ):
                 console.print("[yellow]Role deletion cancelled.[/yellow]")
                 return
 
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("role_delete") as metrics:
+        async with perf_monitor.measure_command("role_delete"):
             console.print(f"[bold red]🗑️  Deleting role: {role_name}...[/bold red]")
 
             role_manager = RoleManager()
@@ -369,9 +374,10 @@ def delete(
                 console.print(f"[red]❌ Role '{role_name}' not found[/red]")
                 raise typer.Exit(1)
 
-            # Note: This is a stub implementation since RoleManager doesn't have delete_role yet
-            # In a full implementation, this would remove the role file from the roles directory
+            # Note: This is a stub implementation since RoleManager doesn't have delete_role yet  # noqa: E501
+            # In a full implementation, this would remove the role file from the roles directory  # noqa: E501
             console.print(f"[green]✅ Role '{role_name}' deleted successfully[/green]")
 
     import asyncio
+
     asyncio.run(_delete_role())

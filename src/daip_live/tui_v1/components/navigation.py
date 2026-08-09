@@ -8,10 +8,11 @@ keyboard shortcuts, and user interface navigation functionality.
 Based on newP6 specification requirements for navigation management.
 """
 
-from typing import Any, Dict, Optional, List, Callable
-from textual.widgets import Static, Button, Label
-from textual.containers import Vertical, Horizontal
+from typing import Any, Callable, Optional
+
 from textual import events
+from textual.containers import Horizontal
+from textual.widgets import Label
 
 from .base import TUIComponent
 
@@ -34,9 +35,9 @@ class NavigationComponent(TUIComponent):
     def __init__(
         self,
         component_id: Optional[str] = None,
-        menu_items: Optional[List[Dict[str, Any]]] = None,
-        keyboard_shortcuts: Optional[Dict[str, str]] = None,
-        show_menu: bool = True
+        menu_items: Optional[list[dict[str, Any]]] = None,
+        keyboard_shortcuts: Optional[dict[str, str]] = None,
+        show_menu: bool = True,
     ):
         """
         Initialize the navigation component.
@@ -46,7 +47,7 @@ class NavigationComponent(TUIComponent):
             menu_items: List of menu items with 'label', 'action', and optional 'shortcut'
             keyboard_shortcuts: Dictionary of shortcut keys to actions
             show_menu: Whether to display the menu
-        """
+        """  # noqa: E501
         super().__init__(component_id)
 
         # Default menu items if not provided
@@ -55,7 +56,7 @@ class NavigationComponent(TUIComponent):
             {"label": "Edit", "action": "edit_menu", "shortcut": "Alt+e"},
             {"label": "View", "action": "view_menu", "shortcut": "Alt+v"},
             {"label": "Tools", "action": "tools_menu", "shortcut": "Alt+t"},
-            {"label": "Help", "action": "help_menu", "shortcut": "Alt+h"}
+            {"label": "Help", "action": "help_menu", "shortcut": "Alt+h"},
         ]
 
         # Navigation configuration
@@ -66,11 +67,11 @@ class NavigationComponent(TUIComponent):
             current_selection=0,
             focused_item=None,
             navigation_history=[],
-            breadcrumb_trail=[]
+            breadcrumb_trail=[],
         )
 
         # Event handlers for menu actions
-        self._action_handlers: Dict[str, Callable] = {}
+        self._action_handlers: dict[str, Callable] = {}
 
     def render(self):
         """
@@ -85,10 +86,10 @@ class NavigationComponent(TUIComponent):
         container.id = self.component_id
 
         # Add navigation content as a simple label for testing
-        if self.state.get('show_menu', True):
-            menu_items = self.state.get('menu_items', [])
+        if self.state.get("show_menu", True):
+            menu_items = self.state.get("menu_items", [])
             if menu_items:
-                current_item = menu_items[self.state.get('current_selection', 0)]
+                current_item = menu_items[self.state.get("current_selection", 0)]
                 label = Label(f"Nav: {current_item.get('label', 'Menu')}")
                 container._compose_children = lambda: [label]
 
@@ -115,13 +116,13 @@ class NavigationComponent(TUIComponent):
             event: The event to handle
         """
         # Handle navigation-specific events
-        if hasattr(event, 'event_type'):
-            if event.event_type.value == 'navigate':
-                self.navigate_to(event.data.get('target', ''))
-            elif event.event_type.value == 'menu_select':
-                self.select_menu_item(event.data.get('index', 0))
-            elif event.event_type.value == 'focus_change':
-                self.set_focused_item(event.data.get('item_id'))
+        if hasattr(event, "event_type"):
+            if event.event_type.value == "navigate":
+                self.navigate_to(event.data.get("target", ""))
+            elif event.event_type.value == "menu_select":
+                self.select_menu_item(event.data.get("index", 0))
+            elif event.event_type.value == "focus_change":
+                self.set_focused_item(event.data.get("item_id"))
 
         # Handle keyboard events
         if isinstance(event, events.Key):
@@ -135,7 +136,7 @@ class NavigationComponent(TUIComponent):
             event: The keyboard event
         """
         key = event.key
-        shortcuts = self.state.get('keyboard_shortcuts', {})
+        shortcuts = self.state.get("keyboard_shortcuts", {})
 
         # Check if key matches a shortcut
         if key in shortcuts:
@@ -143,15 +144,15 @@ class NavigationComponent(TUIComponent):
             self._handle_menu_action(action)
 
         # Handle navigation keys
-        elif key == 'left':
+        elif key == "left":
             self.navigate_left()
-        elif key == 'right':
+        elif key == "right":
             self.navigate_right()
-        elif key == 'up':
+        elif key == "up":
             self.navigate_up()
-        elif key == 'down':
+        elif key == "down":
             self.navigate_down()
-        elif key == 'enter':
+        elif key == "enter":
             self.activate_current_selection()
 
     def _handle_menu_action(self, action: str) -> None:
@@ -162,7 +163,7 @@ class NavigationComponent(TUIComponent):
             action: The action to handle
         """
         # Add to navigation history
-        history = self.state.get('navigation_history', [])
+        history = self.state.get("navigation_history", [])
         history.append(action)
         self.update_state(navigation_history=history)
 
@@ -191,12 +192,13 @@ class NavigationComponent(TUIComponent):
             target: The navigation target
         """
         # Add to breadcrumb trail
-        breadcrumb = self.state.get('breadcrumb_trail', [])
+        breadcrumb = self.state.get("breadcrumb_trail", [])
         breadcrumb.append(target)
 
         self.update_state(
             breadcrumb_trail=breadcrumb,
-            navigation_history=self.state.get('navigation_history', []) + [f"navigate_to:{target}"]
+            navigation_history=self.state.get("navigation_history", [])
+            + [f"navigate_to:{target}"],
         )
 
         self._emit_navigation_event(f"navigate_to:{target}")
@@ -208,19 +210,19 @@ class NavigationComponent(TUIComponent):
         Args:
             index: The index of the menu item to select
         """
-        menu_items = self.state.get('menu_items', [])
+        menu_items = self.state.get("menu_items", [])
         if 0 <= index < len(menu_items):
             self.update_state(current_selection=index)
 
             # Activate the selected item
-            action = menu_items[index].get('action')
+            action = menu_items[index].get("action")
             if action:
                 self._handle_menu_action(action)
 
     def navigate_left(self) -> None:
         """Navigate to the left in the menu."""
-        current = self.state.get('current_selection', 0)
-        menu_items = self.state.get('menu_items', [])
+        current = self.state.get("current_selection", 0)
+        menu_items = self.state.get("menu_items", [])
 
         if menu_items:
             new_selection = (current - 1) % len(menu_items)
@@ -228,8 +230,8 @@ class NavigationComponent(TUIComponent):
 
     def navigate_right(self) -> None:
         """Navigate to the right in the menu."""
-        current = self.state.get('current_selection', 0)
-        menu_items = self.state.get('menu_items', [])
+        current = self.state.get("current_selection", 0)
+        menu_items = self.state.get("menu_items", [])
 
         if menu_items:
             new_selection = (current + 1) % len(menu_items)
@@ -238,7 +240,7 @@ class NavigationComponent(TUIComponent):
     def navigate_up(self) -> None:
         """Navigate up in sub-menus or contexts."""
         # This would handle navigation in hierarchical menus
-        breadcrumb = self.state.get('breadcrumb_trail', [])
+        breadcrumb = self.state.get("breadcrumb_trail", [])
         if len(breadcrumb) > 1:
             breadcrumb.pop()
             self.update_state(breadcrumb_trail=breadcrumb)
@@ -250,7 +252,7 @@ class NavigationComponent(TUIComponent):
 
     def activate_current_selection(self) -> None:
         """Activate the currently selected menu item."""
-        current = self.state.get('current_selection', 0)
+        current = self.state.get("current_selection", 0)
         self.select_menu_item(current)
 
     def set_focused_item(self, item_id: Optional[str]) -> None:
@@ -269,43 +271,43 @@ class NavigationComponent(TUIComponent):
         Returns:
             int: Current selection index
         """
-        return self.state.get('current_selection', 0)
+        return self.state.get("current_selection", 0)
 
-    def get_menu_items(self) -> List[Dict[str, Any]]:
+    def get_menu_items(self) -> list[dict[str, Any]]:
         """
         Get the current menu items.
 
         Returns:
             List[Dict[str, Any]]: Menu items
         """
-        return self.state.get('menu_items', [])
+        return self.state.get("menu_items", [])
 
-    def get_breadcrumb_trail(self) -> List[str]:
+    def get_breadcrumb_trail(self) -> list[str]:
         """
         Get the current breadcrumb trail.
 
         Returns:
             List[str]: Breadcrumb trail
         """
-        return self.state.get('breadcrumb_trail', [])
+        return self.state.get("breadcrumb_trail", [])
 
-    def get_navigation_history(self) -> List[str]:
+    def get_navigation_history(self) -> list[str]:
         """
         Get the navigation history.
 
         Returns:
             List[str]: Navigation history
         """
-        return self.state.get('navigation_history', [])
+        return self.state.get("navigation_history", [])
 
-    def add_menu_item(self, item: Dict[str, Any]) -> None:
+    def add_menu_item(self, item: dict[str, Any]) -> None:
         """
         Add a new menu item.
 
         Args:
             item: Menu item dictionary with 'label', 'action', and optional 'shortcut'
         """
-        menu_items = self.state.get('menu_items', [])
+        menu_items = self.state.get("menu_items", [])
         menu_items.append(item)
         self.update_state(menu_items=menu_items)
 
@@ -316,7 +318,7 @@ class NavigationComponent(TUIComponent):
         Args:
             index: Index of the menu item to remove
         """
-        menu_items = self.state.get('menu_items', [])
+        menu_items = self.state.get("menu_items", [])
         if 0 <= index < len(menu_items):
             menu_items.pop(index)
             self.update_state(menu_items=menu_items)
@@ -329,7 +331,7 @@ class NavigationComponent(TUIComponent):
             key: The key combination
             action: The action to perform
         """
-        shortcuts = self.state.get('keyboard_shortcuts', {})
+        shortcuts = self.state.get("keyboard_shortcuts", {})
         shortcuts[key] = action
         self.update_state(keyboard_shortcuts=shortcuts)
 
@@ -343,11 +345,13 @@ class NavigationComponent(TUIComponent):
         # This would integrate with the event system
         # For now, we'll just pass the event to children
         for child in self.get_children():
-            child.handle_event({
-                'event_type': 'navigation',
-                'action': action,
-                'source': 'navigation_component'
-            })
+            child.handle_event(
+                {
+                    "event_type": "navigation",
+                    "action": action,
+                    "source": "navigation_component",
+                }
+            )
 
     def show_menu(self, show: bool) -> None:
         """

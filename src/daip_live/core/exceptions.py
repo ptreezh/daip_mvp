@@ -1,14 +1,14 @@
 """Defines the custom exception hierarchy for the DAIP-LIVE application."""
 
-from dataclasses import dataclass, field
-from typing import Dict, Any, Optional, List, Callable
 import logging
+from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
 
 
 class DAIPError(Exception):
     """Base exception for all application-specific errors."""
 
-    def __init__(self, message: str, context: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, context: Optional[dict[str, Any]] = None):
         """Initialize a DAIP error.
 
         Args:
@@ -23,12 +23,12 @@ class DAIPError(Exception):
     def __str__(self) -> str:
         return self.message
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert error to dictionary for logging/serialization."""
         return {
             "error_code": self.error_code,
             "message": self.message,
-            "context": self.context
+            "context": self.context,
         }
 
 
@@ -40,7 +40,7 @@ class ModelError(DAIPError):
         message: str,
         model: Optional[str] = None,
         provider: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[dict[str, Any]] = None,
     ):
         super().__init__(message, context)
         self.model = model
@@ -49,11 +49,13 @@ class ModelError(DAIPError):
 
 class ModelConnectionError(ModelError):
     """Represents an error in connecting to the model provider."""
+
     pass
 
 
 class ModelAuthenticationError(ModelError):
     """Represents an authentication error with the model provider."""
+
     pass
 
 
@@ -64,7 +66,7 @@ class ToolError(DAIPError):
         self,
         message: str,
         tool_name: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[dict[str, Any]] = None,
     ):
         super().__init__(message, context)
         self.tool_name = tool_name
@@ -72,11 +74,13 @@ class ToolError(DAIPError):
 
 class ToolInputError(ToolError):
     """Represents an error due to invalid input for a tool."""
+
     pass
 
 
 class ToolPermissionError(ToolError):
     """Represents an error due to insufficient permissions to use a tool."""
+
     pass
 
 
@@ -88,7 +92,7 @@ class ValidationError(DAIPError):
         message: str,
         field: Optional[str] = None,
         value: Optional[Any] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[dict[str, Any]] = None,
     ):
         super().__init__(message, context)
         self.field = field
@@ -102,7 +106,7 @@ class ConfigurationError(DAIPError):
         self,
         message: str,
         key: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[dict[str, Any]] = None,
     ):
         super().__init__(message, context)
         self.key = key
@@ -115,7 +119,7 @@ class PermissionDenied(DAIPError):
         self,
         message: str,
         permission: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[dict[str, Any]] = None,
     ):
         super().__init__(message, context)
         self.permission = permission
@@ -129,9 +133,10 @@ PermissionError = PermissionDenied
 @dataclass
 class ErrorContext:
     """Structured error context."""
+
     component: str
     operation: Optional[str] = None
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 class ErrorHandler:
@@ -139,7 +144,7 @@ class ErrorHandler:
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.callbacks: List[Callable[[DAIPError], None]] = []
+        self.callbacks: list[Callable[[DAIPError], None]] = []
 
     def register_callback(self, callback: Callable[[DAIPError], None]) -> None:
         """Register an error callback.
@@ -163,8 +168,7 @@ class ErrorHandler:
     def _handle_daip_error(self, error: DAIPError) -> None:
         """Handle a DAIP error."""
         self.logger.error(
-            f"[{error.error_code}] {error.message}",
-            extra={"context": error.context}
+            f"[{error.error_code}] {error.message}", extra={"context": error.context}
         )
         for callback in self.callbacks:
             try:

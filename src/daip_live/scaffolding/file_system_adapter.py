@@ -3,16 +3,15 @@
 遵循SOLID原则，提供异步文件操作功能
 """
 
-import os
-import asyncio
 import shutil
-from pathlib import Path
-from typing import Union, Dict, Any, List, Tuple, Optional
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional, Union
 
 # 异步文件操作库
 try:
     import aiofiles
+
     AIOFILES_AVAILABLE = True
 except ImportError:
     aiofiles = None
@@ -33,7 +32,7 @@ class FileOperationResult:
         data: Any = None,
         error: Optional[FileOperationError] = None,
         error_code: Optional[str] = None,
-        operation_type: Optional[str] = None
+        operation_type: Optional[str] = None,
     ):
         self.success = success
         self.data = data
@@ -57,7 +56,7 @@ class FileOperationResult:
         if self.success:
             return f"FileOperationResult(success=True, operation={self.operation_type})"
         else:
-            return f"FileOperationResult(success=False, error={self.error}, operation={self.operation_type})"
+            return f"FileOperationResult(success=False, error={self.error}, operation={self.operation_type})"  # noqa: E501
 
     def __repr__(self) -> str:
         """详细字符串表示"""
@@ -80,7 +79,7 @@ class FileSystemAdapter:
         chunk_size: int = 8192,
         create_directories: bool = True,
         overwrite_existing: bool = True,
-        encoding: str = 'utf-8'
+        encoding: str = "utf-8",
     ):
         """初始化文件系统适配器
 
@@ -117,11 +116,10 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"File not found: {file_path}",
-                        "FILE_NOT_FOUND"
+                        f"File not found: {file_path}", "FILE_NOT_FOUND"
                     ),
                     error_code="FILE_NOT_FOUND",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             # 检查是否为文件
@@ -129,59 +127,53 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Path is not a file: {file_path}",
-                        "NOT_A_FILE"
+                        f"Path is not a file: {file_path}", "NOT_A_FILE"
                     ),
                     error_code="NOT_A_FILE",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             # 异步读取文件
-            async with aiofiles.open(file_path, 'r', encoding=self.encoding) as file:
+            async with aiofiles.open(file_path, "r", encoding=self.encoding) as file:
                 content = await file.read()
 
             return FileOperationResult(
-                success=True,
-                data=content,
-                operation_type=operation_type
+                success=True, data=content, operation_type=operation_type
             )
 
         except PermissionError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Permission denied: {str(e)}",
-                    "PERMISSION_DENIED"
+                    f"Permission denied: {str(e)}", "PERMISSION_DENIED"
                 ),
                 error_code="PERMISSION_DENIED",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except UnicodeDecodeError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"File encoding error: {str(e)}",
-                    "ENCODING_ERROR"
+                    f"File encoding error: {str(e)}", "ENCODING_ERROR"
                 ),
                 error_code="ENCODING_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Unexpected error reading file: {str(e)}",
-                    "READ_ERROR"
+                    f"Unexpected error reading file: {str(e)}", "READ_ERROR"
                 ),
                 error_code="READ_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def write_file(
         self,
         file_path: Union[str, Path],
         content: str,
-        create_directories: Optional[bool] = None
+        create_directories: Optional[bool] = None,
     ) -> FileOperationResult:
         """异步写入文件
 
@@ -199,7 +191,8 @@ class FileSystemAdapter:
         try:
             # 创建目录（如果需要）
             should_create_dirs = (
-                create_directories if create_directories is not None
+                create_directories
+                if create_directories is not None
                 else self.create_directories
             )
 
@@ -212,49 +205,42 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"File already exists: {file_path}",
-                        "FILE_EXISTS"
+                        f"File already exists: {file_path}", "FILE_EXISTS"
                     ),
                     error_code="FILE_EXISTS",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             # 异步写入文件
-            async with aiofiles.open(file_path, 'w', encoding=self.encoding) as file:
+            async with aiofiles.open(file_path, "w", encoding=self.encoding) as file:
                 bytes_written = await file.write(content)
                 await file.flush()  # 确保数据写入磁盘
 
             return FileOperationResult(
-                success=True,
-                data=bytes_written,
-                operation_type=operation_type
+                success=True, data=bytes_written, operation_type=operation_type
             )
 
         except PermissionError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Permission denied: {str(e)}",
-                    "PERMISSION_DENIED"
+                    f"Permission denied: {str(e)}", "PERMISSION_DENIED"
                 ),
                 error_code="PERMISSION_DENIED",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Unexpected error writing file: {str(e)}",
-                    "WRITE_ERROR"
+                    f"Unexpected error writing file: {str(e)}", "WRITE_ERROR"
                 ),
                 error_code="WRITE_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def create_directory(
-        self,
-        dir_path: Union[str, Path],
-        exist_ok: bool = True
+        self, dir_path: Union[str, Path], exist_ok: bool = True
     ) -> FileOperationResult:
         """异步创建目录
 
@@ -272,30 +258,26 @@ class FileSystemAdapter:
             dir_path.mkdir(parents=True, exist_ok=exist_ok)
 
             return FileOperationResult(
-                success=True,
-                data=str(dir_path),
-                operation_type=operation_type
+                success=True, data=str(dir_path), operation_type=operation_type
             )
 
         except PermissionError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Permission denied: {str(e)}",
-                    "PERMISSION_DENIED"
+                    f"Permission denied: {str(e)}", "PERMISSION_DENIED"
                 ),
                 error_code="PERMISSION_DENIED",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Unexpected error creating directory: {str(e)}",
-                    "CREATE_DIR_ERROR"
+                    f"Unexpected error creating directory: {str(e)}", "CREATE_DIR_ERROR"
                 ),
                 error_code="CREATE_DIR_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def exists(self, path: Union[str, Path]) -> FileOperationResult:
@@ -313,19 +295,16 @@ class FileSystemAdapter:
         try:
             exists = path.exists()
             return FileOperationResult(
-                success=True,
-                data=exists,
-                operation_type=operation_type
+                success=True, data=exists, operation_type=operation_type
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Error checking path existence: {str(e)}",
-                    "EXISTS_CHECK_ERROR"
+                    f"Error checking path existence: {str(e)}", "EXISTS_CHECK_ERROR"
                 ),
                 error_code="EXISTS_CHECK_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def is_file(self, path: Union[str, Path]) -> FileOperationResult:
@@ -343,19 +322,16 @@ class FileSystemAdapter:
         try:
             is_file = path.is_file()
             return FileOperationResult(
-                success=True,
-                data=is_file,
-                operation_type=operation_type
+                success=True, data=is_file, operation_type=operation_type
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Error checking if path is file: {str(e)}",
-                    "IS_FILE_CHECK_ERROR"
+                    f"Error checking if path is file: {str(e)}", "IS_FILE_CHECK_ERROR"
                 ),
                 error_code="IS_FILE_CHECK_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def get_file_info(self, file_path: Union[str, Path]) -> FileOperationResult:
@@ -375,47 +351,41 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"File not found: {file_path}",
-                        "FILE_NOT_FOUND"
+                        f"File not found: {file_path}", "FILE_NOT_FOUND"
                     ),
                     error_code="FILE_NOT_FOUND",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             stat = file_path.stat()
 
             info = {
-                'path': str(file_path),
-                'name': file_path.name,
-                'size': stat.st_size,
-                'is_file': file_path.is_file(),
-                'is_directory': file_path.is_dir(),
-                'created_at': datetime.fromtimestamp(stat.st_ctime),
-                'modified_at': datetime.fromtimestamp(stat.st_mtime),
-                'accessed_at': datetime.fromtimestamp(stat.st_atime),
+                "path": str(file_path),
+                "name": file_path.name,
+                "size": stat.st_size,
+                "is_file": file_path.is_file(),
+                "is_directory": file_path.is_dir(),
+                "created_at": datetime.fromtimestamp(stat.st_ctime),
+                "modified_at": datetime.fromtimestamp(stat.st_mtime),
+                "accessed_at": datetime.fromtimestamp(stat.st_atime),
             }
 
             return FileOperationResult(
-                success=True,
-                data=info,
-                operation_type=operation_type
+                success=True, data=info, operation_type=operation_type
             )
 
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Error getting file info: {str(e)}",
-                    "GET_INFO_ERROR"
+                    f"Error getting file info: {str(e)}", "GET_INFO_ERROR"
                 ),
                 error_code="GET_INFO_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def list_directory(
-        self,
-        dir_path: Union[str, Path],
-        include_hidden: bool = False
+        self, dir_path: Union[str, Path], include_hidden: bool = False
     ) -> FileOperationResult:
         """列出目录内容
 
@@ -434,39 +404,37 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Directory not found: {dir_path}",
-                        "FILE_NOT_FOUND"
+                        f"Directory not found: {dir_path}", "FILE_NOT_FOUND"
                     ),
                     error_code="FILE_NOT_FOUND",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             if not dir_path.is_dir():
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Path is not a directory: {dir_path}",
-                        "NOT_A_DIRECTORY"
+                        f"Path is not a directory: {dir_path}", "NOT_A_DIRECTORY"
                     ),
                     error_code="NOT_A_DIRECTORY",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             items = []
             for item in dir_path.iterdir():
-                if not include_hidden and item.name.startswith('.'):
+                if not include_hidden and item.name.startswith("."):
                     continue
 
                 try:
                     stat = item.stat()
                     item_info = {
-                        'name': item.name,
-                        'path': str(item),
-                        'is_file': item.is_file(),
-                        'is_directory': item.is_dir(),
-                        'size': stat.st_size if item.is_file() else 0,
-                        'created_at': datetime.fromtimestamp(stat.st_ctime),
-                        'modified_at': datetime.fromtimestamp(stat.st_mtime),
+                        "name": item.name,
+                        "path": str(item),
+                        "is_file": item.is_file(),
+                        "is_directory": item.is_dir(),
+                        "size": stat.st_size if item.is_file() else 0,
+                        "created_at": datetime.fromtimestamp(stat.st_ctime),
+                        "modified_at": datetime.fromtimestamp(stat.st_mtime),
                     }
                     items.append(item_info)
                 except (OSError, PermissionError):
@@ -474,30 +442,26 @@ class FileSystemAdapter:
                     continue
 
             return FileOperationResult(
-                success=True,
-                data=items,
-                operation_type=operation_type
+                success=True, data=items, operation_type=operation_type
             )
 
         except PermissionError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Permission denied: {str(e)}",
-                    "PERMISSION_DENIED"
+                    f"Permission denied: {str(e)}", "PERMISSION_DENIED"
                 ),
                 error_code="PERMISSION_DENIED",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Error listing directory: {str(e)}",
-                    "LIST_DIR_ERROR"
+                    f"Error listing directory: {str(e)}", "LIST_DIR_ERROR"
                 ),
                 error_code="LIST_DIR_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def delete_file(self, file_path: Union[str, Path]) -> FileOperationResult:
@@ -517,57 +481,49 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"File not found: {file_path}",
-                        "FILE_NOT_FOUND"
+                        f"File not found: {file_path}", "FILE_NOT_FOUND"
                     ),
                     error_code="FILE_NOT_FOUND",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             if not file_path.is_file():
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Path is not a file: {file_path}",
-                        "NOT_A_FILE"
+                        f"Path is not a file: {file_path}", "NOT_A_FILE"
                     ),
                     error_code="NOT_A_FILE",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             file_path.unlink()
 
             return FileOperationResult(
-                success=True,
-                data=str(file_path),
-                operation_type=operation_type
+                success=True, data=str(file_path), operation_type=operation_type
             )
 
         except PermissionError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Permission denied: {str(e)}",
-                    "PERMISSION_DENIED"
+                    f"Permission denied: {str(e)}", "PERMISSION_DENIED"
                 ),
                 error_code="PERMISSION_DENIED",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Error deleting file: {str(e)}",
-                    "DELETE_ERROR"
+                    f"Error deleting file: {str(e)}", "DELETE_ERROR"
                 ),
                 error_code="DELETE_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def copy_file(
-        self,
-        source_path: Union[str, Path],
-        dest_path: Union[str, Path]
+        self, source_path: Union[str, Path], dest_path: Union[str, Path]
     ) -> FileOperationResult:
         """复制文件
 
@@ -588,22 +544,20 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Source file not found: {source_path}",
-                        "FILE_NOT_FOUND"
+                        f"Source file not found: {source_path}", "FILE_NOT_FOUND"
                     ),
                     error_code="FILE_NOT_FOUND",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             if not source_path.is_file():
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Source path is not a file: {source_path}",
-                        "NOT_A_FILE"
+                        f"Source path is not a file: {source_path}", "NOT_A_FILE"
                     ),
                     error_code="NOT_A_FILE",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             # 创建目标目录
@@ -614,38 +568,29 @@ class FileSystemAdapter:
 
             return FileOperationResult(
                 success=True,
-                data={
-                    'source': str(source_path),
-                    'destination': str(dest_path)
-                },
-                operation_type=operation_type
+                data={"source": str(source_path), "destination": str(dest_path)},
+                operation_type=operation_type,
             )
 
         except PermissionError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Permission denied: {str(e)}",
-                    "PERMISSION_DENIED"
+                    f"Permission denied: {str(e)}", "PERMISSION_DENIED"
                 ),
                 error_code="PERMISSION_DENIED",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
-                error=FileOperationError(
-                    f"Error copying file: {str(e)}",
-                    "COPY_ERROR"
-                ),
+                error=FileOperationError(f"Error copying file: {str(e)}", "COPY_ERROR"),
                 error_code="COPY_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def move_file(
-        self,
-        source_path: Union[str, Path],
-        dest_path: Union[str, Path]
+        self, source_path: Union[str, Path], dest_path: Union[str, Path]
     ) -> FileOperationResult:
         """移动文件
 
@@ -666,22 +611,20 @@ class FileSystemAdapter:
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Source file not found: {source_path}",
-                        "FILE_NOT_FOUND"
+                        f"Source file not found: {source_path}", "FILE_NOT_FOUND"
                     ),
                     error_code="FILE_NOT_FOUND",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             if not source_path.is_file():
                 return FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Source path is not a file: {source_path}",
-                        "NOT_A_FILE"
+                        f"Source path is not a file: {source_path}", "NOT_A_FILE"
                     ),
                     error_code="NOT_A_FILE",
-                    operation_type=operation_type
+                    operation_type=operation_type,
                 )
 
             # 创建目标目录
@@ -692,38 +635,30 @@ class FileSystemAdapter:
 
             return FileOperationResult(
                 success=True,
-                data={
-                    'source': str(source_path),
-                    'destination': str(dest_path)
-                },
-                operation_type=operation_type
+                data={"source": str(source_path), "destination": str(dest_path)},
+                operation_type=operation_type,
             )
 
         except PermissionError as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Permission denied: {str(e)}",
-                    "PERMISSION_DENIED"
+                    f"Permission denied: {str(e)}", "PERMISSION_DENIED"
                 ),
                 error_code="PERMISSION_DENIED",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
         except Exception as e:
             return FileOperationResult(
                 success=False,
-                error=FileOperationError(
-                    f"Error moving file: {str(e)}",
-                    "MOVE_ERROR"
-                ),
+                error=FileOperationError(f"Error moving file: {str(e)}", "MOVE_ERROR"),
                 error_code="MOVE_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )
 
     async def batch_operations(
-        self,
-        operations: List[Tuple[str, ...]]
-    ) -> List[FileOperationResult]:
+        self, operations: list[tuple[str, ...]]
+    ) -> list[FileOperationResult]:
         """批量执行文件操作
 
         Args:
@@ -742,46 +677,44 @@ class FileSystemAdapter:
             args = operation[1:]
 
             try:
-                if operation_name == 'read':
+                if operation_name == "read":
                     result = await self.read_file(*args)
-                elif operation_name == 'write':
+                elif operation_name == "write":
                     result = await self.write_file(*args)
-                elif operation_name == 'create_directory':
+                elif operation_name == "create_directory":
                     result = await self.create_directory(*args)
-                elif operation_name == 'exists':
+                elif operation_name == "exists":
                     result = await self.exists(*args)
-                elif operation_name == 'is_file':
+                elif operation_name == "is_file":
                     result = await self.is_file(*args)
-                elif operation_name == 'get_file_info':
+                elif operation_name == "get_file_info":
                     result = await self.get_file_info(*args)
-                elif operation_name == 'list_directory':
+                elif operation_name == "list_directory":
                     result = await self.list_directory(*args)
-                elif operation_name == 'delete_file':
+                elif operation_name == "delete_file":
                     result = await self.delete_file(*args)
-                elif operation_name == 'copy_file':
+                elif operation_name == "copy_file":
                     result = await self.copy_file(*args)
-                elif operation_name == 'move_file':
+                elif operation_name == "move_file":
                     result = await self.move_file(*args)
                 else:
                     result = FileOperationResult(
                         success=False,
                         error=FileOperationError(
-                            f"Unknown operation: {operation_name}",
-                            "UNKNOWN_OPERATION"
+                            f"Unknown operation: {operation_name}", "UNKNOWN_OPERATION"
                         ),
                         error_code="UNKNOWN_OPERATION",
-                        operation_type=operation_name
+                        operation_type=operation_name,
                     )
 
             except Exception as e:
                 result = FileOperationResult(
                     success=False,
                     error=FileOperationError(
-                        f"Error executing {operation_name}: {str(e)}",
-                        "EXECUTION_ERROR"
+                        f"Error executing {operation_name}: {str(e)}", "EXECUTION_ERROR"
                     ),
                     error_code="EXECUTION_ERROR",
-                    operation_type=operation_name
+                    operation_type=operation_name,
                 )
 
             results.append(result)
@@ -804,25 +737,22 @@ class FileSystemAdapter:
             usage = shutil.disk_usage(path)
 
             usage_info = {
-                'total': usage.total,
-                'used': usage.used,
-                'free': usage.free,
-                'path': str(path),
+                "total": usage.total,
+                "used": usage.used,
+                "free": usage.free,
+                "path": str(path),
             }
 
             return FileOperationResult(
-                success=True,
-                data=usage_info,
-                operation_type=operation_type
+                success=True, data=usage_info, operation_type=operation_type
             )
 
         except Exception as e:
             return FileOperationResult(
                 success=False,
                 error=FileOperationError(
-                    f"Error getting disk usage: {str(e)}",
-                    "DISK_USAGE_ERROR"
+                    f"Error getting disk usage: {str(e)}", "DISK_USAGE_ERROR"
                 ),
                 error_code="DISK_USAGE_ERROR",
-                operation_type=operation_type
+                operation_type=operation_type,
             )

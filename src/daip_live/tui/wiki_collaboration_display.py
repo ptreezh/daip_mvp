@@ -3,12 +3,10 @@ TUI Wiki协作过程展示组件
 在终端界面中实时展示协作创建的进度和结果
 """
 
-from textual.widget import Widget
+from textual.containers import Vertical
 from textual.progress import ProgressBar
 from textual.reactive import reactive
-from textual.containers import Vertical, Horizontal
-from textual import log
-import asyncio
+from textual.widget import Widget
 
 from daip_live.wiki.simple_collaboration_engine import CollaborationProgress
 
@@ -94,13 +92,17 @@ class WikiCollaborationDisplay(Widget):
             return
 
         # 显示最新的内容
-        for i, content_item in enumerate(self.current_progress.generated_content[-5:]):  # 只显示最新5条
+        for i, content_item in enumerate(
+            self.current_progress.generated_content[-5:]
+        ):  # 只显示最新5条
             role = content_item.get("role", "Unknown")
             content = content_item.get("content", "")
-            timestamp = content_item.get("timestamp", "")
+            content_item.get("timestamp", "")
 
             # 创建内容项
-            content_widget = Static(f"📌 {role}:\n{content[:100]}...", classes="content-item")
+            content_widget = Static(
+                f"📌 {role}:\n{content[:100]}...", classes="content-item"
+            )
             self.content_container.mount(content_widget)
 
     def _update_error_display(self):
@@ -121,7 +123,7 @@ class WikiCollaborationDisplay(Widget):
         # 显示错误
         for error_item in self.current_progress.errors[-3:]:  # 只显示最新3个错误
             error_text = error_item.get("error", "")
-            timestamp = error_item.get("timestamp", "")
+            error_item.get("timestamp", "")
 
             error_widget = Static(f"❌ {error_text}", classes="error-item")
             self.error_container.mount(error_widget)

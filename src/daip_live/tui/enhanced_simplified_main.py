@@ -3,35 +3,21 @@ DAIP-LIVE TUI Moduler v2.1.0-modular-simplified
 简化版TUI实现，解决原有复杂性问题
 """
 
-import asyncio
-import json
-import os
-import queue
-import re
 import sys
-import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
-import pyperclip
-import typer
 from rich.console import Console
 from rich.markdown import Markdown
-from rich.panel import Panel
-from rich.table import Table
-from textual import events
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
-from textual.screen import ModalScreen
-from textual.widgets import Button, Footer, Header, Input, Label, RichLog, Static
+from textual.widgets import Footer, Header, Input, Static
 
+from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
 from daip_live.agent_engine.executor import AgentExecutor
 from daip_live.agent_engine.intent_recognizer import Intent
-from daip_live.agent_engine.enhanced_intent_recognizer import EnhancedIntentRecognizer
 from daip_live.config_bridge import config_bridge
 from daip_live.container import Container
 from daip_live.memory.session_manager import SessionManager
@@ -42,15 +28,28 @@ from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateMan
 from daip_live.p8_debate_system.history_tracker import DebateHistoryTracker
 from daip_live.persistence.database import DatabaseManager
 from daip_live.skills.claude_skill_adapter import ClaudeSkillAdapterManager
+from daip_live.tui.simplified_main import get_container
 from daip_live.tui_modular.components.autocomplete import TUIAutocomplete
 from daip_live.tui_modular.components.enhanced_commands import DebateCommands
-from daip_live.tui_modular.components.interactive_role_creation import InteractiveRoleCreationService
-from daip_live.tui_modular.components.screens import CommandHelpDialog, ExitConfirmationDialog
+from daip_live.tui_modular.components.interactive_role_creation import (
+    InteractiveRoleCreationService,
+)
+from daip_live.tui_modular.components.screens import (
+    CommandHelpDialog,
+    ExitConfirmationDialog,
+)
 from daip_live.tui_modular.components.tui_role_integration import TUIRoleCommandHandler
-from daip_live.tui_modular.utils import ConfigManager, FocusMode, HistoryManager, Logger, PerformanceMonitor
+from daip_live.tui_modular.utils import (
+    ConfigManager,
+    FocusMode,
+    HistoryManager,
+    Logger,
+    PerformanceMonitor,
+)
 
-from .copyable_widgets import CopyableLogWidget
 from .clipboard_helper import copy_content
+from .copyable_widgets import CopyableLogWidget
+
 
 class SimplifiedTUI(App):
     """简化版DAIP-LIVE TUI - 解决原有架构问题"""
@@ -111,8 +110,6 @@ class SimplifiedTUI(App):
 
         # 异步任务集合
         self._background_tasks = set()
-        
-        print("✅ DAIP-LIVE TUI Modular v2.1.0-modular-simplified loaded (Simplified)")
 
     def _initialize_components(self) -> None:
         """初始化TUI组件"""
@@ -126,51 +123,68 @@ class SimplifiedTUI(App):
                 self._debate_history_tracker = self.container.debate_history_tracker()
                 self._agent_executor = self.container.agent_executor()
                 self._intent_recognizer = self.container.intent_recognizer()
-            except Exception as e:
-                print(f"⚠️ 从容器获取组件失败，使用本地初始化: {e}")
+            except Exception:
                 # Fallback: 本地初始化组件
                 db_manager = DatabaseManager(":memory:")
                 self._session_manager = SessionManager(db_manager)
                 self._role_manager = RoleManager(roles_dir_path="roles")
                 self._role_model_manager = RoleModelManager(roles_dir_path="roles")
                 self._model_provider = LiteLLMProvider(config=None)
-                
+
                 # 初始化辩论历史跟踪器
                 try:
-                    self._debate_history_tracker = DebateHistoryTracker(db_path=":memory:")
+                    self._debate_history_tracker = DebateHistoryTracker(
+                        db_path=":memory:"
+                    )
                 except Exception:
                     # 如果辩论组件不可用，使用mock对象
                     class MockDebateHistoryTracker:
-                        async def start_tracking(self, event): pass
-                        async def get_history(self, session_id): return None
-                        async def get_all_histories(self): return []
+                        async def start_tracking(self, event):
+                            pass
+
+                        async def get_history(self, session_id):
+                            return None
+
+                        async def get_all_histories(self):
+                            return []
+
                     self._debate_history_tracker = MockDebateHistoryTracker()
-                
+
                 # 初始化智能体执行器
                 try:
                     self._agent_executor = AgentExecutor(
                         session_manager=self._session_manager,
-                        model_provider=self._model_provider
+                        model_provider=self._model_provider,
                     )
                 except Exception:
+
                     class MockAgentExecutor:
-                        async def process_input(self, input_text): return f"Mock response for: {input_text}"
+                        async def process_input(self, input_text):
+                            return f"Mock response for: {input_text}"
+
                     self._agent_executor = MockAgentExecutor()
-                
+
                 # 初始化意图识别器
                 try:
                     self._intent_recognizer = EnhancedIntentRecognizer()
                 except Exception:
+
                     class MockIntentRecognizer:
                         def recognize_intent(self, text):
-                            return Intent(name="chat", confidence=0.5, parameters={"content": text})
+                            return Intent(
+                                name="chat",
+                                confidence=0.5,
+                                parameters={"content": text},
+                            )
+
                     self._intent_recognizer = MockIntentRecognizer()
 
             # 初始化Claude技能适配器管理器
             try:
-                self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(self._session_manager)
-            except Exception as e:
-                print(f"Warning: Could not initialize ClaudeSkillAdapterManager: {e}")
+                self._claude_skill_adapter_manager = ClaudeSkillAdapterManager(
+                    self._session_manager
+                )
+            except Exception:
                 self._claude_skill_adapter_manager = None
 
             # 初始化辩论命令处理器
@@ -178,10 +192,9 @@ class SimplifiedTUI(App):
                 self._debate_commands = DebateCommands(
                     debate_manager=None,  # Will be set up properly later if available
                     session_manager=self._session_manager,
-                    role_manager=self._role_manager
+                    role_manager=self._role_manager,
                 )
-            except Exception as e:
-                print(f"Warning: Could not initialize DebateCommands: {e}")
+            except Exception:
                 self._debate_commands = None
 
             # 初始化角色命令处理器
@@ -189,27 +202,37 @@ class SimplifiedTUI(App):
                 tui_instance=self,
                 role_manager=self._role_manager,
                 role_model_manager=self._role_model_manager,
-                session_manager=self._session_manager
+                session_manager=self._session_manager,
             )
 
             # 初始化交互式角色创建服务
             self._interactive_role_service = InteractiveRoleCreationService(
                 role_manager=self._role_manager,
-                role_model_manager=self._role_model_manager
+                role_model_manager=self._role_model_manager,
             )
 
             # 初始化自动补全
             self._autocomplete = TUIAutocomplete(
                 role_manager=self._role_manager,
                 available_commands=[
-                    "/help", "/debate", "/wiki", "/knowledge", "/doc", "/role", 
-                    "/model", "/session", "/skill", "/clear", "/quit", "/exit"
-                ]
+                    "/help",
+                    "/debate",
+                    "/wiki",
+                    "/knowledge",
+                    "/doc",
+                    "/role",
+                    "/model",
+                    "/session",
+                    "/skill",
+                    "/clear",
+                    "/quit",
+                    "/exit",
+                ],
             )
 
-        except Exception as e:
-            print(f"❌ TUI组件初始化失败: {e}")
+        except Exception:
             import traceback
+
             traceback.print_exc()
             raise
 
@@ -222,15 +245,29 @@ class SimplifiedTUI(App):
             # Conversation area - takes most of the space
             with Vertical():
                 yield Static("💬 对话区域", classes="panel-header")
-                yield CopyableLogWidget(id="main_log", classes="output-mode", highlight=True, markup=True, wrap=True)
+                yield CopyableLogWidget(
+                    id="main_log",
+                    classes="output-mode",
+                    highlight=True,
+                    markup=True,
+                    wrap=True,
+                )
 
             # System activity panel - narrow sidebar for system messages
             with Vertical(classes="system-panel"):
                 yield Static("🔧 系统状态", classes="panel-header")
-                yield CopyableLogWidget(id="system_log", classes="system-log", highlight=True, markup=True, wrap=True)
+                yield CopyableLogWidget(
+                    id="system_log",
+                    classes="system-log",
+                    highlight=True,
+                    markup=True,
+                    wrap=True,
+                )
 
         yield Input(placeholder="Enter command or message...", id="user_input")
-        yield Static("DAIP-LIVE Modular TUI | Status: Ready | Focus: Input", id="status_bar")
+        yield Static(
+            "DAIP-LIVE Modular TUI | Status: Ready | Focus: Input", id="status_bar"
+        )
         yield Footer()
 
     def on_mount(self) -> None:
@@ -252,29 +289,27 @@ class SimplifiedTUI(App):
 - 输入 `Ctrl+C` 退出
         """
         self._update_log_view(Markdown(welcome_msg))
-        
-        print("GUI initialized successfully")
 
     def _update_log_view(self, content: str) -> None:
         """更新主日志视图"""
         try:
-            if hasattr(self, 'main_log') and self.main_log:
+            if hasattr(self, "main_log") and self.main_log:
                 self.main_log.write(content)
             else:
                 # 如果组件还没准备好，先缓存
                 self._conversation_history.append(content)
-        except Exception as e:
-            print(f"Error updating log view: {e}")
+        except Exception:
+            pass
 
     def _update_system_log(self, content: str) -> None:
         """更新系统日志视图"""
         try:
-            if hasattr(self, 'system_log') and self.system_log:
+            if hasattr(self, "system_log") and self.system_log:
                 self.system_log.write(content)
             else:
                 self._system_messages.append(content)
-        except Exception as e:
-            print(f"Error updating system log: {e}")
+        except Exception:
+            pass
 
     async def on_input_submitted(self, event: Input.Submitted) -> None:
         """处理用户输入"""
@@ -314,7 +349,7 @@ class SimplifiedTUI(App):
     async def _process_user_input(self, user_input: str) -> None:
         """处理用户输入的核心逻辑"""
         start_time = time.time()
-        
+
         try:
             # 记录性能
             self.performance_monitor.log_action("user_input_processed", start_time)
@@ -323,9 +358,11 @@ class SimplifiedTUI(App):
             intent: Optional[Intent] = None
             try:
                 # 尝试上下文感知意图识别
-                if hasattr(self._intent_recognizer, 'recognize_intent_with_context'):
-                    intent = await self._intent_recognizer.recognize_intent_with_context(
-                        user_input, self.session_id
+                if hasattr(self._intent_recognizer, "recognize_intent_with_context"):
+                    intent = (
+                        await self._intent_recognizer.recognize_intent_with_context(
+                            user_input, self.session_id
+                        )
                     )
                 else:
                     # 使用标准意图识别
@@ -333,12 +370,16 @@ class SimplifiedTUI(App):
             except Exception as e:
                 self._update_system_log(f"[yellow]⚠️ 意图识别失败: {e}[/yellow]")
                 # 使用默认聊天意图
-                intent = Intent(name="chat", confidence=0.5, parameters={"content": user_input})
+                intent = Intent(
+                    name="chat", confidence=0.5, parameters={"content": user_input}
+                )
 
             # 根据意图名称路由到相应的处理函数
             intent_name = intent.name if intent else "unknown"
-            
-            self._update_system_log(f"[dim]🎯 意图: {intent_name} (置信度: {intent.confidence if intent else 0:.2f})[/dim]")
+
+            self._update_system_log(
+                f"[dim]🎯 意图: {intent_name} (置信度: {intent.confidence if intent else 0:.2f})[/dim]"  # noqa: E501
+            )
 
             if intent_name == "chat" or intent_name == "question":
                 await self._handle_chat_intent(user_input, intent)
@@ -359,12 +400,15 @@ class SimplifiedTUI(App):
             self._update_log_view(error_msg)
             self._update_system_log(f"[red]⚠️ 错误详情: {str(e)}[/red]")
             import traceback
+
             traceback.print_exc()
 
         finally:
             # 记录处理完成时间
             processing_time = time.time() - start_time
-            self.performance_monitor.log_action("input_processing_complete", processing_time)
+            self.performance_monitor.log_action(
+                "input_processing_complete", processing_time
+            )
 
     async def _handle_chat_intent(self, user_input: str, intent: Intent) -> None:
         """处理聊天意图"""
@@ -381,15 +425,23 @@ class SimplifiedTUI(App):
         """处理辩论意图"""
         try:
             # 提取辩论参数
-            topic = intent.parameters.get("topic", user_input.replace("辩论", "").replace("讨论", "").strip() or "通用话题")
+            topic = intent.parameters.get(
+                "topic",
+                user_input.replace("辩论", "").replace("讨论", "").strip()
+                or "通用话题",
+            )
             roles_param = intent.parameters.get("roles", "pro_arguer,con_arguer")
-            roles = [role.strip() for role in roles_param.split(",")] if roles_param else ["pro_arguer", "con_arguer"]
+            roles = (
+                [role.strip() for role in roles_param.split(",")]
+                if roles_param
+                else ["pro_arguer", "con_arguer"]
+            )
             rounds = intent.parameters.get("rounds", 3)
-            
+
             self._update_log_view(f"[blue]🎮 开始辩论: {topic}[/blue]")
             self._update_log_view(f"[blue]👥 角色: {', '.join(roles)}[/blue]")
             self._update_log_view(f"[blue]🔢 轮次: {rounds}[/blue]")
-            
+
             # 尝试使用增强辩论管理器
             try:
                 debate_manager = EnhancedDebateManager(
@@ -397,36 +449,43 @@ class SimplifiedTUI(App):
                     role_manager=self._role_manager,
                     role_model_manager=self._role_model_manager,
                     model_provider=self._model_provider,
-                    debate_history_tracker=self._debate_history_tracker
+                    debate_history_tracker=self._debate_history_tracker,
                 )
-                
+
                 # 运行辩论（异步生成器）
                 async for event in debate_manager.run_debate(topic, roles, rounds):
                     # 处理辩论事件并更新UI
                     self._handle_debate_event(event)
-                    
+
             except Exception as debate_error:
-                self._update_log_view(f"[yellow]⚠️ 增强辩论管理器失败: {debate_error}[/yellow]")
+                self._update_log_view(
+                    f"[yellow]⚠️ 增强辩论管理器失败: {debate_error}[/yellow]"
+                )
                 self._update_log_view("[yellow]🔄 回退到基本辩论功能...[/yellow]")
-                
+
         except Exception as e:
             self._update_log_view(f"[red]❌ 辩论处理错误: {e}[/red]")
             import traceback
+
             traceback.print_exc()
 
     def _handle_debate_event(self, event: Any) -> None:
         """处理辩论事件并更新UI"""
         try:
-            if hasattr(event, 'type'):
+            if hasattr(event, "type"):
                 event_type = event.type
                 if event_type == "debate_start":
-                    self._update_log_view(f"[bold magenta]🎮 辩论开始: {getattr(event, 'topic', 'Unknown')}[/bold magenta]")
+                    self._update_log_view(
+                        f"[bold magenta]🎮 辩论开始: {getattr(event, 'topic', 'Unknown')}[/bold magenta]"  # noqa: E501
+                    )
                 elif event_type == "round_start":
-                    round_num = getattr(event, 'round_number', '?')
-                    self._update_log_view(f"[bold blue]🔄 第 {round_num} 轮开始[/bold blue]")
+                    round_num = getattr(event, "round_number", "?")
+                    self._update_log_view(
+                        f"[bold blue]🔄 第 {round_num} 轮开始[/bold blue]"
+                    )
                 elif event_type == "turn_complete":
-                    participant = getattr(event, 'participant', 'Unknown')
-                    content = getattr(event, 'content_preview', '...')
+                    participant = getattr(event, "participant", "Unknown")
+                    content = getattr(event, "content_preview", "...")
                     self._update_log_view(f"[cyan]🗣️ {participant}:[/cyan] {content}")
                 elif event_type == "debate_complete":
                     self._update_log_view("[bold green]✅ 辩论完成![/bold green]")
@@ -437,14 +496,15 @@ class SimplifiedTUI(App):
         """处理维基意图"""
         try:
             from daip_live.wiki.manager import WikiManager
+
             wiki_manager = WikiManager(wiki_root=Path("wiki"))
-            
+
             title = intent.parameters.get("title", "未命名页面")
             content = intent.parameters.get("content", user_input)
-            
+
             page = wiki_manager.create_page(title, content)
             self._update_log_view(f"[green]📝 维基页面创建成功: {page.title}[/green]")
-            
+
         except Exception as e:
             self._update_log_view(f"[red]❌ 维基创建错误: {e}[/red]")
 
@@ -492,16 +552,18 @@ class SimplifiedTUI(App):
         """复制所有输出到剪贴板"""
         try:
             # 获取主日志内容（这是主要的输出区域）
-            main_log_widget = self.query_one("#main_log", CopyableLogWidget)
-            
+            self.query_one("#main_log", CopyableLogWidget)
+
             # 在实际实现中，我们会从RichLog组件获取内容
             # 但由于Textual组件架构限制，我们需要另辟蹊径
-            content_to_copy = "DAIP-LIVE TUI 输出内容:\\n\\n" + "\\n".join([
-                "此功能允许复制TUI输出内容到剪贴板",
-                "在实际部署版本中，这将复制所有显示的对话和系统消息",
-                "当前显示为示例文本"
-            ])
-            
+            content_to_copy = "DAIP-LIVE TUI 输出内容:\\n\\n" + "\\n".join(
+                [
+                    "此功能允许复制TUI输出内容到剪贴板",
+                    "在实际部署版本中，这将复制所有显示的对话和系统消息",
+                    "当前显示为示例文本",
+                ]
+            )
+
             success = copy_content(content_to_copy)
             if success:
                 self.notify("输出内容已复制到剪贴板！", timeout=2)
@@ -509,7 +571,7 @@ class SimplifiedTUI(App):
             else:
                 self.notify("复制失败，请检查剪贴板权限", timeout=2)
                 self._update_system_log("[red]❌ 复制失败[/red]")
-                
+
         except Exception as e:
             self._update_system_log(f"[red]❌ 复制操作失败: {e}[/red]")
 
@@ -518,10 +580,10 @@ class SimplifiedTUI(App):
         try:
             main_log_widget = self.query_one("#main_log", CopyableLogWidget)
             system_log_widget = self.query_one("#system_log", CopyableLogWidget)
-            
+
             main_log_widget.clear()
             system_log_widget.clear()
-            
+
             self._update_system_log("[blue]🗑️ 日志已清除[/blue]")
         except Exception as e:
             self._update_system_log(f"[red]❌ 清除日志失败: {e}[/red]")
@@ -530,14 +592,16 @@ class SimplifiedTUI(App):
         """重启会话"""
         try:
             self.session_id = f"tui_session_{int(time.time())}"
-            self._update_system_log(f"[green]🔄 会话已重启 (ID: {self.session_id})[/green]")
-            
+            self._update_system_log(
+                f"[green]🔄 会话已重启 (ID: {self.session_id})[/green]"
+            )
+
             # 清除日志并显示欢迎消息
             self.action_clear_logs()
-            
+
             welcome_msg = f"会话已重启。新会话ID: {self.session_id}"
             self._update_log_view(f"[bold green]{welcome_msg}[/bold green]")
-            
+
         except Exception as e:
             self._update_system_log(f"[red]❌ 重启会话失败: {e}[/red]")
 
@@ -550,26 +614,29 @@ class SimplifiedTUI(App):
         if self._tui_role_handler:
             try:
                 # 解析命令参数
-                parts = command_args.strip().split(' ', 1)
-                cmd = parts[0].lower() if parts else ''
-                args = parts[1] if len(parts) > 1 else ''
+                parts = command_args.strip().split(" ", 1)
+                cmd = parts[0].lower() if parts else ""
+                args = parts[1] if len(parts) > 1 else ""
 
                 # 传递给角色命令处理器
                 result = self._tui_role_handler.handle_role_command(cmd, args)
-                
+
                 if result:
                     self._update_log_view(f"[cyan]🎭 角色命令结果: {result}[/cyan]")
                 else:
                     self._update_log_view("[yellow]⚠️ 角色命令未产生结果[/yellow]")
-                    
+
             except Exception as e:
                 self._update_log_view(f"[red]❌ 角色命令处理错误: {e}[/red]")
                 import traceback
+
                 traceback.print_exc()
         else:
             self._update_log_view("[red]❌ 角色命令处理器未初始化[/red]")
 
+
 console = Console()
+
 
 def main():
     """主入口点"""
@@ -577,21 +644,21 @@ def main():
         # 检查并创建必要目录
         Path("wiki").mkdir(exist_ok=True)
         Path("roles").mkdir(exist_ok=True)
-        
+
         # 初始化配置桥接
         try:
             config_bridge.init_config()
-        except Exception as e:
-            print(f"⚠️ 配置桥接初始化警告: {e}")
-        
+        except Exception:
+            pass
+
         app = SimplifiedTUI()
         app.run()
-        
+
     except KeyboardInterrupt:
-        print("\\n👋 TUI已退出")
-    except Exception as e:
-        print(f"❌ TUI启动失败: {e}")
+        pass
+    except Exception:
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

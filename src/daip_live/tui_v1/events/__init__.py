@@ -11,7 +11,7 @@ newP6 architecture requirements. The event system provides:
 - Performance-optimized event delivery
 """
 
-from .types import Event, EventType, EventPriority
 from .system import TUIEventSystem
+from .types import Event, EventPriority, EventType
 
 __all__ = ["Event", "EventType", "EventPriority", "TUIEventSystem"]

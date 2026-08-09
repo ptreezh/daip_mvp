@@ -1,12 +1,11 @@
 """
 IntelligentRoleManager Wrapper
 Provides backward compatibility with RoleManager API while using IntelligentRoleManager functionality
-"""
+"""  # noqa: E501
 
-import os
-import glob
 import asyncio
-from pathlib import Path
+import glob
+import os
 
 
 class IntelligentRoleManagerWrapper:
@@ -16,12 +15,13 @@ class IntelligentRoleManagerWrapper:
     """
 
     def __init__(self, roles_dir_path=None, model_provider=None):
-        from daip_live.p4_role_manager_tools.intelligent_role_manager import IntelligentRoleManager
+        from daip_live.p4_role_manager_tools.intelligent_role_manager import (
+            IntelligentRoleManager,
+        )
         from daip_live.p4_role_manager_tools.role_manager import RoleManager
 
         self._internal_manager = IntelligentRoleManager(
-            roles_dir=roles_dir_path or "roles",
-            model_provider=model_provider
+            roles_dir=roles_dir_path or "roles", model_provider=model_provider
         )
         self._roles_dir_path = roles_dir_path or "roles"
 

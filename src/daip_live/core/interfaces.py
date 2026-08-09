@@ -2,7 +2,8 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
+
 from daip_live.core.models import AgentEvent
 
 
@@ -17,7 +18,7 @@ class ModuleContract(ABC):
 
     @classmethod
     @abstractmethod
-    def get_dependencies(cls) -> List[str]:
+    def get_dependencies(cls) -> list[str]:
         """获取依赖列表"""
         pass
 
@@ -41,7 +42,7 @@ class IModelProvider(ABC):
     """Interface for a service that provides LLM generation and embeddings."""
 
     @abstractmethod
-    async def generate(self, prompt: str, params: Dict) -> AsyncGenerator[str, None]:
+    async def generate(self, prompt: str, params: dict) -> AsyncGenerator[str, None]:
         """Generates a response from a language model."""
         # This is an async generator, so it must be implemented with `async def`
         # and use `yield` to stream tokens.
@@ -50,7 +51,7 @@ class IModelProvider(ABC):
         # The actual implementation will not have it.
 
     @abstractmethod
-    async def embed(self, text: str) -> List[float]:
+    async def embed(self, text: str) -> list[float]:
         """Creates an embedding vector for a given text asynchronously."""
         pass
 
@@ -59,12 +60,12 @@ class IKnowledgeManager(ABC):
     """Interface for a service that manages the knowledge base."""
 
     @abstractmethod
-    def search(self, query_text: str, top_k: int) -> List[Dict]:
+    def search(self, query_text: str, top_k: int) -> list[dict]:
         """Searches the knowledge base for relevant documents."""
         pass
 
     @abstractmethod
-    def sync_knowledge_base(self) -> Dict:
+    def sync_knowledge_base(self) -> dict:
         """Synchronizes the knowledge base with the source documents."""
         pass
 
@@ -94,7 +95,13 @@ class IDebateManager(ABC):
     """Interface for a debate management service."""
 
     @abstractmethod
-    def __init__(self, session_manager, role_manager, model_provider, use_optimized_architecture: bool = False):
+    def __init__(
+        self,
+        session_manager,
+        role_manager,
+        model_provider,
+        use_optimized_architecture: bool = False,
+    ):
         """Initialize the debate manager."""
         pass
 
@@ -102,19 +109,19 @@ class IDebateManager(ABC):
     async def run_debate(
         self,
         topic: str,
-        roles: List[str],
+        roles: list[str],
         rounds: int,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
     ) -> AsyncGenerator[AgentEvent, None]:
         """Run a debate between multiple roles."""
         pass
 
     @abstractmethod
-    def get_debate_model_summary(self, roles: List[str]) -> Dict[str, Any]:
+    def get_debate_model_summary(self, roles: list[str]) -> dict[str, Any]:
         """Get model configuration summary for the debate."""
         pass
 
     @abstractmethod
-    def get_debate_state(self) -> Dict[str, Any]:
+    def get_debate_state(self) -> dict[str, Any]:
         """Get current debate state."""
         pass

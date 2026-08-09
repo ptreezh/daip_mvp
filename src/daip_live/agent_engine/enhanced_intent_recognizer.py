@@ -3,24 +3,26 @@
 """
 
 import re
-from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Optional
 
 
 class IntentType(Enum):
     """意图类型枚举"""
-    QUESTION = "question"      # 问题类对话
-    CHAT = "chat"            # 普通聊天
-    WORKFLOW = "workflow"      # 工作流（辩论、论文下载、Wiki等）
+
+    QUESTION = "question"  # 问题类对话
+    CHAT = "chat"  # 普通聊天
+    WORKFLOW = "workflow"  # 工作流（辩论、论文下载、Wiki等）
 
 
 @dataclass
 class Intent:
     """意图数据类"""
+
     name: str
     confidence: float
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     tool_name: Optional[str] = None
     description: str = ""
     intent_type: IntentType = IntentType.CHAT
@@ -35,11 +37,13 @@ class EnhancedIntentRecognizer:
     def __init__(self):
         """初始化增强意图识别器"""
         # 导入澄清服务
-        from daip_live.agent_engine.services.clarification_service import ClarificationService
+        from daip_live.agent_engine.services.clarification_service import (
+            ClarificationService,
+        )
+
         self.clarification_service = ClarificationService()
 
         # 导入技能集成服务
-        from daip_live.skills.integration import ClaudeSkillsIntegrationService
         self.claude_integration_service = None  # 初始化为None，将在系统启动时赋值
 
         # 初始化技能管理器引用（将在系统启动时设置）
@@ -51,10 +55,10 @@ class EnhancedIntentRecognizer:
         # 导入模型适配管理器
         try:
             from daip_live.skills.model_adapter_manager import ModelAdapterManager
+
             self.model_adapter_manager = ModelAdapterManager()
-        except Exception as e:
+        except Exception:
             self.model_adapter_manager = None
-            print(f"⚠️  Model adapter manager not available: {e}")
 
         self.intent_patterns = {
             # 复杂任务功能 - 最高优先级
@@ -122,15 +126,14 @@ class EnhancedIntentRecognizer:
                     r".*(咨询|建议|推荐).*最佳.*实践",
                     r".*(咨询|建议|推荐).*最优.*方案",
                     r".*(咨询|建议|推荐).*完整.*流程",
-                    r".*(咨询|建议|推荐).*系统.*方法"
+                    r".*(咨询|建议|推荐).*系统.*方法",
                 ],
                 "tool": "complex_task",
                 "extract_params": self._extract_complex_task_params,
                 "description": "复杂任务处理工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # PA助手功能 - 高优先级
             "personal_assistant": {
                 "patterns": [
@@ -162,15 +165,14 @@ class EnhancedIntentRecognizer:
                     # 包含"助手"且有动作的表达
                     r".*助手.*帮我.*",
                     r".*助手.*请.*",
-                    r".*助手.*帮.*"
+                    r".*助手.*帮.*",
                 ],
                 "tool": "personal_assistant",
                 "extract_params": self._extract_assistant_params,
                 "description": "个人助手工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 技能执行工作流 - 高优先级
             "execute_skill": {
                 "patterns": [
@@ -228,9 +230,8 @@ class EnhancedIntentRecognizer:
                 "extract_params": self._extract_skill_params,
                 "description": "技能执行工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 知识库搜索 - 高优先级
             "knowledge_search": {
                 "patterns": [
@@ -268,15 +269,14 @@ class EnhancedIntentRecognizer:
                     r"本地.*资料.*",
                     r"我的.*资料.*",
                     r"个人.*资料.*",
-                    r"自有.*资料.*"
+                    r"自有.*资料.*",
                 ],
                 "tool": "knowledge",
                 "extract_params": self._extract_knowledge_search_params,
                 "description": "知识库搜索",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 查看Wiki词条 - 高优先级（避免与创建意图冲突）
             "view_wiki": {
                 "patterns": [
@@ -296,15 +296,14 @@ class EnhancedIntentRecognizer:
                     r"查看\s+(.+?)\s+百科",
                     r"浏览\s+(.+?)\s+词条",
                     r"浏览\s+(.+?)\s+维基",
-                    r"浏览\s+(.+?)\s+百科"
+                    r"浏览\s+(.+?)\s+百科",
                 ],
                 "tool": "wiki",
                 "extract_params": self._extract_view_wiki_params,
                 "description": "查看Wiki词条",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # Wiki工作流 - 优先级调整
             "create_wiki": {
                 "patterns": [
@@ -354,15 +353,14 @@ class EnhancedIntentRecognizer:
                     # 简单维基/百科模式（放在后面，降低优先级以避免冲突）
                     r".*维基.*",
                     r".*百科.*",
-                    r".*词条.*"
+                    r".*词条.*",
                 ],
                 "tool": "wiki",
                 "extract_params": self._extract_wiki_params,
                 "description": "Wiki创建工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 论文检索工作流 - 中优先级
             "search_papers": {
                 "patterns": [
@@ -390,7 +388,7 @@ class EnhancedIntentRecognizer:
                     r".*(学术|研究|科学|期刊|arxiv|cite|bibliography).*搜索.*",
                     r".*(学术|研究|科学|期刊|arxiv|cite|bibliography).*查找.*",
                     # 添加简短的论文请求模式
-                    r"论文\s+.+",      # "论文 人工智能" - 需要具体主题
+                    r"论文\s+.+",  # "论文 人工智能" - 需要具体主题
                     # 知识库搜索模式（更具体）
                     r".*知识库.*搜索.*",
                     r".*知识库.*查找.*",
@@ -402,13 +400,12 @@ class EnhancedIntentRecognizer:
                 "extract_params": self._extract_search_params,
                 "description": "学术论文检索工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 问题类意图 - 中优先级
             "question": {
                 "patterns": [
-                    r".+\?",                          # 以问号结尾
+                    r".+\?",  # 以问号结尾
                     r"什么是",
                     r"如何",
                     r"为什么",
@@ -456,15 +453,14 @@ class EnhancedIntentRecognizer:
                     r".*detailed.*",
                     r".*comprehensive.*",
                     r".*careful.*consideration.*",
-                    r".*thorough.*analysis.*"
+                    r".*thorough.*analysis.*",
                 ],
                 "tool": None,
                 "extract_params": self._extract_question_params,
                 "description": "问题类对话",
                 "intent_type": IntentType.QUESTION,
-                "requires_confidence_check": True
+                "requires_confidence_check": True,
             },
-            
             # 普通聊天意图 - 直接回答
             "chat": {
                 "patterns": [
@@ -482,42 +478,40 @@ class EnhancedIntentRecognizer:
                     r"怎么样",
                     r"最近.*怎么样",
                     r"最近.*",
-                    r"你.*理.*我",      # "你怎么不理我"
-                    r"你.*没.*理.*",    # "你没理我"
-                    r"刚.*让.*你.*",    # "刚才让你"
-                    r"为.*么.*不.*",    # "为什么不"
-                    r".*怎么.*不.*",    # "怎么不"
-                    r".*随便.*聊聊.*",   # "随便聊聊"
-                    r".*随意.*聊天.*",   # "随意聊天"
-                    r".*闲.*聊.*",     # "闲聊"
-                    r"你.*好.*",       # "你好啊", "你好呀"等
-                    r"哈.*哈.*",       # "哈哈", "哈哈哈"等
-                    r"嗯.*",          # "嗯", "嗯嗯"等
-                    r"哦.*",          # "哦", "哦哦"等
-                    r"啊.*",          # "啊", "啊啊"等
-                    r".*聊.*天.*",    # "聊天", "聊聊", "聊一下"等
-                    r".*谈.*谈.*",    # "谈谈", "谈一谈"等
+                    r"你.*理.*我",  # "你怎么不理我"
+                    r"你.*没.*理.*",  # "你没理我"
+                    r"刚.*让.*你.*",  # "刚才让你"
+                    r"为.*么.*不.*",  # "为什么不"
+                    r".*怎么.*不.*",  # "怎么不"
+                    r".*随便.*聊聊.*",  # "随便聊聊"
+                    r".*随意.*聊天.*",  # "随意聊天"
+                    r".*闲.*聊.*",  # "闲聊"
+                    r"你.*好.*",  # "你好啊", "你好呀"等
+                    r"哈.*哈.*",  # "哈哈", "哈哈哈"等
+                    r"嗯.*",  # "嗯", "嗯嗯"等
+                    r"哦.*",  # "哦", "哦哦"等
+                    r"啊.*",  # "啊", "啊啊"等
+                    r".*聊.*天.*",  # "聊天", "聊聊", "聊一下"等
+                    r".*谈.*谈.*",  # "谈谈", "谈一谈"等
                     # 一般性对话
-                    r"怎么样.*",      # "怎么样啊", "怎么样呢"
-                    r"如何.*",        # "如何啊"
-                    r"你.*在.*吗",    # "你在吗", "你还在吗"
-                    r"你.*在.*",      # "你在做什么", "你在干啥"
-                    r"你.*做.*什么.*", # "你在做什么"
-                    r"你.*干.*什么.*", # "你在干什么"
-                    r".*吗",         # 一般疑问句后缀
-                    r"是.*吗",       # "是吗", "是这样吗"
-                    r"对.*吧",       # "对吧", "是吧"
+                    r"怎么样.*",  # "怎么样啊", "怎么样呢"
+                    r"如何.*",  # "如何啊"
+                    r"你.*在.*吗",  # "你在吗", "你还在吗"
+                    r"你.*在.*",  # "你在做什么", "你在干啥"
+                    r"你.*做.*什么.*",  # "你在做什么"
+                    r"你.*干.*什么.*",  # "你在干什么"
+                    r".*吗",  # 一般疑问句后缀
+                    r"是.*吗",  # "是吗", "是这样吗"
+                    r"对.*吧",  # "对吧", "是吧"
                 ],
                 "tool": None,
                 "extract_params": self._extract_chat_params,
                 "description": "普通聊天",
                 "intent_type": IntentType.CHAT,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
-
             # 论文检索工作流 - 进入专门流程
-            "search_papers": {
+            "search_papers": {  # noqa: F601  # L365 同 key 死配置待清理（dict 后者生效）
                 "patterns": [
                     r"搜索.*论文.*",
                     r"查找.*论文.*",
@@ -543,8 +537,8 @@ class EnhancedIntentRecognizer:
                     r".*(学术|研究|科学|期刊|arxiv|cite|bibliography).*搜索.*",
                     r".*(学术|研究|科学|期刊|arxiv|cite|bibliography).*查找.*",
                     # 添加简短的论文请求模式
-                    r"论文\s+.+",      # "论文 人工智能"
-                    r"论文\s*$",       # "论文" (空格后可能有内容)
+                    r"论文\s+.+",  # "论文 人工智能"
+                    r"论文\s*$",  # "论文" (空格后可能有内容)
                     # 添加知识库搜索模式
                     r".*知识库.*搜索.*",
                     r".*知识库.*查找.*",
@@ -575,16 +569,14 @@ class EnhancedIntentRecognizer:
                     r"查找.*内容.*",
                     r".*搜索.*",
                     r".*查找.*",
-                    r".*找.*"
+                    r".*找.*",
                 ],
                 "tool": "search_academic_papers",
                 "extract_params": self._extract_search_params,
                 "description": "学术论文检索工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-            
-
             # 论文下载工作流
             "download_paper": {
                 "patterns": [
@@ -594,34 +586,29 @@ class EnhancedIntentRecognizer:
                     r"download.*arxiv.*(\d{4}\.\d{4,5}(v\d+)?)",
                     r"获取.*论文.*(\d{4}\.\d{4,5}(v\d+)?)",
                     r"download.*paper.*(\d{4}\.\d{4,5}(v\d+)?)",
-
                     # 查看/阅读论文请求
                     r"查看.*论文.*(\d{4}\.\d{4,5}(v\d+)?)",
                     r"阅读.*论文.*(\d{4}\.\d{4,5}(v\d+)?)",
                     r"看.*论文.*(\d{4}\.\d{4,5}(v\d+)?)",
-
                     # 不带ID的一般论文/文章/文献下载请求 - 这会触发搜索下载流程
                     r"下载.*论文.*关于.*",  # 需要具体主题
                     r"下载.*关于.*的论文.*",
                     r"获取.*关于.*的论文.*",
                     r"下载.*论文.*[\s:：].*",  # 需要冒号或空格后跟内容
                     r"获取.*论文.*[\s:：].*",
-
                     # 查看/阅读请求 (没有具体ID时需要搜索)
                     r"查看.*论文.*关于.*",
                     r"阅读.*论文.*关于.*",
                     r"看.*论文.*关于.*",
-
                     # 通用搜索请求，在没有具体ID时
-                    r"论文\s+.+",      # "论文 人工智能" 格式 - 需要具体主题
+                    r"论文\s+.+",  # "论文 人工智能" 格式 - 需要具体主题
                 ],
                 "tool": "download_paper",
                 "extract_params": self._extract_download_params,
                 "description": "论文下载工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 知识库管理
             "knowledge_sync": {
                 "patterns": [
@@ -632,17 +619,15 @@ class EnhancedIntentRecognizer:
                     r"知识库.*同步",
                     r"知识.*刷新",
                     r"scan.*knowledge",
-                    r"refresh.*knowledge"
+                    r"refresh.*knowledge",
                 ],
                 "tool": "knowledge",
                 "extract_params": self._extract_knowledge_params,
                 "description": "知识库同步",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 知识库搜索
-
             # 压缩上下文
             "compress_context": {
                 "patterns": [
@@ -651,15 +636,14 @@ class EnhancedIntentRecognizer:
                     r"压缩.*对话",
                     r"compress.*context",
                     r"清理.*内存",
-                    r"内存.*管理"
+                    r"内存.*管理",
                 ],
                 "tool": "compress",
                 "extract_params": self._extract_compress_params,
                 "description": "上下文压缩",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-            
             # 项目初始化工作流
             "initialize_project": {
                 "patterns": [
@@ -670,15 +654,14 @@ class EnhancedIntentRecognizer:
                     r"初始化.*环境",
                     r"setup.*project",
                     r"init.*project",
-                    r"设置.*环境"
+                    r"设置.*环境",
                 ],
                 "tool": "scaffold",
                 "extract_params": self._extract_scaffold_params,
                 "description": "项目初始化工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-            
             # 查看辩论历史
             "view_debate_history": {
                 "patterns": [
@@ -700,15 +683,14 @@ class EnhancedIntentRecognizer:
                     r"上次.*辩论.*情况",
                     r"近期.*辩论.*记录",
                     r"历史.*记录.*辩论",
-                    r"show.*debate.*history"
+                    r"show.*debate.*history",
                 ],
                 "tool": None,  # 不需要特定工具，通过TUI直接处理
                 "extract_params": self._extract_debate_history_params,
                 "description": "查看辩论历史",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-            
             # 查看特定辩论历史
             "view_specific_debate": {
                 "patterns": [
@@ -720,36 +702,33 @@ class EnhancedIntentRecognizer:
                     r"view.*debate.*(\w+)",
                     r"show.*debate.*(\w+)",
                     r"view.*session.*(\w+)",
-                    r"show.*session.*(\w+)"
+                    r"show.*session.*(\w+)",
                 ],
                 "tool": None,  # 不需要特定工具，通过TUI直接处理
                 "extract_params": self._extract_specific_debate_params,
                 "description": "查看特定辩论历史",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
+                "requires_confidence_check": False,
             },
-
             # 辩论工作流
             "start_debate": {
                 "patterns": [
                     # 简单辩论请求支持 - 优先级较高
-                    r"辩论\s*$",       # "辩论" 单独请求
-                    r"辩论\s+(.+)$",   # "辩论 [主题]" 格式
-
+                    r"辩论\s*$",  # "辩论" 单独请求
+                    r"辩论\s+(.+)$",  # "辩论 [主题]" 格式
                     # 多模型相关辩论
-                    r"多模型辩论\s*$",      # "多模型辩论" 单独请求
+                    r"多模型辩论\s*$",  # "多模型辩论" 单独请求
                     r"多模型辩论\s+(.+)$",  # "多模型辩论 [主题]" 格式
-                    r"多模态辩论\s*$",      # "多模态辩论"
+                    r"多模态辩论\s*$",  # "多模态辩论"
                     r"多模态辩论\s+(.+)$",  # "多模态辩论 [主题]"
-
                     # 原有经典辩论模式
                     r"开始.*辩论",
                     r"发起.*辩论",
                     r"发起.*一个.*辩论",
                     r"辩论.*话题",
                     r"辩论.*主题",
-                    r"辩论[一下吧]",    # 匹配辩论+下/一/吧
-                    r"辩论下.*",      # 明确匹配"辩论下"开头
+                    r"辩论[一下吧]",  # 匹配辩论+下/一/吧
+                    r"辩论下.*",  # 明确匹配"辩论下"开头
                     r"辩论.*一下",
                     r"辩论.*吧",
                     r"让我.*辩论.*",
@@ -770,84 +749,58 @@ class EnhancedIntentRecognizer:
                     r"就.*展开辩论",
                     r"针对.*辩论",
                     r"围绕.*辩论",
-                    r"我们.*辩论.*",    # 匹配"我们辩论 XXX"
-                    r"我们要.*辩论.*",   # 匹配"我们要辩论 XXX"
-                    r"辩论.*吧.*",      # 匹配"辩论吧，关于XXX"
+                    r"我们.*辩论.*",  # 匹配"我们辩论 XXX"
+                    r"我们要.*辩论.*",  # 匹配"我们要辩论 XXX"
+                    r"辩论.*吧.*",  # 匹配"辩论吧，关于XXX"
                     r"debate.*topic",
                     r"discuss.*debate",
                     r"start.*debate",
                     r"begin.*debate",
                     r"let's.*debate",
-                    r"let us.*debate"
+                    r"let us.*debate",
                 ],
                 "tool": "debate",
                 "extract_params": self._extract_debate_params,
                 "description": "辩论工作流",
                 "intent_type": IntentType.WORKFLOW,
-                "requires_confidence_check": False
-            }
+                "requires_confidence_check": False,
+            },
         }
-    
-    def recognize_intent(self, text: str, session_id: str = "default") -> Optional[Intent]:
-        """
-        识别用户输入的意图
-
-        Args:
-            text: 用户输入文本
-            session_id: 会话ID用于上下文管理
-
-        Returns:
-            识别到的意图，如果没有匹配则返回None
-        """
-        text = text.strip().lower()
-
-        best_intent = None
-        best_confidence = 0.0
-
-        for intent_name, intent_config in self.intent_patterns.items():
-            for pattern in intent_config["patterns"]:
-                match = re.search(pattern, text, re.IGNORECASE)
-                if match:
-                    # 计算匹配置信度，对不同类型的意图使用不同的计算方式
-                    matched_text = match.group(0)
-
-                    # 对于特定的、包含明确关键词的匹配，给予更高权重
-                    if intent_name in ["download_paper", "search_papers"] and len(matched_text) < 3:
-                        # 如果是论文相关但匹配的文本太短，降低置信度
-                        confidence = len(matched_text) / len(text) * 0.5  # 降低权重
-                    elif intent_name == "chat":
-                        # 普通聊天意图的置信度计算
-                        confidence = len(matched_text) / len(text)
-                        # 对特定的聊天模式给予高置信度
-                        if any(chat_pattern in text for chat_pattern in ["你好", "hello", "hi", "谢谢", "再见", "拜拜", "嗯", "哦", "啊", "哈"]):
-                            confidence = min(confidence * 1.5, 1.0)  # 提高权重
-                    else:
-                        # 标准的置信度计算
-                        confidence = len(matched_text) / len(text)
-
-                    if confidence > best_confidence:
-                        # 提取参数
-                        params = intent_config["extract_params"](text, match)
-
-                        best_intent = Intent(
-                            name=intent_name,
-                            confidence=confidence,
-                            parameters=params,
-                            tool_name=intent_config["tool"],
-                            description=intent_config["description"],
-                            intent_type=intent_config["intent_type"],
-                            requires_confidence_check=intent_config["requires_confidence_check"]
-                        )
-                        best_confidence = confidence
 
     def _is_certainly_chat(self, text: str) -> bool:
         """检查文本是否明确是普通聊天"""
         # 检查是否是明确的聊天短语
         chat_indicators = [
-            "嗯", "哦", "啊", "嗯嗯", "哦哦", "啊啊", "哈哈", "嘿嘿", "吼吼",
-            "嗯?", "哦?", "啊?", "诶", "咦", "噢", "哎", "哎呀", "哎呀呀",
-            "嗯嗯嗯", "哦哦哦", "啊啊啊", "嘿嘿嘿", "哈哈哈", "嘻嘻嘻",
-            "拜拜", "bye", "88", "晚安", "早安", "午安"
+            "嗯",
+            "哦",
+            "啊",
+            "嗯嗯",
+            "哦哦",
+            "啊啊",
+            "哈哈",
+            "嘿嘿",
+            "吼吼",
+            "嗯?",
+            "哦?",
+            "啊?",
+            "诶",
+            "咦",
+            "噢",
+            "哎",
+            "哎呀",
+            "哎呀呀",
+            "嗯嗯嗯",
+            "哦哦哦",
+            "啊啊啊",
+            "嘿嘿嘿",
+            "哈哈哈",
+            "嘻嘻嘻",
+            "拜拜",
+            "bye",
+            "88",
+            "晚安",
+            "早安",
+            "午安",
         ]
         return any(indicator in text for indicator in chat_indicators)
 
@@ -866,13 +819,24 @@ class EnhancedIntentRecognizer:
         # 检查是否是疑问句但不包含特定功能词
         if text.endswith("吗") or text.endswith("？") or text.endswith("?"):
             # 排除明确的功能请求
-            non_chat_indicators = ["下载", "搜索", "查找", "论文", "维基", "辩论", "创建", "执行"]
+            non_chat_indicators = [
+                "下载",
+                "搜索",
+                "查找",
+                "论文",
+                "维基",
+                "辩论",
+                "创建",
+                "执行",
+            ]
             if not any(indicator in text for indicator in non_chat_indicators):
                 return True
 
         return False
 
-    def recognize_intent(self, text: str, session_id: str = "default") -> Optional[Intent]:
+    def recognize_intent(
+        self, text: str, session_id: str = "default"
+    ) -> Optional[Intent]:
         """
         识别用户输入的意图
 
@@ -894,7 +858,7 @@ class EnhancedIntentRecognizer:
                 tool_name=None,
                 description="普通聊天",
                 intent_type=IntentType.CHAT,
-                requires_confidence_check=False
+                requires_confidence_check=False,
             )
 
         best_intent = None
@@ -912,27 +876,56 @@ class EnhancedIntentRecognizer:
                         # 如果是论文相关，检查匹配文本是否包含实际内容
                         if len(matched_text) < 4:
                             # 如果匹配的文本太短，降低置信度
-                            confidence = len(matched_text) / len(text) * 0.3  # 大幅降低权重
+                            confidence = (
+                                len(matched_text) / len(text) * 0.3
+                            )  # 大幅降低权重
                         else:
                             # 否则使用标准计算但增加对具体关键词的权重
                             confidence = len(matched_text) / len(text)
                             # 检查是否包含具体的学术关键词
-                            if any(keyword in text for keyword in ["arxiv", "1234.", "v1", "论文", "学术", "期刊", "研究"]):
+                            if any(
+                                keyword in text
+                                for keyword in [
+                                    "arxiv",
+                                    "1234.",
+                                    "v1",
+                                    "论文",
+                                    "学术",
+                                    "期刊",
+                                    "研究",
+                                ]
+                            ):
                                 confidence = min(confidence * 1.2, 1.0)
                     elif intent_name == "chat":
                         # 普通聊天意图的置信度计算
                         confidence = len(matched_text) / len(text)
                         # 对特定的聊天模式给予高置信度
-                        if any(chat_pattern in text for chat_pattern in ["你好", "hello", "hi", "谢谢", "再见", "拜拜", "嗯", "哦", "啊", "哈"]):
+                        if any(
+                            chat_pattern in text
+                            for chat_pattern in [
+                                "你好",
+                                "hello",
+                                "hi",
+                                "谢谢",
+                                "再见",
+                                "拜拜",
+                                "嗯",
+                                "哦",
+                                "啊",
+                                "哈",
+                            ]
+                        ):
                             confidence = min(confidence * 1.5, 1.0)  # 提高权重
                     else:
                         # 标准的置信度计算
                         confidence = len(matched_text) / len(text)
 
-                        # 对于wiki相关的意图，如果匹配模式非常精确（如"wiki create"），提高置信度
+                        # 对于wiki相关的意图，如果匹配模式非常精确（如"wiki create"），提高置信度  # noqa: E501
                         if intent_name == "create_wiki":
                             # 检查是否包含明确的wiki create模式
-                            if "wiki create" in text or re.search(r"wiki\s+create", text, re.IGNORECASE):
+                            if "wiki create" in text or re.search(
+                                r"wiki\s+create", text, re.IGNORECASE
+                            ):
                                 confidence = min(confidence * 1.5, 1.0)  # 提高权重
 
                     if confidence > best_confidence:
@@ -946,7 +939,9 @@ class EnhancedIntentRecognizer:
                             tool_name=intent_config["tool"],
                             description=intent_config["description"],
                             intent_type=intent_config["intent_type"],
-                            requires_confidence_check=intent_config["requires_confidence_check"]
+                            requires_confidence_check=intent_config[
+                                "requires_confidence_check"
+                            ],
                         )
                         best_confidence = confidence
 
@@ -960,7 +955,20 @@ class EnhancedIntentRecognizer:
             # 对于某些模糊的输入，如果无法明确识别意图，返回普通聊天意图
             if best_intent and best_intent.name in ["search_papers", "download_paper"]:
                 # 如果匹配的是论文相关但置信度低，更倾向于认为是普通聊天
-                if any(chat_word in text for chat_word in ["怎么", "为何", "为什么", "是吗", "对吧", "呢", "啊", "呀", "吧"]):
+                if any(
+                    chat_word in text
+                    for chat_word in [
+                        "怎么",
+                        "为何",
+                        "为什么",
+                        "是吗",
+                        "对吧",
+                        "呢",
+                        "啊",
+                        "呀",
+                        "吧",
+                    ]
+                ):
                     # 认为是普通聊天
                     return Intent(
                         name="chat",
@@ -969,7 +977,7 @@ class EnhancedIntentRecognizer:
                         tool_name=None,
                         description="普通聊天",
                         intent_type=IntentType.CHAT,
-                        requires_confidence_check=False
+                        requires_confidence_check=False,
                     )
 
         # 如果没有找到高置信度的意图，但文本看起来像是普通聊天，返回聊天意图
@@ -981,22 +989,28 @@ class EnhancedIntentRecognizer:
                 tool_name=None,
                 description="普通聊天",
                 intent_type=IntentType.CHAT,
-                requires_confidence_check=False
+                requires_confidence_check=False,
             )
 
         return None
 
-    def _check_intent_clarification(self, intent: Intent, session_id: str, original_text: str):
+    def _check_intent_clarification(
+        self, intent: Intent, session_id: str, original_text: str
+    ):
         """检查意图是否需要澄清，如缺少关键词或参数"""
         # 检查是否缺少关键词
-        missing_keywords = self.clarification_service.check_missing_keywords(intent.name, intent.parameters)
+        missing_keywords = self.clarification_service.check_missing_keywords(
+            intent.name, intent.parameters
+        )
         if missing_keywords:
             intent.requires_clarification = True
             intent.clarification_needed = missing_keywords
             return
 
         # 检查是否缺少参数
-        missing_params = self.clarification_service.check_missing_parameters(intent.name, intent.parameters)
+        missing_params = self.clarification_service.check_missing_parameters(
+            intent.name, intent.parameters
+        )
         if missing_params:
             intent.requires_clarification = True
             intent.clarification_needed = missing_params
@@ -1010,15 +1024,26 @@ class EnhancedIntentRecognizer:
             # 检查参数是否确实缺失
             if not title or title == "":
                 # 检查是否原始文本只包含通用命令词而没有实际标题
-                generic_phrases = ["创建维基", "写个维基", "新建维基", "做个维基", "创建百科", "写个百科", "新建百科", "创建页面", "写个页面", "新建页面"]
+                generic_phrases = [
+                    "创建维基",
+                    "写个维基",
+                    "新建维基",
+                    "做个维基",
+                    "创建百科",
+                    "写个百科",
+                    "新建百科",
+                    "创建页面",
+                    "写个页面",
+                    "新建页面",
+                ]
                 is_generic = any(phrase in original_clean for phrase in generic_phrases)
                 if is_generic or len(original_clean.split()) <= 2:
                     # 设置澄清需求
                     intent.requires_clarification = True
                     intent.clarification_needed = {
                         "type": "missing_keywords",
-                        "message": "请输入您想创建的维基页面标题，例如：创建维基 人工智能 或 写个维基 量子计算",
-                        "required_parameters": ["title"]
+                        "message": "请输入您想创建的维基页面标题，例如：创建维基 人工智能 或 写个维基 量子计算",  # noqa: E501
+                        "required_parameters": ["title"],
                     }
                     return
             elif title == original_clean:
@@ -1026,8 +1051,8 @@ class EnhancedIntentRecognizer:
                 intent.requires_clarification = True
                 intent.clarification_needed = {
                     "type": "missing_keywords",
-                    "message": "请提供具体的维基页面标题，例如：创建维基 项目计划 或 新建百科 机器学习",
-                    "required_parameters": ["title"]
+                    "message": "请提供具体的维基页面标题，例如：创建维基 项目计划 或 新建百科 机器学习",  # noqa: E501
+                    "required_parameters": ["title"],
                 }
                 return
 
@@ -1038,24 +1063,52 @@ class EnhancedIntentRecognizer:
 
             if not query or query == "":
                 # 检查是否是通用搜索词汇或短语
-                generic_terms = ["搜索", "查找", "找", "查", "资料", "信息", "论文", "内容", "一下", "一点", "点", "东西"]
-                generic_phrases = ["搜索论文", "查找论文", "找论文", "查论文", "下载论文", "搜索资料", "查找资料", "找资料"]
+                generic_terms = [
+                    "搜索",
+                    "查找",
+                    "找",
+                    "查",
+                    "资料",
+                    "信息",
+                    "论文",
+                    "内容",
+                    "一下",
+                    "一点",
+                    "点",
+                    "东西",
+                ]
+                generic_phrases = [
+                    "搜索论文",
+                    "查找论文",
+                    "找论文",
+                    "查论文",
+                    "下载论文",
+                    "搜索资料",
+                    "查找资料",
+                    "找资料",
+                ]
 
-                is_generic = any(phrase in original_clean for phrase in generic_phrases) or \
-                           any(term in original_clean for term in generic_terms and len(original_clean.split()) <= 2)
+                is_generic = any(
+                    phrase in original_clean for phrase in generic_phrases
+                ) or any(
+                    term in original_clean
+                    for term in generic_terms and len(original_clean.split()) <= 2
+                )
 
                 if is_generic:
                     # 确实是通用搜索词，需要澄清
                     intent.requires_clarification = True
                     intent.clarification_needed = {
                         "type": "missing_keywords",
-                        "message": "请输入搜索关键词，例如：论文 人工智能 或 搜索 机器学习",
-                        "required_parameters": ["query"]
+                        "message": "请输入搜索关键词，例如：论文 人工智能 或 搜索 机器学习",  # noqa: E501
+                        "required_parameters": ["query"],
                     }
                     return
                 else:
                     # 如果输入有一定长度且不是通用命令词，使用它作为查询
-                    if len(original_clean) > 3 and not any(keyword in original_clean for keyword in generic_terms):
+                    if len(original_clean) > 3 and not any(
+                        keyword in original_clean for keyword in generic_terms
+                    ):
                         intent.parameters["query"] = original_clean
                         intent.requires_clarification = False
                         intent.clarification_needed = None
@@ -1065,8 +1118,8 @@ class EnhancedIntentRecognizer:
                         intent.requires_clarification = True
                         intent.clarification_needed = {
                             "type": "missing_keywords",
-                            "message": "请输入搜索关键词，例如：论文 人工智能 或 搜索 机器学习",
-                            "required_parameters": ["query"]
+                            "message": "请输入搜索关键词，例如：论文 人工智能 或 搜索 机器学习",  # noqa: E501
+                            "required_parameters": ["query"],
                         }
                         return
             else:
@@ -1084,15 +1137,22 @@ class EnhancedIntentRecognizer:
             # 如果既没有ID也没有有效的搜索查询，需要澄清
             if not paper_id and (not search_query or search_query == ""):
                 # 检查是否只是通用命令词
-                generic_phrases = ["下载论文", "获取论文", "下载文章", "获取文章", "下载文献", "获取文献"]
+                generic_phrases = [
+                    "下载论文",
+                    "获取论文",
+                    "下载文章",
+                    "获取文章",
+                    "下载文献",
+                    "获取文献",
+                ]
 
                 is_generic = any(phrase in original_clean for phrase in generic_phrases)
                 if is_generic or len(original_clean.split()) <= 2:
                     intent.requires_clarification = True
                     intent.clarification_needed = {
                         "type": "missing_keywords",
-                        "message": "请提供论文标题、主题或arXiv ID，例如：下载论文 人工智能 或 下载 1234.5678",
-                        "required_parameters": ["paper_id or search_query"]
+                        "message": "请提供论文标题、主题或arXiv ID，例如：下载论文 人工智能 或 下载 1234.5678",  # noqa: E501
+                        "required_parameters": ["paper_id or search_query"],
                     }
                     return
             elif not paper_id and search_query and search_query != "":
@@ -1111,16 +1171,16 @@ class EnhancedIntentRecognizer:
                 intent.clarification_needed = {
                     "type": "missing_keywords",
                     "message": "请提供论文ID或搜索关键词",
-                    "required_parameters": ["paper_id or search_query"]
+                    "required_parameters": ["paper_id or search_query"],
                 }
                 return  # 添加return语句，防止继续执行到默认设置
 
         # 特殊处理：检查技能执行意图是否缺少参数
         elif intent.name == "execute_skill":
-            skill_name = (intent.parameters.get("skill_name") or "").strip()
+            (intent.parameters.get("skill_name") or "").strip()
             query = (intent.parameters.get("query") or "").strip()
             content = (intent.parameters.get("content") or "").strip()
-            action = (intent.parameters.get("action") or "").strip()
+            (intent.parameters.get("action") or "").strip()
             original_clean = original_text.strip() if original_text else ""
 
             # 使用content作为主要参数，如果为空则使用query
@@ -1130,14 +1190,24 @@ class EnhancedIntentRecognizer:
                 # 不总是需要澄清 - 检查是否应该使用原始文本作为默认值
                 if len(original_clean) > 5:  # 如果原始输入有一定长度
                     # 使用原始文本作为内容参数，除非它只是通用命令词
-                    generic_command_words = ["帮我", "执行技能", "运行技能", "使用技能", "开始技能", "启用技能", "启动技能"]
-                    if any(keyword in original_clean for keyword in generic_command_words):
+                    generic_command_words = [
+                        "帮我",
+                        "执行技能",
+                        "运行技能",
+                        "使用技能",
+                        "开始技能",
+                        "启用技能",
+                        "启动技能",
+                    ]
+                    if any(
+                        keyword in original_clean for keyword in generic_command_words
+                    ):
                         # 如果输入是通用命令词，仍需要澄清
                         intent.requires_clarification = True
                         intent.clarification_needed = {
                             "type": "missing_keywords",
-                            "message": "请提供要处理的内容，例如：帮我分析 这段文本内容",
-                            "required_parameters": ["content"]
+                            "message": "请提供要处理的内容，例如：帮我分析 这段文本内容",  # noqa: E501
+                            "required_parameters": ["content"],
                         }
                         return
                     else:
@@ -1150,8 +1220,8 @@ class EnhancedIntentRecognizer:
                     intent.requires_clarification = True
                     intent.clarification_needed = {
                         "type": "missing_keywords",
-                        "message": "请提供具体内容，例如：帮我分析 人工智能发展趋势 或 执行文本分析 这段代码",
-                        "required_parameters": ["content"]
+                        "message": "请提供具体内容，例如：帮我分析 人工智能发展趋势 或 执行文本分析 这段代码",  # noqa: E501
+                        "required_parameters": ["content"],
                     }
                     return
             else:
@@ -1169,20 +1239,31 @@ class EnhancedIntentRecognizer:
             if not topic or topic == "":
                 # 检查是否只包含通用命令词而不包含具体主题
                 generic_phrases = [
-                    "辩论", "展开辩论", "开始辩论", "发起辩论",
-                    "多模型辩论", "多智能体辩论", "多角色辩论",
-                    "multi-agent debate", "multi-model debate"
+                    "辩论",
+                    "展开辩论",
+                    "开始辩论",
+                    "发起辩论",
+                    "多模型辩论",
+                    "多智能体辩论",
+                    "多角色辩论",
+                    "multi-agent debate",
+                    "multi-model debate",
                 ]
 
-                is_generic = any(phrase in original_clean.replace(" ", "") for phrase in ["辩论", "展开辩论", "开始辩论", "发起辩论"]) or \
-                           any(generic in original_clean for generic in ["多模型辩论", "多智能体辩论", "多角色辩论"])
+                is_generic = any(
+                    phrase in original_clean.replace(" ", "")
+                    for phrase in ["辩论", "展开辩论", "开始辩论", "发起辩论"]
+                ) or any(
+                    generic in original_clean
+                    for generic in ["多模型辩论", "多智能体辩论", "多角色辩论"]
+                )
 
                 if is_generic or len(original_clean) <= 4:
                     intent.requires_clarification = True
                     intent.clarification_needed = {
                         "type": "missing_keywords",
-                        "message": "请输入辩论主题，例如：辩论 AI伦理 或 多模型辩论 量子计算",
-                        "required_parameters": ["topic"]
+                        "message": "请输入辩论主题，例如：辩论 AI伦理 或 多模型辩论 量子计算",  # noqa: E501
+                        "required_parameters": ["topic"],
                     }
                     return
             elif topic:  # 如果主题存在且不为空
@@ -1192,8 +1273,8 @@ class EnhancedIntentRecognizer:
                     intent.requires_clarification = True
                     intent.clarification_needed = {
                         "type": "missing_keywords",
-                        "message": "请输入具体的辩论主题，例如：辩论 人工智能未来 或 开始辩论 AI伦理",
-                        "required_parameters": ["topic"]
+                        "message": "请输入具体的辩论主题，例如：辩论 人工智能未来 或 开始辩论 AI伦理",  # noqa: E501
+                        "required_parameters": ["topic"],
                     }
                     return
                 else:
@@ -1203,33 +1284,33 @@ class EnhancedIntentRecognizer:
                     return
 
         # 为所有未设置澄清的意图设置默认值
-        if not hasattr(intent, 'requires_clarification') or intent.requires_clarification is None:
+        if (
+            not hasattr(intent, "requires_clarification")
+            or intent.requires_clarification is None
+        ):
             intent.requires_clarification = False
             intent.clarification_needed = None
 
         # 额外检查：某些通用性很强的请求，即使参数存在也可能需要澄清
         # 但只对execute_skill以外的意图应用此规则
-        if (original_text.strip() in ["帮我", "帮帮我", "帮我一下", "帮我个忙"] or
-            (original_text.strip().startswith("帮我") and len(original_text.strip()) <= 6 and intent.name != "execute_skill")):
+        if original_text.strip() in ["帮我", "帮帮我", "帮我一下", "帮我个忙"] or (
+            original_text.strip().startswith("帮我")
+            and len(original_text.strip()) <= 6
+            and intent.name != "execute_skill"
+        ):
             # 如果这是通用帮助请求且没有明确内容，设置为需要澄清
             # 但不覆盖已设置的澄清状态
             pass  # 此规则已在前面的execute_skill处理中应用
-    
-    def _extract_question_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+
+    def _extract_question_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取问题参数"""
-        return {
-            "question": text,
-            "requires_confidence_check": True
-        }
-    
-    def _extract_chat_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+        return {"question": text, "requires_confidence_check": True}
+
+    def _extract_chat_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取聊天参数"""
-        return {
-            "chat_content": text,
-            "requires_confidence_check": False
-        }
-    
-    def _extract_search_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+        return {"chat_content": text, "requires_confidence_check": False}
+
+    def _extract_search_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取论文搜索参数"""
         # 尝试提取搜索关键词
         keywords = []
@@ -1240,7 +1321,7 @@ class EnhancedIntentRecognizer:
             r"搜索(.+?)论文",
             r"查找(.+?)相关",
             r"search.*for(.+)",
-            r"find.*papers.*about(.+)"
+            r"find.*papers.*about(.+)",
         ]
 
         for pattern in academic_patterns:
@@ -1251,28 +1332,52 @@ class EnhancedIntentRecognizer:
         # 如果没有找到特定关键词，进一步检查是否只是命令词而没有具体内容
         if not keywords:
             # 移除常见的命令词，看看是否剩下有意义的内容
-            cleaned_text = re.sub(r"(搜索|查找|找|search|find|论文|paper|下载|获取|fetch|download)", "", text, flags=re.IGNORECASE)
+            cleaned_text = re.sub(
+                r"(搜索|查找|找|search|find|论文|paper|下载|获取|fetch|download)",
+                "",
+                text,
+                flags=re.IGNORECASE,
+            )
             # 清理多余的空格
-            cleaned_text = re.sub(r'\s+', ' ', cleaned_text).strip()
+            cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
 
             # 需要确保不是通用命令词，且有实际内容
-            if cleaned_text and cleaned_text not in ["", "下载", "获取", "获取", "download", "fetch", "资料", "信息", "内容", "东西"] and len(cleaned_text) > 2:
+            if (
+                cleaned_text
+                and cleaned_text
+                not in [
+                    "",
+                    "下载",
+                    "获取",
+                    "获取",
+                    "download",
+                    "fetch",
+                    "资料",
+                    "信息",
+                    "内容",
+                    "东西",
+                ]
+                and len(cleaned_text) > 2
+            ):
                 keywords = [cleaned_text]
             else:
                 keywords = [""]  # 没有找到有用的内容
 
         # 不使用默认关键词，而是返回真实提取的内容或空值
-        query = keywords[0] if keywords and len(keywords) > 0 and keywords[0] != "" else ""
+        query = (
+            keywords[0] if keywords and len(keywords) > 0 and keywords[0] != "" else ""
+        )
 
         return {
             "query": query,
             "max_results": 5,  # 默认5篇
-            "source": "arxiv"  # 默认arxiv源
+            "source": "arxiv",  # 默认arxiv源
         }
-    
-    def _extract_download_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+
+    def _extract_download_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取论文下载参数"""
         import re
+
         # 首先尝试从正则匹配中提取ID
         paper_id = match.group(1) if match.groups() else None
 
@@ -1280,7 +1385,7 @@ class EnhancedIntentRecognizer:
         search_query = None
         if not paper_id:
             # 更精确地查找arXiv ID模式 (4位数字.数字部分，如 1234.56789)
-            arxiv_id_match = re.search(r'(\d{4}\.\d{4,5}(v\d+)?)', text)
+            arxiv_id_match = re.search(r"(\d{4}\.\d{4,5}(v\d+)?)", text)
             if arxiv_id_match:
                 paper_id = arxiv_id_match.group(1)
 
@@ -1304,17 +1409,19 @@ class EnhancedIntentRecognizer:
                 r"论文.*下载",
                 r"论文.*获取",
                 r"论文.*查看",
-                r"论文.*阅读"
+                r"论文.*阅读",
             ]
 
             # 移除命令部分，提取可能的关键词
             clean_text = text
             for pattern in command_patterns:
-                clean_text = re.sub(pattern, "", clean_text, flags=re.IGNORECASE).strip()
+                clean_text = re.sub(
+                    pattern, "", clean_text, flags=re.IGNORECASE
+                ).strip()
 
             # 再次尝试从清理后的文本中提取ID
             if not paper_id:
-                arxiv_id_match = re.search(r'(\d{4}\.\d{4,5}(v\d+)?)', clean_text)
+                arxiv_id_match = re.search(r"(\d{4}\.\d{4,5}(v\d+)?)", clean_text)
                 if arxiv_id_match:
                     paper_id = arxiv_id_match.group(1)
 
@@ -1323,27 +1430,49 @@ class EnhancedIntentRecognizer:
                 search_query = None
             else:
                 # 如果没有找到ID，使用清理后的文本作为搜索查询
-                if clean_text and len(clean_text.strip()) > 0 and clean_text != text.strip() and len(clean_text.strip()) > 1:
+                if (
+                    clean_text
+                    and len(clean_text.strip()) > 0
+                    and clean_text != text.strip()
+                    and len(clean_text.strip()) > 1
+                ):
                     search_query = clean_text.strip()
                 elif clean_text and len(clean_text.strip()) > 1 and clean_text != "":
-                    # 即使clean_text=text.strip()，如果clean_text有实际内容，也使用它（比如"下载论文 机器学习" -> 提取"机器学习"）
+                    # 即使clean_text=text.strip()，如果clean_text有实际内容，也使用它（比如"下载论文 机器学习" -> 提取"机器学习"）  # noqa: E501
                     # 检查是否是"命令 + 空格 + 内容"的格式
                     import re
-                    parts_by_cmd = re.split(r'(?:下载|获取)\s*(?:论文|文章|文献|资料)\s*', text, flags=re.IGNORECASE)
+
+                    parts_by_cmd = re.split(
+                        r"(?:下载|获取)\s*(?:论文|文章|文献|资料)\s*",
+                        text,
+                        flags=re.IGNORECASE,
+                    )
                     if len(parts_by_cmd) > 1:
                         # 取最后一个部分作为可能的查询
                         possible_query = parts_by_cmd[-1].strip()
-                        if len(possible_query) > 0 and possible_query not in ["", "下载", "获取", "查看", "阅读", "看"]:
+                        if len(possible_query) > 0 and possible_query not in [
+                            "",
+                            "下载",
+                            "获取",
+                            "查看",
+                            "阅读",
+                            "看",
+                        ]:
                             search_query = possible_query
                         else:
                             # 如果还是没有找到明确内容，使用clean_text
-                            search_query = clean_text.strip() if len(clean_text.strip()) > 1 else ""
+                            search_query = (
+                                clean_text.strip()
+                                if len(clean_text.strip()) > 1
+                                else ""
+                            )
                     else:
                         search_query = clean_text.strip()  # 使用清理后的文本
                 else:
                     # 如果没有明确关键词，尝试从原文本中提取（去除命令词）
                     import re
-                    parts = re.split(r'[关于|的|是|关于.*的]', text)
+
+                    parts = re.split(r"[关于|的|是|关于.*的]", text)
                     if len(parts) > 1:
                         possible_query = parts[-1].strip()  # 取最后一部分作为可能的查询
                         if len(possible_query) > 2:  # 确保不是空或太短
@@ -1362,17 +1491,17 @@ class EnhancedIntentRecognizer:
             "paper_id": paper_id,  # 如果有具体ID则使用
             "search_query": search_query,  # 如果没有ID则使用搜索关键词
             "save_path": None,
-            "format": "pdf"
+            "format": "pdf",
         }
-    
-    def _extract_debate_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+
+    def _extract_debate_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取辩论参数"""
         # 尝试提取辩论主题
         topic_patterns = [
             r"辩论.*[:：](.+)",
             r"话题[:：](.+)",
             r"关于(.+?)的辩论",
-            r"debate.*about(.+)"
+            r"debate.*about(.+)",
         ]
 
         topic = None
@@ -1391,7 +1520,14 @@ class EnhancedIntentRecognizer:
                 if len(parts) > 1 and len(parts[1].strip()) > 0:
                     # 看看辩论后的部分是否是具体主题
                     after_debate = parts[1].strip()
-                    if after_debate and after_debate not in ["开始", "发起", "我们来", "让我", "让", ""]:
+                    if after_debate and after_debate not in [
+                        "开始",
+                        "发起",
+                        "我们来",
+                        "让我",
+                        "让",
+                        "",
+                    ]:
                         topic = after_debate
                     else:
                         topic = ""  # 只是通用命令词
@@ -1406,22 +1542,27 @@ class EnhancedIntentRecognizer:
                             r"多模态辩论\s*$",
                             r"多角色辩论\s*$",
                             r"多智能体辩论\s*$",
-                            r"^[多|多]*[模型|模态|角色|智能体]*辩论\s*$"  # 匹配各种前缀+辩论
+                            r"^[多|多]*[模型|模态|角色|智能体]*辩论\s*$",  # 匹配各种前缀+辩论  # noqa: E501
                         ]
 
-                        is_plain_debate = any(re.search(pattern, text, re.IGNORECASE) for pattern in plain_debate_patterns)
+                        is_plain_debate = any(
+                            re.search(pattern, text, re.IGNORECASE)
+                            for pattern in plain_debate_patterns
+                        )
                         if is_plain_debate:
                             topic = ""  # 多模型辩论但没有具体内容，需要澄清
                         else:
                             # 尝试其他方式提取，例如检查文本是否有空格分隔
                             words = text.split()
-                            debate_word_indices = [i for i, word in enumerate(words) if "辩论" in word]
+                            debate_word_indices = [
+                                i for i, word in enumerate(words) if "辩论" in word
+                            ]
 
                             if debate_word_indices:
                                 debate_idx = debate_word_indices[0]
                                 if debate_idx < len(words) - 1:
                                     # 辩论词后面有内容，提取作为主题
-                                    after_debate_words = words[debate_idx + 1:]
+                                    after_debate_words = words[debate_idx + 1 :]
                                     if after_debate_words:
                                         topic = " ".join(after_debate_words).strip()
                                     else:
@@ -1436,10 +1577,10 @@ class EnhancedIntentRecognizer:
         return {
             "topic": topic,
             "roles": None,  # 使用默认角色
-            "rounds": 3     # 默认3轮
+            "rounds": 3,  # 默认3轮
         }
-    
-    def _extract_view_wiki_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+
+    def _extract_view_wiki_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取查看Wiki参数"""
         title = ""
 
@@ -1464,7 +1605,7 @@ class EnhancedIntentRecognizer:
                 r"浏览\s*维基\s*(.+)",
                 r"浏览\s*百科\s*(.+)",
                 r"查看\s+(.+)",
-                r"浏览\s+(.+)"
+                r"浏览\s+(.+)",
             ]
 
             for pattern in command_patterns:
@@ -1472,7 +1613,10 @@ class EnhancedIntentRecognizer:
                 if m and m.group(1):
                     extracted = m.group(1).strip()
                     # 检查是否是合理的标题（至少2个字符且不包含命令词）
-                    if len(extracted) >= 2 and not any(cmd in extracted for cmd in ["查看", "浏览", "词条", "维基", "百科"]):
+                    if len(extracted) >= 2 and not any(
+                        cmd in extracted
+                        for cmd in ["查看", "浏览", "词条", "维基", "百科"]
+                    ):
                         title = extracted
                         break
 
@@ -1480,8 +1624,19 @@ class EnhancedIntentRecognizer:
         if not title:
             # 移除常见的查看命令词，提取核心标题
             command_words = [
-                "查看", "浏览", "view", "show", "display", "get", "read",
-                "查看词条", "查看维基", "查看百科", "浏览词条", "浏览维基", "浏览百科"
+                "查看",
+                "浏览",
+                "view",
+                "show",
+                "display",
+                "get",
+                "read",
+                "查看词条",
+                "查看维基",
+                "查看百科",
+                "浏览词条",
+                "浏览维基",
+                "浏览百科",
             ]
 
             # 按长度排序，优先匹配长命令词
@@ -1490,29 +1645,32 @@ class EnhancedIntentRecognizer:
             original_text = text.strip()
             for cmd in sorted_commands:
                 if original_text.startswith(cmd):
-                    title = original_text[len(cmd):].strip()
+                    title = original_text[len(cmd) :].strip()
                     break
                 elif f"{cmd} " in original_text or original_text.startswith(cmd + " "):
                     # 在文本中找到命令词后跟空格，提取其后面的内容
                     pos = original_text.find(cmd + " ")
                     if pos != -1:
-                        title = original_text[pos + len(cmd) + 1:].strip()  # +1 for the space
+                        title = original_text[
+                            pos + len(cmd) + 1 :
+                        ].strip()  # +1 for the space
                         break
 
         # 清理标题，移除可能的标点符号
         if title:
             # 移除开头和结尾的标点符号
             import string
+
             title = title.strip(string.punctuation + " \t\n\r")
 
         return {
             "title": title,
             "action": "view",  # 明确标识这是查看操作
             "content": "",  # 查看操作不需要额外内容
-            "tags": []
+            "tags": [],
         }
 
-    def _extract_wiki_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+    def _extract_wiki_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取Wiki参数"""
         # 尝试提取页面标题
         title_patterns = [
@@ -1540,18 +1698,47 @@ class EnhancedIntentRecognizer:
             parts = text.split()
             if len(parts) >= 2:  # 如果有至少2个词，就可以尝试智能提取
                 # 特殊处理：检查是否包含"词条"、"维基"、"百科"等关键词
-                has_target_keyword = any(keyword in text for keyword in ["词条", "维基", "百科", "wiki", "Wiki"])
+                has_target_keyword = any(
+                    keyword in text
+                    for keyword in ["词条", "维基", "百科", "wiki", "Wiki"]
+                )
 
                 # 检查各种可能的创建/编辑/查看命令
                 creation_patterns = [
-                    "创建维基", "新建维基", "写个维基", "创建百科", "新建百科", "写个百科",
-                    "创建词条", "新建词条", "写个词条", "做个词条", "创建条目", "新建条目",
-                    "编辑词条", "协同编辑词条", "协同编辑一个词条", "协作编辑词条", "协作编辑一个词条", "编辑维基", "编辑百科", "修改词条", "修改维基", "修改百科",
-                    "查看词条", "查看维基", "查看百科", "浏览词条", "浏览维基", "浏览百科"
+                    "创建维基",
+                    "新建维基",
+                    "写个维基",
+                    "创建百科",
+                    "新建百科",
+                    "写个百科",
+                    "创建词条",
+                    "新建词条",
+                    "写个词条",
+                    "做个词条",
+                    "创建条目",
+                    "新建条目",
+                    "编辑词条",
+                    "协同编辑词条",
+                    "协同编辑一个词条",
+                    "协作编辑词条",
+                    "协作编辑一个词条",
+                    "编辑维基",
+                    "编辑百科",
+                    "修改词条",
+                    "修改维基",
+                    "修改百科",
+                    "查看词条",
+                    "查看维基",
+                    "查看百科",
+                    "浏览词条",
+                    "浏览维基",
+                    "浏览百科",
                 ]
 
                 # 更智能的命令检测：直接检查文本中是否包含创建/编辑相关的命令
-                is_command_pattern = any(cmd_pattern in text for cmd_pattern in creation_patterns)
+                is_command_pattern = any(
+                    cmd_pattern in text for cmd_pattern in creation_patterns
+                )
 
                 if is_command_pattern and has_target_keyword:
                     # 更智能的标题提取：找到"词条"、"维基"、"百科"等关键词的位置
@@ -1562,7 +1749,10 @@ class EnhancedIntentRecognizer:
                         if found_keyword:
                             # 已经找到关键词，之后的所有内容都是标题
                             title_parts.append(part)
-                        elif any(keyword in part for keyword in ["词条", "维基", "百科", "wiki", "Wiki"]):
+                        elif any(
+                            keyword in part
+                            for keyword in ["词条", "维基", "百科", "wiki", "Wiki"]
+                        ):
                             # 找到关键词
                             found_keyword = True
 
@@ -1574,13 +1764,16 @@ class EnhancedIntentRecognizer:
                         # 找到第一个包含关键词的词的位置
                         keyword_idx = -1
                         for i, part in enumerate(parts):
-                            if any(keyword in part for keyword in ["词条", "维基", "百科", "wiki", "Wiki"]):
+                            if any(
+                                keyword in part
+                                for keyword in ["词条", "维基", "百科", "wiki", "Wiki"]
+                            ):
                                 keyword_idx = i
                                 break
 
                         if keyword_idx >= 0 and keyword_idx < len(parts) - 1:
                             # 取关键词之后的所有词作为标题
-                            title = " ".join(parts[keyword_idx + 1:]).strip()
+                            title = " ".join(parts[keyword_idx + 1 :]).strip()
                         elif len(parts) > 2:
                             # 最后的备用方案：取最后几个词作为标题
                             title = " ".join(parts[2:]).strip()
@@ -1637,7 +1830,9 @@ class EnhancedIntentRecognizer:
                     title = ""  # 设置为空值以触发澄清
                 else:
                     # 查找带标题的 "wiki create <title>" 模式
-                    wiki_create_match = re.search(r"wiki\s+create\s+(.+)", text, re.IGNORECASE)
+                    wiki_create_match = re.search(
+                        r"wiki\s+create\s+(.+)", text, re.IGNORECASE
+                    )
                     if wiki_create_match:
                         title = wiki_create_match.group(1).strip()
 
@@ -1671,18 +1866,48 @@ class EnhancedIntentRecognizer:
                 r"创造.*wiki",
                 r"制作.*wiki",
                 # 添加wiki create变体
-                r"wiki\s+create"
+                r"wiki\s+create",
             ]
 
-            is_generic = any(re.search(pattern, text, re.IGNORECASE) for pattern in generic_patterns)
+            is_generic = any(
+                re.search(pattern, text, re.IGNORECASE) for pattern in generic_patterns
+            )
 
             # 检查是否是通用命令（只有命令词，没有具体内容）
             # 提取命令操作部分，看是否只有操作词没有具体内容
-            command_match = re.search(r'(?:创建|新建|写|写个|做个|创造|制作|编辑|协同编辑|协作编辑)\s*(?:维基|百科|词条|wiki|Wiki)\s*$', text, re.IGNORECASE)
-            if is_generic and (not title or command_match or text.strip() in ["创建词条", "新建词条", "写个词条", "做个词条",
-                "创造词条", "制作词条", "创建维基", "新建维基", "写个维基", "做个维基", "创造维基", "制作维基",
-                "创建百科", "新建百科", "写个百科", "创造百科", "制作百科", "协同编辑一个词条", "协作编辑一个词条",
-                "wiki", "wiki create"]):  # 添加对 "wiki create" 作为通用命令的识别
+            command_match = re.search(
+                r"(?:创建|新建|写|写个|做个|创造|制作|编辑|协同编辑|协作编辑)\s*(?:维基|百科|词条|wiki|Wiki)\s*$",
+                text,
+                re.IGNORECASE,
+            )
+            if is_generic and (
+                not title
+                or command_match
+                or text.strip()
+                in [
+                    "创建词条",
+                    "新建词条",
+                    "写个词条",
+                    "做个词条",
+                    "创造词条",
+                    "制作词条",
+                    "创建维基",
+                    "新建维基",
+                    "写个维基",
+                    "做个维基",
+                    "创造维基",
+                    "制作维基",
+                    "创建百科",
+                    "新建百科",
+                    "写个百科",
+                    "创造百科",
+                    "制作百科",
+                    "协同编辑一个词条",
+                    "协作编辑一个词条",
+                    "wiki",
+                    "wiki create",
+                ]
+            ):  # 添加对 "wiki create" 作为通用命令的识别
                 title = ""  # 设置为空值以触发澄清
             elif not title:  # 如果仍然没有找到标题，使用原始文本
                 title = text
@@ -1694,17 +1919,17 @@ class EnhancedIntentRecognizer:
         return {
             "title": title,
             "content": "",  # 将由用户后续提供
-            "tags": []
+            "tags": [],
         }
-    
-    def _extract_compress_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+
+    def _extract_compress_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取压缩参数"""
         return {
             "method": "auto",  # 自动压缩
-            "keep_recent": 5   # 保留最近5条对话
+            "keep_recent": 5,  # 保留最近5条对话
         }
-    
-    def _extract_scaffold_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+
+    def _extract_scaffold_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取项目初始化参数"""
         # 尝试提取项目类型或描述
         type_patterns = [
@@ -1712,7 +1937,7 @@ class EnhancedIntentRecognizer:
             r"初始化.*(.+?)项目",
             r"新建.*(.+?)项目",
             r"create.*(.+?)project",
-            r"init.*(.+?)project"
+            r"init.*(.+?)project",
         ]
 
         project_type = None
@@ -1722,19 +1947,15 @@ class EnhancedIntentRecognizer:
                 project_type = m.group(1).strip()
                 break
 
-        return {
-            "project_type": project_type or "general",
-            "description": text
-        }
+        return {"project_type": project_type or "general", "description": text}
 
-    def _extract_knowledge_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+    def _extract_knowledge_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取知识库管理参数"""
-        return {
-            "action": "sync",
-            "description": text
-        }
+        return {"action": "sync", "description": text}
 
-    def _extract_knowledge_search_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+    def _extract_knowledge_search_params(
+        self, text: str, match: re.Match
+    ) -> dict[str, Any]:
         """提取知识库搜索参数"""
         # 尝试提取搜索关键词
         search_patterns = [
@@ -1743,7 +1964,7 @@ class EnhancedIntentRecognizer:
             r"查找.*知识.*[:：\s]*(.+)",
             r"查询.*知识.*[:：\s]*(.+)",
             r"搜索.*[:：\s]*(.+)",
-            r"查找.*[:：\s]*(.+)"
+            r"查找.*[:：\s]*(.+)",
         ]
 
         query = None
@@ -1756,49 +1977,48 @@ class EnhancedIntentRecognizer:
         # 如果没有找到特定关键词，使用整个文本作为查询
         if not query or query.strip() == "":
             # 移除命令词，保留核心搜索词
-            cleaned_text = re.sub(r"(搜索|查找|查询|知识库|知识)", "", text, flags=re.IGNORECASE)
+            cleaned_text = re.sub(
+                r"(搜索|查找|查询|知识库|知识)", "", text, flags=re.IGNORECASE
+            )
             query = cleaned_text.strip()
 
-        return {
-            "action": "search",
-            "query": query,
-            "description": text
-        }
-    
-    def _extract_debate_history_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+        return {"action": "search", "query": query, "description": text}
+
+    def _extract_debate_history_params(
+        self, text: str, match: re.Match
+    ) -> dict[str, Any]:
         """提取辩论历史查询参数"""
         return {
             "query": text,
-            "session_id": None  # Will be extracted if specific session is mentioned
+            "session_id": None,  # Will be extracted if specific session is mentioned
         }
-    
-    def _extract_specific_debate_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+
+    def _extract_specific_debate_params(
+        self, text: str, match: re.Match
+    ) -> dict[str, Any]:
         """提取特定辩论查询参数"""
         # Extract session ID or debate ID if present in the match
         session_id = None
         if match.groups():
             session_id = match.group(1)  # First capture group usually contains the ID
-        
+
         # Look for more specific session ID patterns if not already found
         if not session_id:
             session_patterns = [
                 r"session[:\s]*([a-zA-Z0-9_-]+)",
                 r"debate[:\s]*([a-zA-Z0-9_-]+)",
-                r"([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})",  # UUID pattern
+                r"([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})",  # UUID pattern  # noqa: E501
             ]
-            
+
             for pattern in session_patterns:
                 m = re.search(pattern, text, re.IGNORECASE)
                 if m:
                     session_id = m.group(1)
                     break
-        
-        return {
-            "query": text,
-            "session_id": session_id
-        }
 
-    def _extract_skill_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+        return {"query": text, "session_id": session_id}
+
+    def _extract_skill_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取技能参数"""
         # 首先尝试从文本中提取技能相关参数
         skill_patterns = [
@@ -1843,18 +2063,18 @@ class EnhancedIntentRecognizer:
         if not skill_content or skill_content == "":
             # 智能提取文本内容的模式
             intelligent_patterns = [
-                r".*帮我.*分析[关于|的|这]*\s*([^。、？！]+)",   # "帮我分析关于人工智能的发展趋势"
-                r".*帮我.*处理[关于|这]*\s*([^。、？！]+)",   # "帮我处理这个文档"
-                r".*帮我.*搜索[关于|这]*\s*([^。、？！]+)",   # "帮我搜索机器学习资料"
-                r".*帮我.*查找[关于|这]*\s*([^。、？！]+)",   # "帮我查找资料"
-                r".*帮我.*总结[关于|这]*\s*([^。、？！]+)",   # "帮我总结论文"
-                r".*分析[一下|下|这个]*\s*([^。、？！]+)",   # "分析一下人工智能"
-                r".*处理[这个|这些]*\s*([^。、？！]+)",      # "处理这个资料"
-                r".*搜索[关于|这]*\s*([^。、？！]+)",       # "搜索量子计算资料"
+                r".*帮我.*分析[关于|的|这]*\s*([^。、？！]+)",  # "帮我分析关于人工智能的发展趋势"  # noqa: E501
+                r".*帮我.*处理[关于|这]*\s*([^。、？！]+)",  # "帮我处理这个文档"
+                r".*帮我.*搜索[关于|这]*\s*([^。、？！]+)",  # "帮我搜索机器学习资料"
+                r".*帮我.*查找[关于|这]*\s*([^。、？！]+)",  # "帮我查找资料"
+                r".*帮我.*总结[关于|这]*\s*([^。、？！]+)",  # "帮我总结论文"
+                r".*分析[一下|下|这个]*\s*([^。、？！]+)",  # "分析一下人工智能"
+                r".*处理[这个|这些]*\s*([^。、？！]+)",  # "处理这个资料"
+                r".*搜索[关于|这]*\s*([^。、？！]+)",  # "搜索量子计算资料"
                 r".*查找[这些|这个|相关]*\s*([^。、？！]+)",  # "查找这些文献"
                 r".*总结[这个|这份|这篇]*\s*([^。、？！]+)",  # "总结这份报告"
-                r".*帮我.*([一|一|一下|些|这个|这些|那份].+?)[。、？！]*",  # "帮我一下XXX"
-                r".*(写|分析|处理|搜索|查找|总结).*(.+?)[。、？！]*",  # "帮我写人工智能"
+                r".*帮我.*([一|一|一下|些|这个|这些|那份].+?)[。、？！]*",  # "帮我一下XXX"  # noqa: E501
+                r".*(写|分析|处理|搜索|查找|总结).*(.+?)[。、？！]*",  # "帮我写人工智能"  # noqa: E501
             ]
 
             for pattern in intelligent_patterns:
@@ -1863,7 +2083,18 @@ class EnhancedIntentRecognizer:
                     extracted = m.group(1).strip()
                     if extracted and len(extracted) > 1 and extracted != text.strip():
                         # 检查提取的内容是否包含命令词
-                        if not any(cmd.strip() == extracted for cmd in ["帮我", "请帮我", "分析", "处理", "搜索", "查找", "总结"]):
+                        if not any(
+                            cmd.strip() == extracted
+                            for cmd in [
+                                "帮我",
+                                "请帮我",
+                                "分析",
+                                "处理",
+                                "搜索",
+                                "查找",
+                                "总结",
+                            ]
+                        ):
                             skill_content = extracted
                             break
 
@@ -1871,14 +2102,54 @@ class EnhancedIntentRecognizer:
         if not skill_content or skill_content == "":
             # 移除常见的技能提示词，保留后面的内容
             command_words = [
-                "帮我", "请帮我", "帮我分析", "帮我处理", "帮我搜索", "帮我查找",
-                "帮我总结", "帮我写", "帮我生成", "帮我翻译", "帮我整理",
-                "帮我创建", "请分析", "请处理", "请搜索", "请查找", "请总结",
-                "执行", "运行", "使用", "启动", "开始", "分析", "处理", "搜索",
-                "查找", "总结", "生成", "翻译", "创建", "写个", "做个",
-                "创建维基", "新建百科", "写百科", "编辑页面", "创建页面",
-                "文本分析", "文档处理", "内容搜索", "信息查找", "知识搜索",
-                "给", "给我", "给我分析", "给我处理", "给我搜索", "给我查找"
+                "帮我",
+                "请帮我",
+                "帮我分析",
+                "帮我处理",
+                "帮我搜索",
+                "帮我查找",
+                "帮我总结",
+                "帮我写",
+                "帮我生成",
+                "帮我翻译",
+                "帮我整理",
+                "帮我创建",
+                "请分析",
+                "请处理",
+                "请搜索",
+                "请查找",
+                "请总结",
+                "执行",
+                "运行",
+                "使用",
+                "启动",
+                "开始",
+                "分析",
+                "处理",
+                "搜索",
+                "查找",
+                "总结",
+                "生成",
+                "翻译",
+                "创建",
+                "写个",
+                "做个",
+                "创建维基",
+                "新建百科",
+                "写百科",
+                "编辑页面",
+                "创建页面",
+                "文本分析",
+                "文档处理",
+                "内容搜索",
+                "信息查找",
+                "知识搜索",
+                "给",
+                "给我",
+                "给我分析",
+                "给我处理",
+                "给我搜索",
+                "给我查找",
             ]
 
             # 按长度排序，优先匹配长命令词
@@ -1886,10 +2157,14 @@ class EnhancedIntentRecognizer:
 
             original_text = text.strip()
             for cmd in sorted_commands:
-                if original_text.startswith(cmd.lower()) or original_text.startswith(cmd):
+                if original_text.startswith(cmd.lower()) or original_text.startswith(
+                    cmd
+                ):
                     # 提取命令词后面的内容
-                    potential_content = original_text[len(cmd):].strip()
-                    if potential_content and len(potential_content) > 3:  # 至少3个字符才是有效内容
+                    potential_content = original_text[len(cmd) :].strip()
+                    if (
+                        potential_content and len(potential_content) > 3
+                    ):  # 至少3个字符才是有效内容
                         # 检查是否是纯命令词
                         if potential_content not in command_words:
                             skill_content = potential_content
@@ -1898,7 +2173,7 @@ class EnhancedIntentRecognizer:
                     # 在文本中找到命令词，提取其后面的内容
                     pos = original_text.lower().find(cmd.lower())
                     if pos != -1:
-                        potential_content = original_text[pos + len(cmd):].strip()
+                        potential_content = original_text[pos + len(cmd) :].strip()
                         if potential_content and len(potential_content) > 3:
                             # 检查是否是纯命令词
                             if potential_content not in command_words:
@@ -1911,33 +2186,61 @@ class EnhancedIntentRecognizer:
 
         # 识别期望的技能类型
         skill_type = "general"
-        if any(keyword in text.lower() for keyword in ["分析", "analyze", "text", "内容", "文档"]):
+        if any(
+            keyword in text.lower()
+            for keyword in ["分析", "analyze", "text", "内容", "文档"]
+        ):
             skill_type = "analysis"
-        elif any(keyword in text.lower() for keyword in ["处理", "process", "文档", "document", "文本"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["处理", "process", "文档", "document", "文本"]
+        ):
             skill_type = "processing"
-        elif any(keyword in text.lower() for keyword in ["搜索", "查找", "search", "find", "资料", "信息", "论文"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["搜索", "查找", "search", "find", "资料", "信息", "论文"]
+        ):
             skill_type = "search"
-        elif any(keyword in text.lower() for keyword in ["写作", "write", "create", "撰写", "创建", "生成"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["写作", "write", "create", "撰写", "创建", "生成"]
+        ):
             skill_type = "writing"
-        elif any(keyword in text.lower() for keyword in ["翻译", "translate", "translation"]):
+        elif any(
+            keyword in text.lower() for keyword in ["翻译", "translate", "translation"]
+        ):
             skill_type = "translation"
-        elif any(keyword in text.lower() for keyword in ["总结", "summarize", "摘要", "概括"]):
+        elif any(
+            keyword in text.lower() for keyword in ["总结", "summarize", "摘要", "概括"]
+        ):
             skill_type = "summarization"
-        elif any(keyword in text.lower() for keyword in ["问答", "question", "answer", "问", "答"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["问答", "question", "answer", "问", "答"]
+        ):
             skill_type = "question_answering"
-        elif any(keyword in text.lower() for keyword in ["规划", "planning", "安排", "策略"]):
+        elif any(
+            keyword in text.lower() for keyword in ["规划", "planning", "安排", "策略"]
+        ):
             skill_type = "planning"
-        elif any(keyword in text.lower() for keyword in ["助手", "assistant", "智能", "AI"]):
+        elif any(
+            keyword in text.lower() for keyword in ["助手", "assistant", "智能", "AI"]
+        ):
             skill_type = "assistant"
         elif any(keyword in text.lower() for keyword in ["维基", "wiki", "百科"]):
             skill_type = "wiki_creation"
-        elif any(keyword in text.lower() for keyword in ["技能", "skill", "工具", "tool"]):
+        elif any(
+            keyword in text.lower() for keyword in ["技能", "skill", "工具", "tool"]
+        ):
             skill_type = "general_skill"
 
         # 如果skill_content为空且text包含足够信息，使用text作为skill_content
         if not skill_content and len(text.strip()) > 5:
             # 检查是否只是命令词，如果不是，则使用原文本作为内容
-            is_just_command = any(text.strip() == cmd or text.strip().startswith(cmd) for cmd in command_words)
+            is_just_command = any(
+                text.strip() == cmd or text.strip().startswith(cmd)
+                for cmd in command_words
+            )
             if not is_just_command:
                 skill_content = text
 
@@ -1953,22 +2256,34 @@ class EnhancedIntentRecognizer:
                     target_skill_name = skill_name
                     break
                 # 检查技能是否匹配输入中的关键词
-                elif skill_name == "text_analysis" and any(kw in text.lower() for kw in ["分析", "analyze", "text", "内容"]):
+                elif skill_name == "text_analysis" and any(
+                    kw in text.lower() for kw in ["分析", "analyze", "text", "内容"]
+                ):
                     target_skill_name = skill_name
                     break
-                elif skill_name == "search" and any(kw in text.lower() for kw in ["搜索", "查找", "find", "search"]):
+                elif skill_name == "search" and any(
+                    kw in text.lower() for kw in ["搜索", "查找", "find", "search"]
+                ):
                     target_skill_name = skill_name
                     break
-                elif skill_name == "writing" and any(kw in text.lower() for kw in ["写", "写作", "create", "write"]):
+                elif skill_name == "writing" and any(
+                    kw in text.lower() for kw in ["写", "写作", "create", "write"]
+                ):
                     target_skill_name = skill_name
                     break
-                elif skill_name == "translation" and any(kw in text.lower() for kw in ["翻译", "translate"]):
+                elif skill_name == "translation" and any(
+                    kw in text.lower() for kw in ["翻译", "translate"]
+                ):
                     target_skill_name = skill_name
                     break
-                elif skill_name == "summarization" and any(kw in text.lower() for kw in ["总结", "摘要", "summarize"]):
+                elif skill_name == "summarization" and any(
+                    kw in text.lower() for kw in ["总结", "摘要", "summarize"]
+                ):
                     target_skill_name = skill_name
                     break
-                elif skill_name == "calculation" and any(kw in text.lower() for kw in ["计算", "计算", "算", "math"]):
+                elif skill_name == "calculation" and any(
+                    kw in text.lower() for kw in ["计算", "计算", "算", "math"]
+                ):
                     target_skill_name = skill_name
                     break
 
@@ -1982,25 +2297,48 @@ class EnhancedIntentRecognizer:
             "original_request_text": text,  # 修正字段名
             "parameters": {
                 "content_to_analyze": skill_content if skill_content else text,
-                "skill_type": skill_type
-            }
+                "skill_type": skill_type,
+            },
         }
 
-    def _extract_assistant_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+    def _extract_assistant_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取助手参数"""
         # 确定助手的具体请求类型
         request_type = "general_assistance"  # 默认通用助手请求
 
         # 检查具体意图
-        if any(keyword in text.lower() for keyword in ["分析", "总结", "search", "find", "search", "find", "searching", "finding"]):
+        if any(
+            keyword in text.lower()
+            for keyword in [
+                "分析",
+                "总结",
+                "search",
+                "find",
+                "search",
+                "find",
+                "searching",
+                "finding",
+            ]
+        ):
             request_type = "research_assistance"
-        elif any(keyword in text.lower() for keyword in ["写", "create", "generate", "draft", "make"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["写", "create", "generate", "draft", "make"]
+        ):
             request_type = "content_creation"
-        elif any(keyword in text.lower() for keyword in ["翻译", "translate", "translation", "convert"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["翻译", "translate", "translation", "convert"]
+        ):
             request_type = "translation"
-        elif any(keyword in text.lower() for keyword in ["解释", "explain", "understand", "understanding"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["解释", "explain", "understand", "understanding"]
+        ):
             request_type = "explanation"
-        elif any(keyword in text.lower() for keyword in ["帮助", "help", "assist", "assist"]):
+        elif any(
+            keyword in text.lower() for keyword in ["帮助", "help", "assist", "assist"]
+        ):
             request_type = "help_request"
 
         # 尝试提取具体请求内容
@@ -2017,7 +2355,7 @@ class EnhancedIntentRecognizer:
                 if keyword in text:
                     idx = text.find(keyword)
                     if idx != -1:
-                        content = text[idx + len(keyword):].strip()
+                        content = text[idx + len(keyword) :].strip()
                         if content:
                             content_parts = [content]
                         break
@@ -2029,25 +2367,39 @@ class EnhancedIntentRecognizer:
             "specific_request": specific_request.strip() if specific_request else text,
             "original_request": text,
             "use_knowledge_base": True,  # 默认启用知识库检索
-            "multi_model_required": True  # 默认启用多模型协作
+            "multi_model_required": True,  # 默认启用多模型协作
         }
 
-    def _extract_skill_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+    def _extract_skill_params(self, text: str, match: re.Match) -> dict[str, Any]:
         """提取技能参数"""
         skill_params = {}
 
         # 确定技能类型
         skill_type = "general"
 
-        if any(keyword in text.lower() for keyword in ["分析", "analyze", "analyze", "text_analysis", "文本分析"]):
+        if any(
+            keyword in text.lower()
+            for keyword in ["分析", "analyze", "analyze", "text_analysis", "文本分析"]
+        ):
             skill_type = "text_analysis"
-        elif any(keyword in text.lower() for keyword in ["搜索", "查找", "search", "find", "检索"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["搜索", "查找", "search", "find", "检索"]
+        ):
             skill_type = "search"
-        elif any(keyword in text.lower() for keyword in ["创建", "create", "write", "写", "生成", "generate"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["创建", "create", "write", "写", "生成", "generate"]
+        ):
             skill_type = "content_creation"
-        elif any(keyword in text.lower() for keyword in ["处理", "process", "convert", "转换"]):
+        elif any(
+            keyword in text.lower()
+            for keyword in ["处理", "process", "convert", "转换"]
+        ):
             skill_type = "processing"
-        elif any(keyword in text.lower() for keyword in ["助手", "assistant", "AI", "智能"]):
+        elif any(
+            keyword in text.lower() for keyword in ["助手", "assistant", "AI", "智能"]
+        ):
             skill_type = "assistant"
 
         skill_params["skill_type"] = skill_type
@@ -2062,7 +2414,7 @@ class EnhancedIntentRecognizer:
             r"执行.*[:：\s]*(.+)",
             r"运行.*[:：\s]*(.+)",
             r"关于.*[:：\s]*(.+)",
-            r".*[主题|内容|文本|资料].*[:：\s]*(.+)"
+            r".*[主题|内容|文本|资料].*[:：\s]*(.+)",
         ]
 
         for pattern in extract_patterns:
@@ -2074,7 +2426,16 @@ class EnhancedIntentRecognizer:
         if not content:
             # 如果没有找到特定内容，尝试从整个文本中提取有意义的部分
             # 移除功能词，保留内容词
-            functional_words = ["帮我", "请", "帮我分析", "帮我处理", "我想", "我想让", "执行", "运行"]
+            functional_words = [
+                "帮我",
+                "请",
+                "帮我分析",
+                "帮我处理",
+                "我想",
+                "我想让",
+                "执行",
+                "运行",
+            ]
             content = text
             for word in functional_words:
                 content = content.replace(word, "").strip()
@@ -2083,18 +2444,22 @@ class EnhancedIntentRecognizer:
         skill_params["original_request"] = text
 
         # 确定是否需要额外的澄清
-        skill_params["requires_clarification"] = not bool(content.strip()) if content else True
+        skill_params["requires_clarification"] = (
+            not bool(content.strip()) if content else True
+        )
 
         return skill_params
 
-    def _extract_complex_task_params(self, text: str, match: re.Match) -> Dict[str, Any]:
+    def _extract_complex_task_params(
+        self, text: str, match: re.Match
+    ) -> dict[str, Any]:
         """提取复杂任务参数"""
         # 复杂任务通常就是整个用户请求
         return {
             "original_request": text,
             "task_description": text,
             "task_type": self._determine_complex_task_type(text),
-            "requires_clarification": False  # 复杂任务通常不需要额外澄清
+            "requires_clarification": False,  # 复杂任务通常不需要额外澄清
         }
 
     def _determine_complex_task_type(self, text: str) -> str:
@@ -2117,7 +2482,7 @@ class EnhancedIntentRecognizer:
         else:
             return "general"
 
-    def get_available_intents(self) -> List[str]:
+    def get_available_intents(self) -> list[str]:
         """获取所有可用的意图列表"""
         return list(self.intent_patterns.keys())
 

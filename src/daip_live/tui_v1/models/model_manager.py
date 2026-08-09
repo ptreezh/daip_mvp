@@ -5,8 +5,9 @@ This module provides comprehensive model management functionality.
 """
 
 import logging
-from typing import Dict, List, Optional, Any
-from .model_registry import ModelRegistry, ModelInfo, ModelType
+from typing import Any, Optional
+
+from .model_registry import ModelInfo, ModelRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class ModelManager:
     def __init__(self):
         self.registry = ModelRegistry()
         self.current_model: Optional[str] = None
-        self.model_configs: Dict[str, Dict[str, Any]] = {}
+        self.model_configs: dict[str, dict[str, Any]] = {}
 
     def set_current_model(self, model_name: str) -> bool:
         """Set the current active model"""
@@ -33,7 +34,7 @@ class ModelManager:
             return self.registry.get_model(self.current_model)
         return None
 
-    def list_available_models(self) -> List[ModelInfo]:
+    def list_available_models(self) -> list[ModelInfo]:
         """List all available models"""
         return self.registry.list_models()
 
@@ -41,7 +42,7 @@ class ModelManager:
         """Get information about a specific model"""
         return self.registry.get_model(model_name)
 
-    def configure_model(self, model_name: str, config: Dict[str, Any]) -> bool:
+    def configure_model(self, model_name: str, config: dict[str, Any]) -> bool:
         """Configure a model with specific settings"""
         if self.registry.get_model(model_name):
             self.model_configs[model_name] = config
@@ -49,7 +50,7 @@ class ModelManager:
             return True
         return False
 
-    def get_model_config(self, model_name: str) -> Dict[str, Any]:
+    def get_model_config(self, model_name: str) -> dict[str, Any]:
         """Get configuration for a model"""
         return self.model_configs.get(model_name, {})
 

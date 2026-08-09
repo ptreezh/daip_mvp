@@ -6,18 +6,22 @@
 遵循SOLID原则中的单一职责原则
 """
 
-import re
 import logging
-from typing import Dict, Any, List, Optional, Tuple
+import re
 from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Optional
+
+if TYPE_CHECKING:
+    from daip_live.intent_recognition.entity_extractor import EntityExtractor
 
 
 @dataclass
 class Entity:
     """实体数据类"""
+
     name: str
     value: str
-    position: Tuple[int, int]
+    position: tuple[int, int]
     confidence: float
     entity_type: str
 
@@ -32,7 +36,7 @@ class QueryRewriter:
     - OCP: 可扩展更多重写规则
     """
 
-    def __init__(self, entity_extractor: Optional['EntityExtractor'] = None):
+    def __init__(self, entity_extractor: Optional["EntityExtractor"] = None):
         """
         构造函数
 
@@ -66,7 +70,7 @@ class QueryRewriter:
 
         return completed_text
 
-    def resolve_pronouns(self, text: str, entities: List[Entity]) -> str:
+    def resolve_pronouns(self, text: str, entities: list[Entity]) -> str:
         """
         执行代词消解
 
@@ -80,13 +84,37 @@ class QueryRewriter:
         # 定义代词消解规则
         pronoun_rules = [
             # 规则格式：(代词模式, 对应实体类型, 替换逻辑)
-            ('它', ['paper_id', 'topic', 'title', 'query'], self._resolve_it_pronoun),
-            ('这', ['topic', 'argument', 'concept', 'title'], self._resolve_this_pronoun),
-            ('那', ['topic', 'argument', 'concept', 'title'], self._resolve_that_pronoun),
-            ('这个', ['topic', 'argument', 'concept', 'title'], self._resolve_this_pronoun),
-            ('那个', ['topic', 'argument', 'concept', 'title'], self._resolve_that_pronoun),
-            ('这些', ['topics', 'arguments', 'concepts', 'titles'], self._resolve_these_pronoun),
-            ('那些', ['topics', 'arguments', 'concepts', 'titles'], self._resolve_those_pronoun),
+            ("它", ["paper_id", "topic", "title", "query"], self._resolve_it_pronoun),
+            (
+                "这",
+                ["topic", "argument", "concept", "title"],
+                self._resolve_this_pronoun,
+            ),
+            (
+                "那",
+                ["topic", "argument", "concept", "title"],
+                self._resolve_that_pronoun,
+            ),
+            (
+                "这个",
+                ["topic", "argument", "concept", "title"],
+                self._resolve_this_pronoun,
+            ),
+            (
+                "那个",
+                ["topic", "argument", "concept", "title"],
+                self._resolve_that_pronoun,
+            ),
+            (
+                "这些",
+                ["topics", "arguments", "concepts", "titles"],
+                self._resolve_these_pronoun,
+            ),
+            (
+                "那些",
+                ["topics", "arguments", "concepts", "titles"],
+                self._resolve_those_pronoun,
+            ),
         ]
 
         result_text = text
@@ -95,10 +123,14 @@ class QueryRewriter:
             # 查找文本中的代词
             if pronoun in result_text:
                 # 在实体中找到最相关的实体进行替换
-                relevant_entity = self._find_most_relevant_entity(entities, entity_types)
+                relevant_entity = self._find_most_relevant_entity(
+                    entities, entity_types
+                )
                 if relevant_entity:
                     # 应用消解规则
-                    result_text = resolver_func(result_text, pronoun, relevant_entity.value)
+                    result_text = resolver_func(
+                        result_text, pronoun, relevant_entity.value
+                    )
 
         return result_text
 
@@ -107,34 +139,35 @@ class QueryRewriter:
         解析"它"代词
         """
         # 使用正则替换，确保上下文准确性
-        return re.sub(r'\b' + re.escape(pronoun) + r'\b', entity_value, text)
+        return re.sub(r"\b" + re.escape(pronoun) + r"\b", entity_value, text)
 
     def _resolve_this_pronoun(self, text: str, pronoun: str, entity_value: str) -> str:
         """
         解析"这/这个"代词
         """
-        return re.sub(r'\b' + re.escape(pronoun) + r'\b', entity_value, text)
+        return re.sub(r"\b" + re.escape(pronoun) + r"\b", entity_value, text)
 
     def _resolve_that_pronoun(self, text: str, pronoun: str, entity_value: str) -> str:
         """
         解析"那/那个"代词
         """
-        return re.sub(r'\b' + re.escape(pronoun) + r'\b', entity_value, text)
+        return re.sub(r"\b" + re.escape(pronoun) + r"\b", entity_value, text)
 
     def _resolve_these_pronoun(self, text: str, pronoun: str, entity_value: str) -> str:
         """
         解析"这些"代词
         """
-        return re.sub(r'\b' + re.escape(pronoun) + r'\b', entity_value, text)
+        return re.sub(r"\b" + re.escape(pronoun) + r"\b", entity_value, text)
 
     def _resolve_those_pronoun(self, text: str, pronoun: str, entity_value: str) -> str:
         """
         解析"那些"代词
         """
-        return re.sub(r'\b' + re.escape(pronoun) + r'\b', entity_value, text)
+        return re.sub(r"\b" + re.escape(pronoun) + r"\b", entity_value, text)
 
-    def _find_most_relevant_entity(self, entities: List[Entity],
-                                   target_types: List[str]) -> Optional[Entity]:
+    def _find_most_relevant_entity(
+        self, entities: list[Entity], target_types: list[str]
+    ) -> Optional[Entity]:
         """
         根据类型查找最相关的实体
         """
@@ -151,7 +184,7 @@ class QueryRewriter:
 
         return None
 
-    def expand_ellipsis(self, text: str, entities: List[Entity]) -> str:
+    def expand_ellipsis(self, text: str, entities: list[Entity]) -> str:
         """
         补全省略表达
 
@@ -164,10 +197,22 @@ class QueryRewriter:
         """
         # 常见省略表达映射
         ellipsis_patterns = [
-            (r'是\s*[\uff0c\uff1a\u002c\u003a]?', r'是(上文提到的内容)'),  # "是：" -> "是(上文提到的内容)"
-            (r'好\s*[\uff0c\uff1a\u002c\u003a]?', r'好(按你说的)'),  # "好：" -> "好(按你说的)"
-            (r'行\s*[\uff0c\uff1a\u002c\u003a]?', r'行(按计划)'),  # "行：" -> "行(按计划)"
-            (r'对\s*[\uff0c\uff1a\u002c\u003a]?', r'对(你说的)'),  # "对：" -> "对(你说的)"
+            (
+                r"是\s*[\uff0c\uff1a\u002c\u003a]?",
+                r"是(上文提到的内容)",
+            ),  # "是：" -> "是(上文提到的内容)"
+            (
+                r"好\s*[\uff0c\uff1a\u002c\u003a]?",
+                r"好(按你说的)",
+            ),  # "好：" -> "好(按你说的)"
+            (
+                r"行\s*[\uff0c\uff1a\u002c\u003a]?",
+                r"行(按计划)",
+            ),  # "行：" -> "行(按计划)"
+            (
+                r"对\s*[\uff0c\uff1a\u002c\u003a]?",
+                r"对(你说的)",
+            ),  # "对：" -> "对(你说的)"
         ]
 
         result_text = text
@@ -177,30 +222,38 @@ class QueryRewriter:
 
         # 检查是否包含上下文引用
         context_reference_patterns = [
-            r'它\s+怎么样',      # "它怎么样"
-            r'这个\s+如何',      # "这个如何"
-            r'那\s+呢',         # "那呢"
-            r'那个\s+呢',       # "那个呢"
+            r"它\s+怎么样",  # "它怎么样"
+            r"这个\s+如何",  # "这个如何"
+            r"那\s+呢",  # "那呢"
+            r"那个\s+呢",  # "那个呢"
         ]
 
         for pattern in context_reference_patterns:
             if re.search(pattern, result_text):
                 # 如果是上下文引用，保留实体引用
                 for entity in entities:
-                    if entity.entity_type in ['paper_id', 'topic', 'title', 'query']:
+                    if entity.entity_type in ["paper_id", "topic", "title", "query"]:
                         # 在上下文引用中明确提及实体
-                        if '它怎么样' in result_text:
-                            result_text = result_text.replace('它怎么样', f'{entity.value}怎么样')
-                        elif '这个如何' in result_text:
-                            result_text = result_text.replace('这个如何', f'{entity.value}如何')
-                        elif '那呢' in result_text:
-                            result_text = result_text.replace('那呢', f'{entity.value}呢')
-                        elif '那个呢' in result_text:
-                            result_text = result_text.replace('那个呢', f'{entity.value}呢')
+                        if "它怎么样" in result_text:
+                            result_text = result_text.replace(
+                                "它怎么样", f"{entity.value}怎么样"
+                            )
+                        elif "这个如何" in result_text:
+                            result_text = result_text.replace(
+                                "这个如何", f"{entity.value}如何"
+                            )
+                        elif "那呢" in result_text:
+                            result_text = result_text.replace(
+                                "那呢", f"{entity.value}呢"
+                            )
+                        elif "那个呢" in result_text:
+                            result_text = result_text.replace(
+                                "那个呢", f"{entity.value}呢"
+                            )
 
         return result_text
 
-    def enhance_with_context(self, text: str, context: Dict[str, Any]) -> str:
+    def enhance_with_context(self, text: str, context: dict[str, Any]) -> str:
         """
         使用上下文信息增强查询
 
@@ -214,12 +267,12 @@ class QueryRewriter:
         enhanced_text = text
 
         # 添加话题上下文
-        current_topic = context.get('current_topic', '')
+        current_topic = context.get("current_topic", "")
         if current_topic and self._is_topic_relevant(text, current_topic):
             enhanced_text = f"关于{current_topic}，{text}"
 
         # 添加参数上下文
-        parameters = context.get('parameters', {})
+        parameters = context.get("parameters", {})
         for param_name, param_value in parameters.items():
             if str(param_value) in text:
                 # 参数已经在文本中，不需要额外处理
@@ -249,7 +302,9 @@ class QueryRewriter:
 
         return len(common_words) > 0
 
-    def _should_add_parameter_context(self, query: str, param_name: str, param_value: Any) -> bool:
+    def _should_add_parameter_context(
+        self, query: str, param_name: str, param_value: Any
+    ) -> bool:
         """
         判断是否应该添加参数上下文
         """
@@ -262,13 +317,15 @@ class QueryRewriter:
             return False  # 已经包含，不需要添加
 
         # 参数名称与查询主题相关
-        related_param_names = ['topic', 'title', 'query', 'search_term', 'paper_id']
+        related_param_names = ["topic", "title", "query", "search_term", "paper_id"]
         if param_name in related_param_names:
             return True
 
         return False
 
-    def process_query_for_padatious(self, text: str, session_id: str, context: Dict[str, Any]) -> str:
+    def process_query_for_padatious(
+        self, text: str, session_id: str, context: dict[str, Any]
+    ) -> str:
         """
         为Padatious处理查询文本
 
@@ -302,12 +359,17 @@ class QueryRewriter:
             规范化后的文本
         """
         # 移除多余的空格
-        normalized = re.sub(r'\s+', ' ', text.strip())
+        normalized = re.sub(r"\s+", " ", text.strip())
 
         # 标准化标点符号
-        normalized = normalized.replace('，', ',').replace('。', '.').replace('？', '?').replace('！', '!')
+        normalized = (
+            normalized.replace("，", ",")
+            .replace("。", ".")
+            .replace("？", "?")
+            .replace("！", "!")
+        )
 
         # 移除多余的标点
-        normalized = re.sub(r'[.!?]+', '.', normalized)  # 将多个标点替换为单个句号
+        normalized = re.sub(r"[.!?]+", ".", normalized)  # 将多个标点替换为单个句号
 
         return normalized

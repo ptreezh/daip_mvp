@@ -3,18 +3,19 @@
 遵循SOLID原则，提供统一的配置管理功能
 """
 
-import os
 import copy
 import json
+import os
 import re
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Callable, Any, Union
-from dataclasses import dataclass, field
+from typing import Any, Callable, Optional
 
 # 配置文件解析库
 try:
     import yaml
+
     YAML_AVAILABLE = True
 except ImportError:
     yaml = None
@@ -22,6 +23,7 @@ except ImportError:
 
 try:
     import toml
+
     TOML_AVAILABLE = True
 except ImportError:
     toml = None
@@ -32,20 +34,21 @@ from .models import ValidationError
 
 class ConfigFormat(Enum):
     """配置文件格式"""
+
     YAML = "yaml"
     JSON = "json"
     TOML = "toml"
 
     @classmethod
-    def from_extension(cls, file_path: str) -> 'ConfigFormat':
+    def from_extension(cls, file_path: str) -> "ConfigFormat":
         """从文件扩展名获取配置格式"""
         ext = Path(file_path).suffix.lower()
 
-        if ext in ['.yaml', '.yml']:
+        if ext in [".yaml", ".yml"]:
             return cls.YAML
-        elif ext == '.json':
+        elif ext == ".json":
             return cls.JSON
-        elif ext == '.toml':
+        elif ext == ".toml":
             return cls.TOML
         else:
             # 默认使用YAML
@@ -55,6 +58,7 @@ class ConfigFormat(Enum):
 @dataclass
 class ConfigSource:
     """配置源"""
+
     name: str
     path: str
     format: ConfigFormat = ConfigFormat.YAML
@@ -73,6 +77,7 @@ class ConfigSource:
 @dataclass
 class ConfigChange:
     """配置变更记录"""
+
     key: str
     old_value: Any
     new_value: Any
@@ -83,7 +88,7 @@ class ConfigChange:
 class ConfigValidator:
     """配置验证器"""
 
-    def __init__(self, schema: Dict[str, Any]):
+    def __init__(self, schema: dict[str, Any]):
         """初始化验证器
 
         Args:
@@ -91,7 +96,7 @@ class ConfigValidator:
         """
         self.schema = schema
 
-    def validate(self, config: Dict[str, Any]) -> None:
+    def validate(self, config: dict[str, Any]) -> None:
         """验证配置
 
         Args:
@@ -103,57 +108,65 @@ class ConfigValidator:
         # 简化的验证实现
         self._validate_schema(config, self.schema, "")
 
-    def _validate_schema(self, data: Any, schema: Dict[str, Any], path: str) -> None:
+    def _validate_schema(self, data: Any, schema: dict[str, Any], path: str) -> None:
         """递归验证配置模式"""
-        if not isinstance(schema, dict) or 'type' not in schema:
+        if not isinstance(schema, dict) or "type" not in schema:
             return
 
-        data_type = schema['type']
+        data_type = schema["type"]
         current_path = f"{path}." if path else ""
 
-        if data_type == 'object':
+        if data_type == "object":
             if not isinstance(data, dict):
                 raise ValidationError(f"Expected object at {current_path}")
 
             # 检查必需属性
-            required = schema.get('required', [])
+            required = schema.get("required", [])
             for prop in required:
                 if prop not in data:
-                    raise ValidationError(f"Required property '{current_path}{prop}' is missing")
+                    raise ValidationError(
+                        f"Required property '{current_path}{prop}' is missing"
+                    )
 
             # 验证属性
-            properties = schema.get('properties', {})
+            properties = schema.get("properties", {})
             for prop, prop_schema in properties.items():
                 if prop in data:
-                    self._validate_schema(data[prop], prop_schema, f"{current_path}{prop}")
+                    self._validate_schema(
+                        data[prop], prop_schema, f"{current_path}{prop}"
+                    )
 
-        elif data_type == 'string':
+        elif data_type == "string":
             if not isinstance(data, str):
                 raise ValidationError(f"Expected string at {current_path}")
 
-        elif data_type == 'integer':
+        elif data_type == "integer":
             if not isinstance(data, int):
                 raise ValidationError(f"Expected integer at {current_path}")
 
             # 检查数值范围
-            minimum = schema.get('minimum')
+            minimum = schema.get("minimum")
             if minimum is not None and data < minimum:
-                raise ValidationError(f"Value {data} at {current_path} is below minimum {minimum}")
+                raise ValidationError(
+                    f"Value {data} at {current_path} is below minimum {minimum}"
+                )
 
-            maximum = schema.get('maximum')
+            maximum = schema.get("maximum")
             if maximum is not None and data > maximum:
-                raise ValidationError(f"Value {data} at {current_path} is above maximum {maximum}")
+                raise ValidationError(
+                    f"Value {data} at {current_path} is above maximum {maximum}"
+                )
 
-        elif data_type == 'boolean':
+        elif data_type == "boolean":
             if not isinstance(data, bool):
                 raise ValidationError(f"Expected boolean at {current_path}")
 
-        elif data_type == 'array':
+        elif data_type == "array":
             if not isinstance(data, list):
                 raise ValidationError(f"Expected array at {current_path}")
 
             # 验证数组项
-            items_schema = schema.get('items')
+            items_schema = schema.get("items")
             if items_schema:
                 for i, item in enumerate(data):
                     self._validate_schema(item, items_schema, f"{current_path}[{i}]")
@@ -163,7 +176,7 @@ class ConfigWatcher:
     """配置监听器管理"""
 
     def __init__(self):
-        self._watchers: Dict[str, List[Callable]] = {}
+        self._watchers: dict[str, list[Callable]] = {}
 
     def add_watcher(self, key: str, callback: Callable[[str, Any, Any], None]) -> None:
         """添加配置监听器
@@ -218,7 +231,7 @@ class ConfigWatcher:
 
     def _key_matches(self, key: str, pattern: str) -> bool:
         """检查键是否匹配模式"""
-        if pattern.endswith('*'):
+        if pattern.endswith("*"):
             prefix = pattern[:-1]
             return key.startswith(prefix)
         return False
@@ -238,45 +251,45 @@ class ScaffoldConfig:
             "max_files": 1000,
             "default_encoding": "utf-8",
             "backup_enabled": True,
-            "auto_create_dirs": True
+            "auto_create_dirs": True,
         },
         "validation": {
             "min_description_length": 10,
             "max_description_length": 5000,
             "strict_mode": False,
-            "validate_paths": True
+            "validate_paths": True,
         },
         "retry": {
             "max_attempts": 3,
             "base_delay": 1.0,
             "max_delay": 60.0,
             "backoff_factor": 2.0,
-            "jitter": True
+            "jitter": True,
         },
         "generation": {
             "timeout": 300,  # 5分钟
             "max_tokens": 4000,
-            "temperature": 0.7
+            "temperature": 0.7,
         },
         "file_operations": {
             "chunk_size": 8192,
             "atomic_writes": True,
-            "preserve_permissions": True
-        }
+            "preserve_permissions": True,
+        },
     }
 
-    def __init__(self, initial_data: Optional[Dict[str, Any]] = None):
+    def __init__(self, initial_data: Optional[dict[str, Any]] = None):
         """初始化配置管理器
 
         Args:
             initial_data: 初始配置数据
         """
-        self._data: Dict[str, Any] = {}
-        self.sources: List[ConfigSource] = []
+        self._data: dict[str, Any] = {}
+        self.sources: list[ConfigSource] = []
         self.validator: Optional[ConfigValidator] = None
         self.watcher = ConfigWatcher()
         self.env_prefix: Optional[str] = None
-        self._change_history: List[ConfigChange] = []
+        self._change_history: list[ConfigChange] = []
 
         # 加载默认配置
         self.load_defaults()
@@ -299,7 +312,7 @@ class ScaffoldConfig:
         Returns:
             Any: 配置值
         """
-        keys = key.split('.')
+        keys = key.split(".")
         current = self._data
 
         try:
@@ -317,7 +330,7 @@ class ScaffoldConfig:
             value: 配置值
             source: 配置来源
         """
-        keys = key.split('.')
+        keys = key.split(".")
         old_value = self.get(key)
 
         # 设置嵌套值
@@ -331,12 +344,13 @@ class ScaffoldConfig:
 
         # 记录变更
         import time
+
         change = ConfigChange(
             key=key,
             old_value=old_value,
             new_value=value,
             timestamp=time.time(),
-            source=source
+            source=source,
         )
         self._change_history.append(change)
 
@@ -360,7 +374,7 @@ class ScaffoldConfig:
         Args:
             key: 要删除的配置键
         """
-        keys = key.split('.')
+        keys = key.split(".")
         current = self._data
 
         try:
@@ -370,7 +384,7 @@ class ScaffoldConfig:
             old_value = current.pop(keys[-1], None)
 
             # 如果父级节点为空，也删除
-            self._cleanup_empty_paths(key.split('.'))
+            self._cleanup_empty_paths(key.split("."))
 
             # 通知监听器
             self.watcher.notify_change(key, old_value, None)
@@ -378,7 +392,7 @@ class ScaffoldConfig:
         except (KeyError, TypeError):
             pass  # 路径不存在
 
-    def _cleanup_empty_paths(self, keys: List[str]) -> None:
+    def _cleanup_empty_paths(self, keys: list[str]) -> None:
         """清理空的路径节点"""
         current = self._data
 
@@ -397,7 +411,7 @@ class ScaffoldConfig:
                         break
                 current = current[key]
 
-    def merge(self, data: Dict[str, Any]) -> None:
+    def merge(self, data: dict[str, Any]) -> None:
         """合并配置数据
 
         Args:
@@ -405,23 +419,29 @@ class ScaffoldConfig:
         """
         self._deep_merge(self._data, data)
 
-    def _deep_merge(self, target: Dict[str, Any], source: Dict[str, Any]) -> None:
+    def _deep_merge(self, target: dict[str, Any], source: dict[str, Any]) -> None:
         """深度合并字典"""
         for key, value in source.items():
-            if key in target and isinstance(target[key], dict) and isinstance(value, dict):
+            if (
+                key in target
+                and isinstance(target[key], dict)
+                and isinstance(value, dict)
+            ):
                 self._deep_merge(target[key], value)
             else:
                 target[key] = copy.deepcopy(value)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """将配置转换为字典"""
         return copy.deepcopy(self._data)
 
-    def get_flattened(self) -> Dict[str, Any]:
+    def get_flattened(self) -> dict[str, Any]:
         """获取扁平化的配置字典"""
         return self._flatten_dict(self._data)
 
-    def _flatten_dict(self, d: Dict[str, Any], parent_key: str = "", sep: str = ".") -> Dict[str, Any]:
+    def _flatten_dict(
+        self, d: dict[str, Any], parent_key: str = "", sep: str = "."
+    ) -> dict[str, Any]:
         """扁平化字典"""
         items = []
         for k, v in d.items():
@@ -433,7 +453,7 @@ class ScaffoldConfig:
         return dict(items)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ScaffoldConfig':
+    def from_dict(cls, data: dict[str, Any]) -> "ScaffoldConfig":
         """从字典创建配置
 
         Args:
@@ -445,7 +465,9 @@ class ScaffoldConfig:
         return cls(initial_data=data)
 
     @classmethod
-    def load_from_file(cls, file_path: str, format: Optional[ConfigFormat] = None) -> 'ScaffoldConfig':
+    def load_from_file(
+        cls, file_path: str, format: Optional[ConfigFormat] = None
+    ) -> "ScaffoldConfig":
         """从文件加载配置
 
         Args:
@@ -458,7 +480,7 @@ class ScaffoldConfig:
         if format is None:
             format = ConfigFormat.from_extension(file_path)
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             if format == ConfigFormat.YAML:
                 if not YAML_AVAILABLE:
                     raise ImportError("PyYAML is required for YAML configuration files")
@@ -474,7 +496,9 @@ class ScaffoldConfig:
 
         return cls(initial_data=data)
 
-    def save_to_file(self, file_path: str, format: Optional[ConfigFormat] = None) -> None:
+    def save_to_file(
+        self, file_path: str, format: Optional[ConfigFormat] = None
+    ) -> None:
         """保存配置到文件
 
         Args:
@@ -487,7 +511,7 @@ class ScaffoldConfig:
         # 确保目录存在
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             if format == ConfigFormat.YAML:
                 if not YAML_AVAILABLE:
                     raise ImportError("PyYAML is required for YAML configuration files")
@@ -501,10 +525,10 @@ class ScaffoldConfig:
             else:
                 raise ValueError(f"Unsupported format: {format}")
 
-    def _load_from_file(self, file_path: str) -> Dict[str, Any]:
+    def _load_from_file(self, file_path: str) -> dict[str, Any]:
         """从文件加载配置数据（内部方法）"""
         format = ConfigFormat.from_extension(file_path)
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             if format == ConfigFormat.YAML:
                 if not YAML_AVAILABLE:
                     raise ImportError("PyYAML is required for YAML configuration files")
@@ -557,9 +581,9 @@ class ScaffoldConfig:
                 try:
                     data = self._load_from_file(source.path)
                     self.merge(data)
-                except Exception as e:
+                except Exception:
                     # 记录错误但继续加载其他源
-                    print(f"Warning: Failed to load config from {source.path}: {e}")
+                    pass
 
     def set_validator(self, validator: ConfigValidator) -> None:
         """设置配置验证器
@@ -595,7 +619,7 @@ class ScaffoldConfig:
         # 递归替换配置中的环境变量
         self._substitute_in_dict(self._data)
 
-    def _substitute_in_dict(self, data: Dict[str, Any], path: str = "") -> None:
+    def _substitute_in_dict(self, data: dict[str, Any], path: str = "") -> None:
         """在字典中替换环境变量"""
         for key, value in data.items():
             current_path = f"{path}.{key}" if path else key
@@ -613,7 +637,7 @@ class ScaffoldConfig:
                         str_value = os.environ[env_name]
                         try:
                             # 尝试转换为数字
-                            if '.' in str_value:
+                            if "." in str_value:
                                 data[key] = float(str_value)
                             else:
                                 data[key] = int(str_value)
@@ -639,7 +663,7 @@ class ScaffoldConfig:
         """
         self.watcher.remove_watcher(key, callback)
 
-    def export(self) -> Dict[str, Any]:
+    def export(self) -> dict[str, Any]:
         """导出配置
 
         Returns:
@@ -647,7 +671,7 @@ class ScaffoldConfig:
         """
         return self.to_dict()
 
-    def import_data(self, data: Dict[str, Any], merge: bool = True) -> None:
+    def import_data(self, data: dict[str, Any], merge: bool = True) -> None:
         """导入配置数据
 
         Args:
@@ -659,7 +683,7 @@ class ScaffoldConfig:
         else:
             self._data = copy.deepcopy(data)
 
-    def create_backup(self) -> Dict[str, Any]:
+    def create_backup(self) -> dict[str, Any]:
         """创建配置备份
 
         Returns:
@@ -668,10 +692,10 @@ class ScaffoldConfig:
         return {
             "config": copy.deepcopy(self._data),
             "sources": copy.deepcopy(self.sources),
-            "timestamp": __import__('time').time()
+            "timestamp": __import__("time").time(),
         }
 
-    def restore_backup(self, backup: Dict[str, Any]) -> None:
+    def restore_backup(self, backup: dict[str, Any]) -> None:
         """恢复配置备份
 
         Args:
@@ -682,7 +706,7 @@ class ScaffoldConfig:
         if "sources" in backup:
             self.sources = copy.deepcopy(backup["sources"])
 
-    def copy(self) -> 'ScaffoldConfig':
+    def copy(self) -> "ScaffoldConfig":
         """创建配置的深拷贝
 
         Returns:
@@ -695,7 +719,7 @@ class ScaffoldConfig:
         new_config.env_prefix = self.env_prefix
         return new_config
 
-    def search_keys(self, pattern: str) -> List[str]:
+    def search_keys(self, pattern: str) -> list[str]:
         """搜索配置键
 
         Args:
@@ -707,7 +731,7 @@ class ScaffoldConfig:
         flattened = self.get_flattened()
         return [key for key in flattened.keys() if pattern in key]
 
-    def search_values(self, pattern: str) -> List[str]:
+    def search_values(self, pattern: str) -> list[str]:
         """搜索配置值
 
         Args:
@@ -717,10 +741,13 @@ class ScaffoldConfig:
             List[str]: 匹配的配置键列表
         """
         flattened = self.get_flattened()
-        return [key for key, value in flattened.items()
-                if isinstance(value, str) and pattern in value]
+        return [
+            key
+            for key, value in flattened.items()
+            if isinstance(value, str) and pattern in value
+        ]
 
-    def get_change_history(self, limit: Optional[int] = None) -> List[ConfigChange]:
+    def get_change_history(self, limit: Optional[int] = None) -> list[ConfigChange]:
         """获取变更历史
 
         Args:

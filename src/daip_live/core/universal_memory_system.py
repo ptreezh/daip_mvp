@@ -3,16 +3,16 @@
 支持所有角色应用场景的分层记忆管理
 """
 
-from typing import Dict, List, Optional, Any, Tuple, Union
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import json
-import re
 from enum import Enum
+from typing import Any, Optional
 
 
 class MemoryType(Enum):
     """记忆类型枚举"""
+
     SHARED_FACT = "shared_fact"
     PERSONAL_ARGUMENT = "personal_argument"
     ROUND_SUMMARY = "round_summary"
@@ -25,12 +25,13 @@ class MemoryType(Enum):
 @dataclass
 class MemoryEntry:
     """记忆条目"""
+
     content: str
     memory_type: MemoryType
     source: str
     confidence: float
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     expires_at: Optional[str] = None
 
 
@@ -39,14 +40,18 @@ class UniversalMemorySystem:
     """通用记忆系统 - 适用于所有应用场景"""
 
     # 分层记忆存储
-    shared_factual_history: List[MemoryEntry] = field(default_factory=list)
-    role_personal_memories: Dict[str, Dict[MemoryType, List[MemoryEntry]]] = field(default_factory=dict)
-    session_memories: Dict[str, Dict[MemoryType, List[MemoryEntry]]] = field(default_factory=dict)
-    knowledge_base: List[MemoryEntry] = field(default_factory=list)
+    shared_factual_history: list[MemoryEntry] = field(default_factory=list)
+    role_personal_memories: dict[str, dict[MemoryType, list[MemoryEntry]]] = field(
+        default_factory=dict
+    )
+    session_memories: dict[str, dict[MemoryType, list[MemoryEntry]]] = field(
+        default_factory=dict
+    )
+    knowledge_base: list[MemoryEntry] = field(default_factory=list)
 
     # 记忆索引
-    memory_index: Dict[str, List[MemoryEntry]] = field(default_factory=dict)
-    tag_index: Dict[str, List[MemoryEntry]] = field(default_factory=dict)
+    memory_index: dict[str, list[MemoryEntry]] = field(default_factory=dict)
+    tag_index: dict[str, list[MemoryEntry]] = field(default_factory=dict)
 
     # 配置
     max_memory_entries: int = 10000
@@ -61,9 +66,9 @@ class UniversalMemorySystem:
         confidence: float = 1.0,
         role_name: Optional[str] = None,
         session_id: Optional[str] = None,
-        tags: List[str] = None,
-        metadata: Dict[str, Any] = None,
-        expires_in: Optional[int] = None
+        tags: list[str] = None,
+        metadata: dict[str, Any] = None,
+        expires_in: Optional[int] = None,
     ) -> str:
         """添加记忆条目"""
         memory_entry = MemoryEntry(
@@ -72,7 +77,7 @@ class UniversalMemorySystem:
             source=source,
             confidence=confidence,
             metadata=metadata or {},
-            expires_at=self._calculate_expiry(expires_in) if expires_in else None
+            expires_at=self._calculate_expiry(expires_in) if expires_in else None,
         )
 
         # 添加标签
@@ -114,9 +119,9 @@ class UniversalMemorySystem:
         role_name: Optional[str] = None,
         session_id: Optional[str] = None,
         current_round: int = 1,
-        memory_types: List[MemoryType] = None,
+        memory_types: list[MemoryType] = None,
         max_entries: int = 10,
-        keywords: List[str] = None
+        keywords: list[str] = None,
     ) -> str:
         """获取上下文"""
         if memory_types is None:
@@ -134,17 +139,22 @@ class UniversalMemorySystem:
             # 角色个人记忆
             if role_name and role_name in self.role_personal_memories:
                 if memory_type in self.role_personal_memories[role_name]:
-                    relevant_memories.extend(self.role_personal_memories[role_name][memory_type])
+                    relevant_memories.extend(
+                        self.role_personal_memories[role_name][memory_type]
+                    )
 
             # 会话记忆
             if session_id and session_id in self.session_memories:
                 if memory_type in self.session_memories[session_id]:
-                    relevant_memories.extend(self.session_memories[session_id][memory_type])
+                    relevant_memories.extend(
+                        self.session_memories[session_id][memory_type]
+                    )
 
         # 按关键词过滤
         if keywords:
             relevant_memories = [
-                mem for mem in relevant_memories
+                mem
+                for mem in relevant_memories
                 if any(keyword.lower() in mem.content.lower() for keyword in keywords)
             ]
 
@@ -162,14 +172,16 @@ class UniversalMemorySystem:
             if memory.metadata.get("tags"):
                 context_parts.append(f"  Tags: {', '.join(memory.metadata['tags'])}")
 
-        return "\n".join(context_parts) if context_parts else "No relevant memories found."
+        return (
+            "\n".join(context_parts) if context_parts else "No relevant memories found."
+        )
 
     def get_compressed_context(
         self,
         role_name: Optional[str] = None,
         session_id: Optional[str] = None,
         current_round: int = 1,
-        max_length: int = 2000
+        max_length: int = 2000,
     ) -> str:
         """获取压缩上下文"""
         full_context = self.get_context(role_name, session_id, current_round)
@@ -178,24 +190,24 @@ class UniversalMemorySystem:
             return full_context
 
         # 简单的压缩策略：保留最重要的记忆
-        lines = full_context.split('\n')
+        lines = full_context.split("\n")
         compressed_lines = []
 
         for line in lines:
-            if len('\n'.join(compressed_lines + [line])) > max_length:
+            if len("\n".join(compressed_lines + [line])) > max_length:
                 break
             compressed_lines.append(line)
 
-        return '\n'.join(compressed_lines) + "\n... (context truncated)"
+        return "\n".join(compressed_lines) + "\n... (context truncated)"
 
     def search_memories(
         self,
         query: str,
-        memory_types: List[MemoryType] = None,
+        memory_types: list[MemoryType] = None,
         role_name: Optional[str] = None,
         session_id: Optional[str] = None,
-        limit: int = 20
-    ) -> List[MemoryEntry]:
+        limit: int = 20,
+    ) -> list[MemoryEntry]:
         """搜索记忆"""
         results = []
 
@@ -211,23 +223,47 @@ class UniversalMemorySystem:
 
         # 过滤
         if memory_types:
-            unique_results = [mem for mem in unique_results if mem.memory_type in memory_types]
+            unique_results = [
+                mem for mem in unique_results if mem.memory_type in memory_types
+            ]
         if role_name:
-            unique_results = [mem for mem in unique_results if mem in getattr(self.role_personal_memories.get(role_name, {}).values(), [])]
+            unique_results = [
+                mem
+                for mem in unique_results
+                if mem
+                in getattr(self.role_personal_memories.get(role_name, {}).values(), [])
+            ]
         if session_id:
-            unique_results = [mem for mem in unique_results if mem in getattr(self.session_memories.get(session_id, {}).values(), [])]
+            unique_results = [
+                mem
+                for mem in unique_results
+                if mem
+                in getattr(self.session_memories.get(session_id, {}).values(), [])
+            ]
 
         return unique_results[:limit]
 
     def update_memory_confidence(self, memory_timestamp: str, new_confidence: float):
         """更新记忆置信度"""
         all_memories = (
-            self.shared_factual_history +
-            sum([memories for role_memories in self.role_personal_memories.values()
-                 for memories in role_memories.values()], []) +
-            sum([memories for session_memories in self.session_memories.values()
-                 for memories in session_memories.values()], []) +
-            self.knowledge_base
+            self.shared_factual_history
+            + sum(
+                [
+                    memories
+                    for role_memories in self.role_personal_memories.values()
+                    for memories in role_memories.values()
+                ],
+                [],
+            )
+            + sum(
+                [
+                    memories
+                    for session_memories in self.session_memories.values()
+                    for memories in session_memories.values()
+                ],
+                [],
+            )
+            + self.knowledge_base
         )
 
         for memory in all_memories:
@@ -235,39 +271,54 @@ class UniversalMemorySystem:
                 memory.confidence = new_confidence
                 break
 
-    def get_memory_statistics(self) -> Dict[str, Any]:
+    def get_memory_statistics(self) -> dict[str, Any]:
         """获取记忆统计"""
         return {
             "total_shared_facts": len(self.shared_factual_history),
-            "total_role_memories": sum(len(memories) for role_memories in self.role_personal_memories.values() for memories in role_memories.values()),
-            "total_session_memories": sum(len(memories) for session_memories in self.session_memories.values() for memories in session_memories.values()),
+            "total_role_memories": sum(
+                len(memories)
+                for role_memories in self.role_personal_memories.values()
+                for memories in role_memories.values()
+            ),
+            "total_session_memories": sum(
+                len(memories)
+                for session_memories in self.session_memories.values()
+                for memories in session_memories.values()
+            ),
             "total_knowledge_entries": len(self.knowledge_base),
             "total_roles": len(self.role_personal_memories),
             "total_sessions": len(self.session_memories),
             "memory_index_size": len(self.memory_index),
             "tag_index_size": len(self.tag_index),
-            "memory_types_used": list(set(mem.memory_type for mem in self.shared_factual_history + self.knowledge_base))
+            "memory_types_used": list(
+                {
+                    mem.memory_type
+                    for mem in self.shared_factual_history + self.knowledge_base
+                }
+            ),
         }
 
-    def check_memory_consistency(self) -> List[Dict[str, Any]]:
+    def check_memory_consistency(self) -> list[dict[str, Any]]:
         """检查记忆一致性"""
         conflicts = []
 
         # 检查共享事实的一致性
         for i, fact1 in enumerate(self.shared_factual_history):
-            for fact2 in self.shared_factual_history[i+1:]:
+            for fact2 in self.shared_factual_history[i + 1 :]:
                 if self._are_contradictory(fact1.content, fact2.content):
-                    conflicts.append({
-                        "type": "contradictory_facts",
-                        "fact1": fact1.content,
-                        "fact2": fact2.content,
-                        "confidence1": fact1.confidence,
-                        "confidence2": fact2.confidence
-                    })
+                    conflicts.append(
+                        {
+                            "type": "contradictory_facts",
+                            "fact1": fact1.content,
+                            "fact2": fact2.content,
+                            "confidence1": fact1.confidence,
+                            "confidence2": fact2.confidence,
+                        }
+                    )
 
         return conflicts
 
-    def export_memory(self) -> Dict[str, Any]:
+    def export_memory(self) -> dict[str, Any]:
         """导出记忆数据"""
         return {
             "shared_factual_history": [
@@ -277,8 +328,9 @@ class UniversalMemorySystem:
                     "source": mem.source,
                     "confidence": mem.confidence,
                     "timestamp": mem.timestamp,
-                    "metadata": mem.metadata
-                } for mem in self.shared_factual_history
+                    "metadata": mem.metadata,
+                }
+                for mem in self.shared_factual_history
             ],
             "role_personal_memories": {
                 role: {
@@ -289,10 +341,13 @@ class UniversalMemorySystem:
                             "source": mem.source,
                             "confidence": mem.confidence,
                             "timestamp": mem.timestamp,
-                            "metadata": mem.metadata
-                        } for mem in memories
-                    ] for mem_type, memories in role_memories.items()
-                } for role, role_memories in self.role_personal_memories.items()
+                            "metadata": mem.metadata,
+                        }
+                        for mem in memories
+                    ]
+                    for mem_type, memories in role_memories.items()
+                }
+                for role, role_memories in self.role_personal_memories.items()
             },
             "knowledge_base": [
                 {
@@ -301,13 +356,14 @@ class UniversalMemorySystem:
                     "source": mem.source,
                     "confidence": mem.confidence,
                     "timestamp": mem.timestamp,
-                    "metadata": mem.metadata
-                } for mem in self.knowledge_base
+                    "metadata": mem.metadata,
+                }
+                for mem in self.knowledge_base
             ],
-            "export_timestamp": datetime.now().isoformat()
+            "export_timestamp": datetime.now().isoformat(),
         }
 
-    def import_memory(self, memory_data: Dict[str, Any]):
+    def import_memory(self, memory_data: dict[str, Any]):
         """导入记忆数据"""
         # 导入共享事实
         for fact_data in memory_data.get("shared_factual_history", []):
@@ -316,11 +372,13 @@ class UniversalMemorySystem:
                 memory_type=MemoryType(fact_data["memory_type"]),
                 source=fact_data["source"],
                 confidence=fact_data["confidence"],
-                metadata=fact_data.get("metadata", {})
+                metadata=fact_data.get("metadata", {}),
             )
 
         # 导入角色个人记忆
-        for role, role_memories in memory_data.get("role_personal_memories", {}).items():
+        for role, role_memories in memory_data.get(
+            "role_personal_memories", {}
+        ).items():
             for mem_type_str, memories in role_memories.items():
                 mem_type = MemoryType(mem_type_str)
                 for mem_data in memories:
@@ -330,7 +388,7 @@ class UniversalMemorySystem:
                         source=mem_data["source"],
                         confidence=mem_data["confidence"],
                         role_name=role,
-                        metadata=mem_data.get("metadata", {})
+                        metadata=mem_data.get("metadata", {}),
                     )
 
         # 导入知识库
@@ -340,7 +398,7 @@ class UniversalMemorySystem:
                 memory_type=MemoryType(knowledge_data["memory_type"]),
                 source=knowledge_data["source"],
                 confidence=knowledge_data["confidence"],
-                metadata=knowledge_data.get("metadata", {})
+                metadata=knowledge_data.get("metadata", {}),
             )
 
     def clear_all_memories(self):
@@ -355,7 +413,7 @@ class UniversalMemorySystem:
     def _update_index(self, memory_entry: MemoryEntry):
         """更新索引"""
         # 简单的关键词索引
-        words = re.findall(r'\b\w+\b', memory_entry.content.lower())
+        words = re.findall(r"\b\w+\b", memory_entry.content.lower())
         for word in words:
             if len(word) > 3:  # 只索引长度大于3的词
                 if word not in self.memory_index:
@@ -378,14 +436,22 @@ class UniversalMemorySystem:
             return current_time > expiry_time
 
         # 清理各个存储区域
-        self.shared_factual_history = [mem for mem in self.shared_factual_history if not is_expired(mem)]
+        self.shared_factual_history = [
+            mem for mem in self.shared_factual_history if not is_expired(mem)
+        ]
         for role_memories in self.role_personal_memories.values():
             for mem_type in role_memories:
-                role_memories[mem_type] = [mem for mem in role_memories[mem_type] if not is_expired(mem)]
+                role_memories[mem_type] = [
+                    mem for mem in role_memories[mem_type] if not is_expired(mem)
+                ]
         for session_memories in self.session_memories.values():
             for mem_type in session_memories:
-                session_memories[mem_type] = [mem for mem in session_memories[mem_type] if not is_expired(mem)]
-        self.knowledge_base = [mem for mem in self.knowledge_base if not is_expired(mem)]
+                session_memories[mem_type] = [
+                    mem for mem in session_memories[mem_type] if not is_expired(mem)
+                ]
+        self.knowledge_base = [
+            mem for mem in self.knowledge_base if not is_expired(mem)
+        ]
 
     def _are_contradictory(self, fact1: str, fact2: str) -> bool:
         """检查两个事实是否矛盾"""
@@ -394,32 +460,38 @@ class UniversalMemorySystem:
             (r"is beneficial", r"is harmful"),
             (r"will improve", r"will worsen"),
             (r"supports", r"opposes"),
-            (r"increases", r"decreases")
+            (r"increases", r"decreases"),
         ]
 
         fact1_lower = fact1.lower()
         fact2_lower = fact2.lower()
 
         for pattern1, pattern2 in contradictory_pairs:
-            if (re.search(pattern1, fact1_lower) and re.search(pattern2, fact2_lower)) or \
-               (re.search(pattern2, fact1_lower) and re.search(pattern1, fact2_lower)):
+            if (
+                re.search(pattern1, fact1_lower) and re.search(pattern2, fact2_lower)
+            ) or (
+                re.search(pattern2, fact1_lower) and re.search(pattern1, fact2_lower)
+            ):
                 return True
 
         return False
 
     def __str__(self) -> str:
         stats = self.get_memory_statistics()
-        return f"UniversalMemorySystem(facts={stats['total_shared_facts']}, roles={stats['total_roles']}, sessions={stats['total_sessions']})"
+        return f"UniversalMemorySystem(facts={stats['total_shared_facts']}, roles={stats['total_roles']}, sessions={stats['total_sessions']})"  # noqa: E501
 
     def __repr__(self) -> str:
-        return (f"UniversalMemorySystem("
-                f"shared_facts={len(self.shared_factual_history)}, "
-                f"roles={list(self.role_personal_memories.keys())}, "
-                f"sessions={list(self.session_memories.keys())}, "
-                f"knowledge={len(self.knowledge_base)})")
+        return (
+            f"UniversalMemorySystem("
+            f"shared_facts={len(self.shared_factual_history)}, "
+            f"roles={list(self.role_personal_memories.keys())}, "
+            f"sessions={list(self.session_memories.keys())}, "
+            f"knowledge={len(self.knowledge_base)})"
+        )
 
 
 # 为了向后兼容，保留原有的LayeredMemorySystem作为别名
 class LayeredMemorySystem(UniversalMemorySystem):
     """向后兼容的分层记忆系统"""
+
     pass

@@ -5,11 +5,12 @@ This module provides health check functionality for monitoring system status.
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, Callable, Optional
+from typing import Callable, Optional
 
 
 class HealthStatus(Enum):
     """Health status enumeration."""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -18,30 +19,28 @@ class HealthStatus(Enum):
 @dataclass
 class ComponentHealth:
     """Health status of a single component."""
+
     name: str
     status: HealthStatus
     message: str
-    details: Optional[Dict] = None
+    details: Optional[dict] = None
 
 
 @dataclass
 class HealthCheck:
     """Overall health check result."""
+
     status: HealthStatus
-    components: Dict[str, ComponentHealth] = field(default_factory=dict)
+    components: dict[str, ComponentHealth] = field(default_factory=dict)
 
 
 class HealthCheckRegistry:
     """Registry for health check functions."""
 
     def __init__(self):
-        self.checks: Dict[str, Callable[[], ComponentHealth]] = {}
+        self.checks: dict[str, Callable[[], ComponentHealth]] = {}
 
-    def register(
-        self,
-        name: str,
-        check_func: Callable[[], ComponentHealth]
-    ) -> None:
+    def register(self, name: str, check_func: Callable[[], ComponentHealth]) -> None:
         """Register a health check function.
 
         Args:
@@ -80,7 +79,7 @@ class HealthCheckRegistry:
                 components[name] = ComponentHealth(
                     name=name,
                     status=HealthStatus.UNHEALTHY,
-                    message=f"Check failed: {e}"
+                    message=f"Check failed: {e}",
                 )
                 unhealthy_count += 1
 
@@ -92,7 +91,4 @@ class HealthCheckRegistry:
         else:
             overall_status = HealthStatus.DEGRADED
 
-        return HealthCheck(
-            status=overall_status,
-            components=components
-        )
+        return HealthCheck(status=overall_status, components=components)

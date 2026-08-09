@@ -13,31 +13,29 @@ This module provides comprehensive skill management including:
 """
 
 import asyncio
-import uuid
+import hashlib
 import json
-import importlib
-import inspect
-import sys
-import subprocess
-import tempfile
+import logging
 import os
+import sqlite3
+import subprocess
+import sys
 import threading
 import time
-import hashlib
-import pickle
-from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional, Set, Tuple, Union, Callable
+import uuid
+
+try:
+    import resource  # Unix-only；Windows 上不可用
+except ImportError:
+    resource = None
+from collections import defaultdict
+from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-import logging
-import sqlite3
-from abc import ABC, abstractmethod
-import psutil
-import resource
-import signal
-from contextlib import asynccontextmanager
-import yaml
+from typing import Any, Callable, Optional, Union
+
 import networkx as nx
 
 logger = logging.getLogger(__name__)
@@ -45,17 +43,19 @@ logger = logging.getLogger(__name__)
 
 class SkillType(Enum):
     """Types of skills with different execution patterns"""
-    FUNCTION = "function"           # Python function
-    SCRIPT = "script"              # External script
-    API = "api"                    # External API call
-    WORKFLOW = "workflow"          # Multi-step workflow
-    TEMPLATE = "template"          # Template-based skill
-    PLUGIN = "plugin"              # Loaded plugin
-    AGENT = "agent"                # AI agent skill
+
+    FUNCTION = "function"  # Python function
+    SCRIPT = "script"  # External script
+    API = "api"  # External API call
+    WORKFLOW = "workflow"  # Multi-step workflow
+    TEMPLATE = "template"  # Template-based skill
+    PLUGIN = "plugin"  # Loaded plugin
+    AGENT = "agent"  # AI agent skill
 
 
 class SkillStatus(Enum):
     """Skill lifecycle status"""
+
     REGISTERED = "registered"
     ACTIVE = "active"
     INACTIVE = "inactive"
@@ -67,6 +67,7 @@ class SkillStatus(Enum):
 
 class SkillPermission(Enum):
     """Skill permission levels"""
+
     READ_ONLY = "read_only"
     READ_WRITE = "read_write"
     EXECUTE = "execute"
@@ -79,34 +80,37 @@ class SkillPermission(Enum):
 @dataclass
 class SkillParameter:
     """Skill parameter definition"""
+
     name: str
     param_type: str
     description: str = ""
     required: bool = True
     default_value: Any = None
-    validation_rules: Dict[str, Any] = field(default_factory=dict)
-    examples: List[Any] = field(default_factory=list)
+    validation_rules: dict[str, Any] = field(default_factory=dict)
+    examples: list[Any] = field(default_factory=list)
     min_value: Optional[Union[int, float]] = None
     max_value: Optional[Union[int, float]] = None
-    allowed_values: Optional[List[Any]] = None
+    allowed_values: Optional[list[Any]] = None
 
 
 @dataclass
 class SkillResource:
     """Resource requirements and limits for skill execution"""
+
     max_memory_mb: Optional[int] = None
     max_cpu_time_seconds: Optional[int] = None
     max_execution_time_seconds: Optional[int] = None
-    required_files: List[str] = field(default_factory=list)
-    required_permissions: List[SkillPermission] = field(default_factory=list)
+    required_files: list[str] = field(default_factory=list)
+    required_permissions: list[SkillPermission] = field(default_factory=list)
     network_access: bool = False
     file_system_access: bool = False
-    environment_variables: Dict[str, str] = field(default_factory=dict)
+    environment_variables: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
 class SkillMetrics:
     """Skill execution metrics"""
+
     execution_count: int = 0
     success_count: int = 0
     failure_count: int = 0
@@ -116,13 +120,14 @@ class SkillMetrics:
     last_success_time: Optional[datetime] = None
     last_failure_time: Optional[datetime] = None
     performance_score: float = 1.0
-    resource_usage: Dict[str, float] = field(default_factory=dict)
-    error_types: Dict[str, int] = field(default_factory=dict)
+    resource_usage: dict[str, float] = field(default_factory=dict)
+    error_types: dict[str, int] = field(default_factory=dict)
 
 
 @dataclass
 class SkillDependency:
     """Skill dependency definition"""
+
     skill_id: str
     version_constraint: str = ">=1.0.0"
     is_optional: bool = False
@@ -139,7 +144,7 @@ class Skill:
         description: str = "",
         version: str = "1.0.0",
         author: str = "",
-        skill_id: Optional[str] = None
+        skill_id: Optional[str] = None,
     ):
         self.id = skill_id or str(uuid.uuid4())
         self.name = name
@@ -156,25 +161,25 @@ class Skill:
         self.file_path: Optional[str] = None
 
         # Interface definition
-        self.parameters: List[SkillParameter] = []
-        self.return_schema: Dict[str, Any] = {}
-        self.examples: List[Dict[str, Any]] = []
+        self.parameters: list[SkillParameter] = []
+        self.return_schema: dict[str, Any] = {}
+        self.examples: list[dict[str, Any]] = []
 
         # Dependencies and resources
-        self.dependencies: List[SkillDependency] = []
-        self.dependents: Set[str] = set()
+        self.dependencies: list[SkillDependency] = []
+        self.dependents: set[str] = set()
         self.resources = SkillResource()
 
         # Metadata and documentation
-        self.tags: List[str] = []
+        self.tags: list[str] = []
         self.category: str = "general"
         self.documentation: str = ""
-        self.changelog: List[Dict[str, Any]] = []
+        self.changelog: list[dict[str, Any]] = []
         self.license: str = "MIT"
 
         # Security and validation
-        self.permissions: List[SkillPermission] = []
-        self.validation_rules: List[Dict[str, Any]] = []
+        self.permissions: list[SkillPermission] = []
+        self.validation_rules: list[dict[str, Any]] = []
         self.security_score: float = 1.0
         self.code_checksum: Optional[str] = None
 
@@ -182,7 +187,7 @@ class Skill:
         self.metrics = SkillMetrics()
 
         # Version management
-        self.versions: List[str] = [version]
+        self.versions: list[str] = [version]
         self.is_deprecated: bool = False
         self.deprecation_message: Optional[str] = None
 
@@ -190,7 +195,7 @@ class Skill:
         self.rating: float = 0.0
         self.rating_count: int = 0
         self.download_count: int = 0
-        self.community_tags: List[str] = []
+        self.community_tags: list[str] = []
 
         # Timestamps
         self.created_at = datetime.now()
@@ -199,16 +204,20 @@ class Skill:
         self.last_published_at: Optional[datetime] = None
 
         # Execution context
-        self.execution_context: Dict[str, Any] = {}
-        self.environment_variables: Dict[str, str] = {}
+        self.execution_context: dict[str, Any] = {}
+        self.environment_variables: dict[str, str] = {}
 
     def add_parameter(self, param: SkillParameter) -> None:
         """Add a parameter to the skill"""
         self.parameters.append(param)
         self.updated_at = datetime.now()
 
-    def add_dependency(self, skill_id: str, version_constraint: str = ">=1.0.0",
-                       is_optional: bool = False) -> None:
+    def add_dependency(
+        self,
+        skill_id: str,
+        version_constraint: str = ">=1.0.0",
+        is_optional: bool = False,
+    ) -> None:
         """Add a dependency to this skill"""
         dependency = SkillDependency(skill_id, version_constraint, is_optional)
         self.dependencies.append(dependency)
@@ -223,18 +232,23 @@ class Skill:
             SkillPermission.SYSTEM: 0.5,
             SkillPermission.ADMIN: 0.4,
             SkillPermission.FILE_SYSTEM: 0.2,
-            SkillPermission.NETWORK: 0.1
+            SkillPermission.NETWORK: 0.1,
         }
 
         for permission in self.permissions:
-            base_score *= (1 - risk_scores.get(permission, 0))
+            base_score *= 1 - risk_scores.get(permission, 0)
 
         # Analyze code for security issues (simplified)
         if self.code:
             # Check for dangerous patterns
             dangerous_patterns = [
-                'subprocess.call', 'os.system', 'eval(', 'exec(',
-                '__import__', 'open(', 'file('
+                "subprocess.call",
+                "os.system",
+                "eval(",
+                "exec(",
+                "__import__",
+                "open(",
+                "file(",
             ]
             for pattern in dangerous_patterns:
                 if pattern in self.code:
@@ -242,7 +256,7 @@ class Skill:
 
         return max(0.0, min(1.0, base_score))
 
-    def validate_parameters(self, parameters: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    def validate_parameters(self, parameters: dict[str, Any]) -> tuple[bool, list[str]]:
         """Validate input parameters against skill definition"""
         errors = []
 
@@ -277,18 +291,28 @@ class Skill:
 
             # Range validation
             if param_def.min_value is not None and param_value < param_def.min_value:
-                errors.append(f"Parameter '{param_name}' must be >= {param_def.min_value}")
+                errors.append(
+                    f"Parameter '{param_name}' must be >= {param_def.min_value}"
+                )
             if param_def.max_value is not None and param_value > param_def.max_value:
-                errors.append(f"Parameter '{param_name}' must be <= {param_def.max_value}")
+                errors.append(
+                    f"Parameter '{param_name}' must be <= {param_def.max_value}"
+                )
 
             # Allowed values validation
             if param_def.allowed_values and param_value not in param_def.allowed_values:
-                errors.append(f"Parameter '{param_name}' must be one of {param_def.allowed_values}")
+                errors.append(
+                    f"Parameter '{param_name}' must be one of {param_def.allowed_values}"  # noqa: E501
+                )
 
         return len(errors) == 0, errors
 
-    def update_metrics(self, execution_time_ms: float, success: bool,
-                      error_message: Optional[str] = None) -> None:
+    def update_metrics(
+        self,
+        execution_time_ms: float,
+        success: bool,
+        error_message: Optional[str] = None,
+    ) -> None:
         """Update skill execution metrics"""
         self.metrics.execution_count += 1
         self.metrics.total_execution_time_ms += execution_time_ms
@@ -304,15 +328,21 @@ class Skill:
             self.metrics.failure_count += 1
             self.metrics.last_failure_time = datetime.now()
             if error_message:
-                error_type = error_message.split(':')[0] if ':' in error_message else error_message
-                self.metrics.error_types[error_type] = self.metrics.error_types.get(error_type, 0) + 1
+                error_type = (
+                    error_message.split(":")[0]
+                    if ":" in error_message
+                    else error_message
+                )
+                self.metrics.error_types[error_type] = (
+                    self.metrics.error_types.get(error_type, 0) + 1
+                )
 
         # Update performance score
         success_rate = self.metrics.success_count / self.metrics.execution_count
         time_efficiency = max(0, 1 - (execution_time_ms / 10000))  # 10s as baseline
-        self.metrics.performance_score = (success_rate * 0.7 + time_efficiency * 0.3)
+        self.metrics.performance_score = success_rate * 0.7 + time_efficiency * 0.3
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert skill to dictionary"""
         return {
             "id": self.id,
@@ -335,8 +365,9 @@ class Skill:
                     "examples": p.examples,
                     "min_value": p.min_value,
                     "max_value": p.max_value,
-                    "allowed_values": p.allowed_values
-                } for p in self.parameters
+                    "allowed_values": p.allowed_values,
+                }
+                for p in self.parameters
             ],
             "return_schema": self.return_schema,
             "examples": self.examples,
@@ -345,8 +376,9 @@ class Skill:
                     "skill_id": d.skill_id,
                     "version_constraint": d.version_constraint,
                     "is_optional": d.is_optional,
-                    "dependency_type": d.dependency_type
-                } for d in self.dependencies
+                    "dependency_type": d.dependency_type,
+                }
+                for d in self.dependencies
             ],
             "dependents": list(self.dependents),
             "resources": {
@@ -354,10 +386,12 @@ class Skill:
                 "max_cpu_time_seconds": self.resources.max_cpu_time_seconds,
                 "max_execution_time_seconds": self.resources.max_execution_time_seconds,
                 "required_files": self.resources.required_files,
-                "required_permissions": [p.value for p in self.resources.required_permissions],
+                "required_permissions": [
+                    p.value for p in self.resources.required_permissions
+                ],
                 "network_access": self.resources.network_access,
                 "file_system_access": self.resources.file_system_access,
-                "environment_variables": self.resources.environment_variables
+                "environment_variables": self.resources.environment_variables,
             },
             "tags": self.tags,
             "category": self.category,
@@ -373,7 +407,7 @@ class Skill:
                 "failure_count": self.metrics.failure_count,
                 "average_execution_time_ms": self.metrics.average_execution_time_ms,
                 "performance_score": self.metrics.performance_score,
-                "error_types": self.metrics.error_types
+                "error_types": self.metrics.error_types,
             },
             "versions": self.versions,
             "is_deprecated": self.is_deprecated,
@@ -384,12 +418,16 @@ class Skill:
             "community_tags": self.community_tags,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
-            "last_tested_at": self.last_tested_at.isoformat() if self.last_tested_at else None,
-            "last_published_at": self.last_published_at.isoformat() if self.last_published_at else None
+            "last_tested_at": self.last_tested_at.isoformat()
+            if self.last_tested_at
+            else None,
+            "last_published_at": self.last_published_at.isoformat()
+            if self.last_published_at
+            else None,
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Skill':
+    def from_dict(cls, data: dict[str, Any]) -> "Skill":
         """Create skill from dictionary"""
         skill = cls(
             name=data["name"],
@@ -397,7 +435,7 @@ class Skill:
             description=data.get("description", ""),
             version=data.get("version", "1.0.0"),
             author=data.get("author", ""),
-            skill_id=data.get("id")
+            skill_id=data.get("id"),
         )
 
         # Restore basic attributes
@@ -431,7 +469,7 @@ class Skill:
                 examples=param_data.get("examples", []),
                 min_value=param_data.get("min_value"),
                 max_value=param_data.get("max_value"),
-                allowed_values=param_data.get("allowed_values")
+                allowed_values=param_data.get("allowed_values"),
             )
             skill.add_parameter(param)
 
@@ -440,7 +478,7 @@ class Skill:
             skill.add_dependency(
                 dep_data["skill_id"],
                 dep_data.get("version_constraint", ">=1.0.0"),
-                dep_data.get("is_optional", False)
+                dep_data.get("is_optional", False),
             )
 
         skill.dependents = set(data.get("dependents", []))
@@ -452,10 +490,13 @@ class Skill:
             max_cpu_time_seconds=resources_data.get("max_cpu_time_seconds"),
             max_execution_time_seconds=resources_data.get("max_execution_time_seconds"),
             required_files=resources_data.get("required_files", []),
-            required_permissions=[SkillPermission(p) for p in resources_data.get("required_permissions", [])],
+            required_permissions=[
+                SkillPermission(p)
+                for p in resources_data.get("required_permissions", [])
+            ],
             network_access=resources_data.get("network_access", False),
             file_system_access=resources_data.get("file_system_access", False),
-            environment_variables=resources_data.get("environment_variables", {})
+            environment_variables=resources_data.get("environment_variables", {}),
         )
 
         # Restore permissions
@@ -467,10 +508,12 @@ class Skill:
             execution_count=metrics_data.get("execution_count", 0),
             success_count=metrics_data.get("success_count", 0),
             failure_count=metrics_data.get("failure_count", 0),
-            average_execution_time_ms=metrics_data.get("average_execution_time_ms", 0.0),
+            average_execution_time_ms=metrics_data.get(
+                "average_execution_time_ms", 0.0
+            ),
             total_execution_time_ms=metrics_data.get("total_execution_time_ms", 0.0),
             performance_score=metrics_data.get("performance_score", 1.0),
-            error_types=metrics_data.get("error_types", {})
+            error_types=metrics_data.get("error_types", {}),
         )
 
         # Restore timestamps
@@ -490,10 +533,10 @@ class SkillSandbox:
     def __init__(self, max_memory_mb: int = 512, max_execution_time_seconds: int = 30):
         self.max_memory_mb = max_memory_mb
         self.max_execution_time_seconds = max_execution_time_seconds
-        self.active_processes: Dict[str, subprocess.Popen] = {}
+        self.active_processes: dict[str, subprocess.Popen] = {}
 
     @asynccontextmanager
-    async def execute(self, skill: Skill, parameters: Dict[str, Any]):
+    async def execute(self, skill: Skill, parameters: dict[str, Any]):
         """Execute skill within sandbox context"""
         execution_id = str(uuid.uuid4())
         start_time = time.time()
@@ -523,47 +566,41 @@ class SkillSandbox:
             await self._cleanup(execution_id)
 
     def _set_resource_limits(self, skill: Skill) -> None:
-        """Set resource limits for skill execution"""
+        """Set resource limits for skill execution (Unix-only; no-op on Windows)"""
+        if resource is None:
+            return
+
         # Memory limit
         memory_limit = skill.resources.max_memory_mb or self.max_memory_mb
         if memory_limit:
             resource.setrlimit(resource.RLIMIT_AS, (memory_limit * 1024 * 1024, -1))
 
         # CPU time limit
-        cpu_limit = skill.resources.max_cpu_time_seconds or self.max_execution_time_seconds
+        cpu_limit = (
+            skill.resources.max_cpu_time_seconds or self.max_execution_time_seconds
+        )
         if cpu_limit:
             resource.setrlimit(resource.RLIMIT_CPU, (cpu_limit, -1))
 
-    async def _execute_function(self, skill: Skill, parameters: Dict[str, Any]) -> Any:
+    async def _execute_function(self, skill: Skill, parameters: dict[str, Any]) -> Any:
         """Execute Python function skill"""
         if not skill.execution_function:
             raise ValueError("Skill has no execution function")
 
         # Create isolated namespace
-        namespace = {
-            '__builtins__': {
-                'abs': abs, 'all': all, 'any': any, 'bin': bin, 'bool': bool,
-                'chr': chr, 'dict': dict, 'divmod': divmod, 'enumerate': enumerate,
-                'float': float, 'int': int, 'len': len, 'list': list,
-                'map': map, 'max': max, 'min': min, 'pow': pow, 'range': range,
-                'reversed': reversed, 'round': round, 'sorted': sorted, 'str': str,
-                'sum': sum, 'tuple': tuple, 'type': type, 'zip': zip
-            },
-            'parameters': parameters,
-            'logger': logger
-        }
 
         try:
             # Execute function with timeout
             result = await asyncio.wait_for(
                 asyncio.to_thread(skill.execution_function, parameters),
-                timeout=skill.resources.max_execution_time_seconds or self.max_execution_time_seconds
+                timeout=skill.resources.max_execution_time_seconds
+                or self.max_execution_time_seconds,
             )
             return result
         except asyncio.TimeoutError:
             raise TimeoutError("Skill execution timed out")
 
-    async def _execute_script(self, skill: Skill, parameters: Dict[str, Any]) -> Any:
+    async def _execute_script(self, skill: Skill, parameters: dict[str, Any]) -> Any:
         """Execute script skill"""
         if not skill.file_path:
             raise ValueError("Script skill has no file path")
@@ -580,15 +617,17 @@ class SkillSandbox:
         try:
             # Execute script
             process = await asyncio.create_subprocess_exec(
-                sys.executable, str(script_path),
+                sys.executable,
+                str(script_path),
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
-                env=env
+                env=env,
             )
 
             stdout, stderr = await asyncio.wait_for(
                 process.communicate(),
-                timeout=skill.resources.max_execution_time_seconds or self.max_execution_time_seconds
+                timeout=skill.resources.max_execution_time_seconds
+                or self.max_execution_time_seconds,
             )
 
             if process.returncode != 0:
@@ -604,7 +643,7 @@ class SkillSandbox:
         except asyncio.TimeoutError:
             raise TimeoutError("Script execution timed out")
 
-    async def _execute_api(self, skill: Skill, parameters: Dict[str, Any]) -> Any:
+    async def _execute_api(self, skill: Skill, parameters: dict[str, Any]) -> Any:
         """Execute API skill"""
         import aiohttp
 
@@ -612,20 +651,23 @@ class SkillSandbox:
             raise ValueError("API skill has no entry point")
 
         headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': f'DAIP-SkillManager/{skill.name}'
+            "Content-Type": "application/json",
+            "User-Agent": f"DAIP-SkillManager/{skill.name}",
         }
 
         try:
             async with aiohttp.ClientSession() as session:
                 async with asyncio.wait_for(
                     session.post(skill.entry_point, json=parameters, headers=headers),
-                    timeout=skill.resources.max_execution_time_seconds or self.max_execution_time_seconds
+                    timeout=skill.resources.max_execution_time_seconds
+                    or self.max_execution_time_seconds,
                 ) as response:
                     if response.status == 200:
                         return await response.json()
                     else:
-                        raise RuntimeError(f"API call failed with status {response.status}")
+                        raise RuntimeError(
+                            f"API call failed with status {response.status}"
+                        )
 
         except asyncio.TimeoutError:
             raise TimeoutError("API execution timed out")
@@ -647,7 +689,7 @@ class SkillRegistry:
     """Registry for managing skills with dependency resolution"""
 
     def __init__(self):
-        self.skills: Dict[str, Skill] = {}
+        self.skills: dict[str, Skill] = {}
         self.dependency_graph = nx.DiGraph()
         self._lock = threading.RLock()
 
@@ -692,7 +734,9 @@ class SkillRegistry:
 
             # Check if other skills depend on this one
             if skill.dependents:
-                logger.warning(f"Cannot unregister skill {skill_id}: has dependents {skill.dependents}")
+                logger.warning(
+                    f"Cannot unregister skill {skill_id}: has dependents {skill.dependents}"  # noqa: E501
+                )
                 return False
 
             # Remove from registry and graph
@@ -712,8 +756,8 @@ class SkillRegistry:
         skill_type: Optional[SkillType] = None,
         category: Optional[str] = None,
         status: Optional[SkillStatus] = None,
-        tags: Optional[List[str]] = None
-    ) -> List[Skill]:
+        tags: Optional[list[str]] = None,
+    ) -> list[Skill]:
         """List skills with filtering"""
         skills = list(self.skills.values())
 
@@ -728,7 +772,7 @@ class SkillRegistry:
 
         return skills
 
-    def search_skills(self, query: str, limit: int = 10) -> List[Tuple[Skill, float]]:
+    def search_skills(self, query: str, limit: int = 10) -> list[tuple[Skill, float]]:
         """Search skills by name, description, or tags"""
         query_lower = query.lower()
         results = []
@@ -760,7 +804,7 @@ class SkillRegistry:
         results.sort(key=lambda x: x[1], reverse=True)
         return results[:limit]
 
-    def get_skill_dependencies(self, skill_id: str) -> List[Skill]:
+    def get_skill_dependencies(self, skill_id: str) -> list[Skill]:
         """Get all dependencies for a skill"""
         if skill_id not in self.skills:
             return []
@@ -772,7 +816,7 @@ class SkillRegistry:
 
         return dependencies
 
-    def get_skill_dependents(self, skill_id: str) -> List[Skill]:
+    def get_skill_dependents(self, skill_id: str) -> list[Skill]:
         """Get all skills that depend on this skill"""
         if skill_id not in self.skills:
             return []
@@ -784,7 +828,7 @@ class SkillRegistry:
 
         return dependents
 
-    def validate_dependencies(self, skill_id: str) -> Tuple[bool, List[str]]:
+    def validate_dependencies(self, skill_id: str) -> tuple[bool, list[str]]:
         """Validate that all dependencies are satisfied"""
         if skill_id not in self.skills:
             return False, ["Skill not found"]
@@ -799,8 +843,12 @@ class SkillRegistry:
             else:
                 dep_skill = self.skills[dep.skill_id]
                 # Version constraint check (simplified)
-                if not self._check_version_constraint(dep_skill.version, dep.version_constraint):
-                    errors.append(f"Dependency '{dep.skill_id}' version constraint not satisfied")
+                if not self._check_version_constraint(
+                    dep_skill.version, dep.version_constraint
+                ):
+                    errors.append(
+                        f"Dependency '{dep.skill_id}' version constraint not satisfied"
+                    )
 
         return len(errors) == 0, errors
 
@@ -817,7 +865,7 @@ class SkillRegistry:
                 return version == required_version
             else:
                 return True  # No constraint or unknown format
-        except:
+        except Exception:
             return True  # Default to allowing
 
 
@@ -825,7 +873,9 @@ class SkillManager:
     """Production-level Skill Manager with comprehensive functionality"""
 
     def __init__(self, storage_path: Optional[str] = None):
-        self.storage_path = Path(storage_path) if storage_path else Path("data/skills.db")
+        self.storage_path = (
+            Path(storage_path) if storage_path else Path("data/skills.db")
+        )
         self.storage_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Core components
@@ -833,12 +883,12 @@ class SkillManager:
         self.sandbox = SkillSandbox()
 
         # Plugin system
-        self.plugin_paths: List[Path] = []
-        self.loaded_plugins: Dict[str, Any] = {}
+        self.plugin_paths: list[Path] = []
+        self.loaded_plugins: dict[str, Any] = {}
 
         # Execution tracking
-        self.active_executions: Dict[str, Dict[str, Any]] = {}
-        self.execution_history: List[Dict[str, Any]] = []
+        self.active_executions: dict[str, dict[str, Any]] = {}
+        self.execution_history: list[dict[str, Any]] = []
 
         # Performance monitoring
         self.performance_metrics = defaultdict(list)
@@ -897,10 +947,18 @@ class SkillManager:
             """)
 
             # Indexes
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_skills_type ON skills (json_extract(data, '$.skill_type'))")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_skills_category ON skills (json_extract(data, '$.category'))")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_executions_skill_id ON skill_executions (skill_id)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_executions_timestamp ON skill_executions (timestamp)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_skills_type ON skills (json_extract(data, '$.skill_type'))"  # noqa: E501
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_skills_category ON skills (json_extract(data, '$.category'))"  # noqa: E501
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_executions_skill_id ON skill_executions (skill_id)"  # noqa: E501
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_executions_timestamp ON skill_executions (timestamp)"  # noqa: E501
+            )
 
             conn.commit()
 
@@ -927,8 +985,8 @@ class SkillManager:
         try:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
-                    "INSERT OR REPLACE INTO skills (id, data, updated_at) VALUES (?, ?, ?)",
-                    (skill.id, json.dumps(skill.to_dict()), datetime.now().isoformat())
+                    "INSERT OR REPLACE INTO skills (id, data, updated_at) VALUES (?, ?, ?)",  # noqa: E501
+                    (skill.id, json.dumps(skill.to_dict()), datetime.now().isoformat()),
                 )
                 conn.commit()
         except Exception as e:
@@ -977,7 +1035,7 @@ class SkillManager:
         code: Optional[str] = None,
         file_path: Optional[str] = None,
         entry_point: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Register a new skill"""
         skill = Skill(name, skill_type, **kwargs)
@@ -997,7 +1055,9 @@ class SkillManager:
                 # Execute code to get function
                 namespace = {}
                 exec(code, namespace)
-                skill.execution_function = namespace.get('main') or namespace.get('execute')
+                skill.execution_function = namespace.get("main") or namespace.get(
+                    "execute"
+                )
                 if not skill.execution_function:
                     raise ValueError("No main/execute function found in code")
             except Exception as e:
@@ -1021,9 +1081,9 @@ class SkillManager:
     async def execute_skill(
         self,
         skill_id: str,
-        parameters: Dict[str, Any],
-        execution_context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
+        parameters: dict[str, Any],
+        execution_context: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
         """Execute a skill with comprehensive monitoring"""
         execution_id = str(uuid.uuid4())
         start_time = time.time()
@@ -1045,7 +1105,9 @@ class SkillManager:
                 raise ValueError(f"Parameter validation failed: {param_errors}")
 
             # Check permissions
-            if not await self.permission_manager.check_execution_permission(skill, execution_context):
+            if not await self.permission_manager.check_execution_permission(
+                skill, execution_context
+            ):
                 raise PermissionError("Execution permission denied")
 
             # Set execution context
@@ -1056,27 +1118,34 @@ class SkillManager:
                 "skill_id": skill_id,
                 "parameters": parameters,
                 "start_time": start_time,
-                "status": "running"
+                "status": "running",
             }
 
             # Execute in sandbox
-            async with self.sandbox.execute(skill, parameters) as (result, execution_time_ms):
+            async with self.sandbox.execute(skill, parameters) as (
+                result,
+                execution_time_ms,
+            ):
                 # Update metrics
                 skill.update_metrics(execution_time_ms, True)
                 self._save_skill(skill)
 
                 # Log execution
-                await self._log_execution(execution_id, skill_id, parameters, result, execution_time_ms, True)
+                await self._log_execution(
+                    execution_id, skill_id, parameters, result, execution_time_ms, True
+                )
 
                 # Update performance metrics
-                self.performance_metrics[f"skill_{skill_id}_execution_time"].append(execution_time_ms)
+                self.performance_metrics[f"skill_{skill_id}_execution_time"].append(
+                    execution_time_ms
+                )
                 self.performance_metrics[f"skill_{skill_id}_success"].append(1)
 
                 return {
                     "execution_id": execution_id,
                     "result": result,
                     "execution_time_ms": execution_time_ms,
-                    "success": True
+                    "success": True,
                 }
 
         except Exception as e:
@@ -1089,17 +1158,21 @@ class SkillManager:
                 self._save_skill(skill)
 
             # Log execution
-            await self._log_execution(execution_id, skill_id, parameters, None, execution_time, False, str(e))
+            await self._log_execution(
+                execution_id, skill_id, parameters, None, execution_time, False, str(e)
+            )
 
             # Update performance metrics
-            self.performance_metrics[f"skill_{skill_id}_execution_time"].append(execution_time)
+            self.performance_metrics[f"skill_{skill_id}_execution_time"].append(
+                execution_time
+            )
             self.performance_metrics[f"skill_{skill_id}_success"].append(0)
 
             return {
                 "execution_id": execution_id,
                 "error": str(e),
                 "execution_time_ms": execution_time,
-                "success": False
+                "success": False,
             }
 
         finally:
@@ -1116,16 +1189,18 @@ class SkillManager:
         skill_type: Optional[SkillType] = None,
         category: Optional[str] = None,
         status: Optional[SkillStatus] = None,
-        tags: Optional[List[str]] = None,
-        limit: Optional[int] = None
-    ) -> List[Skill]:
+        tags: Optional[list[str]] = None,
+        limit: Optional[int] = None,
+    ) -> list[Skill]:
         """List skills with filtering"""
         skills = self.registry.list_skills(skill_type, category, status, tags)
         if limit:
             skills = skills[:limit]
         return skills
 
-    async def search_skills(self, query: str, limit: int = 10) -> List[Tuple[Skill, float]]:
+    async def search_skills(
+        self, query: str, limit: int = 10
+    ) -> list[tuple[Skill, float]]:
         """Search skills"""
         return self.registry.search_skills(query, limit)
 
@@ -1161,7 +1236,7 @@ class SkillManager:
             return True
         return False
 
-    async def get_skill_statistics(self) -> Dict[str, Any]:
+    async def get_skill_statistics(self) -> dict[str, Any]:
         """Get comprehensive skill statistics"""
         total_skills = len(self.registry.skills)
 
@@ -1184,8 +1259,12 @@ class SkillManager:
             total_execution_time += skill.metrics.total_execution_time_ms
 
         # Calculate averages
-        average_execution_time = total_execution_time / total_executions if total_executions > 0 else 0
-        overall_success_rate = total_successes / total_executions if total_executions > 0 else 0
+        average_execution_time = (
+            total_execution_time / total_executions if total_executions > 0 else 0
+        )
+        overall_success_rate = (
+            total_successes / total_executions if total_executions > 0 else 0
+        )
 
         # Active executions
         active_executions = len(self.active_executions)
@@ -1204,37 +1283,41 @@ class SkillManager:
                     "count": len(values),
                     "average": sum(values) / len(values) if values else 0,
                     "min": min(values) if values else 0,
-                    "max": max(values) if values else 0
-                } for name, values in self.performance_metrics.items()
-            }
+                    "max": max(values) if values else 0,
+                }
+                for name, values in self.performance_metrics.items()
+            },
         }
 
     async def _log_execution(
         self,
         execution_id: str,
         skill_id: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         result: Optional[Any],
         execution_time_ms: float,
         success: bool,
-        error_message: Optional[str] = None
+        error_message: Optional[str] = None,
     ) -> None:
         """Log skill execution"""
         try:
             with sqlite3.connect(self.storage_path) as conn:
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO skill_executions
                     (id, skill_id, parameters, result, execution_time_ms, success, error_message)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    execution_id,
-                    skill_id,
-                    json.dumps(parameters),
-                    json.dumps(result) if result is not None else None,
-                    execution_time_ms,
-                    success,
-                    error_message
-                ))
+                """,  # noqa: E501
+                    (
+                        execution_id,
+                        skill_id,
+                        json.dumps(parameters),
+                        json.dumps(result) if result is not None else None,
+                        execution_time_ms,
+                        success,
+                        error_message,
+                    ),
+                )
                 conn.commit()
         except Exception as e:
             logger.error(f"Failed to log execution: {e}")
@@ -1245,24 +1328,32 @@ class SkillManager:
             timestamp = datetime.now()
             with sqlite3.connect(self.storage_path) as conn:
                 for skill_id, skill in self.registry.skills.items():
-                    conn.execute("""
+                    conn.execute(
+                        """
                         INSERT INTO skill_analytics (skill_id, metric_name, metric_value, timestamp)
                         VALUES (?, ?, ?, ?)
-                    """, (
-                        skill_id,
-                        "performance_score",
-                        skill.metrics.performance_score,
-                        timestamp
-                    ))
-                    conn.execute("""
+                    """,  # noqa: E501
+                        (
+                            skill_id,
+                            "performance_score",
+                            skill.metrics.performance_score,
+                            timestamp,
+                        ),
+                    )
+                    conn.execute(
+                        """
                         INSERT INTO skill_analytics (skill_id, metric_name, metric_value, timestamp)
                         VALUES (?, ?, ?, ?)
-                    """, (
-                        skill_id,
-                        "success_rate",
-                        skill.metrics.success_count / skill.metrics.execution_count if skill.metrics.execution_count > 0 else 0,
-                        timestamp
-                    ))
+                    """,  # noqa: E501
+                        (
+                            skill_id,
+                            "success_rate",
+                            skill.metrics.success_count / skill.metrics.execution_count
+                            if skill.metrics.execution_count > 0
+                            else 0,
+                            timestamp,
+                        ),
+                    )
                 conn.commit()
         except Exception as e:
             logger.error(f"Failed to collect performance metrics: {e}")
@@ -1275,7 +1366,9 @@ class SkillManager:
                 if security_issues:
                     skill.security_score = max(0.0, 1.0 - len(security_issues) * 0.2)
                     self._save_skill(skill)
-                    logger.warning(f"Security issues found in skill {skill.name}: {security_issues}")
+                    logger.warning(
+                        f"Security issues found in skill {skill.name}: {security_issues}"  # noqa: E501
+                    )
             except Exception as e:
                 logger.error(f"Failed to scan skill {skill.name}: {e}")
 
@@ -1286,7 +1379,7 @@ class SkillManager:
             with sqlite3.connect(self.storage_path) as conn:
                 conn.execute(
                     "DELETE FROM skill_executions WHERE timestamp < ?",
-                    (cutoff_date.isoformat(),)
+                    (cutoff_date.isoformat(),),
                 )
                 conn.commit()
         except Exception as e:
@@ -1298,7 +1391,9 @@ class SkillManager:
 
         # Wait for active executions to complete or timeout
         if self.active_executions:
-            logger.info(f"Waiting for {len(self.active_executions)} active executions to complete")
+            logger.info(
+                f"Waiting for {len(self.active_executions)} active executions to complete"  # noqa: E501
+            )
             await asyncio.sleep(10)  # Give some time for cleanup
 
         logger.info("Skill manager shutdown complete")
@@ -1307,7 +1402,7 @@ class SkillManager:
 class SkillSecurityScanner:
     """Security scanner for skills"""
 
-    async def scan_skill(self, skill: Skill) -> List[str]:
+    async def scan_skill(self, skill: Skill) -> list[str]:
         """Scan skill for security issues"""
         issues = []
 
@@ -1326,22 +1421,22 @@ class SkillSecurityScanner:
 
         return issues
 
-    def _scan_code(self, code: str) -> List[str]:
+    def _scan_code(self, code: str) -> list[str]:
         """Scan code for security issues"""
         issues = []
         dangerous_patterns = {
-            'subprocess.': "Use of subprocess module",
-            'os.system': "Use of os.system",
-            'os.popen': "Use of os.popen",
-            'eval(': "Use of eval function",
-            'exec(': "Use of exec function",
-            '__import__': "Dynamic import",
-            'open(': "File access",
-            'file(': "File access",
-            'input(': "User input (potential injection)",
-            'raw_input(': "User input (potential injection)",
-            'pickle.loads': "Use of pickle (potential code execution)",
-            'marshal.loads': "Use of marshal (potential code execution)",
+            "subprocess.": "Use of subprocess module",
+            "os.system": "Use of os.system",
+            "os.popen": "Use of os.popen",
+            "eval(": "Use of eval function",
+            "exec(": "Use of exec function",
+            "__import__": "Dynamic import",
+            "open(": "File access",
+            "file(": "File access",
+            "input(": "User input (potential injection)",
+            "raw_input(": "User input (potential injection)",
+            "pickle.loads": "Use of pickle (potential code execution)",
+            "marshal.loads": "Use of marshal (potential code execution)",
         }
 
         for pattern, description in dangerous_patterns.items():
@@ -1355,16 +1450,16 @@ class SkillPermissionManager:
     """Permission manager for skill execution"""
 
     async def check_execution_permission(
-        self,
-        skill: Skill,
-        execution_context: Optional[Dict[str, Any]] = None
+        self, skill: Skill, execution_context: Optional[dict[str, Any]] = None
     ) -> bool:
         """Check if skill execution is allowed"""
         # This is a simplified implementation
         # In production, implement proper RBAC/ABAC
 
         # Check if user has required permissions
-        user_permissions = execution_context.get("user_permissions", []) if execution_context else []
+        user_permissions = (
+            execution_context.get("user_permissions", []) if execution_context else []
+        )
 
         for required_permission in skill.permissions:
             if required_permission.value not in user_permissions:
@@ -1380,13 +1475,15 @@ class SkillMarketplaceClient:
         self.api_base_url = "https://api.skills.marketplace/v1"
         self.api_key = None
 
-    async def search_marketplace_skills(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+    async def search_marketplace_skills(
+        self, query: str, limit: int = 10
+    ) -> list[dict[str, Any]]:
         """Search skills in marketplace"""
         # This is a placeholder implementation
         # In production, implement actual API calls
         return []
 
-    async def download_skill(self, skill_id: str) -> Optional[Dict[str, Any]]:
+    async def download_skill(self, skill_id: str) -> Optional[dict[str, Any]]:
         """Download skill from marketplace"""
         # This is a placeholder implementation
         # In production, implement actual API calls

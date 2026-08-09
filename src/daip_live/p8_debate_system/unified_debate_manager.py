@@ -1,19 +1,19 @@
 """
 统一辩论管理器 - 整合SimpleDebateManager和EnhancedDebateManager的功能
 """
-import asyncio
-from typing import AsyncGenerator, List, Dict, Any, Optional
 
-from daip_live.core.models import (
-    AgentEvent, DebateCompleteEvent, DebateRoundStartEvent,
-    DebateStartEvent, DebateTurnStartEvent, DebateTurnCompleteEvent, DebateTurnStartEvent,
-    DialogueTurn, Role, Session, ThoughtEvent, TokenUsageEvent
-)
+import asyncio
+from collections.abc import AsyncGenerator
+from typing import Any, Optional
+
 from daip_live.core.interfaces import IDebateManager, IModelProvider
+from daip_live.core.models import (
+    AgentEvent,
+)
 from daip_live.memory.session_manager import SessionManager
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
-from daip_live.p8_debate_system.simple_debate_manager import SimpleDebateManager
 from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
+from daip_live.p8_debate_system.simple_debate_manager import SimpleDebateManager
 
 
 class UnifiedDebateManager(IDebateManager):
@@ -30,7 +30,7 @@ class UnifiedDebateManager(IDebateManager):
         model_provider: IModelProvider,
         use_enhanced: bool = True,  # 默认使用增强模式
         max_turn_time: int = 120,  # 每轮最大时间（秒）
-        thinking_time: int = 30  # 思考时间
+        thinking_time: int = 30,  # 思考时间
     ):
         """初始化统一辩论管理器"""
         super().__init__(session_manager, role_manager, model_provider, False)
@@ -55,9 +55,9 @@ class UnifiedDebateManager(IDebateManager):
     async def run_debate(
         self,
         topic: str,
-        roles: List[str],
+        roles: list[str],
         rounds: int,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
     ) -> AsyncGenerator[AgentEvent, None]:
         """运行统一辩论"""
         if session_id is None:
@@ -70,19 +70,21 @@ class UnifiedDebateManager(IDebateManager):
         async for event in self.debate_manager.run_debate(topic, roles, rounds):
             yield event
 
-    async def get_debate_model_summary(self, roles: List[str]) -> Dict[str, Any]:
+    async def get_debate_model_summary(self, roles: list[str]) -> dict[str, Any]:
         """获取辩论模型配置摘要"""
-        if hasattr(self.debate_manager, 'get_debate_model_summary'):
+        if hasattr(self.debate_manager, "get_debate_model_summary"):
             return await self.debate_manager.get_debate_model_summary(roles)
         else:
             # SimpleDebateManager没有这个方法，提供基础信息
             return {
-                'model_assignments': {role: self.model_provider.get_default_model() for role in roles},
-                'total_models': 1,
-                'provider_type': 'SimpleProvider'
+                "model_assignments": {
+                    role: self.model_provider.get_default_model() for role in roles
+                },
+                "total_models": 1,
+                "provider_type": "SimpleProvider",
             }
 
-    async def get_available_models(self) -> List[str]:
+    async def get_available_models(self) -> list[str]:
         """获取可用模型列表"""
         return await self.debate_manager.get_available_models()
 

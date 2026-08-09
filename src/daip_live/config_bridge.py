@@ -1,8 +1,7 @@
 """配置桥接适配器 - 解决 dependency-injector 与 ConfigManager 的兼容性问题"""
 
-from typing import Any, Dict, Optional
 import threading
-from pathlib import Path
+from typing import Any, Optional
 
 
 class ConfigurationBridge:
@@ -13,13 +12,13 @@ class ConfigurationBridge:
     确保配置在完全加载后才被访问，同时保持线程安全。
     """
 
-    _instance: Optional['ConfigurationBridge'] = None
+    _instance: Optional["ConfigurationBridge"] = None
     _lock = threading.Lock()
     _config_manager: Optional[Any] = None
-    _config_data: Optional[Dict[str, Any]] = None
+    _config_data: Optional[dict[str, Any]] = None
     _initialized: bool = False
 
-    def __new__(cls) -> 'ConfigurationBridge':
+    def __new__(cls) -> "ConfigurationBridge":
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
@@ -27,7 +26,7 @@ class ConfigurationBridge:
         return cls._instance
 
     def __init__(self) -> None:
-        if not hasattr(self, '_initialized'):
+        if not hasattr(self, "_initialized"):
             self._initialized = True
             self._config_manager = None
             self._config_data = None
@@ -37,7 +36,7 @@ class ConfigurationBridge:
         with self._lock:
             self._config_manager = config_manager
 
-    def get_config_data(self) -> Dict[str, Any]:
+    def get_config_data(self) -> dict[str, Any]:
         """
         获取配置数据，确保配置已加载
 
@@ -60,43 +59,31 @@ class ConfigurationBridge:
 
         return self._config_data
 
-    def _config_to_dict(self, config: Any) -> Dict[str, Any]:
+    def _config_to_dict(self, config: Any) -> dict[str, Any]:
         """将 Pydantic 配置对象转换为字典"""
-        if hasattr(config, 'model_dump'):
+        if hasattr(config, "model_dump"):
             # Pydantic v2
             return config.model_dump()
-        elif hasattr(config, 'dict'):
+        elif hasattr(config, "dict"):
             # Pydantic v1
             return config.dict()
         else:
             # 尝试直接转换为字典
             return dict(config)
 
-    def _get_safe_default_config(self) -> Dict[str, Any]:
+    def _get_safe_default_config(self) -> dict[str, Any]:
         """获取安全的默认配置，确保所有必需字段都有值"""
         return {
-            'database': {
-                'path': 'daip_live.db'
+            "database": {"path": "daip_live.db"},
+            "llm_provider": {
+                "default_model": "gpt-3.5-turbo",  # 确保有默认值
+                "embedding_model": "text-embedding-ada-002",
             },
-            'llm_provider': {
-                'default_model': 'gpt-3.5-turbo',  # 确保有默认值
-                'embedding_model': 'text-embedding-ada-002'
-            },
-            'knowledge_base': {
-                'directory': 'knowledge/'
-            },
-            'role_manager': {
-                'roles_dir': 'roles/'
-            },
-            'wiki': {
-                'pages_directory': 'knowledge/wiki/'
-            },
-            'debate': {
-                'logs_directory': 'knowledge/debate/'
-            },
-            'paper': {
-                'download_directory': 'knowledge/paper/'
-            }
+            "knowledge_base": {"directory": "knowledge/"},
+            "role_manager": {"roles_dir": "roles/"},
+            "wiki": {"pages_directory": "knowledge/wiki/"},
+            "debate": {"logs_directory": "knowledge/debate/"},
+            "paper": {"download_directory": "knowledge/paper/"},
         }
 
     def __getattr__(self, name: str) -> Any:
@@ -109,8 +96,8 @@ class ConfigurationBridge:
         config_data = self.get_config_data()
 
         # 支持嵌套属性访问，如 config.llm_provider.default_model
-        if '.' in name:
-            parts = name.split('.')
+        if "." in name:
+            parts = name.split(".")
             value = config_data
             for part in parts:
                 if isinstance(value, dict) and part in value:

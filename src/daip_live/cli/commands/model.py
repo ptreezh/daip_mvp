@@ -3,24 +3,25 @@
 遵循TDD原则 - 基于测试需求实现
 """
 
+import builtins
 import json
-from typing import List, Optional, Dict, Any
+from typing import Any, Optional
+
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 
+from ...model_manager import ModelManager
 from ..utils.error_handler import ErrorHandler
 from ..utils.performance_monitor import PerformanceMonitor
-from ...model_manager import ModelManager
-
 
 # Create the model command app
 app = typer.Typer(
     name="model",
     help="Manage AI models in the DAIP-LIVE system",
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
 
 # Create instances
@@ -42,14 +43,14 @@ def list(
     ),
     filter_name: Optional[str] = typer.Option(
         None, "--filter", "-f", help="Filter models by name"
-    )
+    ),
 ):
     """List all available AI models"""
 
     @error_handler.handle_command_errors(command_name="model list")
     async def _list_models():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("model_list") as metrics:
+        async with perf_monitor.measure_command("model_list"):
             # Don't show status message for JSON output
             if not json_output:
                 console.print("[bold blue]🤖 Fetching available models...[/bold blue]")
@@ -64,12 +65,14 @@ def list(
                         SpinnerColumn(),
                         TextColumn("[progress.description]{task.description}"),
                         console=console,
-                        transient=True
+                        transient=True,
                     ) as progress:
                         task = progress.add_task("Getting models...", total=None)
 
                         # Get available models
-                        models = model_manager.get_available_models(force_refresh=refresh)
+                        models = model_manager.get_available_models(
+                            force_refresh=refresh
+                        )
 
                         progress.update(task, completed=True)
                 else:
@@ -79,8 +82,9 @@ def list(
                 # Filter models if filter is provided
                 if filter_name:
                     models = [
-                        model for model in models
-                        if filter_name.lower() in model.get('name', '').lower()
+                        model
+                        for model in models
+                        if filter_name.lower() in model.get("name", "").lower()
                     ]
 
                 if not models:
@@ -89,7 +93,7 @@ def list(
                         output_data = {
                             "models": [],
                             "total_count": 0,
-                            "filter": filter_name
+                            "filter": filter_name,
                         }
                         console.print(json.dumps(output_data, indent=2))
                     else:
@@ -103,7 +107,7 @@ def list(
                     output_data = {
                         "models": models,
                         "total_count": len(models),
-                        "filter": filter_name
+                        "filter": filter_name,
                     }
                     console.print(json.dumps(output_data, indent=2))
                 else:
@@ -113,10 +117,7 @@ def list(
             except Exception as e:
                 if json_output:
                     # For JSON output, print error as JSON
-                    error_data = {
-                        "error": str(e),
-                        "error_type": type(e).__name__
-                    }
+                    error_data = {"error": str(e), "error_type": type(e).__name__}
                     console.print(json.dumps(error_data, indent=2))
                 else:
                     console.print(f"[red]❌ Error fetching models: {str(e)}[/red]")
@@ -124,10 +125,11 @@ def list(
 
     # Run the async function
     import asyncio
+
     asyncio.run(_list_models())
 
 
-def _display_models_table(models: List[Dict[str, Any]], verbose: bool = False):
+def _display_models_table(models: builtins.list[dict[str, Any]], verbose: bool = False):
     """Display models in a formatted table"""
 
     table = Table(title="Available AI Models")
@@ -147,19 +149,23 @@ def _display_models_table(models: List[Dict[str, Any]], verbose: bool = False):
     for model in models:
         # Basic info
         row = [
-            model.get('name', 'Unknown'),
-            model.get('size', 'Unknown'),
-            model.get('family', 'Unknown'),
-            model.get('modified', 'Unknown')
+            model.get("name", "Unknown"),
+            model.get("size", "Unknown"),
+            model.get("family", "Unknown"),
+            model.get("modified", "Unknown"),
         ]
 
         # Verbose info
         if verbose:
-            row.extend([
-                model.get('parameter_size', 'Unknown'),
-                model.get('quantization', 'Unknown'),
-                model.get('digest', 'Unknown')[:8] + '...' if model.get('digest') else 'Unknown'
-            ])
+            row.extend(
+                [
+                    model.get("parameter_size", "Unknown"),
+                    model.get("quantization", "Unknown"),
+                    model.get("digest", "Unknown")[:8] + "..."
+                    if model.get("digest")
+                    else "Unknown",
+                ]
+            )
 
         table.add_row(*row)
 
@@ -176,7 +182,7 @@ def status():
     @error_handler.handle_command_errors(command_name="model status")
     async def _show_status():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("model_status") as metrics:
+        async with perf_monitor.measure_command("model_status"):
             console.print("[bold blue]🔍 Checking model status...[/bold blue]")
 
             model_manager = ModelManager()
@@ -185,21 +191,22 @@ def status():
             if current_model:
                 # Display current model info
                 panel_content = f"""
-[bold]Name:[/bold] {current_model.get('name', 'Unknown')}
-[bold]Status:[/bold] {current_model.get('status', 'Unknown')}
-[bold]Uptime:[/bold] {current_model.get('uptime', 'Unknown')}
+[bold]Name:[/bold] {current_model.get("name", "Unknown")}
+[bold]Status:[/bold] {current_model.get("status", "Unknown")}
+[bold]Uptime:[/bold] {current_model.get("uptime", "Unknown")}
                 """
 
                 panel = Panel(
                     panel_content.strip(),
                     title="[bold green]Current Model Status[/bold green]",
-                    border_style="green"
+                    border_style="green",
                 )
                 console.print(panel)
             else:
                 console.print("[yellow]⚠️  No model is currently set[/yellow]")
 
     import asyncio
+
     asyncio.run(_show_status())
 
 
@@ -208,15 +215,17 @@ def info(
     model_name: str = typer.Argument(..., help="Name of the model to get info for"),
     json_output: bool = typer.Option(
         False, "--json", "-j", help="Output in JSON format"
-    )
+    ),
 ):
     """Get detailed information about a specific model"""
 
     @error_handler.handle_command_errors(command_name="model info")
     async def _get_model_info():
         perf_monitor = PerformanceMonitor()
-        async with perf_monitor.measure_command("model_info") as metrics:
-            console.print(f"[bold blue]🔍 Getting info for model: {model_name}...[/bold blue]")
+        async with perf_monitor.measure_command("model_info"):
+            console.print(
+                f"[bold blue]🔍 Getting info for model: {model_name}...[/bold blue]"
+            )
 
             model_manager = ModelManager()
             model_info = model_manager.get_model_info(model_name)
@@ -232,10 +241,11 @@ def info(
                 _display_model_info(model_info, model_name)
 
     import asyncio
+
     asyncio.run(_get_model_info())
 
 
-def _display_model_info(model_info: Dict[str, Any], model_name: str):
+def _display_model_info(model_info: dict[str, Any], model_name: str):
     """Display detailed model information"""
 
     # Create a panel with model details
@@ -245,15 +255,15 @@ def _display_model_info(model_info: Dict[str, Any], model_name: str):
     content_lines.append(f"[bold]Name:[/bold] {model_name}")
 
     key_mapping = {
-        'size': 'Size',
-        'family': 'Family',
-        'parameter_size': 'Parameters',
-        'quantization': 'Quantization',
-        'modified': 'Modified',
-        'digest': 'Digest',
-        'status': 'Status',
-        'description': 'Description',
-        'license': 'License'
+        "size": "Size",
+        "family": "Family",
+        "parameter_size": "Parameters",
+        "quantization": "Quantization",
+        "modified": "Modified",
+        "digest": "Digest",
+        "status": "Status",
+        "description": "Description",
+        "license": "License",
     }
 
     for key, label in key_mapping.items():
@@ -262,7 +272,7 @@ def _display_model_info(model_info: Dict[str, Any], model_name: str):
             content_lines.append(f"[bold]{label}:[/bold] {value}")
 
     # Additional metadata
-    metadata = model_info.get('metadata', {})
+    metadata = model_info.get("metadata", {})
     if metadata:
         content_lines.append("\n[bold]Metadata:[/bold]")
         for meta_key, meta_value in metadata.items():
@@ -273,7 +283,7 @@ def _display_model_info(model_info: Dict[str, Any], model_name: str):
     panel = Panel(
         content,
         title=f"[bold green]Model Information: {model_name}[/bold green]",
-        border_style="green"
+        border_style="green",
     )
 
     console.print(panel)

@@ -6,11 +6,12 @@ This module manages a pool of cloud LLM providers for intelligent delegation.
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Optional
 
 
 class ProviderStatus(Enum):
     """Status of a cloud provider."""
+
     UNKNOWN = "UNKNOWN"
     AVAILABLE = "AVAILABLE"
     UNAVAILABLE = "UNAVAILABLE"
@@ -21,6 +22,7 @@ class ProviderStatus(Enum):
 @dataclass
 class CloudProvider:
     """Configuration for a cloud LLM provider."""
+
     name: str
     model: str
     api_key_env: str
@@ -43,6 +45,7 @@ class CloudProvider:
 @dataclass
 class DelegationRequest:
     """Request for delegation to cloud provider."""
+
     prompt: str
     system_prompt: Optional[str] = None
     max_tokens: int = 2000
@@ -52,6 +55,7 @@ class DelegationRequest:
 @dataclass
 class DelegationResult:
     """Result from delegated request."""
+
     content: str
     provider_name: str
     tokens_used: int
@@ -63,7 +67,7 @@ class CloudPool:
     """Pool of cloud providers for intelligent delegation."""
 
     def __init__(self):
-        self.providers: Dict[str, CloudProvider] = {}
+        self.providers: dict[str, CloudProvider] = {}
 
     def add_provider(self, provider: CloudProvider) -> None:
         """Add a provider to the pool."""
@@ -88,11 +92,7 @@ class CloudPool:
         """Check if any provider is available."""
         return self.get_available_provider() is not None
 
-    def update_provider_status(
-        self,
-        name: str,
-        status: ProviderStatus
-    ) -> None:
+    def update_provider_status(self, name: str, status: ProviderStatus) -> None:
         """Update the status of a provider."""
         if provider := self.providers.get(name):
             provider.status = status

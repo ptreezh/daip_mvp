@@ -4,15 +4,15 @@ Vector Storage for Wiki Knowledge Base
 Handles document embeddings, similarity search, and vector storage operations.
 """
 
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass
-import numpy as np
-import pickle
 import json
 import logging
-from pathlib import Path
+import pickle
+from dataclasses import dataclass
 from datetime import datetime
-import uuid
+from pathlib import Path
+from typing import Any, Optional
+
+import numpy as np
 
 from .document import Document
 
@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SearchResult:
     """Represents a search result with document and similarity score"""
+
     document: Document
     score: float
     chunk_id: Optional[str] = None
@@ -41,16 +42,16 @@ class VectorStore:
         dimension: int,
         index_type: str = "faiss",
         persist_path: Optional[str] = None,
-        max_size: int = 10000
+        max_size: int = 10000,
     ):
         self.dimension = dimension
         self.index_type = index_type
         self.persist_path = Path(persist_path) if persist_path else None
         self.max_size = max_size
-        self.documents: Dict[str, Document] = {}
+        self.documents: dict[str, Document] = {}
         self.embeddings: np.ndarray = np.zeros((0, dimension), dtype=np.float32)
-        self.document_ids: List[str] = []
-        self.chunk_embeddings: Dict[str, List[Dict[str, Any]]] = {}
+        self.document_ids: list[str] = []
+        self.chunk_embeddings: dict[str, list[dict[str, Any]]] = {}
         self.created_at = datetime.now()
         self.updated_at = self.created_at
 
@@ -65,6 +66,7 @@ class VectorStore:
         try:
             if self.index_type == "faiss":
                 import faiss
+
                 self.index = faiss.IndexFlatIP(self.dimension)  # Inner product
                 logger.info("Initialized FAISS index")
             else:
@@ -88,7 +90,9 @@ class VectorStore:
                 return False
 
             if len(document.embedding) != self.dimension:
-                logger.error(f"Embedding dimension mismatch: expected {self.dimension}, got {len(document.embedding)}")
+                logger.error(
+                    f"Embedding dimension mismatch: expected {self.dimension}, got {len(document.embedding)}"  # noqa: E501
+                )
                 return False
 
             # Check if document already exists
@@ -110,16 +114,22 @@ class VectorStore:
             # Add to index
             if self.index:
                 self.index.add(embedding_array)
-                logger.debug(f"Added embedding to FAISS index for document {document.id}")
+                logger.debug(
+                    f"Added embedding to FAISS index for document {document.id}"
+                )
 
             # Add chunk embeddings if available
             if document.chunk_embeddings:
                 self.chunk_embeddings[document.id] = document.chunk_embeddings
-                logger.debug(f"Added {len(document.chunk_embeddings)} chunk embeddings for document {document.id}")
+                logger.debug(
+                    f"Added {len(document.chunk_embeddings)} chunk embeddings for document {document.id}"  # noqa: E501
+                )
 
             # Check size limit
             if len(self.documents) > self.max_size:
-                logger.warning(f"Vector store size ({len(self.documents)}) exceeds max_size ({self.max_size})")
+                logger.warning(
+                    f"Vector store size ({len(self.documents)}) exceeds max_size ({self.max_size})"  # noqa: E501
+                )
 
             self.updated_at = datetime.now()
             logger.info(f"Added document {document.id} to vector store")
@@ -129,7 +139,7 @@ class VectorStore:
             logger.error(f"Error adding document {document.id}: {e}")
             return False
 
-    def add_documents_batch(self, documents: List[Document]) -> int:
+    def add_documents_batch(self, documents: list[Document]) -> int:
         """Add multiple documents in batch"""
         added_count = 0
         for document in documents:
@@ -184,24 +194,29 @@ class VectorStore:
             # Rebuild FAISS index
             if self.index and len(new_embeddings) > 0:
                 import faiss
+
                 self.index = faiss.IndexFlatIP(self.dimension)
                 self.index.add(self.embeddings)
-                logger.debug(f"Rebuilt FAISS index with {len(new_embeddings)} embeddings")
+                logger.debug(
+                    f"Rebuilt FAISS index with {len(new_embeddings)} embeddings"
+                )
 
         except Exception as e:
             logger.error(f"Error rebuilding index: {e}")
 
     def search(
         self,
-        query_vector: List[float],
+        query_vector: list[float],
         top_k: int = 10,
         threshold: float = 0.0,
-        include_chunks: bool = False
-    ) -> List[SearchResult]:
+        include_chunks: bool = False,
+    ) -> list[SearchResult]:
         """Search for similar documents"""
         try:
             if len(query_vector) != self.dimension:
-                raise ValueError(f"Query vector dimension mismatch: expected {self.dimension}, got {len(query_vector)}")
+                raise ValueError(
+                    f"Query vector dimension mismatch: expected {self.dimension}, got {len(query_vector)}"  # noqa: E501
+                )
 
             if len(self.documents) == 0:
                 return []
@@ -210,14 +225,18 @@ class VectorStore:
 
             if self.index:
                 # Use FAISS for search
-                scores, indices = self.index.search(query_array, min(top_k, len(self.documents)))
+                scores, indices = self.index.search(
+                    query_array, min(top_k, len(self.documents))
+                )
                 results = []
 
                 for score, idx in zip(scores[0], indices[0]):
                     if idx < len(self.document_ids) and score >= threshold:
                         doc_id = self.document_ids[idx]
                         document = self.documents[doc_id]
-                        results.append(SearchResult(document=document, score=float(score)))
+                        results.append(
+                            SearchResult(document=document, score=float(score))
+                        )
             else:
                 # Use numpy for search
                 similarities = np.dot(self.embeddings, query_vector.T).flatten()
@@ -228,7 +247,11 @@ class VectorStore:
                     if similarities[idx] >= threshold:
                         doc_id = self.document_ids[idx]
                         document = self.documents[doc_id]
-                        results.append(SearchResult(document=document, score=float(similarities[idx])))
+                        results.append(
+                            SearchResult(
+                                document=document, score=float(similarities[idx])
+                            )
+                        )
 
             # Add chunk results if requested
             if include_chunks:
@@ -244,11 +267,8 @@ class VectorStore:
             return []
 
     def _search_chunks(
-        self,
-        query_vector: List[float],
-        top_k: int,
-        threshold: float
-    ) -> List[SearchResult]:
+        self, query_vector: list[float], top_k: int, threshold: float
+    ) -> list[SearchResult]:
         """Search within document chunks"""
         chunk_results = []
         query_array = np.array(query_vector, dtype=np.float32)
@@ -271,7 +291,7 @@ class VectorStore:
                         document=document,
                         score=similarity,
                         chunk_id=chunk_info["chunk_id"],
-                        chunk_text=chunk_info["text"]
+                        chunk_text=chunk_info["text"],
                     )
                     chunk_results.append(chunk_result)
 
@@ -287,11 +307,11 @@ class VectorStore:
         """Get document by ID"""
         return self.documents.get(document_id)
 
-    def get_all_documents(self) -> List[Document]:
+    def get_all_documents(self) -> list[Document]:
         """Get all documents"""
         return list(self.documents.values())
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get vector store statistics"""
         doc_types = {}
         for doc in self.documents.values():
@@ -309,7 +329,9 @@ class VectorStore:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
             "max_size": self.max_size,
-            "size_utilization": len(self.documents) / self.max_size if self.max_size > 0 else 0
+            "size_utilization": len(self.documents) / self.max_size
+            if self.max_size > 0
+            else 0,
         }
 
     def save(self) -> bool:
@@ -321,7 +343,7 @@ class VectorStore:
         try:
             # Save documents
             docs_file = self.persist_path / "documents.pkl"
-            with open(docs_file, 'wb') as f:
+            with open(docs_file, "wb") as f:
                 pickle.dump(self.documents, f)
 
             # Save embeddings
@@ -336,17 +358,18 @@ class VectorStore:
                 "chunk_embeddings": self.chunk_embeddings,
                 "created_at": self.created_at.isoformat(),
                 "updated_at": self.updated_at.isoformat(),
-                "max_size": self.max_size
+                "max_size": self.max_size,
             }
 
             metadata_file = self.persist_path / "metadata.json"
-            with open(metadata_file, 'w') as f:
+            with open(metadata_file, "w") as f:
                 json.dump(metadata, f, indent=2)
 
             # Save FAISS index if available
             if self.index:
                 index_file = self.persist_path / "faiss.index"
                 import faiss
+
                 faiss.write_index(self.index, str(index_file))
 
             logger.info(f"Saved vector store to {self.persist_path}")
@@ -369,7 +392,7 @@ class VectorStore:
                 logger.warning("No metadata file found")
                 return False
 
-            with open(metadata_file, 'r') as f:
+            with open(metadata_file) as f:
                 metadata = json.load(f)
 
             self.dimension = metadata["dimension"]
@@ -382,7 +405,7 @@ class VectorStore:
 
             # Load documents
             docs_file = self.persist_path / "documents.pkl"
-            with open(docs_file, 'rb') as f:
+            with open(docs_file, "rb") as f:
                 self.documents = pickle.load(f)
 
             # Load embeddings
@@ -421,5 +444,7 @@ class VectorStore:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"VectorStore(size={len(self.documents)}, dimension={self.dimension}, "
-                f"index_type={self.index_type}, persist_path={self.persist_path})")
+        return (
+            f"VectorStore(size={len(self.documents)}, dimension={self.dimension}, "
+            f"index_type={self.index_type}, persist_path={self.persist_path})"
+        )

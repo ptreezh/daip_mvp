@@ -4,9 +4,9 @@ Service Container for newP6 TUI
 Manages registration and lifecycle of service adapters.
 """
 
-from typing import Dict, Any, Optional, List
 import asyncio
 import logging
+from typing import Any, Optional
 
 from .base import BaseServiceAdapter
 
@@ -17,13 +17,15 @@ class ServiceContainer:
     """Container for managing service adapters"""
 
     def __init__(self):
-        self._services: Dict[str, BaseServiceAdapter] = {}
+        self._services: dict[str, BaseServiceAdapter] = {}
         self._initialized = False
 
     def register_service(self, name: str, adapter: BaseServiceAdapter) -> None:
         """Register a service adapter"""
         if not isinstance(adapter, BaseServiceAdapter):
-            raise TypeError(f"Service adapter must inherit from BaseServiceAdapter, got {type(adapter)}")
+            raise TypeError(
+                f"Service adapter must inherit from BaseServiceAdapter, got {type(adapter)}"  # noqa: E501
+            )
 
         self._services[name] = adapter
         logger.debug(f"Registered service: {name}")
@@ -31,7 +33,9 @@ class ServiceContainer:
     def get_service(self, name: str) -> Optional[BaseServiceAdapter]:
         """Get a registered service adapter"""
         if not self._initialized:
-            logger.warning(f"Container not initialized, returning None for service: {name}")
+            logger.warning(
+                f"Container not initialized, returning None for service: {name}"
+            )
             return None
         return self._services.get(name)
 
@@ -39,7 +43,7 @@ class ServiceContainer:
         """Check if a service is registered"""
         return name in self._services
 
-    def list_services(self) -> List[str]:
+    def list_services(self) -> list[str]:
         """List all registered service names"""
         return list(self._services.keys())
 
@@ -101,7 +105,9 @@ class ServiceContainer:
         self._initialized = False
         logger.info("All services shutdown successfully")
 
-    async def _shutdown_service_safe(self, name: str, service: BaseServiceAdapter) -> None:
+    async def _shutdown_service_safe(
+        self, name: str, service: BaseServiceAdapter
+    ) -> None:
         """Safely shutdown a single service"""
         try:
             await service.shutdown()
@@ -109,7 +115,7 @@ class ServiceContainer:
         except Exception as e:
             logger.error(f"Failed to shutdown service {name}: {e}")
 
-    def get_initialized_services(self) -> Dict[str, BaseServiceAdapter]:
+    def get_initialized_services(self) -> dict[str, BaseServiceAdapter]:
         """Get all successfully initialized services"""
         if not self._initialized:
             return {}

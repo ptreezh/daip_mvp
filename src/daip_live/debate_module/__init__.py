@@ -4,12 +4,8 @@
 """
 
 from .core import DebateCore
-from .events import DebateEvents
+from .events import DebateEvents  # noqa: F401
 from .simple_debate import SimpleDebateEngine
 
 __version__ = "1.0.0"
-__all__ = [
-    "DebateCore",
-    "DebateEventTypes",
-    "SimpleDebateEngine"
-]
+__all__ = ["DebateCore", "DebateEventTypes", "SimpleDebateEngine"]

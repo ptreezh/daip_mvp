@@ -4,10 +4,10 @@ Debate Round Management for newP6 TUI Debate System
 Handles individual debate rounds and argument collection.
 """
 
-from typing import List, Dict, Any, Optional
-from datetime import datetime
 import logging
 import uuid
+from datetime import datetime
+from typing import Any, Optional
 
 from .argument import Argument
 
@@ -22,18 +22,18 @@ class DebateRound:
         round_number: int,
         topic: str,
         max_arguments_per_participant: int = 2,
-        round_id: Optional[str] = None
+        round_id: Optional[str] = None,
     ):
         self.id = round_id or str(uuid.uuid4())
         self.round_number = round_number
         self.topic = topic
         self.max_arguments_per_participant = max_arguments_per_participant
-        self.arguments: List[Argument] = []
+        self.arguments: list[Argument] = []
         self.status = "active"  # active, completed, paused
         self.created_at = datetime.now()
         self.started_at: Optional[datetime] = None
         self.completed_at: Optional[datetime] = None
-        self.metadata: Dict[str, Any] = {}
+        self.metadata: dict[str, Any] = {}
 
     def start(self) -> None:
         """Start the round"""
@@ -46,7 +46,9 @@ class DebateRound:
         # Check if participant has reached max arguments
         participant_args = self.get_arguments_by_participant(argument.participant_id)
         if len(participant_args) >= self.max_arguments_per_participant:
-            logger.warning(f"Participant {argument.participant_id} has reached max arguments for round {self.round_number}")
+            logger.warning(
+                f"Participant {argument.participant_id} has reached max arguments for round {self.round_number}"  # noqa: E501
+            )
             return False
 
         # Set round number on argument
@@ -56,7 +58,7 @@ class DebateRound:
         logger.info(f"Added argument {argument.id} to round {self.round_number}")
         return True
 
-    def get_arguments_by_participant(self, participant_id: str) -> List[Argument]:
+    def get_arguments_by_participant(self, participant_id: str) -> list[Argument]:
         """Get all arguments from a specific participant"""
         return [arg for arg in self.arguments if arg.participant_id == participant_id]
 
@@ -97,7 +99,9 @@ class DebateRound:
             summary += "Arguments by participant:\n"
             participant_counts = {}
             for arg in self.arguments:
-                participant_counts[arg.participant_id] = participant_counts.get(arg.participant_id, 0) + 1
+                participant_counts[arg.participant_id] = (
+                    participant_counts.get(arg.participant_id, 0) + 1
+                )
 
             for participant_id, count in participant_counts.items():
                 summary += f"  {participant_id}: {count} arguments\n"
@@ -113,7 +117,7 @@ class DebateRound:
 
         return summary
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """Get round statistics"""
         stats = {
             "round_number": self.round_number,
@@ -121,14 +125,18 @@ class DebateRound:
             "status": self.status,
             "total_arguments": len(self.arguments),
             "max_arguments_per_participant": self.max_arguments_per_participant,
-            "participant_count": len(set(arg.participant_id for arg in self.arguments)),
+            "participant_count": len({arg.participant_id for arg in self.arguments}),
             "created_at": self.created_at.isoformat(),
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None
+            "completed_at": self.completed_at.isoformat()
+            if self.completed_at
+            else None,
         }
 
         if self.started_at and self.completed_at:
-            stats["duration_seconds"] = (self.completed_at - self.started_at).total_seconds()
+            stats["duration_seconds"] = (
+                self.completed_at - self.started_at
+            ).total_seconds()
 
         # Argument statistics
         if self.arguments:
@@ -146,7 +154,7 @@ class DebateRound:
 
         return stats
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert round to dictionary"""
         return {
             "id": self.id,
@@ -157,19 +165,21 @@ class DebateRound:
             "status": self.status,
             "created_at": self.created_at.isoformat(),
             "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": self.completed_at.isoformat()
+            if self.completed_at
+            else None,
             "metadata": self.metadata,
-            "statistics": self.get_statistics()
+            "statistics": self.get_statistics(),
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DebateRound":
+    def from_dict(cls, data: dict[str, Any]) -> "DebateRound":
         """Create round from dictionary"""
         round = cls(
             round_number=data["round_number"],
             topic=data["topic"],
             max_arguments_per_participant=data.get("max_arguments_per_participant", 2),
-            round_id=data.get("id")
+            round_id=data.get("id"),
         )
 
         if "status" in data:
@@ -190,7 +200,10 @@ class DebateRound:
         # Restore arguments
         if "arguments" in data:
             from .argument import Argument
-            round.arguments = [Argument.from_dict(arg_data) for arg_data in data["arguments"]]
+
+            round.arguments = [
+                Argument.from_dict(arg_data) for arg_data in data["arguments"]
+            ]
 
         return round
 
@@ -200,5 +213,7 @@ class DebateRound:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"DebateRound(id={self.id[:8]}..., round_number={self.round_number}, "
-                f"topic='{self.topic}', status='{self.status}', arguments={len(self.arguments)})")
+        return (
+            f"DebateRound(id={self.id[:8]}..., round_number={self.round_number}, "
+            f"topic='{self.topic}', status='{self.status}', arguments={len(self.arguments)})"  # noqa: E501
+        )

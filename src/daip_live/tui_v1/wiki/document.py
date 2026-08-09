@@ -4,18 +4,19 @@ Document Management for Wiki Knowledge Base
 Handles document representation, metadata, and status tracking.
 """
 
-from typing import List, Dict, Any, Optional, Union
+import logging
+import re
+import uuid
 from datetime import datetime
 from enum import Enum
-import uuid
-import re
-import logging
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 
 class DocumentType(Enum):
     """Supported document types"""
+
     TEXT = "text"
     MARKDOWN = "markdown"
     PDF = "pdf"
@@ -27,6 +28,7 @@ class DocumentType(Enum):
 
 class DocumentStatus(Enum):
     """Document processing status"""
+
     PROCESSING = "processing"
     PROCESSED = "processed"
     FAILED = "failed"
@@ -43,7 +45,7 @@ class Document:
         file_path: str,
         document_type: DocumentType,
         document_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: Optional[dict[str, Any]] = None,
     ):
         self.id = document_id or str(uuid.uuid4())
         self.title = title
@@ -56,17 +58,15 @@ class Document:
         self.updated_at = self.created_at
         self.processed_at: Optional[datetime] = None
         self.error_message: Optional[str] = None
-        self.embedding: Optional[List[float]] = None
+        self.embedding: Optional[list[float]] = None
         self.embedding_dimension: Optional[int] = None
-        self.chunk_embeddings: List[Dict[str, Any]] = []  # For chunked embeddings
-        self.tags: List[str] = self.metadata.get("tags", [])
+        self.chunk_embeddings: list[dict[str, Any]] = []  # For chunked embeddings
+        self.tags: list[str] = self.metadata.get("tags", [])
         self.author = self.metadata.get("author")
         self.version = self.metadata.get("version")
 
     def update_status(
-        self,
-        status: DocumentStatus,
-        error_message: Optional[str] = None
+        self, status: DocumentStatus, error_message: Optional[str] = None
     ) -> None:
         """Update document status"""
         self.status = status
@@ -79,20 +79,22 @@ class Document:
 
         logger.debug(f"Document {self.id} status updated to {status.value}")
 
-    def set_embedding(self, embedding: List[float]) -> None:
+    def set_embedding(self, embedding: list[float]) -> None:
         """Set document embedding"""
         self.embedding = embedding
         self.embedding_dimension = len(embedding)
         self.updated_at = datetime.now()
-        logger.debug(f"Set embedding for document {self.id} (dimension: {self.embedding_dimension})")
+        logger.debug(
+            f"Set embedding for document {self.id} (dimension: {self.embedding_dimension})"  # noqa: E501
+        )
 
     def add_chunk_embedding(
         self,
         chunk_id: str,
-        embedding: List[float],
+        embedding: list[float],
         chunk_text: str,
         start_pos: int,
-        end_pos: int
+        end_pos: int,
     ) -> None:
         """Add chunk embedding for large documents"""
         chunk_info = {
@@ -101,7 +103,7 @@ class Document:
             "text": chunk_text,
             "start_pos": start_pos,
             "end_pos": end_pos,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
         }
         self.chunk_embeddings.append(chunk_info)
         logger.debug(f"Added chunk embedding {chunk_id} for document {self.id}")
@@ -109,9 +111,9 @@ class Document:
     def get_word_count(self) -> int:
         """Get word count of document content"""
         # Remove markdown/HTML tags and count words
-        clean_text = re.sub(r'<[^>]+>', ' ', self.content)  # Remove HTML tags
-        clean_text = re.sub(r'[#*`\[\]()]', ' ', clean_text)  # Remove markdown symbols
-        words = re.findall(r'\b\w+\b', clean_text)
+        clean_text = re.sub(r"<[^>]+>", " ", self.content)  # Remove HTML tags
+        clean_text = re.sub(r"[#*`\[\]()]", " ", clean_text)  # Remove markdown symbols
+        words = re.findall(r"\b\w+\b", clean_text)
         return len(words)
 
     def get_character_count(self) -> int:
@@ -156,7 +158,7 @@ class Document:
             return self.content
         return self.content[:max_length].rstrip() + "..."
 
-    def get_chunks(self, chunk_size: int = 1000, overlap: int = 100) -> List[str]:
+    def get_chunks(self, chunk_size: int = 1000, overlap: int = 100) -> list[str]:
         """Split document into chunks for processing"""
         if len(self.content) <= chunk_size:
             return [self.content]
@@ -172,7 +174,7 @@ class Document:
 
             # Try to break at word boundary
             chunk_end = end
-            while chunk_end > start and self.content[chunk_end] not in '.!?\n ':
+            while chunk_end > start and self.content[chunk_end] not in ".!?\n ":
                 chunk_end -= 1
 
             if chunk_end == start:
@@ -183,7 +185,7 @@ class Document:
 
         return chunks
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert document to dictionary"""
         return {
             "id": self.id,
@@ -195,7 +197,9 @@ class Document:
             "metadata": self.metadata,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
-            "processed_at": self.processed_at.isoformat() if self.processed_at else None,
+            "processed_at": self.processed_at.isoformat()
+            if self.processed_at
+            else None,
             "error_message": self.error_message,
             "embedding": self.embedding,
             "embedding_dimension": self.embedding_dimension,
@@ -206,12 +210,12 @@ class Document:
             "statistics": {
                 "word_count": self.get_word_count(),
                 "character_count": self.get_character_count(),
-                "reading_time_minutes": self.get_reading_time()
-            }
+                "reading_time_minutes": self.get_reading_time(),
+            },
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Document":
+    def from_dict(cls, data: dict[str, Any]) -> "Document":
         """Create document from dictionary"""
         document = cls(
             title=data["title"],
@@ -219,7 +223,7 @@ class Document:
             file_path=data["file_path"],
             document_type=DocumentType(data["document_type"]),
             document_id=data.get("id"),
-            metadata=data.get("metadata", {})
+            metadata=data.get("metadata", {}),
         )
 
         if "status" in data:
@@ -264,9 +268,11 @@ class Document:
 
     def __repr__(self) -> str:
         """Detailed string representation"""
-        return (f"Document(id={self.id[:8]}..., title='{self.title}', "
-                f"type={self.document_type.value}, status={self.status.value}, "
-                f"words={self.get_word_count()})")
+        return (
+            f"Document(id={self.id[:8]}..., title='{self.title}', "
+            f"type={self.document_type.value}, status={self.status.value}, "
+            f"words={self.get_word_count()})"
+        )
 
     def __eq__(self, other) -> bool:
         """Equality comparison based on ID"""

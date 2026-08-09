@@ -4,7 +4,7 @@ Command Processing Module for newP6 TUI
 Provides command parsing, registration, and handling functionality.
 """
 
-from .models import Command, CommandResult, CommandInfo
+from .models import Command, CommandInfo, CommandResult
 from .parser import CommandParser
 from .registry import CommandRegistry
 
@@ -14,5 +14,5 @@ __all__ = [
     "CommandResult",
     "CommandInfo",
     "CommandParser",
-    "CommandRegistry"
+    "CommandRegistry",
 ]

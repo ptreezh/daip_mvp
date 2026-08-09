@@ -3,15 +3,16 @@
 遵循SOLID原则，提供清晰的领域模型
 """
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
-import re
+from typing import Optional
 
 
 class InputType(Enum):
     """输入类型枚举"""
+
     TEXT = "text"
     FILE = "file"
 
@@ -26,12 +27,19 @@ class ProjectFile:
         size: 文件大小（字节，可选，会自动计算）
         created_at: 创建时间
     """
+
     path: str
     size: Optional[int] = None
     created_at: datetime = field(default_factory=datetime.now)
     _content: str = field(repr=False, default="")
 
-    def __init__(self, path: str, content: str = "", size: Optional[int] = None, created_at: Optional[datetime] = None):
+    def __init__(
+        self,
+        path: str,
+        content: str = "",
+        size: Optional[int] = None,
+        created_at: Optional[datetime] = None,
+    ):
         """初始化ProjectFile"""
         self.path = path
         self._content = content
@@ -40,12 +48,12 @@ class ProjectFile:
 
         # 自动计算大小
         if self.size is None:
-            self.size = len(self._content.encode('utf-8'))
+            self.size = len(self._content.encode("utf-8"))
 
     def update_content(self, new_content: str) -> None:
         """更新文件内容并重新计算大小"""
         self.content = new_content
-        self.size = len(new_content.encode('utf-8'))
+        self.size = len(new_content.encode("utf-8"))
 
     @property
     def content(self) -> str:
@@ -56,20 +64,21 @@ class ProjectFile:
     def content(self, value: str) -> None:
         """设置文件内容并自动重新计算大小"""
         self._content = value
-        self.size = len(value.encode('utf-8'))
+        self.size = len(value.encode("utf-8"))
 
     def get_extension(self) -> str:
         """获取文件扩展名"""
         from pathlib import Path
+
         return Path(self.path).suffix.lower()
 
     def is_yaml_file(self) -> bool:
         """判断是否为YAML文件"""
-        return self.get_extension() in ['.yaml', '.yml']
+        return self.get_extension() in [".yaml", ".yml"]
 
     def is_markdown_file(self) -> bool:
         """判断是否为Markdown文件"""
-        return self.get_extension() == '.md'
+        return self.get_extension() == ".md"
 
 
 @dataclass
@@ -83,7 +92,8 @@ class ProjectStructure:
         file_count: 文件数量（自动计算）
         total_size: 总大小（自动计算）
     """
-    files: List[ProjectFile]
+
+    files: list[ProjectFile]
     description: str
     generated_at: datetime = field(default_factory=datetime.now)
     file_count: int = field(init=False)
@@ -101,11 +111,11 @@ class ProjectStructure:
                 return file
         return None
 
-    def get_files_by_extension(self, extension: str) -> List[ProjectFile]:
+    def get_files_by_extension(self, extension: str) -> list[ProjectFile]:
         """根据扩展名获取文件列表"""
         return [file for file in self.files if file.get_extension() == extension]
 
-    def get_yaml_files(self) -> List[ProjectFile]:
+    def get_yaml_files(self) -> list[ProjectFile]:
         """获取所有YAML文件"""
         return [file for file in self.files if file.is_yaml_file()]
 
@@ -113,7 +123,7 @@ class ProjectStructure:
         """获取目录结构"""
         structure = {}
         for file in self.files:
-            parts = file.path.split('/')
+            parts = file.path.split("/")
             current = structure
             for part in parts[:-1]:
                 if part not in current:
@@ -135,28 +145,27 @@ class ScaffoldResult:
         errors: 错误列表
         warnings: 警告列表
     """
+
     is_success: bool
     project_structure: Optional[ProjectStructure] = None
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     @classmethod
-    def success(cls, project_structure: ProjectStructure, warnings: List[str] = None) -> 'ScaffoldResult':
+    def success(
+        cls, project_structure: ProjectStructure, warnings: list[str] = None
+    ) -> "ScaffoldResult":
         """创建成功结果"""
         return cls(
             is_success=True,
             project_structure=project_structure,
-            warnings=warnings or []
+            warnings=warnings or [],
         )
 
     @classmethod
-    def failure(cls, errors: List[str], warnings: List[str] = None) -> 'ScaffoldResult':
+    def failure(cls, errors: list[str], warnings: list[str] = None) -> "ScaffoldResult":
         """创建失败结果"""
-        return cls(
-            is_success=False,
-            errors=errors,
-            warnings=warnings or []
-        )
+        return cls(is_success=False, errors=errors, warnings=warnings or [])
 
     def has_warnings(self) -> bool:
         """是否有警告"""
@@ -165,7 +174,9 @@ class ScaffoldResult:
     def get_summary(self) -> str:
         """获取结果摘要"""
         if self.is_success:
-            file_count = self.project_structure.file_count if self.project_structure else 0
+            file_count = (
+                self.project_structure.file_count if self.project_structure else 0
+            )
             summary = f"成功生成项目结构，包含 {file_count} 个文件"
             if self.has_warnings():
                 summary += f"，{len(self.warnings)} 个警告"
@@ -183,6 +194,7 @@ class RetryConfig:
         delay_seconds: 初始延迟时间（秒）
         backoff_factor: 退避因子
     """
+
     max_retries: int = 3
     delay_seconds: float = 1.0
     backoff_factor: float = 2.0
@@ -217,12 +229,13 @@ class ScaffoldCommand:
         file_path: 文件路径（文件输入时使用）
         auto_confirm: 是否自动确认
     """
+
     input_type: InputType
     description: str
     file_path: Optional[str] = None
     auto_confirm: bool = False
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """验证命令有效性"""
         errors = []
 
@@ -247,7 +260,7 @@ class ScaffoldCommand:
 class ValidationError(Exception):
     """验证错误异常"""
 
-    def __init__(self, errors: List[str]):
+    def __init__(self, errors: list[str]):
         self.validation_errors = errors
         error_message = "; ".join(errors)
         super().__init__(f"Validation failed: {error_message}")
@@ -255,6 +268,7 @@ class ValidationError(Exception):
 
 class GenerationError(Exception):
     """生成错误异常"""
+
     pass
 
 
@@ -267,21 +281,25 @@ class FileCreationError(Exception):
 
 class ScaffoldExecutionError(Exception):
     """脚手架执行错误异常"""
+
     pass
 
 
 class ConfigurationError(Exception):
     """配置错误异常"""
+
     pass
 
 
 class NetworkError(Exception):
     """网络错误异常"""
+
     pass
 
 
 class TimeoutError(Exception):
     """超时错误异常"""
+
     pass
 
 
@@ -294,6 +312,7 @@ class FileOperationError:
         error_code: 错误代码
         timestamp: 错误发生时间
     """
+
     message: str
     error_code: str
     timestamp: datetime = field(default_factory=datetime.now)
@@ -302,26 +321,28 @@ class FileOperationError:
         return f"[{self.error_code}] {self.message}"
 
     def __repr__(self) -> str:
-        return f"FileOperationError(message='{self.message}', error_code='{self.error_code}', timestamp={self.timestamp})"
+        return f"FileOperationError(message='{self.message}', error_code='{self.error_code}', timestamp={self.timestamp})"  # noqa: E501
 
 
 # 工具函数和常量
 class ValidationConstants:
     """验证常量"""
+
     MIN_DESCRIPTION_LENGTH = 10
     MAX_DESCRIPTION_LENGTH = 5000
     MAX_FILE_SIZE = 1024 * 1024  # 1MB
-    SUPPORTED_FILE_EXTENSIONS = {'.txt', '.md', '.docx'}
+    SUPPORTED_FILE_EXTENSIONS = {".txt", ".md", ".docx"}
 
     # YAML文件命名规则
-    YAML_FILENAME_PATTERN = re.compile(r'^[a-zA-Z0-9_/-]+\.ya?ml$')
+    YAML_FILENAME_PATTERN = re.compile(r"^[a-zA-Z0-9_/-]+\.ya?ml$")
 
     # 路径安全规则
-    SAFE_PATH_PATTERN = re.compile(r'^[a-zA-Z0-9_/-]+$')
+    SAFE_PATH_PATTERN = re.compile(r"^[a-zA-Z0-9_/-]+$")
 
 
 class FileConstants:
     """文件常量"""
+
     DEFAULT_ROLES_DIR = "roles"
     DEFAULT_WORKFLOWS_DIR = "workflows"
     DEFAULT_CONFIG_FILE = "config.yaml"
@@ -336,12 +357,18 @@ class ErrorMessages:
 
     # 输入验证错误
     EMPTY_DESCRIPTION = "项目描述不能为空"
-    DESCRIPTION_TOO_SHORT = f"项目描述至少需要{ValidationConstants.MIN_DESCRIPTION_LENGTH}个字符"
-    DESCRIPTION_TOO_LONG = f"项目描述不能超过{ValidationConstants.MAX_DESCRIPTION_LENGTH}个字符"
+    DESCRIPTION_TOO_SHORT = (
+        f"项目描述至少需要{ValidationConstants.MIN_DESCRIPTION_LENGTH}个字符"
+    )
+    DESCRIPTION_TOO_LONG = (
+        f"项目描述不能超过{ValidationConstants.MAX_DESCRIPTION_LENGTH}个字符"
+    )
 
     # 文件验证错误
     FILE_NOT_FOUND = "文件不存在"
-    FILE_TOO_LARGE = f"文件大小不能超过{ValidationConstants.MAX_FILE_SIZE // (1024*1024)}MB"
+    FILE_TOO_LARGE = (
+        f"文件大小不能超过{ValidationConstants.MAX_FILE_SIZE // (1024 * 1024)}MB"
+    )
     UNSUPPORTED_FILE_FORMAT = "不支持的文件格式"
     FILE_READ_ERROR = "文件读取失败"
 

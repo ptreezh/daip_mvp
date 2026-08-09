@@ -4,8 +4,8 @@ Model Status Widget for newP6 TUI Status Bar
 Displays current AI model status and information.
 """
 
-from typing import Optional, Any, Dict
 import logging
+from typing import Any, Optional
 
 from .status_widget import StatusWidget
 
@@ -22,10 +22,10 @@ class ModelStatusWidget(StatusWidget):
     async def refresh(self) -> None:
         """Refresh model status"""
         try:
-            if self.model_service and hasattr(self.model_service, 'get_current_model'):
+            if self.model_service and hasattr(self.model_service, "get_current_model"):
                 model_info = await self.model_service.get_current_model()
                 if model_info:
-                    status_text = f"{model_info.get('name', 'Unknown')} ({model_info.get('status', 'Unknown')})"
+                    status_text = f"{model_info.get('name', 'Unknown')} ({model_info.get('status', 'Unknown')})"  # noqa: E501
                     self.update_value(status_text)
                 else:
                     self.update_value("No Active Model")

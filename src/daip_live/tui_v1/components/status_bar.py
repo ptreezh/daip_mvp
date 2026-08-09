@@ -8,10 +8,11 @@ progress indicators, and system information functionality.
 Based on newP6 specification requirements for status management.
 """
 
-from typing import Any, Dict, Optional, List
-from textual.widgets import Static, ProgressBar, Label
-from textual.containers import Horizontal, Vertical
 from datetime import datetime
+from typing import Any, Optional
+
+from textual.containers import Horizontal
+from textual.widgets import Label
 
 from .base import TUIComponent
 
@@ -38,7 +39,7 @@ class StatusBarComponent(TUIComponent):
         show_progress: bool = False,
         show_time: bool = True,
         show_system_info: bool = True,
-        refresh_interval: int = 1
+        refresh_interval: int = 1,
     ):
         """
         Initialize the status bar component.
@@ -49,7 +50,7 @@ class StatusBarComponent(TUIComponent):
             show_time: Whether to show current time
             show_system_info: Whether to show system information
             refresh_interval: Refresh interval in seconds
-        """
+        """  # noqa: E501
         super().__init__(component_id)
 
         # Status bar configuration
@@ -66,7 +67,7 @@ class StatusBarComponent(TUIComponent):
             performance_metrics={},
             component_statuses={},
             alerts=[],
-            last_update=None
+            last_update=None,
         )
 
     def render(self):
@@ -84,32 +85,32 @@ class StatusBarComponent(TUIComponent):
         children = []
 
         # Status text
-        status_text = self.state.get('status_text', 'Ready')
+        status_text = self.state.get("status_text", "Ready")
         status_label = Label(f"Status: {status_text}")
         children.append(status_label)
 
         # Current time (if enabled)
-        if self.state.get('show_time', True):
-            current_time = self.state.get('current_time')
+        if self.state.get("show_time", True):
+            current_time = self.state.get("current_time")
             if current_time:
                 time_label = Label(f"Time: {current_time}")
                 children.append(time_label)
 
         # Alerts
-        alerts = self.state.get('alerts', [])
+        alerts = self.state.get("alerts", [])
         if alerts:
             alert_count = len(alerts)
             alert_label = Label(f"Alerts: {alert_count}")
             children.append(alert_label)
 
         # System info (if enabled)
-        if self.state.get('show_system_info', True):
-            system_info = self.state.get('system_info', {})
+        if self.state.get("show_system_info", True):
+            system_info = self.state.get("system_info", {})
             if system_info:
                 info_parts = []
-                if system_info.get('cpu_percent'):
+                if system_info.get("cpu_percent"):
                     info_parts.append(f"CPU: {system_info['cpu_percent']:.1f}%")
-                if system_info.get('memory_percent'):
+                if system_info.get("memory_percent"):
                     info_parts.append(f"Mem: {system_info['memory_percent']:.1f}%")
                 if info_parts:
                     info_label = Label(" | ".join(info_parts))
@@ -128,7 +129,7 @@ class StatusBarComponent(TUIComponent):
         self.update_state(current_time=self._get_current_time())
 
         # Start refresh loop
-        if self.state.get('refresh_interval', 1) > 0:
+        if self.state.get("refresh_interval", 1) > 0:
             self._start_refresh_loop()
 
     def update_state(self, **kwargs) -> None:
@@ -148,20 +149,18 @@ class StatusBarComponent(TUIComponent):
             event: The event to handle
         """
         # Handle status-specific events
-        if hasattr(event, 'event_type'):
-            if event.event_type.value == 'status_update':
-                self.set_status(event.data.get('text', ''))
-            elif event.event_type.value == 'progress_update':
+        if hasattr(event, "event_type"):
+            if event.event_type.value == "status_update":
+                self.set_status(event.data.get("text", ""))
+            elif event.event_type.value == "progress_update":
                 self.update_progress(
-                    event.data.get('value', 0),
-                    event.data.get('total', 100)
+                    event.data.get("value", 0), event.data.get("total", 100)
                 )
-            elif event.event_type.value == 'system_info_update':
+            elif event.event_type.value == "system_info_update":
                 self.update_system_info(event.data)
-            elif event.event_type.value == 'alert':
+            elif event.event_type.value == "alert":
                 self.add_alert(
-                    event.data.get('message', ''),
-                    event.data.get('level', 'info')
+                    event.data.get("message", ""), event.data.get("level", "info")
                 )
 
     def set_status(self, status_text: str) -> None:
@@ -172,8 +171,7 @@ class StatusBarComponent(TUIComponent):
             status_text: The status text to display
         """
         self.update_state(
-            status_text=status_text,
-            last_update=self._get_current_timestamp()
+            status_text=status_text, last_update=self._get_current_timestamp()
         )
 
     def update_progress(self, value: float, total: Optional[float] = None) -> None:
@@ -184,15 +182,15 @@ class StatusBarComponent(TUIComponent):
             value: Current progress value
             total: Total progress value (uses current total if None)
         """
-        updates = {'progress_value': value}
+        updates = {"progress_value": value}
         if total:
-            updates['progress_total'] = total
+            updates["progress_total"] = total
 
         self.update_state(**updates)
 
     def set_progress_complete(self) -> None:
         """Set progress to complete."""
-        total = self.state.get('progress_total', 100)
+        total = self.state.get("progress_total", 100)
         self.update_progress(total, total)
         self.set_status("Complete")
 
@@ -200,29 +198,29 @@ class StatusBarComponent(TUIComponent):
         """Reset progress to zero."""
         self.update_progress(0.0)
 
-    def update_system_info(self, system_info: Dict[str, Any]) -> None:
+    def update_system_info(self, system_info: dict[str, Any]) -> None:
         """
         Update system information.
 
         Args:
             system_info: Dictionary with system metrics
         """
-        current_info = self.state.get('system_info', {})
+        current_info = self.state.get("system_info", {})
         current_info.update(system_info)
         self.update_state(system_info=current_info)
 
-    def update_performance_metrics(self, metrics: Dict[str, Any]) -> None:
+    def update_performance_metrics(self, metrics: dict[str, Any]) -> None:
         """
         Update performance metrics.
 
         Args:
             metrics: Dictionary with performance metrics
         """
-        current_metrics = self.state.get('performance_metrics', {})
+        current_metrics = self.state.get("performance_metrics", {})
         current_metrics.update(metrics)
         self.update_state(performance_metrics=current_metrics)
 
-    def add_alert(self, message: str, level: str = 'info') -> None:
+    def add_alert(self, message: str, level: str = "info") -> None:
         """
         Add an alert to the status bar.
 
@@ -230,11 +228,11 @@ class StatusBarComponent(TUIComponent):
             message: Alert message
             level: Alert level ('info', 'warning', 'error', 'success')
         """
-        alerts = self.state.get('alerts', [])
+        alerts = self.state.get("alerts", [])
         alert = {
-            'message': message,
-            'level': level,
-            'timestamp': self._get_current_timestamp()
+            "message": message,
+            "level": level,
+            "timestamp": self._get_current_timestamp(),
         }
         alerts.append(alert)
 
@@ -245,7 +243,7 @@ class StatusBarComponent(TUIComponent):
         self.update_state(alerts=alerts)
 
         # Update status text for important alerts
-        if level in ['error', 'warning']:
+        if level in ["error", "warning"]:
             self.set_status(f"{level.upper()}: {message}")
 
     def clear_alerts(self) -> None:
@@ -260,10 +258,10 @@ class StatusBarComponent(TUIComponent):
             component_id: ID of the component
             status: Status of the component
         """
-        component_statuses = self.state.get('component_statuses', {})
+        component_statuses = self.state.get("component_statuses", {})
         component_statuses[component_id] = {
-            'status': status,
-            'timestamp': self._get_current_timestamp()
+            "status": status,
+            "timestamp": self._get_current_timestamp(),
         }
         self.update_state(component_statuses=component_statuses)
 
@@ -310,7 +308,7 @@ class StatusBarComponent(TUIComponent):
         Returns:
             str: Current status text
         """
-        return self.state.get('status_text', '')
+        return self.state.get("status_text", "")
 
     def get_progress_value(self) -> float:
         """
@@ -319,7 +317,7 @@ class StatusBarComponent(TUIComponent):
         Returns:
             float: Current progress value
         """
-        return self.state.get('progress_value', 0.0)
+        return self.state.get("progress_value", 0.0)
 
     def get_progress_percentage(self) -> float:
         """
@@ -328,36 +326,36 @@ class StatusBarComponent(TUIComponent):
         Returns:
             float: Progress percentage (0-100)
         """
-        value = self.state.get('progress_value', 0.0)
-        total = self.state.get('progress_total', 100.0)
+        value = self.state.get("progress_value", 0.0)
+        total = self.state.get("progress_total", 100.0)
         return (value / total * 100) if total > 0 else 0.0
 
-    def get_alerts(self) -> List[Dict[str, Any]]:
+    def get_alerts(self) -> list[dict[str, Any]]:
         """
         Get current alerts.
 
         Returns:
             List[Dict[str, Any]]: List of alerts
         """
-        return self.state.get('alerts', [])
+        return self.state.get("alerts", [])
 
-    def get_system_info(self) -> Dict[str, Any]:
+    def get_system_info(self) -> dict[str, Any]:
         """
         Get current system information.
 
         Returns:
             Dict[str, Any]: System information
         """
-        return self.state.get('system_info', {})
+        return self.state.get("system_info", {})
 
-    def get_component_statuses(self) -> Dict[str, Any]:
+    def get_component_statuses(self) -> dict[str, Any]:
         """
         Get component statuses.
 
         Returns:
             Dict[str, Any]: Component statuses
         """
-        return self.state.get('component_statuses', {})
+        return self.state.get("component_statuses", {})
 
     def _start_refresh_loop(self) -> None:
         """Start the background refresh loop."""
@@ -394,7 +392,7 @@ class StatusBarComponent(TUIComponent):
         Args:
             error_message: Error message to display
         """
-        self.add_alert(error_message, 'error')
+        self.add_alert(error_message, "error")
         self.set_status(f"Error: {error_message}")
 
     def set_warning_status(self, warning_message: str) -> None:
@@ -404,7 +402,7 @@ class StatusBarComponent(TUIComponent):
         Args:
             warning_message: Warning message to display
         """
-        self.add_alert(warning_message, 'warning')
+        self.add_alert(warning_message, "warning")
         self.set_status(f"Warning: {warning_message}")
 
     def set_success_status(self, success_message: str) -> None:
@@ -414,7 +412,7 @@ class StatusBarComponent(TUIComponent):
         Args:
             success_message: Success message to display
         """
-        self.add_alert(success_message, 'success')
+        self.add_alert(success_message, "success")
         self.set_status(success_message)
 
     def indicate_activity(self, activity_text: str) -> None:

@@ -2,43 +2,48 @@
 任务清单可视化组件
 提供任务分解过程的实时可视化展示
 """
-import asyncio
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+
 from dataclasses import dataclass
+from typing import Optional
+
+from rich import box
 from rich.console import Console
+from rich.panel import Panel
+from rich.progress import BarColumn, Progress, TextColumn
 from rich.table import Table
 from rich.text import Text
-from rich.panel import Panel
 from rich.tree import Tree
-from rich.progress import Progress, BarColumn, TextColumn
-from rich import box
-from daip_live.task_decomposition.task_decomposition_engine import DecomposedTask, TaskStatus
+
+from daip_live.task_decomposition.task_decomposition_engine import (
+    DecomposedTask,
+    TaskStatus,
+)
 
 
 @dataclass
 class TaskVisualizationData:
     """任务可视化数据"""
+
     task_id: str
     title: str
     description: str
     status: TaskStatus
     priority: str
-    dependencies: List[str]
+    dependencies: list[str]
     result: Optional[str] = None
     progress: float = 0.0
 
 
 class TaskVisualizationManager:
     """任务可视化管理器"""
-    
+
     def __init__(self):
         self.console = Console()
-        self.tasks_data: List[TaskVisualizationData] = []
+        self.tasks_data: list[TaskVisualizationData] = []
         self.original_request: str = ""
         self.current_task_index: int = 0
 
-    def update_tasks(self, tasks: List[DecomposedTask], original_request: str = ""):
+    def update_tasks(self, tasks: list[DecomposedTask], original_request: str = ""):
         """更新任务列表数据"""
         self.original_request = original_request
         self.tasks_data = [
@@ -47,9 +52,13 @@ class TaskVisualizationManager:
                 title=task.title,
                 description=task.description,
                 status=task.status,
-                priority=str(task.priority.name if hasattr(task.priority, 'name') else task.priority),
+                priority=str(
+                    task.priority.name
+                    if hasattr(task.priority, "name")
+                    else task.priority
+                ),
                 dependencies=task.dependencies,
-                result=task.result
+                result=task.result,
             )
             for task in tasks
         ]
@@ -61,13 +70,17 @@ class TaskVisualizationManager:
             title=task.title,
             description=task.description,
             status=task.status,
-            priority=str(task.priority.name if hasattr(task.priority, 'name') else task.priority),
+            priority=str(
+                task.priority.name if hasattr(task.priority, "name") else task.priority
+            ),
             dependencies=task.dependencies,
-            result=task.result
+            result=task.result,
         )
         self.tasks_data.append(task_data)
 
-    def update_task_status(self, task_id: str, new_status: TaskStatus, result: Optional[str] = None):
+    def update_task_status(
+        self, task_id: str, new_status: TaskStatus, result: Optional[str] = None
+    ):
         """更新指定任务的状态"""
         for task_data in self.tasks_data:
             if task_data.task_id == task_id:
@@ -90,11 +103,13 @@ class TaskVisualizationManager:
             return
 
         # 创建任务表格
-        table = Table(title=f"任务清单 - 原始请求: {self.original_request[:50]}{'...' if len(self.original_request) > 50 else ''}",
-                      box=box.ROUNDED,
-                      show_header=True,
-                      header_style="bold magenta")
-        
+        table = Table(
+            title=f"任务清单 - 原始请求: {self.original_request[:50]}{'...' if len(self.original_request) > 50 else ''}",  # noqa: E501
+            box=box.ROUNDED,
+            show_header=True,
+            header_style="bold magenta",
+        )
+
         table.add_column("#", style="dim", width=3)
         table.add_column("任务标题", min_width=20)
         table.add_column("描述", min_width=30)
@@ -107,7 +122,7 @@ class TaskVisualizationManager:
             TaskStatus.IN_PROGRESS: "🔄",
             TaskStatus.COMPLETED: "✅",
             TaskStatus.FAILED: "❌",
-            TaskStatus.SKIPPED: "⏭️"
+            TaskStatus.SKIPPED: "⏭️",
         }
 
         status_colors = {
@@ -115,25 +130,33 @@ class TaskVisualizationManager:
             TaskStatus.IN_PROGRESS: "blue",
             TaskStatus.COMPLETED: "green",
             TaskStatus.FAILED: "red",
-            TaskStatus.SKIPPED: "dim"
+            TaskStatus.SKIPPED: "dim",
         }
 
         for i, task_data in enumerate(self.tasks_data, 1):
             status_icon = status_icons.get(task_data.status, "❓")
             status_color = status_colors.get(task_data.status, "white")
-            
+
             # 截断描述以防止表格过宽
-            desc = task_data.description[:50] + "..." if len(task_data.description) > 50 else task_data.description
-            
-            progress_bar = self._create_progress_bar(task_data.progress, 10) if task_data.progress > 0 else ""
-            
+            desc = (
+                task_data.description[:50] + "..."
+                if len(task_data.description) > 50
+                else task_data.description
+            )
+
+            progress_bar = (
+                self._create_progress_bar(task_data.progress, 10)
+                if task_data.progress > 0
+                else ""
+            )
+
             table.add_row(
                 str(i),
                 task_data.title,
                 desc,
-                f"[{status_color}]{status_icon} {task_data.status.value}[/{status_color}]",
+                f"[{status_color}]{status_icon} {task_data.status.value}[/{status_color}]",  # noqa: E501
                 task_data.priority,
-                progress_bar
+                progress_bar,
             )
 
         self.console.print(table)
@@ -142,7 +165,7 @@ class TaskVisualizationManager:
         """创建简单的进度条文本"""
         filled = int(width * progress)
         bar = "█" * filled + "░" * (width - filled)
-        percent = f"{progress*100:.0f}%"
+        percent = f"{progress * 100:.0f}%"
         return f"[{bar}] {percent}"
 
     def display_task_tree(self):
@@ -158,7 +181,7 @@ class TaskVisualizationManager:
             TaskStatus.IN_PROGRESS: "🔄",
             TaskStatus.COMPLETED: "✅",
             TaskStatus.FAILED: "❌",
-            TaskStatus.SKIPPED: "⏭️"
+            TaskStatus.SKIPPED: "⏭️",
         }
 
         status_colors = {
@@ -166,7 +189,7 @@ class TaskVisualizationManager:
             TaskStatus.IN_PROGRESS: "blue",
             TaskStatus.COMPLETED: "green",
             TaskStatus.FAILED: "red",
-            TaskStatus.SKIPPED: "dim"
+            TaskStatus.SKIPPED: "dim",
         }
 
         for i, task_data in enumerate(self.tasks_data, 1):
@@ -174,12 +197,16 @@ class TaskVisualizationManager:
             status_color = status_colors.get(task_data.status, "white")
 
             # 截断描述以防止过长
-            desc = task_data.description[:50] + "..." if len(task_data.description) > 50 else task_data.description
+            desc = (
+                task_data.description[:50] + "..."
+                if len(task_data.description) > 50
+                else task_data.description
+            )
 
             task_text = Text.assemble(
                 f"{i}. ",
                 (f"{status_icon} {task_data.title}", f"bold {status_color}"),
-                f" - {desc} "
+                f" - {desc} ",
             )
             # 添加优先级信息，但不使用嵌套的格式标记
             priority_text = Text(f"({task_data.priority})", style="dim")
@@ -192,7 +219,9 @@ class TaskVisualizationManager:
                 dep_text = Text("依赖任务:", style="yellow")
                 dep_tree = task_tree.add(dep_text)
                 for dep_id in task_data.dependencies:
-                    dep_task = next((t for t in self.tasks_data if t.task_id == dep_id), None)
+                    dep_task = next(
+                        (t for t in self.tasks_data if t.task_id == dep_id), None
+                    )
                     if dep_task:
                         dep_text = Text(dep_task.title, style="dim")
                         dep_tree.add(dep_text)
@@ -206,8 +235,12 @@ class TaskVisualizationManager:
             return
 
         total = len(self.tasks_data)
-        completed = len([t for t in self.tasks_data if t.status == TaskStatus.COMPLETED])
-        in_progress = len([t for t in self.tasks_data if t.status == TaskStatus.IN_PROGRESS])
+        completed = len(
+            [t for t in self.tasks_data if t.status == TaskStatus.COMPLETED]
+        )
+        in_progress = len(
+            [t for t in self.tasks_data if t.status == TaskStatus.IN_PROGRESS]
+        )
         failed = len([t for t in self.tasks_data if t.status == TaskStatus.FAILED])
         pending = len([t for t in self.tasks_data if t.status == TaskStatus.PENDING])
         skipped = len([t for t in self.tasks_data if t.status == TaskStatus.SKIPPED])
@@ -251,7 +284,7 @@ class TaskVisualizationManager:
             task_id = progress.add_task(
                 description=f"{task_data.title} ({task_data.status.value})",
                 total=100,
-                completed=task_data.progress * 100 if task_data.progress else 0
+                completed=task_data.progress * 100 if task_data.progress else 0,
             )
             task_trackers[task_data.task_id] = task_id
 
@@ -261,16 +294,18 @@ class TaskVisualizationManager:
                 # 执行回调以更新进度
                 task_callback(progress, task_trackers)
 
-    def update_and_display(self, tasks: List[DecomposedTask], original_request: str = ""):
+    def update_and_display(
+        self, tasks: list[DecomposedTask], original_request: str = ""
+    ):
         """更新任务数据并立即显示"""
         self.update_tasks(tasks, original_request)
-        
+
         # 显示任务列表
         self.display_task_list()
-        
+
         # 显示进度摘要
         self.display_progress_summary()
-        
+
         # 显示任务树
         self.display_task_tree()
 

@@ -4,11 +4,11 @@ Base Status Widget for newP6 TUI Status Bar
 Provides base functionality for status bar widgets.
 """
 
-from abc import ABC, abstractmethod
-from typing import Optional, Any, Dict
-from datetime import datetime
 import asyncio
 import logging
+from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 

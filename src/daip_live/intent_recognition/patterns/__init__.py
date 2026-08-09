@@ -1,11 +1,9 @@
 """
 Predefined intent patterns for comprehensive intent recognition.
 """
-from typing import Dict, List
-
 
 # Debate history intent patterns
-DEBATE_HISTORY_PATTERNS: Dict[str, List[str]] = {
+DEBATE_HISTORY_PATTERNS: dict[str, list[str]] = {
     "list_debates": [
         r"show.*debates?",
         r"list.*debates?",
@@ -19,7 +17,7 @@ DEBATE_HISTORY_PATTERNS: Dict[str, List[str]] = {
         r"show.*completed.*debate",
         r"show.*recent.*debate",
         r"display.*debate.*list",
-        r"get.*debate.*list"
+        r"get.*debate.*list",
     ],
     "show_specific_debate": [
         r"show.*debate.*(\w+)",
@@ -34,20 +32,20 @@ DEBATE_HISTORY_PATTERNS: Dict[str, List[str]] = {
         r"show.*most.*recent.*debate",
         r"show.*last.*debate",
         r"show.*recent.*results",
-        r"show.*latest.*results"
+        r"show.*latest.*results",
     ],
     "search_debates": [
         r"find.*debates?.*about.*(.*)",
         r"search.*debates?.*about.*(.*)",
         r"look.*for.*debates?.*about.*(.*)",
         r"find.*debate.*on.*(.*)",
-        r"search.*debate.*on.*(.*)"
-    ]
+        r"search.*debate.*on.*(.*)",
+    ],
 }
 
 
 # Document conversion intent patterns
-DOCUMENT_CONVERSION_PATTERNS: Dict[str, List[str]] = {
+DOCUMENT_CONVERSION_PATTERNS: dict[str, list[str]] = {
     "convert": [
         r"convert.*to.*(\w+)",
         r"change.*format.*to.*(\w+)",
@@ -58,45 +56,45 @@ DOCUMENT_CONVERSION_PATTERNS: Dict[str, List[str]] = {
         r"format.*transformation",
         r"file.*conversion",
         r"convert.*document",
-        r"change.*document.*format"
+        r"change.*document.*format",
     ]
 }
 
 
 # Wiki management intent patterns
-WIKI_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
+WIKI_MANAGEMENT_PATTERNS: dict[str, list[str]] = {
     "create_wiki": [
         r"create.*wiki.*page",
         r"create.*page.*about",
         r"make.*wiki.*page",
         r"new.*wiki.*page",
         r"add.*to.*wiki",
-        r"write.*wiki.*page"
+        r"write.*wiki.*page",
     ],
     "list_wiki": [
         r"list.*wikis?",
         r"show.*wiki.*list",
         r"show.*wiki.*pages?",
         r"list.*wiki.*pages?",
-        r"what.*wikis?.*there"
+        r"what.*wikis?.*there",
     ],
     "export_wiki": [
         r"export.*wiki",
         r"save.*wiki",
         r"download.*wiki",
-        r"extract.*wiki"
+        r"extract.*wiki",
     ],
     "search_wiki": [
         r"find.*wiki.*about.*(.*)",
         r"search.*wiki.*for.*(.*)",
         r"look.*for.*page.*about.*(.*)",
-        r"wiki.*search.*for.*(.*)"
-    ]
+        r"wiki.*search.*for.*(.*)",
+    ],
 }
 
 
 # Paper download intent patterns
-PAPER_DOWNLOAD_PATTERNS: Dict[str, List[str]] = {
+PAPER_DOWNLOAD_PATTERNS: dict[str, list[str]] = {
     "download_paper": [
         r"download.*paper.*(.*)",
         r"fetch.*paper.*(.*)",
@@ -106,20 +104,20 @@ PAPER_DOWNLOAD_PATTERNS: Dict[str, List[str]] = {
         r"get.*academic.*(.*)",
         r"download.*research.*(.*)",
         r"get.*research.*paper",
-        r"download.*article"
+        r"download.*article",
     ],
     "list_papers": [
         r"show.*papers?",
         r"list.*papers?",
         r"what.*papers?.*downloaded",
         r"view.*downloaded.*papers?",
-        r"show.*downloaded.*articles"
-    ]
+        r"show.*downloaded.*articles",
+    ],
 }
 
 
 # Session management intent patterns
-SESSION_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
+SESSION_MANAGEMENT_PATTERNS: dict[str, list[str]] = {
     "list_sessions": [
         r"show.*sessions?",
         r"list.*sessions?",
@@ -129,7 +127,7 @@ SESSION_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
         r"show.*chat.*history",
         r"list.*conversations?",
         r"show.*conversations?",
-        r"what.*have.*we.*talked.*about"
+        r"what.*have.*we.*talked.*about",
     ],
     "view_specific_session": [
         r"show.*session.*(\w+)",
@@ -137,7 +135,7 @@ SESSION_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
         r"show.*conversation.*(\w+)",
         r"view.*conversation.*(\w+)",
         r"show.*chat.*(\w+)",
-        r"view.*chat.*(\w+)"
+        r"view.*chat.*(\w+)",
     ],
     "clear_sessions": [
         r"clear.*sessions?",
@@ -146,33 +144,33 @@ SESSION_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
         r"reset.*sessions?",
         r"start.*fresh",
         r"new.*session",
-        r"restart.*conversation"
-    ]
+        r"restart.*conversation",
+    ],
 }
 
 
 # Role management intent patterns
-ROLE_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
+ROLE_MANAGEMENT_PATTERNS: dict[str, list[str]] = {
     "list_roles": [
         r"show.*roles?",
         r"list.*roles?",
         r"what.*roles?.*available",
         r"view.*roles?",
         r"show.*available.*roles?",
-        r"what.*can.*roles.*do"
+        r"what.*can.*roles.*do",
     ],
     "view_role": [
         r"show.*role.*(\w+)",
         r"view.*role.*(\w+)",
         r"tell.*me.*about.*role.*(\w+)",
         r"describe.*role.*(\w+)",
-        r"role.*information.*(\w+)"
-    ]
+        r"role.*information.*(\w+)",
+    ],
 }
 
 
 # Model management intent patterns
-MODEL_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
+MODEL_MANAGEMENT_PATTERNS: dict[str, list[str]] = {
     "list_models": [
         r"show.*models?",
         r"list.*models?",
@@ -180,12 +178,12 @@ MODEL_MANAGEMENT_PATTERNS: Dict[str, List[str]] = {
         r"view.*available.*models?",
         r"list.*available.*models?",
         r"show.*LLM.*models?",
-        r"what.*can.*models.*do"
+        r"what.*can.*models.*do",
     ],
     "switch_model": [
         r"use.*model.*(\w+)",
         r"switch.*to.*model.*(\w+)",
         r"change.*model.*to.*(\w+)",
-        r"switch.*to.*(\w+)"
-    ]
+        r"switch.*to.*(\w+)",
+    ],
 }

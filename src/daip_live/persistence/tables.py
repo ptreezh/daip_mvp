@@ -21,11 +21,11 @@ sessions_table = Table(
     Column("session_id", String, primary_key=True),
     Column("session_type", String(50), nullable=False),
     Column("goal", Text, nullable=False),
-    Column("participant_ids", JSON, nullable=False), # Storing list of strings as JSON
+    Column("participant_ids", JSON, nullable=False),  # Storing list of strings as JSON
     Column("start_time", DateTime, nullable=False),
     Column("end_time", DateTime, nullable=True),
     Column("status", String(50), nullable=False),
-    Column("compressed_history", Text, nullable=True), # Mid-term memory
+    Column("compressed_history", Text, nullable=True),  # Mid-term memory
     Column("summary", Text, nullable=True),
 )
 
@@ -33,7 +33,13 @@ dialogue_turns_table = Table(
     "dialogue_turns",
     metadata_obj,
     Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("session_id", String, ForeignKey("sessions.session_id"), nullable=False, index=True),
+    Column(
+        "session_id",
+        String,
+        ForeignKey("sessions.session_id"),
+        nullable=False,
+        index=True,
+    ),
     Column("participant_id", String, nullable=False),
     Column("timestamp", DateTime, nullable=False),
     Column("content", Text, nullable=False),

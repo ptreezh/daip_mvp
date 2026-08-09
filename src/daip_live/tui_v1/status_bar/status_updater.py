@@ -6,7 +6,7 @@ Provides real-time update coordination for status bar widgets.
 
 import asyncio
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .status_bar import StatusBar
@@ -18,7 +18,7 @@ class StatusUpdater:
     """Coordinates real-time updates for the status bar"""
 
     def __init__(self):
-        self._status_bar: Optional["StatusBar"] = None
+        self._status_bar: Optional[StatusBar] = None
         self._update_interval: float = 1.0
         self._running: bool = False
         self._update_task: Optional[asyncio.Task] = None

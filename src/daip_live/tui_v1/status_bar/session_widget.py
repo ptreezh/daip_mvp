@@ -4,8 +4,8 @@ Session Widget for newP6 TUI Status Bar
 Displays current session information.
 """
 
-from typing import Optional, Any, Dict
 import logging
+from typing import Any, Optional
 
 from .status_widget import StatusWidget
 
@@ -22,11 +22,13 @@ class SessionWidget(StatusWidget):
     async def refresh(self) -> None:
         """Refresh session information"""
         try:
-            if self.session_service and hasattr(self.session_service, 'get_current_session'):
+            if self.session_service and hasattr(
+                self.session_service, "get_current_session"
+            ):
                 session_info = await self.session_service.get_current_session()
                 if session_info:
-                    session_name = session_info.get('name', 'Unnamed')
-                    session_status = session_info.get('status', 'Unknown')
+                    session_name = session_info.get("name", "Unnamed")
+                    session_status = session_info.get("status", "Unknown")
                     status_text = f"{session_name} ({session_status})"
                     self.update_value(status_text)
                 else:

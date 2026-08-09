@@ -14,15 +14,28 @@ except ImportError:
 from .autocomplete import TUIAutocomplete
 from .enhanced_commands import DebateCommands, SearchCommands
 from .screens import (
-    CommandHelpDialog, SessionSelectionDialog, RoleSelectionDialog,
-    ConfirmationDialog, LoadingDialog, ErrorDialog, SuccessDialog,
-    InputDialog, ProgressDialog, MultiSelectDialog
+    CommandHelpDialog,
+    ConfirmationDialog,
+    ErrorDialog,
+    InputDialog,
+    LoadingDialog,
+    MultiSelectDialog,
+    ProgressDialog,
+    RoleSelectionDialog,
+    SessionSelectionDialog,
+    SuccessDialog,
 )
+
 # 移除了虚假的文本选择功能
 # from .text_selection import TextSelectionManager, CopyPasteEnhancer
 from .utils import (
-    FocusMode, TUIUtils, HistoryManager, PerformanceMonitor,
-    ConfigManager, ThemeManager, Logger
+    ConfigManager,
+    FocusMode,
+    HistoryManager,
+    Logger,
+    PerformanceMonitor,
+    ThemeManager,
+    TUIUtils,
 )
 
 # Container 延迟导出（真实定义在 daip_live.container）
@@ -34,41 +47,35 @@ except ImportError:
 
 __all__ = [
     # 主要TUI类（来自上级目录）
-    'DAIP_TUI',
-
+    "DAIP_TUI",
     # 依赖注入容器（真实定义在 daip_live.container）
-    'Container',
-
+    "Container",
     # 自动补全
-    'TUIAutocomplete',
-
+    "TUIAutocomplete",
     # 命令处理
-    'TUICommandHandler',
-    'SearchCommands',
-    'DebateCommands',
-
+    "TUICommandHandler",
+    "SearchCommands",
+    "DebateCommands",
     # 屏幕和对话框
-    'CommandHelpDialog',
-    'SessionSelectionDialog',
-    'RoleSelectionDialog',
-    'ConfirmationDialog',
-    'LoadingDialog',
-    'ErrorDialog',
-    'SuccessDialog',
-    'InputDialog',
-    'ProgressDialog',
-    'MultiSelectDialog',
-
+    "CommandHelpDialog",
+    "SessionSelectionDialog",
+    "RoleSelectionDialog",
+    "ConfirmationDialog",
+    "LoadingDialog",
+    "ErrorDialog",
+    "SuccessDialog",
+    "InputDialog",
+    "ProgressDialog",
+    "MultiSelectDialog",
     # 移除了虚假的文本选择和复制粘贴增强功能
     # 'TextSelectionManager',
     # 'CopyPasteEnhancer',
-
     # 工具函数
-    'FocusMode',
-    'TUIUtils',
-    'HistoryManager',
-    'PerformanceMonitor',
-    'ConfigManager',
-    'ThemeManager',
-    'Logger'
+    "FocusMode",
+    "TUIUtils",
+    "HistoryManager",
+    "PerformanceMonitor",
+    "ConfigManager",
+    "ThemeManager",
+    "Logger",
 ]

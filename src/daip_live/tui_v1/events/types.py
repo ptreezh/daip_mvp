@@ -6,9 +6,9 @@ including event types, priorities, and the base Event class.
 """
 
 import time
-from enum import Enum
-from typing import Any, Dict, Optional
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Optional
 
 
 class EventType(Enum):
@@ -49,11 +49,11 @@ class EventType(Enum):
 class EventPriority(Enum):
     """Enumeration of event processing priorities."""
 
-    CRITICAL = 0    # Highest priority - system critical events
-    HIGH = 1       # High priority - user interactions
-    NORMAL = 2     # Normal priority - standard events
-    LOW = 3        # Low priority - background events
-    BULK = 4       # Lowest priority - bulk operations
+    CRITICAL = 0  # Highest priority - system critical events
+    HIGH = 1  # High priority - user interactions
+    NORMAL = 2  # Normal priority - standard events
+    LOW = 3  # Low priority - background events
+    BULK = 4  # Lowest priority - bulk operations
 
 
 @dataclass
@@ -73,7 +73,7 @@ class Event:
 
     event_type: EventType
     source: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     priority: EventPriority = EventPriority.NORMAL
     timestamp: float = None
     target: Optional[str] = None
@@ -84,14 +84,18 @@ class Event:
         if self.timestamp is None:
             self.timestamp = time.time()
         if self.event_id is None:
-            self.event_id = f"{self.event_type.value}_{self.source}_{int(self.timestamp * 1000000)}"
+            self.event_id = (
+                f"{self.event_type.value}_{self.source}_{int(self.timestamp * 1000000)}"
+            )
 
     def __str__(self) -> str:
         """String representation of the event."""
-        return f"Event({self.event_id}, type={self.event_type.value}, source={self.source})"
+        return f"Event({self.event_id}, type={self.event_type.value}, source={self.source})"  # noqa: E501
 
     def __repr__(self) -> str:
         """Detailed string representation of the event."""
-        return (f"Event(event_id='{self.event_id}', event_type={self.event_type}, "
-                f"source='{self.source}', priority={self.priority}, "
-                f"target={self.target})")
+        return (
+            f"Event(event_id='{self.event_id}', event_type={self.event_type}, "
+            f"source='{self.source}', priority={self.priority}, "
+            f"target={self.target})"
+        )
