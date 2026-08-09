@@ -10,8 +10,8 @@
 
 | # | 门禁 | 状态 | 证据 |
 |---|------|------|------|
-| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1742P/433S/0F/0E |
-| G2 | ruff = 0（src + tests） | ✅ | `py -m ruff check src/ tests/` → 0（曾 11116） |
+| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1754P/433S/0F/0E（+12：合并重复类恢复 8 个被吞测试 + 模型检查器 4 个） |
+| G2 | ruff = 0（src + tests） | ✅ | `py -m ruff check src/ tests/` → **0（首次真实全量覆盖）**；此前 .gitignore `test_*.py` 无锚定规则使 ruff 跳过全部测试文件，G2 曾为假绿；已修复 + 200+ 文件治理 |
 | G3 | mypy = 0 | ⚠️ Backlog | 917 项（1247→917 分级收敛），全为类型注解完善类（抽样确认无运行时 bug）；CI 软门禁，**不作为上线阻塞** |
 | G4 | Python 3.9 语法全过 | ✅ | `py -m python scripts/check_py39_syntax.py` → 0（曾 6 处 invalid-syntax） |
 | G5 | CI 全绿 | ⚠️ | 已硬化并入库（ci.yml 此前从未跟踪）；仅 mypy 软门禁（记录在案的 Backlog） |
@@ -47,6 +47,8 @@
 | Stage 5 混合路由 | 用户确认硬需求、暂缓实施 | Backlog（H1-H6 蓝图在 08-08 报告 §4） |
 | 云端 API key | config.yaml 无云端段 | 混合路由实施时补 |
 | 模型检查器 bug（已修复） | 曾对嵌入模型 nomic-embed-text 调 generate() 致辩论无法启动 | 2026-08-09 修复：嵌入模型走 embed() 检查 + "does not support" 独立分类；防回归测试 4 个 |
+| PermissionInteraction 枚举 bug（已修复） | `use_enum_values=True` 使赋值后 state 变字符串，`to_result().granted`/状态比较恒 False（安全相关） | 2026-08-09 修复：移除 use_enum_values；合并被覆盖吞掉的重复测试类（恢复 8 个测试） |
+| .gitignore 无锚定临时脚本规则（已修复） | `test_*.py` 等模式忽略所有层级，13 个 tests/ 正式测试从未入库 + ruff 全跳过（G2 假绿、CI 测试集≠本地） | 2026-08-09 修复：加 `/` 锚定根目录 + 20 个历史文件入库 + 全量 lint 治理 |
 
 ---
 
@@ -62,7 +64,7 @@
 ## 5. 上线验收命令（一键自检）
 
 ```powershell
-py -m pytest -q --tb=no                        # G1: 1742P/0F/0E
+py -m pytest -q --tb=no                        # G1: 1754P/0F/0E
 py -m ruff check src/ tests/                   # G2: 0
 py -m python scripts/check_py39_syntax.py      # G4: 0 failures
 py -m daip_live.cli.main knowledge status      # G6: Indexed 13

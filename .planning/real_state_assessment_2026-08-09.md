@@ -241,6 +241,14 @@
 - **Go-Live Checklist 交付**：`.planning/go_live_checklist.md`——门禁终态表（G1-G10 实测证据 + 软门禁判定）+ 人工确认 H1-H4（H1 DB 恢复待用户决策；H2 完整 TUI 人工项；H3 辩论冒烟本轮已实跑；H4 备份任务已确认注册、⚠️ Logon Mode=Interactive only）+ 6 项已知限制 + 日常运营 + 一键自检命令。
 - **全量回归终态**：`py -m pytest -q --tb=no` → **1742 passed / 433 skipped / 0 failed / 0 error**（434s，+4 新测试）；ruff src+tests 0。提交 `69d9a44`；本轮模型检查器修复待提交。
 
+### 第五轮（2026-08-09：gitignore 假绿曝光——G2 真绿 + 核心枚举 bug + 1754P）
+- **🔴 重大发现：G2（ruff=0）此前是假绿**。修复 `.gitignore` 误伤后，`ruff check src/ tests/` 爆出 **7299 错误**——根因：`test_*.py` 等"临时脚本"模式**无路径锚定**，ruff 默认尊重 .gitignore → **所有 `test_*.py` 测试文件从未被 lint 检查过**（此前"tests/ ruff 269→0"只覆盖 conftest/runner 等非 test_ 命名文件）。
+- **连带发现 1：13 个 tests/ 正式测试从未入库**（含上轮声称提交的 `tests/unit/test_tui_smoke.py`——`git show --stat 69d9a44` 证实该提交实际只含 5 文件，test_tui_smoke.py 被 gitignore 挡掉）。修复：`.gitignore` 临时脚本模式加 `/` 锚定根目录 + 20 个历史文件入库（tests/ 13 + src/ 3 + tutor/ 4）。**CI 测试集此前 ≠ 本地 1742P**，现一致。
+- **连带发现 2：核心安全 bug**——`PermissionInteraction` 用 `use_enum_values=True`，Pydantic 赋值时把枚举转成 value 字符串，模型内 `self.state == PermissionState.GRANTED` 等比较**恒 False** → `to_result().granted` 永远 False（权限授予判定失效）。修复：移除 `use_enum_values`（保留 validate_assignment）。合并被重复类定义吞掉的 `TestPermissionInteractionRobustness`（8 个测试此前从不执行），修复 naive/aware datetime 测试 bug、微秒级脆弱断言。`test_tool_manager.py` 三组完全相同冗余类去重。
+- **连带发现 3：类重复定义吞测试**——`test_permission_robust_basic.py` 同名类定义两次，Python 后者覆盖前者，第一组 8 个测试**从未被 pytest 收集**。合并后全量 +12 测试。
+- **治理**：`ruff format` 218+41 文件 + `--fix --unsafe-fixes` + E501/E402/F401/F821 noqa（F821 全部在 TDD 红 skip 死代码内，确认无运行时风险）→ **`ruff check src/ tests/` 首次真实全绿 0**；`ruff format --check` 0。
+- **全量回归终态（实测）**：`py -m pytest -q --tb=no` → **1754 passed / 433 skipped / 0 failed / 0 error**（483s）；py39 语法 306 文件全过。提交链：`b676318`（gitignore 锚定 + 20 文件入库 + 模型检查器修复）→ `f2a23b7`（枚举核心修复）→ `6f450fb`（221 文件 lint 治理）。
+
 ### Stage 5: 混合路由落地（4-6 天，08-08 计划 H1-H6 续）——【Backlog：硬需求，暂缓实施】
 
 **决策记录（2026-08-09 用户确认）**: 混合路由是**硬需求**（对应需求映射矩阵全部条目：本地预审/脱敏/云端委托/最小披露/人工确认），但**当前暂不实现**。实施降级为 Backlog，不进入当前上线时间线，不影响发布门禁 G1-G10。恢复实施时沿用 08-08 蓝图：
@@ -261,8 +269,8 @@
 ### 6.1 发布门禁（全部必须为真，缺一不发布）
 | # | 门禁 | 验证命令 | 当前状态 |
 |---|------|---------|---------|
-| G1 | 全量测试 0F/0E | `poetry run pytest -q --tb=line` | ✅ **1742P/0F/0E**（flaky 根因已修：p7_gui 测试污染 root DB 触发保护断言 → `DAIP_DB_PATH` 隔离） |
-| G2 | ruff = 0 | `poetry run ruff check src/` | ✅ **0（11116→0）** |
+| G1 | 全量测试 0F/0E | `poetry run pytest -q --tb=line` | ✅ **1754P/0F/0E**（+12：合并重复类恢复 8 个被吞测试 + 模型检查器 4 个） |
+| G2 | ruff = 0 | `poetry run ruff check src/` | ✅ **0（首次真实全量覆盖）**；此前 .gitignore 无锚定 `test_*.py` 规则使 ruff 跳过全部测试文件（假绿），已修复 |
 | G3 | mypy = 0 | `poetry run mypy src/daip_live` | ❌ 917（1247→917 分级收敛；全为类型注解完善类，Backlog；CI 软门禁） |
 | G4 | ast.parse 3.9 语义全过 | `python scripts/check_py39_syntax.py` | ✅ 0 失败（已入 CI） |
 | G5 | CI 全绿（含 e2e/security，无 continue-on-error） | GitHub Actions | ⚠️ 已硬化并入库；mypy 软门禁（Backlog 完成后转硬） |
