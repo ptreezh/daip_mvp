@@ -195,23 +195,21 @@ litellm/
 # *.md
 # tutor/
 
-# Temporary test scripts
-analyze_non_integration_reasons.py
-check_page.py
-test_args.py
-test_*.py
-*_test.py
-e2e_*.py
-integration_test*.py
-functional_*.py
-verify_*.py
-validate_*.py
-demo_*.py
-comprehensive_*.py
-minimal_*.py
-final_*.py
-system_*.py
-tdd_*.py
+# Temporary test scripts (root-level scratch files only)
+/test_args.py
+/test_*.py
+/*_test.py
+/e2e_*.py
+/integration_test*.py
+/functional_*.py
+/verify_*.py
+/validate_*.py
+/demo_*.py
+/comprehensive_*.py
+/minimal_*.py
+/final_*.py
+/system_*.py
+/tdd_*.py
 role_test.py
 session_test.py
 model_test.py

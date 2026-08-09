@@ -233,6 +233,14 @@
 - **CLI 冷启动评估（7.8s）**：`py -X importtime` 定位根因 = **litellm 全链路 import ~9.2s**（litellm + numpy/sqlalchemy/aiohttp/jinja2 依赖树）。优化方案 = 入口命令级懒加载 litellm（中等重构风险）；**本轮不动**（已绿门禁优先，方案记入 Backlog）。
 - **门禁终态**：G1/G2/G4/G6/G7/G8/G9/G10 全绿；G3（mypy 917）Backlog + CI 软门禁；G5 除 mypy 软门禁外全部硬化。
 
+### 第四轮（2026-08-09：Go-Live 对齐——TUI/knowledge 自动化 + 辩论模型检查真 bug 修复）
+- **G10 完整化（TUI 交互冒烟自动化）**：新建 `tests/unit/test_tui_smoke.py`——Textual `run_test()` 2 测试（启动+渲染 #user_input；输入+系统键路径），patch `daip_live.container.Container`。此前 G10 仅"进程存活 6s+"人工项，现交互路径进回归。
+- **knowledge CLI 落盘防回归**：`tests/cli/commands/test_knowledge_commands.py` 追加 2 测试——env 隔离（`DAIP_DB_PATH`/`DAIP_KNOWLEDGE_DIR` → tmp_path）+ mock `LiteLLMProvider.embed`（768 维）：① sync 后 sqlite 直查 `knowledge_sources`==2（此前 `:memory:` 恒 0 测不到落盘）；② sync+search 断言 "No results found" 不出现（防空壳回潮）。Rich 路径截断导致 "doc1.md" in stdout 断言失败一次，改为非空壳断言。
+- **🔴 实测抓到真实生产 bug（辩论无法启动）**：H3 辩论冒烟复测失败——`ModelAvailabilityChecker` 对嵌入模型 `nomic-embed-text` 调用 `generate()`（chat 接口），Ollama 返回 `"nomic-embed-text" does not support generate`，异常被误分类为"无法连接到模型服务" → `perform_model_check` 失败 → 辩论中止。**根因**：`f9d90b2` 引入真实模型检查时未区分嵌入/对话模型，且 `embed()` 从 `config.embedding_model` 取模型名而 `_get_provider` 未传。**修复**（`model_availability_checker.py`）：嵌入模型走 `embed()` 检查（`ProviderConfig.embedding_model` 同步设置）+ "does not support" 独立异常分类（模型误用而非连接错误）；防回归测试 4 个（`tests/p8_debate_system/test_model_availability_checker.py`：嵌入走 embed/对话走 generate/check_all_models 路由/错误分类）。**修复后真实辩论重跑通过**（正反论点/Consensus/Controversial/DebateCompleteEvent 齐全）。
+- **文档对齐**：README 命令表更新（10 命令全表 + `knowledge search "量子计算"` 真实用法）；AGENTS.md 加"无 poetry 时 `py -m daip_live.cli.main` 等价调用"。
+- **Go-Live Checklist 交付**：`.planning/go_live_checklist.md`——门禁终态表（G1-G10 实测证据 + 软门禁判定）+ 人工确认 H1-H4（H1 DB 恢复待用户决策；H2 完整 TUI 人工项；H3 辩论冒烟本轮已实跑；H4 备份任务已确认注册、⚠️ Logon Mode=Interactive only）+ 6 项已知限制 + 日常运营 + 一键自检命令。
+- **全量回归终态**：`py -m pytest -q --tb=no` → **1742 passed / 433 skipped / 0 failed / 0 error**（434s，+4 新测试）；ruff src+tests 0。提交 `69d9a44`；本轮模型检查器修复待提交。
+
 ### Stage 5: 混合路由落地（4-6 天，08-08 计划 H1-H6 续）——【Backlog：硬需求，暂缓实施】
 
 **决策记录（2026-08-09 用户确认）**: 混合路由是**硬需求**（对应需求映射矩阵全部条目：本地预审/脱敏/云端委托/最小披露/人工确认），但**当前暂不实现**。实施降级为 Backlog，不进入当前上线时间线，不影响发布门禁 G1-G10。恢复实施时沿用 08-08 蓝图：
@@ -253,7 +261,7 @@
 ### 6.1 发布门禁（全部必须为真，缺一不发布）
 | # | 门禁 | 验证命令 | 当前状态 |
 |---|------|---------|---------|
-| G1 | 全量测试 0F/0E | `poetry run pytest -q --tb=line` | ✅ **1738P/0F/0E**（flaky 根因已修：p7_gui 测试污染 root DB 触发保护断言 → `DAIP_DB_PATH` 隔离） |
+| G1 | 全量测试 0F/0E | `poetry run pytest -q --tb=line` | ✅ **1742P/0F/0E**（flaky 根因已修：p7_gui 测试污染 root DB 触发保护断言 → `DAIP_DB_PATH` 隔离） |
 | G2 | ruff = 0 | `poetry run ruff check src/` | ✅ **0（11116→0）** |
 | G3 | mypy = 0 | `poetry run mypy src/daip_live` | ❌ 917（1247→917 分级收敛；全为类型注解完善类，Backlog；CI 软门禁） |
 | G4 | ast.parse 3.9 语义全过 | `python scripts/check_py39_syntax.py` | ✅ 0 失败（已入 CI） |

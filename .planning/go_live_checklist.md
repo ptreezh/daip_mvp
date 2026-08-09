@@ -10,7 +10,7 @@
 
 | # | 门禁 | 状态 | 证据 |
 |---|------|------|------|
-| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1738P/433S/0F/0E |
+| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1742P/433S/0F/0E |
 | G2 | ruff = 0（src + tests） | ✅ | `py -m ruff check src/ tests/` → 0（曾 11116） |
 | G3 | mypy = 0 | ⚠️ Backlog | 917 项（1247→917 分级收敛），全为类型注解完善类（抽样确认无运行时 bug）；CI 软门禁，**不作为上线阻塞** |
 | G4 | Python 3.9 语法全过 | ✅ | `py -m python scripts/check_py39_syntax.py` → 0（曾 6 处 invalid-syntax） |
@@ -31,8 +31,8 @@
 |---|----|------|------|
 | H1 | **DB 数据恢复决策** | 当前 root `daip_live.db` 为 S2 测试污染态（64 个 Test session、dialogue_turns 0）；备份含真实数据（406 会话/611 轮） | 若需恢复：`pwsh .planning/scripts/restore.ps1 -Zip backups/daip-20260808-082131.zip`（自动备份当前态 + 校验 + 覆盖） |
 | H2 | TUI 完整交互体验 | run_test 冒烟已过，完整人工体验一次 | `py -m daip_live.cli.main run`（Ctrl+Q 退出） |
-| H3 | 真实辩论冒烟 | 已实跑一轮通过（2026-08-09）；上线前可再跑一次 | `py -m daip_live.cli.main debate start "上线验收" --roles pro_arguer,con_arguer --rounds 1` |
-| H4 | 备份任务确认 | 计划任务 `DAIP-Live Backup` 每日 02:00；手动触发已验证 | `schtasks /query /tn "DAIP-Live Backup"` |
+| H3 | 真实辩论冒烟 | ✅ 2026-08-09 复测通过（修复嵌入模型检查 bug 后重跑：正反论点/Consensus/DebateCompleteEvent 齐全） | `py -m daip_live.cli.main debate start "上线验收" --roles pro_arguer,con_arguer --rounds 1` |
+| H4 | 备份任务确认 | ✅ 已注册启用，下次 2026/8/10 02:00；⚠️ Logon Mode = Interactive only（仅登录时运行，注销不备份——单用户本机可接受，注意勿长期注销运行） | `schtasks /query /tn "DAIP-Live Backup" /fo LIST /v` |
 
 ---
 
@@ -46,6 +46,7 @@
 | wiki CLI 7 处 `:memory:` DB | wiki_index.json 文件系统兜底 | 观察项 |
 | Stage 5 混合路由 | 用户确认硬需求、暂缓实施 | Backlog（H1-H6 蓝图在 08-08 报告 §4） |
 | 云端 API key | config.yaml 无云端段 | 混合路由实施时补 |
+| 模型检查器 bug（已修复） | 曾对嵌入模型 nomic-embed-text 调 generate() 致辩论无法启动 | 2026-08-09 修复：嵌入模型走 embed() 检查 + "does not support" 独立分类；防回归测试 4 个 |
 
 ---
 
@@ -61,7 +62,7 @@
 ## 5. 上线验收命令（一键自检）
 
 ```powershell
-py -m pytest -q --tb=no                        # G1: 1738P/0F/0E
+py -m pytest -q --tb=no                        # G1: 1742P/0F/0E
 py -m ruff check src/ tests/                   # G2: 0
 py -m python scripts/check_py39_syntax.py      # G4: 0 failures
 py -m daip_live.cli.main knowledge status      # G6: Indexed 13

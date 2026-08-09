@@ -21,38 +21,59 @@ class ModelAvailabilityChecker:
         self.embedding_model = embedding_model
         self._provider_cache = {}
 
-    def _get_provider(self, model_name: str):
-        """获取指定模型的提供者实例"""
-        if model_name not in self._provider_cache:
-            config = ProviderConfig(model=model_name, base_url="http://localhost:11434")
-            self._provider_cache[model_name] = LiteLLMProvider(config)
-        return self._provider_cache[model_name]
+    def _get_provider(self, model_name: str, is_embedding: bool = False):
+        """获取指定模型的提供者实例
+
+        embed() 从 ProviderConfig.embedding_model 取模型名，因此嵌入模型
+        必须把模型名同时放入 embedding_model 字段。
+        """
+        cache_key = f"{'embed:' if is_embedding else ''}{model_name}"
+        if cache_key not in self._provider_cache:
+            config = ProviderConfig(
+                model=model_name,
+                embedding_model=model_name if is_embedding else None,
+                base_url="http://localhost:11434",
+            )
+            self._provider_cache[cache_key] = LiteLLMProvider(config)
+        return self._provider_cache[cache_key]
 
     async def check_model_availability(
-        self, model_name: str, test_prompt: str = "Hello"
+        self, model_name: str, test_prompt: str = "Hello", is_embedding: bool = False
     ) -> tuple[bool, str]:
         """
         检查特定模型是否可用
 
+        嵌入模型（如 nomic-embed-text）不支持 chat/generate 接口，必须走
+        embed() 检查；对话模型走 generate()。混淆二者会导致 Ollama 返回
+        "does not support generate"。
+
         Args:
             model_name: 模型名称
             test_prompt: 测试提示词
+            is_embedding: 是否为嵌入模型
 
         Returns:
             tuple: (是否可用, 错误信息或空字符串)
         """
         try:
-            provider = self._get_provider(model_name)
-            # 尝试生成一个简单的响应来测试模型可用性
-            # LiteLLMProvider.generate 是 async generator（模型名由 ProviderConfig 持有），  # noqa: E501
-            # 参数需放入 params dict；成功产出首个响应块即认为模型可用
-            async for chunk in provider.generate(
-                prompt=test_prompt, params={"temperature": 0.1, "max_tokens": 20}
-            ):
-                break
+            provider = self._get_provider(model_name, is_embedding=is_embedding)
+            if is_embedding:
+                await provider.embed(test_prompt)
+            else:
+                # LiteLLMProvider.generate 是 async generator（模型名由 ProviderConfig 持有），  # noqa: E501
+                # 参数需放入 params dict；成功产出首个响应块即认为模型可用
+                async for chunk in provider.generate(
+                    prompt=test_prompt, params={"temperature": 0.1, "max_tokens": 20}
+                ):
+                    break
             return True, ""
         except Exception as e:
             error_msg = str(e)
+            if "does not support" in error_msg.lower():
+                return (
+                    False,
+                    f"模型'{model_name}'不支持当前操作（可能是嵌入模型/对话模型误用）。",  # noqa: E501
+                )
             if "OllamaException" in error_msg or "ConnectionError" in error_msg:
                 return (
                     False,
@@ -82,11 +103,16 @@ class ModelAvailabilityChecker:
         Returns:
             tuple: (是否全部可用, 不可用模型的错误信息列表)
         """
-        models_to_check = [self.default_model, self.embedding_model]
+        models_to_check = [
+            (self.default_model, False),
+            (self.embedding_model, True),
+        ]
         unavailable_models = []
 
-        for model_name in models_to_check:
-            is_available, error_msg = await self.check_model_availability(model_name)
+        for model_name, is_embedding in models_to_check:
+            is_available, error_msg = await self.check_model_availability(
+                model_name, is_embedding=is_embedding
+            )
             if not is_available:
                 unavailable_models.append(f"{model_name}: {error_msg}")
 
