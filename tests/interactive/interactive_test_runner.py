@@ -11,22 +11,27 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any
 
+
 class InteractiveTestRunner:
     def __init__(self):
         self.test_results = []
         self.start_time = None
 
-    def log_test(self, test_name: str, status: str, details: str = "", response_time: float = 0):
+    def log_test(
+        self, test_name: str, status: str, details: str = "", response_time: float = 0
+    ):
         """记录测试结果"""
         result = {
             "test": test_name,
             "status": status,  # PASS, FAIL, PARTIAL, SKIP
             "details": details,
             "response_time": response_time,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
         self.test_results.append(result)
-        status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[status]
+        status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[
+            status
+        ]
         print(f"{status_symbol} {test_name}: {details} ({response_time:.2f}s)")
 
     def print_test_section(self, title: str):
@@ -58,7 +63,9 @@ class InteractiveTestRunner:
         print("✅ 系统初始化成功: 人格AI initialized successfully!")
 
         response_time = time.time() - start_time
-        self.log_test("TUI界面启动", "PASS", "界面完整加载，所有组件正常", response_time)
+        self.log_test(
+            "TUI界面启动", "PASS", "界面完整加载，所有组件正常", response_time
+        )
 
         # 测试2: 界面元素检查
         print("\n🎨 测试2: 界面元素完整性检查")
@@ -86,7 +93,7 @@ class InteractiveTestRunner:
             "/help quick",
             "/help role",
             "/help session",
-            "/help model"
+            "/help model",
         ]
 
         await self.simulate_tui_input(commands_to_test, delay=2.0)
@@ -105,11 +112,21 @@ class InteractiveTestRunner:
         self.print_test_section("自动补全系统测试")
 
         autocomplete_tests = [
-            ("命令补全", "/", ["应该显示: /help, /role, /session, /model, /compact, /doc, /wiki, /permission等"]),
-            ("子命令补全", "/role ", ["应该显示: create, list, activate, info, delete"]),
+            (
+                "命令补全",
+                "/",
+                [
+                    "应该显示: /help, /role, /session, /model, /compact, /doc, /wiki, /permission等"
+                ],
+            ),
+            (
+                "子命令补全",
+                "/role ",
+                ["应该显示: create, list, activate, info, delete"],
+            ),
             ("参数补全", "/model switch ", ["应该显示可用的模型列表"]),
             ("Wiki补全", "/wiki export ", ["应该显示: markdown, html, obsidian, json"]),
-            ("权限补全", "/permission grant ", ["应该显示可用工具列表"])
+            ("权限补全", "/permission grant ", ["应该显示可用工具列表"]),
         ]
 
         for test_name, input_text, expected in autocomplete_tests:
@@ -128,9 +145,9 @@ class InteractiveTestRunner:
 
         role_commands = [
             '/role create "测试专家" --description "用于测试的专家角色"',
-            '/role list',
+            "/role list",
             '/role activate "测试专家"',
-            '/role info "测试专家"'
+            '/role info "测试专家"',
         ]
 
         await self.simulate_tui_input(role_commands, delay=2.0)
@@ -149,9 +166,9 @@ class InteractiveTestRunner:
 
         session_commands = [
             '/session create "测试会话"',
-            '/session list',
+            "/session list",
             '/session switch "测试会话"',
-            '/session info'
+            "/session info",
         ]
 
         await self.simulate_tui_input(session_commands, delay=2.0)
@@ -172,7 +189,7 @@ class InteractiveTestRunner:
             "你好",
             "请解释机器学习的基本概念",
             "什么是深度学习？",
-            "能举一个监督学习的例子吗？"
+            "能举一个监督学习的例子吗？",
         ]
 
         for i, question in enumerate(conversation_tests, 1):
@@ -192,11 +209,7 @@ class InteractiveTestRunner:
         """测试模型管理功能"""
         self.print_test_section("模型管理功能测试")
 
-        model_commands = [
-            "/model list",
-            "/model info",
-            "/model switch llama3:8b"
-        ]
+        model_commands = ["/model list", "/model info", "/model switch llama3:8b"]
 
         await self.simulate_tui_input(model_commands, delay=2.0)
 
@@ -215,18 +228,15 @@ class InteractiveTestRunner:
         advanced_commands = [
             # 上下文压缩
             "/compact current",
-
             # 权限管理
             "/permission list",
             "/permission check gemini-cli",
-
             # Wiki功能
-            "/wiki create \"测试笔记\" --tags \"test,notes\"",
+            '/wiki create "测试笔记" --tags "test,notes"',
             "/wiki list",
-
             # 论文管理
             "/doc list",
-            "/doc search \"machine learning\""
+            '/doc search "machine learning"',
         ]
 
         await self.simulate_tui_input(advanced_commands, delay=2.0)
@@ -245,9 +255,9 @@ class InteractiveTestRunner:
 
         error_tests = [
             "/invalidcommand",  # 无效命令
-            "/role create",      # 缺失参数
+            "/role create",  # 缺失参数
             "/model switch nonexistent-model",  # 无效模型
-            "/session switch nonexistent-session"  # 无效会话
+            "/session switch nonexistent-session",  # 无效会话
         ]
 
         for error_cmd in error_tests:
@@ -274,11 +284,9 @@ class InteractiveTestRunner:
         print("✅ 系统状态指示")
 
         # 模拟一些操作来观察性能指标
-        await self.simulate_tui_input([
-            "性能测试消息1",
-            "性能测试消息2",
-            "性能测试消息3"
-        ], delay=1.0)
+        await self.simulate_tui_input(
+            ["性能测试消息1", "性能测试消息2", "性能测试消息3"], delay=1.0
+        )
 
         print("\n预期性能指标:")
         print("✅ 响应时间 < 2秒")
@@ -356,9 +364,17 @@ class InteractiveTestRunner:
 
         print(f"\n📋 详细结果:")
         for result in self.test_results:
-            status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[result["status"]]
-            time_info = f"({result['response_time']:.2f}s)" if result['response_time'] > 0 else ""
-            print(f"   {status_symbol} {result['test']}: {result['details']} {time_info}")
+            status_symbol = {"PASS": "✅", "FAIL": "❌", "PARTIAL": "⚠️", "SKIP": "⏭️"}[
+                result["status"]
+            ]
+            time_info = (
+                f"({result['response_time']:.2f}s)"
+                if result["response_time"] > 0
+                else ""
+            )
+            print(
+                f"   {status_symbol} {result['test']}: {result['details']} {time_info}"
+            )
 
         # 保存结果
         self.save_test_results()
@@ -382,11 +398,12 @@ class InteractiveTestRunner:
             "partial": len([r for r in self.test_results if r["status"] == "PARTIAL"]),
             "failed": len([r for r in self.test_results if r["status"] == "FAIL"]),
             "skipped": len([r for r in self.test_results if r["status"] == "SKIP"]),
-            "results": self.test_results
+            "results": self.test_results,
         }
 
-        with open(results_file, 'w', encoding='utf-8') as f:
+        with open(results_file, "w", encoding="utf-8") as f:
             json.dump(summary_data, f, ensure_ascii=False, indent=2)
+
 
 async def main():
     """主函数"""
@@ -399,6 +416,7 @@ async def main():
     else:
         failed_count = len([r for r in results if r["status"] == "FAIL"])
     return failed_count
+
 
 if __name__ == "__main__":
     exit_code = asyncio.run(main())

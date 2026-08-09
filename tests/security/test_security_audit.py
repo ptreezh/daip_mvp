@@ -137,7 +137,7 @@ class TestSecretLeakage:
         """Verify config files don't contain hardcoded secrets."""
         config_file = Path("config.yaml")
         if config_file.exists():
-            content = config_file.read_text()
+            content = config_file.read_text(encoding="utf-8")
 
             # Check for obvious secret patterns
             suspicious_patterns = [
@@ -174,7 +174,7 @@ class OWASPSecurityChecker:
 
         for py_file in source_path.rglob('*.py'):
             try:
-                content = py_file.read_text()
+                content = py_file.read_text(encoding="utf-8")
                 for pattern in sql_patterns:
                     matches = re.finditer(pattern, content, re.IGNORECASE)
                     for match in matches:
@@ -196,15 +196,16 @@ class OWASPSecurityChecker:
         source_path = Path(source_dir)
 
         # Pattern: direct user input in HTML without sanitization
+        # 单行匹配（[^>\n] 排除换行），避免把普通 `<` 比较运算跨行误报为 XSS
         xss_patterns = [
-            r'<[^>]*\+.*user[^>]*>',
-            r'<[^>]*f["\'].*user.*["\'][^>]*>',
-            r'\.html\([^)]*\+',
+            r'<[^>\n]*\+[^>\n]*user[^>\n]*>',
+            r'<[^>\n]*f["\'][^>\n]*user[^>\n]*["\'][^>\n]*>',
+            r'\.html\([^)\n]*\+',
         ]
 
         for py_file in source_path.rglob('*.py'):
             try:
-                content = py_file.read_text()
+                content = py_file.read_text(encoding="utf-8")
                 for pattern in xss_patterns:
                     matches = re.finditer(pattern, content, re.IGNORECASE)
                     for match in matches:
@@ -331,7 +332,7 @@ class TestDependencySecurity:
         """Verify dependencies are from trusted sources."""
         pyproject = Path("pyproject.toml")
         if pyproject.exists():
-            content = pyproject.read_text()
+            content = pyproject.read_text(encoding="utf-8")
 
             # Parse dependencies
             deps = re.findall(r'([a-zA-Z0-9_-]+)\s*>=?[\d.]+', content)
@@ -368,7 +369,7 @@ class TestDependencySecurity:
 
         for py_file in source_path.rglob('*.py'):
             try:
-                content = py_file.read_text()
+                content = py_file.read_text(encoding="utf-8")
                 for pattern in insecure_patterns:
                     matches = re.finditer(pattern, content, re.IGNORECASE)
                     for match in matches:

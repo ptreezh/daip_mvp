@@ -3,9 +3,11 @@ Unit tests for TUI background task management functionality.
 
 Aligned with the current SimplifiedTUI implementation:
 - on_unmount schedules cleanup() via asyncio.create_task (it does not cancel tasks)
-- The active on_key (defined last, ~line 2904) only handles ctrl+c / ctrl+a (copy).
-  ctrl+e / ctrl+q are NOT handled by the active on_key: an earlier on_key
-  definition (line 1012) is shadowed dead code and must not be asserted against.
+- The active on_key delegates to _handle_system_keys (ctrl+e / ctrl+q exit
+  confirmation, ESC exit output mode, input edit keys) and additionally
+  handles ctrl+c / ctrl+a (copy). The former shadowing bug (a later on_key
+  definition silently replacing the earlier one) was fixed on 2026-08-09 by
+  merging both handlers into one dispatch.
 - _handle_quit_command is async and delegates to action_quit
 - _handle_compact_command replaces the removed _compress_session_context_async
 """
@@ -48,8 +50,8 @@ class TestTUIBackgroundTaskManagement:
                 mock_create_task.assert_called_once()
                 mock_cleanup.assert_awaited_once()
 
-    def test_ctrl_e_shortcut_not_handled_by_active_on_key(self, tui_app):
-        """ctrl+e 不在激活的 on_key 处理范围内（激活版仅处理 ctrl+c/ctrl+a）。"""
+    def test_ctrl_e_shortcut_handled_by_on_key(self, tui_app):
+        """ctrl+e 由 on_key 委托的系统快捷键处理触发退出确认（2026-08-09 修复 shadowing 后）。"""
         # Setup
         event = Mock()
         event.key = "ctrl+e"
@@ -58,12 +60,12 @@ class TestTUIBackgroundTaskManagement:
             # Execute
             tui_app.on_key(event)
 
-            # Assert - 激活的 on_key 不处理 ctrl+e，不触发退出确认
-            mock_confirmation.assert_not_called()
-            event.prevent_default.assert_not_called()
+            # Assert - 系统快捷键处理 ctrl+e，触发退出确认并阻止默认行为
+            mock_confirmation.assert_called_once()
+            event.prevent_default.assert_called_once()
 
-    def test_ctrl_q_shortcut_not_handled_by_active_on_key(self, tui_app):
-        """ctrl+q 不在激活的 on_key 处理范围内（激活版仅处理 ctrl+c/ctrl+a）。"""
+    def test_ctrl_q_shortcut_handled_by_on_key(self, tui_app):
+        """ctrl+q 由 on_key 委托的系统快捷键处理触发退出确认（2026-08-09 修复 shadowing 后）。"""
         # Setup
         event = Mock()
         event.key = "ctrl+q"
@@ -72,9 +74,9 @@ class TestTUIBackgroundTaskManagement:
             # Execute
             tui_app.on_key(event)
 
-            # Assert - 激活的 on_key 不处理 ctrl+q，不触发退出确认
-            mock_confirmation.assert_not_called()
-            event.prevent_default.assert_not_called()
+            # Assert - 系统快捷键处理 ctrl+q，触发退出确认并阻止默认行为
+            mock_confirmation.assert_called_once()
+            event.prevent_default.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_ctrl_c_shortcut_copies_content(self, tui_app):

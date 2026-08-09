@@ -20,15 +20,15 @@ class ModuleTestBase(ABC):
     def mock_dependencies(self) -> Dict[str, Any]:
         """模拟依赖项"""
         return {
-            'container': Mock(),
-            'config': Mock(),
-            'logger': Mock(),
-            'event_bus': Mock(),
-            'model_provider': AsyncMock(),
-            'persistence': AsyncMock(),
-            'knowledge_manager': AsyncMock(),
-            'role_manager': AsyncMock(),
-            'tool_manager': AsyncMock(),
+            "container": Mock(),
+            "config": Mock(),
+            "logger": Mock(),
+            "event_bus": Mock(),
+            "model_provider": AsyncMock(),
+            "persistence": AsyncMock(),
+            "knowledge_manager": AsyncMock(),
+            "role_manager": AsyncMock(),
+            "tool_manager": AsyncMock(),
         }
 
     @pytest.fixture
@@ -51,11 +51,11 @@ class ModuleTestBase(ABC):
     def sample_config(self):
         """示例配置"""
         return {
-            'model_provider': 'mock',
-            'embedding_model': 'mock-embedding',
-            'vector_dimension': 384,
-            'max_tokens': 4096,
-            'temperature': 0.7,
+            "model_provider": "mock",
+            "embedding_model": "mock-embedding",
+            "vector_dimension": 384,
+            "max_tokens": 4096,
+            "temperature": 0.7,
         }
 
     # 基础接口测试
@@ -63,26 +63,26 @@ class ModuleTestBase(ABC):
     async def test_module_initialization(self, module_instance):
         """测试模块初始化"""
         assert module_instance is not None
-        if hasattr(module_instance, 'is_initialized'):
+        if hasattr(module_instance, "is_initialized"):
             assert module_instance.is_initialized
 
     @pytest.mark.asyncio
     async def test_health_check(self, module_instance):
         """测试健康检查"""
-        if hasattr(module_instance, 'health_check'):
+        if hasattr(module_instance, "health_check"):
             result = await module_instance.health_check()
             assert isinstance(result, bool)
 
     def test_version_info(self, module_instance):
         """测试版本信息"""
-        if hasattr(module_instance, 'get_version'):
+        if hasattr(module_instance, "get_version"):
             version = module_instance.get_version()
             assert isinstance(version, str)
             assert len(version) > 0
 
     def test_dependency_info(self, module_instance):
         """测试依赖信息"""
-        if hasattr(module_instance, 'get_dependencies'):
+        if hasattr(module_instance, "get_dependencies"):
             deps = module_instance.get_dependencies()
             assert isinstance(deps, list)
             assert all(isinstance(dep, str) for dep in deps)
@@ -90,9 +90,9 @@ class ModuleTestBase(ABC):
     @pytest.mark.asyncio
     async def test_graceful_shutdown(self, module_instance):
         """测试优雅关闭"""
-        if hasattr(module_instance, 'shutdown'):
+        if hasattr(module_instance, "shutdown"):
             await module_instance.shutdown()
-            if hasattr(module_instance, 'is_shutdown'):
+            if hasattr(module_instance, "is_shutdown"):
                 assert module_instance.is_shutdown
 
     # 错误处理测试
@@ -100,7 +100,7 @@ class ModuleTestBase(ABC):
     async def test_invalid_input_handling(self, module_instance):
         """测试无效输入处理"""
         # 测试None输入
-        if hasattr(module_instance, 'process_request'):
+        if hasattr(module_instance, "process_request"):
             with pytest.raises((ValueError, TypeError)):
                 await module_instance.process_request(None)
 
@@ -108,7 +108,7 @@ class ModuleTestBase(ABC):
     async def test_network_error_handling(self, module_instance):
         """测试网络错误处理"""
         # 如果模块有网络调用，测试错误处理
-        if hasattr(module_instance, '_make_request'):
+        if hasattr(module_instance, "_make_request"):
             # 模拟网络错误
             with pytest.raises(Exception):
                 await module_instance._make_request("http://invalid-url")
@@ -119,7 +119,7 @@ class ModuleTestBase(ABC):
         """测试响应时间"""
         import time
 
-        if hasattr(module_instance, 'process_request'):
+        if hasattr(module_instance, "process_request"):
             start_time = time.time()
             await module_instance.process_request("test")
             end_time = time.time()
@@ -131,9 +131,9 @@ class ModuleTestBase(ABC):
     # 配置测试
     def test_configuration_validation(self, module_instance):
         """测试配置验证"""
-        if hasattr(module_instance, 'validate_config'):
+        if hasattr(module_instance, "validate_config"):
             # 测试有效配置
-            valid_config = {'key': 'value'}
+            valid_config = {"key": "value"}
             assert module_instance.validate_config(valid_config)
 
             # 测试无效配置
@@ -144,14 +144,14 @@ class ModuleTestBase(ABC):
     async def setup_test_data(self, temp_dir: Path) -> Dict[str, Any]:
         """设置测试数据"""
         test_data = {
-            'test_file': temp_dir / 'test.txt',
-            'test_config': temp_dir / 'config.yaml',
-            'test_db': temp_dir / 'test.db',
+            "test_file": temp_dir / "test.txt",
+            "test_config": temp_dir / "config.yaml",
+            "test_db": temp_dir / "test.db",
         }
 
         # 创建测试文件
-        test_data['test_file'].write_text("test content")
-        test_data['test_config'].write_text("key: value")
+        test_data["test_file"].write_text("test content")
+        test_data["test_config"].write_text("key: value")
 
         return test_data
 
@@ -187,7 +187,7 @@ class PersistentModuleTestBase(ModuleTestBase):
     @pytest.fixture
     def module_instance(self, mock_dependencies: Dict[str, Any], mock_database):
         """持久化模块实例"""
-        mock_dependencies['database'] = mock_database
+        mock_dependencies["database"] = mock_database
         return self.create_module_instance(mock_dependencies)
 
     @abstractmethod
@@ -198,14 +198,14 @@ class PersistentModuleTestBase(ModuleTestBase):
     @pytest.mark.asyncio
     async def test_database_connection(self, module_instance, mock_database):
         """测试数据库连接"""
-        if hasattr(module_instance, '_database'):
+        if hasattr(module_instance, "_database"):
             await module_instance._database.connect()
             mock_database.connect.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_transaction_handling(self, module_instance, mock_database):
         """测试事务处理"""
-        if hasattr(module_instance, 'execute_transaction'):
+        if hasattr(module_instance, "execute_transaction"):
             await module_instance.execute_transaction([])
             mock_database.execute.assert_called()
 
@@ -230,11 +230,12 @@ class KnowledgeModuleTestBase(ModuleTestBase):
         return mock_model
 
     @pytest.fixture
-    def module_instance(self, mock_dependencies: Dict[str, Any],
-                       mock_vector_store, mock_embedding_model):
+    def module_instance(
+        self, mock_dependencies: Dict[str, Any], mock_vector_store, mock_embedding_model
+    ):
         """知识管理模块实例"""
-        mock_dependencies['vector_store'] = mock_vector_store
-        mock_dependencies['embedding_model'] = mock_embedding_model
+        mock_dependencies["vector_store"] = mock_vector_store
+        mock_dependencies["embedding_model"] = mock_embedding_model
         return self.create_module_instance(mock_dependencies)
 
     @abstractmethod
@@ -245,14 +246,14 @@ class KnowledgeModuleTestBase(ModuleTestBase):
     @pytest.mark.asyncio
     async def test_knowledge_addition(self, module_instance, mock_vector_store):
         """测试知识添加"""
-        if hasattr(module_instance, 'add_knowledge'):
+        if hasattr(module_instance, "add_knowledge"):
             await module_instance.add_knowledge("test content", {"title": "test"})
             mock_vector_store.add_vectors.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_knowledge_search(self, module_instance, mock_vector_store):
         """测试知识搜索"""
-        if hasattr(module_instance, 'search_knowledge'):
+        if hasattr(module_instance, "search_knowledge"):
             results = await module_instance.search_knowledge("test query")
             mock_vector_store.search.assert_called_once()
             assert isinstance(results, list)
@@ -271,7 +272,7 @@ class AgentModuleTestBase(ModuleTestBase):
     @pytest.fixture
     def module_instance(self, mock_dependencies: Dict[str, Any], mock_tool_executor):
         """Agent模块实例"""
-        mock_dependencies['tool_executor'] = mock_tool_executor
+        mock_dependencies["tool_executor"] = mock_tool_executor
         return self.create_module_instance(mock_dependencies)
 
     @abstractmethod
@@ -282,7 +283,7 @@ class AgentModuleTestBase(ModuleTestBase):
     @pytest.mark.asyncio
     async def test_goal_execution(self, module_instance):
         """测试目标执行"""
-        if hasattr(module_instance, 'execute_goal'):
+        if hasattr(module_instance, "execute_goal"):
             result_generator = module_instance.execute_goal("test goal")
             results = []
             async for result in result_generator:
@@ -292,7 +293,7 @@ class AgentModuleTestBase(ModuleTestBase):
     @pytest.mark.asyncio
     async def test_tool_integration(self, module_instance, mock_tool_executor):
         """测试工具集成"""
-        if hasattr(module_instance, 'execute_tool'):
+        if hasattr(module_instance, "execute_tool"):
             await module_instance.execute_tool("test_tool", {"param": "value"})
             mock_tool_executor.execute.assert_called_once()
 
@@ -328,16 +329,22 @@ def create_mock_tool():
 # 性能测试装饰器
 def performance_test(max_duration: float = 5.0):
     """性能测试装饰器"""
+
     def decorator(test_func):
         @pytest.mark.asyncio
         async def wrapper(*args, **kwargs):
             import time
+
             start_time = time.time()
             result = await test_func(*args, **kwargs)
             end_time = time.time()
 
             duration = end_time - start_time
-            assert duration < max_duration, f"测试执行时间 {duration:.2f}s 超过限制 {max_duration}s"
+            assert duration < max_duration, (
+                f"测试执行时间 {duration:.2f}s 超过限制 {max_duration}s"
+            )
             return result
+
         return wrapper
+
     return decorator
