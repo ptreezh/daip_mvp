@@ -6,7 +6,7 @@ Wiki CLI命令
 import builtins
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 from rich.console import Console
@@ -18,6 +18,14 @@ from ...model_provider.provider import LiteLLMProvider
 from ...wiki.manager import WikiManager
 from ..utils.error_handler import ErrorHandler
 from ..utils.performance_monitor import PerformanceMonitor
+
+
+def _get_wiki_dir(config_data: dict[str, Any] | None) -> str:
+    """从配置解析 wiki 页面目录（兼容 pages_directory 与旧 directory key）。"""
+    wiki_cfg = (config_data or {}).get("wiki", {}) or {}
+    return wiki_cfg.get(
+        "pages_directory", wiki_cfg.get("directory", "wiki/")
+    )
 
 # Create the wiki command app
 app = typer.Typer(
@@ -58,7 +66,7 @@ def create(
                     with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    wiki_dir = config_data.get("wiki", {}).get("directory", "wiki/")
+                    wiki_dir = _get_wiki_dir(config_data)
                 else:
                     wiki_dir = "wiki/"
 
@@ -172,7 +180,7 @@ def list(
                     with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    wiki_dir = config_data.get("wiki", {}).get("directory", "wiki/")
+                    wiki_dir = _get_wiki_dir(config_data)
                 else:
                     wiki_dir = "wiki/"
 
@@ -323,7 +331,7 @@ def search(
                     with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    wiki_dir = config_data.get("wiki", {}).get("directory", "wiki/")
+                    wiki_dir = _get_wiki_dir(config_data)
                 else:
                     wiki_dir = "wiki/"
 
@@ -477,7 +485,7 @@ def show(
                     with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    wiki_dir = config_data.get("wiki", {}).get("directory", "wiki/")
+                    wiki_dir = _get_wiki_dir(config_data)
                 else:
                     wiki_dir = "wiki/"
 
@@ -634,7 +642,7 @@ def delete(
                     with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    wiki_dir = config_data.get("wiki", {}).get("directory", "wiki/")
+                    wiki_dir = _get_wiki_dir(config_data)
                 else:
                     wiki_dir = "wiki/"
 
@@ -718,7 +726,7 @@ def stats(
                     with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    wiki_dir = config_data.get("wiki", {}).get("directory", "wiki/")
+                    wiki_dir = _get_wiki_dir(config_data)
                 else:
                     wiki_dir = "wiki/"
 
@@ -851,7 +859,7 @@ def export(
                     with open(config_path, encoding="utf-8") as f:
                         config_data = yaml.safe_load(f)
 
-                    wiki_dir = config_data.get("wiki", {}).get("directory", "wiki/")
+                    wiki_dir = _get_wiki_dir(config_data)
                 else:
                     wiki_dir = "wiki/"
 
