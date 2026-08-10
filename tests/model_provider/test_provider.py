@@ -32,7 +32,7 @@ class TestLiteLLMProvider:
         mock_response.choices = [mock_choice]
 
         mock_litellm_completion = mocker.patch(
-            "daip_live.model_provider.provider.litellm.completion",
+            "litellm.completion",
             return_value=mock_response,
         )
 
@@ -50,7 +50,7 @@ class TestLiteLLMProvider:
         provider = LiteLLMProvider(config=config)
 
         mocker.patch(
-            "daip_live.model_provider.provider.litellm.completion",
+            "litellm.completion",
             side_effect=litellm.exceptions.AuthenticationError(
                 message="Invalid API Key",
                 llm_provider="test_provider",
@@ -75,7 +75,7 @@ class TestLiteLLMProvider:
         mock_response.data = [mocker.Mock(embedding=expected_vector)]
 
         mock_aembedding = mocker.patch(
-            "daip_live.model_provider.provider.litellm.aembedding",
+            "litellm.aembedding",
             new=mocker.AsyncMock(return_value=mock_response),
         )
 
@@ -96,7 +96,7 @@ class TestLiteLLMProvider:
         provider = LiteLLMProvider(config=config)
 
         mocker.patch(
-            "daip_live.model_provider.provider.litellm.aembedding",
+            "litellm.aembedding",
             side_effect=litellm.exceptions.AuthenticationError(
                 message="Invalid API Key",
                 llm_provider="test_provider",

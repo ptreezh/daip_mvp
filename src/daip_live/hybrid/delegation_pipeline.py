@@ -22,8 +22,6 @@ import re
 from dataclasses import dataclass, field
 from typing import Optional
 
-import litellm
-
 from daip_live.hybrid.cloud_pool import (
     CloudPool,
     DelegationResult,
@@ -302,6 +300,9 @@ class DelegationPipeline:
             Exception: 本地模型不可用/调用失败（调用方退化切分）
         """
         prompt = _DECOMPOSE_PROMPT.format(min_n=self.min_subtasks, task=task)
+        # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+        import litellm
+
         response = await litellm.acompletion(
             model=self.decomposer_model,
             messages=[{"role": "user", "content": prompt}],
@@ -349,6 +350,8 @@ class DelegationPipeline:
         """
         api_key = api_key or os.environ.get(provider.api_key_env, "")
         messages = [{"role": "user", "content": prompt}]
+        # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+        import litellm
 
         response = await litellm.acompletion(
             model=f"{provider.name}/{provider.model}",

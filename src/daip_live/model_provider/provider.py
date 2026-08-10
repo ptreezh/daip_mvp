@@ -4,8 +4,6 @@ import asyncio
 import subprocess
 from typing import Any
 
-import litellm
-
 from daip_live.core.config import is_local_model
 from daip_live.core.exceptions import ModelAuthenticationError, ModelError
 from daip_live.core.interfaces import IModelProvider
@@ -85,6 +83,9 @@ class LiteLLMProvider(IModelProvider):
 
     async def embed(self, text: str) -> list[float]:
         """Creates an embedding vector for the given text using litellm."""
+        # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+        import litellm
+
         config_model = (
             getattr(self.config, "embedding_model", None) or "text-embedding-ada-002"
         )
@@ -134,6 +135,9 @@ class LiteLLMProvider(IModelProvider):
         self, model: str, text: str, api_key: str, base_url: str
     ) -> list[float]:
         """Attempt to generate embedding with the specified model."""
+        # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+        import litellm
+
         params = {"model": model, "input": [text]}
         if api_key:
             params["api_key"] = api_key
@@ -302,6 +306,9 @@ class LiteLLMProvider(IModelProvider):
 
     async def generate(self, prompt: str, params: dict):
         """Generates a response from a language model using litellm."""
+        # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+        import litellm
+
         config_model = getattr(self.config, "model", "test-model")
 
         # 如果是本地模型，返回模拟响应
@@ -352,6 +359,9 @@ class LiteLLMProvider(IModelProvider):
         # 与 generate 保持一致：本地模型返回模拟响应
         if is_local_model(config_model):
             return self._generate_mock_response(prompt, config_model)
+
+        # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+        import litellm
 
         # 检查模型是否可用，如果不可用则使用回退模型
         effective_model = self._get_fallback_model(config_model)

@@ -64,7 +64,7 @@ class TestDelegationPipelineV3:
         with (
             _stub_decomposer(pipeline, subtasks),
             patch(
-                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                "litellm.acompletion",
                 new=AsyncMock(side_effect=fake_cloud),
             ),
         ):
@@ -109,7 +109,7 @@ class TestDelegationPipelineV3:
                 ],
             ),
             patch(
-                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                "litellm.acompletion",
                 new=AsyncMock(side_effect=fake_cloud),
             ),
         ):
@@ -142,7 +142,7 @@ class TestDelegationPipelineV3:
                 new=AsyncMock(side_effect=fake_decompose),
             ),
             patch(
-                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                "litellm.acompletion",
                 new=AsyncMock(),
             ) as mock_cloud,
         ):
@@ -197,7 +197,7 @@ class TestDelegationPipelineV3:
                 ],
             ),
             patch(
-                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                "litellm.acompletion",
                 new=AsyncMock(side_effect=fake_cloud),
             ),
         ):
