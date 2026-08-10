@@ -462,10 +462,11 @@ def process_natural_language(
             _handle_search_papers_intent(intent)
         elif intent.name == "download_paper":
             _handle_download_paper_intent(intent)
-        elif intent.name in ["chat", "question"]:
+        elif intent.name in ["chat", "question", "complex_task"]:
             asyncio.run(_handle_conversation_intent(intent))
         else:
-            pass
+            # 未知意图兜底：按对话处理，避免静默无输出
+            asyncio.run(_handle_conversation_intent(intent))
 
     except Exception as e:
         # 不再静默吞错：向用户展示错误信息
@@ -518,8 +519,16 @@ async def _handle_conversation_intent(intent: Intent):
     """Handle conversation intents"""
     question = intent.parameters.get("question", "")
     chat_content = intent.parameters.get("chat_content", "")
+    # 兼容 complex_task/workflow 意图（参数为 task_description/original_request）
+    task_description = intent.parameters.get("task_description", "")
+    original_request = intent.parameters.get("original_request", "")
 
-    prompt = question or chat_content
+    prompt = (
+        question
+        or chat_content
+        or task_description
+        or original_request
+    )
     if not prompt:
         return
 
