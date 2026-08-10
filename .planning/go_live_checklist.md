@@ -49,6 +49,28 @@
 | 模型检查器 bug（已修复） | 曾对嵌入模型 nomic-embed-text 调 generate() 致辩论无法启动 | 2026-08-09 修复：嵌入模型走 embed() 检查 + "does not support" 独立分类；防回归测试 4 个 |
 | PermissionInteraction 枚举 bug（已修复） | `use_enum_values=True` 使赋值后 state 变字符串，`to_result().granted`/状态比较恒 False（安全相关） | 2026-08-09 修复：移除 use_enum_values；合并被覆盖吞掉的重复测试类（恢复 8 个测试） |
 | .gitignore 无锚定临时脚本规则（已修复） | `test_*.py` 等模式忽略所有层级，13 个 tests/ 正式测试从未入库 + ruff 全跳过（G2 假绿、CI 测试集≠本地） | 2026-08-09 修复：加 `/` 锚定根目录 + 20 个历史文件入库 + 全量 lint 治理 |
+| role create/delete（已修复） | stub 打印成功但不写/删文件（假功能） | 2026-08-10 修复：RoleManager 真实 yaml 持久化 + get_role_by_name 不再造默认角色 |
+| doc search/download（已修复） | CLI 用依赖已删 arxiv 库的版本，恒不可用 | 2026-08-10 修复：切到完整版 + arxiv API(https) + 修重复方法遮蔽/atom:id/版本号 |
+| model list/status/info（已修复） | ModelManager 全空 stub | 2026-08-10 修复：连 Ollama /api/tags 真实解析 |
+| wiki 全命令目录错位（已修复） | 读错 config key（directory vs pages_directory）→ 页面写到 root wiki/ | 2026-08-10 修复：_get_wiki_dir 兼容两 key + 迁移 12 个用户页面 |
+| debate multimodel（已修复） | 缺 session_id 致 pydantic 报错 | 2026-08-10 修复：补 timestamp session_id |
+| TUI 论文搜索/下载（已修复） | 用 basic_tools.core 依赖已删 arxiv 库 → 恒降级"模拟" | 2026-08-10 修复：改用 doc.paper_downloader 真实 API |
+
+## 3b. 仍未实现清单（诚实盘点，2026-08-10）
+
+| 项 | 性质 | 说明 |
+|----|------|------|
+| **Stage 5 混合路由（云端）** | 已确认硬需求、暂缓 | 本地预审/脱敏/云端委托/人工确认全流程未实现；config.yaml 无云端段 |
+| **pubmed/web 论文来源** | doc 命令明确提示"暂不支持" | 仅 arxiv 可用；pubmed/web 需另接 API（当前诚实降级提示，非假成功） |
+| **mypy 917 项类型注解** | Backlog | CI 软门禁，非运行时 bug |
+| **CLI 冷启动 7.8s** | Backlog | 根因 litellm import 9.2s；方案=入口懒加载 |
+| **turn_in_round 硬编码 1** | 小缺陷 | history_tracker.py:173 轮内序号恒 1（同轮多发言序号不递增）；不阻塞核心辩论 |
+| **wiki CLI `:memory:` DB** | 观察项 | wiki_index.json 文件系统兜底，无持久 DB |
+| **TUI `/sync`（Claude Skills）与 `/compact`** | TUI 内部命令为模拟 | 仅提示"同步/压缩完成"不做实际工作；非 CLI 核心 |
+| **433 skip 测试** | 绝大多数是旧 spec | TDD 红阶段/旧 TUI API spec（测已删除代码），skip 正确；无真实功能缺口 |
+| **multi_agent_collab 模拟搜索** | 死代码 | 模块未被 CLI 引用（仅旧 TUI import 痕迹），内部 _simulate 不影响交付 |
+| **`daip knowledge <query>` 裸参数** | Typer 架构限制 | 主入口 `knowledge search <query>` |
+| **H2 完整 TUI 人工体验** | 待用户 | 自动化冒烟已过 |
 
 ---
 
