@@ -159,6 +159,17 @@ class DebateHistoryTracker:
                 # Add the turn to database
                 with sqlite3.connect(self.db_path) as conn:
                     cursor = conn.cursor()
+
+                    # 计算该会话+轮内的下一个 turn 序号（同轮多发言递增）
+                    cursor.execute(
+                        """
+                        SELECT COUNT(*) FROM debate_turns
+                        WHERE session_id = ? AND round_number = ?
+                    """,
+                        (turn_event.session_id, turn_event.round_number),
+                    )
+                    next_turn_in_round = cursor.fetchone()[0] + 1
+
                     cursor.execute(
                         """
                         INSERT INTO debate_turns
@@ -170,7 +181,7 @@ class DebateHistoryTracker:
                             turn_event.participant,
                             turn_event.round_number,
                             turn_event.content_preview,
-                            1,  # We'll update this properly later
+                            next_turn_in_round,
                         ),
                     )
 

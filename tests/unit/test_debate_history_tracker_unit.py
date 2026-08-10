@@ -314,6 +314,72 @@ class TestDebateHistoryTrackerUnit:
 
         assert cleared is False
 
+    def test_turn_in_round_increments_within_round(self, tracker):
+        """同轮内多发言 turn_in_round 递增（1,2,3...）。
+
+        背景（2026-08-10）：history_tracker.py:173 硬编码 turn_in_round=1，
+        同轮所有发言序号恒为 1。
+        """
+        start_event = DebateStartEvent(
+            topic="Turn Order Test",
+            roles=["role1", "role2", "role3"],
+            rounds=2,
+            session_id="turn_order_012",
+        )
+        asyncio.run(tracker.start_tracking(start_event))
+
+        # Round 1: 3 turns
+        for i, role in enumerate(["role1", "role2", "role3"], start=1):
+            turn = DebateTurnCompleteEvent(
+                participant=role,
+                round_number=1,
+                content_preview=f"Turn {i} from {role}",
+                session_id="turn_order_012",
+            )
+            asyncio.run(tracker.add_turn(turn))
+
+        history = asyncio.run(tracker.get_history("turn_order_012"))
+        assert len(history.turns) == 3
+        assert [t.turn_in_round for t in history.turns] == [1, 2, 3]
+
+    def test_turn_in_round_resets_across_rounds(self, tracker):
+        """跨轮时 turn_in_round 从 1 重新计数。"""
+        start_event = DebateStartEvent(
+            topic="Round Reset Test",
+            roles=["role1", "role2"],
+            rounds=2,
+            session_id="round_reset_013",
+        )
+        asyncio.run(tracker.start_tracking(start_event))
+
+        # Round 1: 2 turns
+        for role in ["role1", "role2"]:
+            asyncio.run(
+                tracker.add_turn(
+                    DebateTurnCompleteEvent(
+                        participant=role,
+                        round_number=1,
+                        content_preview=f"R1 {role}",
+                        session_id="round_reset_013",
+                    )
+                )
+            )
+
+        # Round 2: 1 turn
+        asyncio.run(
+            tracker.add_turn(
+                DebateTurnCompleteEvent(
+                    participant="role1",
+                    round_number=2,
+                    content_preview="R2 role1",
+                    session_id="round_reset_013",
+                )
+            )
+        )
+
+        history = asyncio.run(tracker.get_history("round_reset_013"))
+        assert [t.turn_in_round for t in history.turns] == [1, 2, 1]
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
