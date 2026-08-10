@@ -10,7 +10,7 @@
 
 | # | 门禁 | 状态 | 证据 |
 |---|------|------|------|
-| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1766P/433S/0F/0E（本地与 CI 一致；+9：role/model 防回归） |
+| G1 | 全量测试 0F/0E | ✅ | `py -m pytest -q` → 1774P/433S/0F/0E（本地与 CI 一致；+6：hybrid pipeline v3） |
 | G2 | ruff = 0（src + tests） | ✅ | `py -m ruff check src/ tests/` → **0（首次真实全量覆盖）**；此前 .gitignore `test_*.py` 无锚定规则使 ruff 跳过全部测试文件，G2 曾为假绿；已修复 + 200+ 文件治理 |
 | G3 | mypy = 0 | ⚠️ Backlog | 917 项（1247→917 分级收敛），全为类型注解完善类（抽样确认无运行时 bug）；CI 软门禁，**不作为上线阻塞** |
 | G4 | Python 3.9 语法全过 | ✅ | `py -m python scripts/check_py39_syntax.py` → 0（曾 6 处 invalid-syntax） |
@@ -44,7 +44,7 @@
 | CLI 冷启动 ~7.8s | 根因 = litellm import ~9.2s | 方案（入口懒加载）已记录，Backlog |
 | `daip knowledge <query>` 裸参数 | Typer 架构限制（未知命令优先报错） | 主入口 `daip knowledge search <query>` |
 | wiki CLI 7 处 `:memory:` DB | wiki_index.json 文件系统兜底 | 观察项 |
-| Stage 5 混合路由 | 用户确认硬需求、暂缓实施 | Backlog（H1-H6 蓝图在 08-08 报告 §4） |
+| Stage 5 混合路由 | ✅ 最小闭环已实施（2026-08-10） | **核心原则（用户）**：全局上下文永不发云端；任务本地模型（Ollama）分解为 >=3 自包含子任务；子任务级分发不同云端模型；无 key/失败/高风险回退本地。feature flag `DAIP_HYBRID_ENABLED`（默认关）。**未做**：人工确认流、规则外置 config、云端 provider 真实接入（需 API key） |
 | 云端 API key | config.yaml 无云端段 | 混合路由实施时补 |
 | 模型检查器 bug（已修复） | 曾对嵌入模型 nomic-embed-text 调 generate() 致辩论无法启动 | 2026-08-09 修复：嵌入模型走 embed() 检查 + "does not support" 独立分类；防回归测试 4 个 |
 | PermissionInteraction 枚举 bug（已修复） | `use_enum_values=True` 使赋值后 state 变字符串，`to_result().granted`/状态比较恒 False（安全相关） | 2026-08-09 修复：移除 use_enum_values；合并被覆盖吞掉的重复测试类（恢复 8 个测试） |
