@@ -50,8 +50,23 @@ jobs:
 
       - name: Pull models for real-model tests
         run: |
-          ollama pull llama3:latest
-          ollama pull nomic-embed-text
+          set -e
+          # Retry transient registry 503s from Ollama (upstream network flakiness)
+          retry_pull() {
+            local model="$1"
+            local attempt=0
+            until ollama pull "$model"; do
+              attempt=$((attempt + 1))
+              if [ "$attempt" -ge 3 ]; then
+                echo "::error::Failed to pull $model after 3 attempts"
+                exit 1
+              fi
+              echo "::warning::ollama pull $model attempt $attempt failed, retrying in 5s"
+              sleep 5
+            done
+          }
+          retry_pull llama3:latest
+          retry_pull nomic-embed-text
 
       - name: Run full test suite (unit + integration + e2e + security)
         run: poetry run pytest tests/ -q --tb=line
