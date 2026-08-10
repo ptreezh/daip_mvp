@@ -50,7 +50,7 @@ class TestModelAvailabilityChecker:
     async def test_embedding_model_checked_via_embed(self, fake_provider, checker):
         """嵌入模型必须走 embed() 检查，绝不走 generate()。"""
         with patch(
-            "daip_live.p8_debate_system.model_availability_checker.LiteLLMProvider",
+            "daip_live.model_provider.provider.LiteLLMProvider",
             return_value=fake_provider,
         ):
             ok, msg = await checker.check_model_availability(
@@ -66,7 +66,7 @@ class TestModelAvailabilityChecker:
     async def test_chat_model_checked_via_generate(self, fake_provider, checker):
         """对话模型必须走 generate() 检查。"""
         with patch(
-            "daip_live.p8_debate_system.model_availability_checker.LiteLLMProvider",
+            "daip_live.model_provider.provider.LiteLLMProvider",
             return_value=fake_provider,
         ):
             ok, msg = await checker.check_model_availability(
@@ -82,7 +82,7 @@ class TestModelAvailabilityChecker:
     async def test_check_all_models_routes_embedding(self, fake_provider, checker):
         """check_all_models 必须把嵌入模型路由到 embed()、对话模型路由到 generate()。"""
         with patch(
-            "daip_live.p8_debate_system.model_availability_checker.LiteLLMProvider",
+            "daip_live.model_provider.provider.LiteLLMProvider",
             return_value=fake_provider,
         ):
             all_ok, errors = await checker.check_all_models()
@@ -106,7 +106,7 @@ class TestModelAvailabilityChecker:
 
         provider.generate = MagicMock(side_effect=_raise_generator)
         with patch(
-            "daip_live.p8_debate_system.model_availability_checker.LiteLLMProvider",
+            "daip_live.model_provider.provider.LiteLLMProvider",
             return_value=provider,
         ):
             ok, msg = await checker.check_model_availability(

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from collections.abc import AsyncGenerator
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from daip_live.core.models import (
     AgentEvent,
@@ -14,8 +16,10 @@ from daip_live.core.models import (
     TokenUsageEvent,
 )
 from daip_live.memory.session_manager import SessionManager
-from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
+
+if TYPE_CHECKING:  # 仅类型注解，避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+    from daip_live.model_provider.provider import LiteLLMProvider
 
 
 class DebateManager:
@@ -126,7 +130,7 @@ class DebateManager:
 
     async def _generate_response(
         self, topic: str, persona: str, history: list[DialogueTurn]
-    ) -> tuple[str, Optional[dict]]:
+    ) -> tuple[str, dict | None]:
         """Generate a response from a role given the topic and history."""
         history_str = self._format_history(history)
         prompt = f"Debate Topic: {topic}\n\nYour Persona: {persona}\n\nConversation History:\n{history_str}\n\nBased on the history and your persona, what is your next argument?"  # noqa: E501
@@ -135,7 +139,7 @@ class DebateManager:
 
     async def _generate_summary(
         self, history: list[DialogueTurn]
-    ) -> tuple[str, Optional[dict]]:
+    ) -> tuple[str, dict | None]:
         """Generate a summary of the debate."""
         history_str = self._format_history(history)
         summary_prompt = f"Please provide a neutral summary of the following debate, identifying key arguments, points of contention, and any potential consensus.\n\nDebate History:\n{history_str}"  # noqa: E501

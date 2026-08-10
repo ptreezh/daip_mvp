@@ -133,7 +133,9 @@ class TestWikiCollaboration:
         # Setup
         with (
             patch("daip_live.wiki.manager.RoleModelManager") as mock_role_manager,
-            patch("daip_live.wiki.manager.LiteLLMProvider") as mock_model_provider,
+            patch(
+                "daip_live.model_provider.provider.LiteLLMProvider"
+            ) as mock_model_provider,
         ):
             # Mock role model manager
             mock_mapping = Mock()

@@ -14,7 +14,6 @@ from rich.panel import Panel
 from rich.table import Table
 
 from ...core.models import ProviderConfig
-from ...model_provider.provider import LiteLLMProvider
 from ...wiki.manager import WikiManager
 from ..utils.error_handler import ErrorHandler
 from ..utils.performance_monitor import PerformanceMonitor
@@ -92,6 +91,8 @@ def create(
                     provider_config = ProviderConfig(
                         model="mock-model", provider="mock"
                     )
+                    from ...model_provider.provider import LiteLLMProvider  # noqa: E402
+
                     model_provider = LiteLLMProvider(provider_config)
                 except Exception:
                     # Fallback for initial implementation
@@ -216,6 +217,8 @@ def list(
                     provider_config = ProviderConfig(
                         model="mock-model", provider="mock"
                     )
+                    from ...model_provider.provider import LiteLLMProvider  # noqa: E402
+
                     model_provider = LiteLLMProvider(provider_config)
                 except Exception:
                     # Fallback for initial implementation
@@ -367,6 +370,8 @@ def search(
                     provider_config = ProviderConfig(
                         model="mock-model", provider="mock"
                     )
+                    from ...model_provider.provider import LiteLLMProvider  # noqa: E402
+
                     model_provider = LiteLLMProvider(provider_config)
                 except Exception:
                     # Fallback for initial implementation
@@ -513,6 +518,8 @@ def show(
                     provider_config = ProviderConfig(
                         model="mock-model", provider="mock"
                     )
+                    from ...model_provider.provider import LiteLLMProvider  # noqa: E402
+
                     model_provider = LiteLLMProvider(provider_config)
                 except Exception:
                     # Fallback for initial implementation
@@ -670,6 +677,8 @@ def delete(
                     provider_config = ProviderConfig(
                         model="mock-model", provider="mock"
                     )
+                    from ...model_provider.provider import LiteLLMProvider  # noqa: E402
+
                     model_provider = LiteLLMProvider(provider_config)
                 except Exception:
                     # Fallback for initial implementation
@@ -762,6 +771,8 @@ def stats(
                     provider_config = ProviderConfig(
                         model="mock-model", provider="mock"
                     )
+                    from ...model_provider.provider import LiteLLMProvider  # noqa: E402
+
                     model_provider = LiteLLMProvider(provider_config)
                 except Exception:
                     # Fallback for initial implementation
@@ -890,6 +901,8 @@ def export(
                     provider_config = ProviderConfig(
                         model="mock-model", provider="mock"
                     )
+                    from ...model_provider.provider import LiteLLMProvider  # noqa: E402
+
                     model_provider = LiteLLMProvider(provider_config)
                 except Exception:
                     # Fallback for initial implementation

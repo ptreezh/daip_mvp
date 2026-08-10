@@ -43,7 +43,7 @@ class TestKnowledgeSyncCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -80,7 +80,7 @@ class TestKnowledgeSyncCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -113,7 +113,7 @@ class TestKnowledgeSyncCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -152,7 +152,7 @@ class TestKnowledgeSyncCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -191,7 +191,7 @@ class TestKnowledgeSyncCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -224,7 +224,7 @@ class TestKnowledgeSyncCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -259,7 +259,7 @@ class TestKnowledgeSyncCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -302,7 +302,7 @@ class TestKnowledgeStatusCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -343,7 +343,7 @@ class TestKnowledgeStatusCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -392,7 +392,7 @@ class TestKnowledgeSearchCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -439,7 +439,7 @@ class TestKnowledgeSearchCommand:
         with (
             patch("daip_live.cli.commands.knowledge.DatabaseManager") as mock_db_class,
             patch(
-                "daip_live.cli.commands.knowledge.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_provider_class,
             patch(
                 "daip_live.cli.commands.knowledge.KnowledgeManager"
@@ -487,7 +487,7 @@ class TestKnowledgeSyncPersistence:
             return [0.1] * 768
 
         monkeypatch.setattr(
-            "daip_live.cli.commands.knowledge.LiteLLMProvider.embed", fake_embed
+            "daip_live.model_provider.provider.LiteLLMProvider.embed", fake_embed
         )
 
         runner = CliRunner()
@@ -517,7 +517,7 @@ class TestKnowledgeSyncPersistence:
             return [0.1] * 768
 
         monkeypatch.setattr(
-            "daip_live.cli.commands.knowledge.LiteLLMProvider.embed", fake_embed
+            "daip_live.model_provider.provider.LiteLLMProvider.embed", fake_embed
         )
 
         runner = CliRunner()

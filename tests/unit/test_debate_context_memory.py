@@ -220,7 +220,7 @@ class TestDebateContextMemory:
                 "src.daip_live.p8_debate_system.enhanced_debate_manager.SessionManager"
             ) as mock_session_manager,
             patch(
-                "src.daip_live.p8_debate_system.enhanced_debate_manager.LiteLLMProvider"
+                "daip_live.model_provider.provider.LiteLLMProvider"
             ) as mock_model_provider,
             patch(
                 "src.daip_live.p8_debate_system.enhanced_debate_manager.RoleModelManager"

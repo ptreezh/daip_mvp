@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import os
-from typing import Optional
+from typing import TYPE_CHECKING
 
 from daip_live.config_bridge import config_bridge
 from daip_live.core.models import Session, TodoItem
-from daip_live.model_provider.provider import LiteLLMProvider
+
+if TYPE_CHECKING:  # 仅类型注解，避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+    from daip_live.model_provider.provider import LiteLLMProvider
 
 
 class MemoryService:
@@ -83,8 +87,8 @@ Structured Summary:
     async def construct_prompt(
         self,
         goal: str,
-        last_tool_result: Optional[str],
-        last_llm_response: Optional[str],
+        last_tool_result: str | None,
+        last_llm_response: str | None,
         session: Session,
     ) -> str:
         """Constructs a simple prompt for the LLM."""

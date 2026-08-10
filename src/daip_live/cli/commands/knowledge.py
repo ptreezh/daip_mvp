@@ -15,7 +15,6 @@ from rich.table import Table
 
 from ...core.models import KnowledgeBaseConfig, ProviderConfig
 from ...knowledge.manager import KnowledgeManager
-from ...model_provider.provider import LiteLLMProvider
 from ...persistence.database import DatabaseManager
 from ..utils.error_handler import ErrorHandler
 from ..utils.performance_monitor import PerformanceMonitor
@@ -72,6 +71,9 @@ def _build_knowledge_manager() -> tuple[KnowledgeManager, str]:
 
     knowledge_config = KnowledgeBaseConfig(directory=knowledge_dir)
     db_manager = DatabaseManager(db_path=db_path)
+    # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+    from ...model_provider.provider import LiteLLMProvider
+
     provider_config = ProviderConfig(
         model=embedding_model,
         provider="ollama",

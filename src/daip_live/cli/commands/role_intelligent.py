@@ -6,11 +6,25 @@ from typing import Optional
 import typer
 
 from daip_live.container import Container
-from daip_live.p4_role_manager_tools.intelligent_role_manager import (
-    IntelligentRoleManager,
-)
 
 app = typer.Typer()
+
+
+def _get_intelligent_role_manager(roles_dir: str = "roles"):
+    """延迟创建 IntelligentRoleManager（避免模块级 import 连带加载 litellm）。
+
+    背景（2026-08-10 CLI 冷启动优化）：role_intelligent 模块级 import
+    IntelligentRoleManager → 其模块级 import LiteLLMProvider → litellm，
+    导致任意 CLI 命令（如 role list）都要加载 litellm（~3-4s）。
+    role-intel 命令实际需要模型（创建角色），故仅在调用时加载。
+    """
+    from daip_live.p4_role_manager_tools.intelligent_role_manager import (
+        IntelligentRoleManager,
+    )
+
+    container = Container()
+    model_provider = container.model_provider()
+    return IntelligentRoleManager(roles_dir=roles_dir, model_provider=model_provider)
 
 
 @app.command("create-role")
@@ -24,12 +38,7 @@ def create_role(
 ):
     """Create a new role based on a topic and save it to a file."""
     try:
-        container = Container()
-        model_provider = container.model_provider()
-
-        role_manager = IntelligentRoleManager(
-            roles_dir=roles_dir, model_provider=model_provider
-        )
+        role_manager = _get_intelligent_role_manager(roles_dir)
 
         # If a custom role name is provided, create the role with that name
         if role_name:
@@ -90,10 +99,7 @@ def create_role(
 def analyze_topic(topic: str = typer.Argument(..., help="The debate topic to analyze")):
     """Analyze a topic and suggest appropriate roles."""
     try:
-        container = Container()
-        model_provider = container.model_provider()
-
-        role_manager = IntelligentRoleManager(model_provider=model_provider)
+        role_manager = _get_intelligent_role_manager()
 
         # Analyze the topic
         analysis = role_manager.analyze_topic(topic)
@@ -115,12 +121,7 @@ def suggest_roles(
 ):
     """Suggest roles for a topic based on existing roles."""
     try:
-        container = Container()
-        model_provider = container.model_provider()
-
-        role_manager = IntelligentRoleManager(
-            roles_dir=roles_dir, model_provider=model_provider
-        )
+        role_manager = _get_intelligent_role_manager(roles_dir)
 
         # Load existing roles
         available_roles = []
@@ -154,10 +155,7 @@ def suggest_roles(
 def check_models():
     """Check available models for role creation."""
     try:
-        container = Container()
-        model_provider = container.model_provider()
-
-        role_manager = IntelligentRoleManager(model_provider=model_provider)
+        role_manager = _get_intelligent_role_manager()
 
         import asyncio
 
@@ -184,12 +182,7 @@ def auto_select_roles(
 ):
     """Automatically select the best roles for a debate topic."""
     try:
-        container = Container()
-        model_provider = container.model_provider()
-
-        role_manager = IntelligentRoleManager(
-            roles_dir=roles_dir, model_provider=model_provider
-        )
+        role_manager = _get_intelligent_role_manager(roles_dir)
 
         # Load existing roles
         available_roles = []

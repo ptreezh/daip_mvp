@@ -6,7 +6,6 @@
 import asyncio
 
 from daip_live.core.models import ProviderConfig
-from daip_live.model_provider.provider import LiteLLMProvider
 
 
 class ModelAvailabilityChecker:
@@ -29,6 +28,8 @@ class ModelAvailabilityChecker:
         """
         cache_key = f"{'embed:' if is_embedding else ''}{model_name}"
         if cache_key not in self._provider_cache:
+            from daip_live.model_provider.provider import LiteLLMProvider
+
             config = ProviderConfig(
                 model=model_name,
                 embedding_model=model_name if is_embedding else None,

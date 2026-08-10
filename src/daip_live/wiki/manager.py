@@ -4,18 +4,22 @@ Wiki管理器核心服务
 遵循TDD RED-GREEN-REFACTOR循环开发
 """
 
+from __future__ import annotations
+
 import json
 import re
 import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
 
-from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_model_manager import RoleModelManager
 
 from .models import WikiPage
+
+if TYPE_CHECKING:  # 仅类型注解，避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+    from daip_live.model_provider.provider import LiteLLMProvider
 
 
 @dataclass
@@ -64,8 +68,8 @@ class WikiManager:
     def __init__(
         self,
         wiki_root: Path,
-        role_model_manager: Optional[RoleModelManager] = None,
-        model_provider: Optional[LiteLLMProvider] = None,
+        role_model_manager: RoleModelManager | None = None,
+        model_provider: LiteLLMProvider | None = None,
     ):
         """初始化Wiki管理器
 
@@ -137,7 +141,7 @@ class WikiManager:
         return len(self._pages)
 
     def create_page(
-        self, title: str, content: str, tags: Optional[list[str]] = None
+        self, title: str, content: str, tags: list[str] | None = None
     ) -> WikiPage:
         """创建新的Wiki页面
 
@@ -231,7 +235,7 @@ class WikiManager:
 
         return unique_tags[:10]  # 最多10个标签
 
-    def get_page_by_title(self, title: str) -> Optional[WikiPage]:
+    def get_page_by_title(self, title: str) -> WikiPage | None:
         """根据标题获取页面
 
         Args:
@@ -278,7 +282,7 @@ class WikiManager:
         ]
 
     def update_page(
-        self, title: str, new_content: str, new_tags: Optional[list[str]] = None
+        self, title: str, new_content: str, new_tags: list[str] | None = None
     ) -> WikiPage:
         """更新现有页面
 
@@ -481,7 +485,7 @@ class WikiManager:
             raise ValueError(f"Unsupported export format: {format}")
 
     def search_advanced(
-        self, query: str, search_type: str = "content", tags: Optional[list[str]] = None
+        self, query: str, search_type: str = "content", tags: list[str] | None = None
     ) -> list[WikiPage]:
         """高级搜索功能
 
@@ -616,8 +620,8 @@ class WikiManager:
         self,
         title: str,
         initial_content: str = "",
-        roles_instructions: Optional[dict[str, str]] = None,
-        tags: Optional[list[str]] = None,
+        roles_instructions: dict[str, str] | None = None,
+        tags: list[str] | None = None,
     ) -> WikiPage:
         """创建由多个AI角色协作完成的Wiki页面"""
         if roles_instructions is None:
@@ -734,7 +738,7 @@ class WikiManager:
         section_title: str,
         new_content: str,
         action: str = "replace",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> WikiPage:
         """基于wiki原则的增量编辑功能
 
@@ -879,7 +883,7 @@ class WikiManager:
         title: str,
         editor_role: str,
         edit_instruction: str,
-        section_title: Optional[str] = None,
+        section_title: str | None = None,
     ) -> WikiPage:
         """协同编辑页面 - 基于wiki原则的多人协作编辑
 
@@ -913,7 +917,7 @@ class WikiManager:
             return self.update_page(title, updated_content, page.tags)
 
     def _update_existing_page(
-        self, page: WikiPage, new_content: str, new_tags: Optional[list[str]] = None
+        self, page: WikiPage, new_content: str, new_tags: list[str] | None = None
     ) -> None:
         """更新已存在的页面（用于空文档的情况）
 

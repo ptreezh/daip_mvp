@@ -1,5 +1,7 @@
 # src/daip_live/container.py
 
+from __future__ import annotations
+
 import asyncio
 import logging
 import os
@@ -80,7 +82,6 @@ from daip_live.core.models import KnowledgeBaseConfig, ProviderConfig  # noqa: E
 from daip_live.knowledge.manager import KnowledgeManager  # noqa: E402
 from daip_live.memory.service import MemoryService  # noqa: E402
 from daip_live.memory.session_manager import SessionManager  # noqa: E402
-from daip_live.model_provider.provider import LiteLLMProvider  # noqa: E402
 from daip_live.p4_role_manager_tools.intelligent_role_manager_wrapper import (  # noqa: E402
     IntelligentRoleManagerWrapper,
 )
@@ -117,6 +118,13 @@ from daip_live.skills.manager import SkillManager  # noqa: E402
 class Container(containers.DeclarativeContainer):
     """Main application dependency injection container."""
 
+    @staticmethod
+    def _make_llm_provider(config) -> LiteLLMProvider:  # noqa: F821
+        """延迟创建 LiteLLMProvider（首次调用时才 import litellm，加速 CLI 冷启动）。"""  # noqa: E501
+        from daip_live.model_provider.provider import LiteLLMProvider
+
+        return LiteLLMProvider(config)
+
     # 移除了CLI模块的自动绑定以防止TUI初始化
     # wiring_config = containers.WiringConfiguration(modules=["daip_live.tui_modular", "daip_live.cli"])  # noqa: E501
     # 仅绑定需要的服务组件，而不绑定CLI应用本身
@@ -137,9 +145,9 @@ class Container(containers.DeclarativeContainer):
         db_path=providers.Callable(lambda cm=config_manager: _resolve_db_path(cm())),
     )
 
-    # 模型提供者 - 使用延迟工厂确保配置已加载
+    # 模型提供者 - 使用延迟工厂确保配置已加载（LiteLLMProvider 延迟 import）
     model_provider = providers.Singleton(
-        LiteLLMProvider,
+        _make_llm_provider,
         config=providers.Factory(
             ProviderConfig,
             model=providers.Callable(
@@ -152,7 +160,7 @@ class Container(containers.DeclarativeContainer):
 
     # 嵌入模型提供者
     embed_provider = providers.Singleton(
-        LiteLLMProvider,
+        _make_llm_provider,
         config=providers.Factory(
             ProviderConfig,
             model=providers.Callable(

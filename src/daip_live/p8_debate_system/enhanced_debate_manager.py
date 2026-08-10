@@ -10,9 +10,14 @@ with proper model configuration management and intelligent model selection.
 - LayeredMemorySystem: 分层记忆系统
 """  # noqa: E501
 
+from __future__ import annotations
+
 import asyncio
 from collections.abc import AsyncGenerator
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:  # 仅类型注解，避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
+    from daip_live.model_provider.provider import LiteLLMProvider
 
 from daip_live.core.exceptions import ModelError
 from daip_live.core.models import (
@@ -31,7 +36,6 @@ from daip_live.core.models import (
     TokenUsageEvent,
 )
 from daip_live.memory.session_manager import SessionManager
-from daip_live.model_provider.provider import LiteLLMProvider
 from daip_live.p4_role_manager_tools.role_manager import RoleManager
 from daip_live.p4_role_manager_tools.role_model_manager import (
     RoleModelManager,
@@ -57,7 +61,7 @@ class EnhancedDebateManager:
         role_manager: RoleManager,
         role_model_manager: RoleModelManager,
         model_provider: LiteLLMProvider,
-        debate_history_tracker: Optional[DebateHistoryTracker] = None,
+        debate_history_tracker: DebateHistoryTracker | None = None,
         use_optimized_architecture: bool = True,  # 控制是否使用优化架构
     ):
         self.session_manager = session_manager
@@ -553,7 +557,7 @@ class EnhancedDebateManager:
         round_num: int,
         role_session: RoleDebateSession,
         role_model_map: dict[str, RoleModelMapping],
-    ) -> tuple[str, Optional[dict]]:
+    ) -> tuple[str, dict | None]:
         """使用优化架构生成回复"""
         # 构建上下文感知的提示词
         prompt = role_session.build_context_aware_prompt(topic, round_num)
@@ -658,7 +662,7 @@ class EnhancedDebateManager:
         role: Role,
         role_mapping: RoleModelMapping,
         history: list[DialogueTurn],
-    ) -> tuple[str, Optional[dict]]:
+    ) -> tuple[str, dict | None]:
         """Generate response using role-specific model configuration (legacy method)."""
         history_str = self._format_history(history)
 
@@ -695,7 +699,7 @@ Based on the history, your role persona, and your assigned model configuration, 
 
     async def _generate_summary_with_model(
         self, history: list[DialogueTurn], role_model_map: dict[str, RoleModelMapping]
-    ) -> tuple[str, Optional[dict]]:
+    ) -> tuple[str, dict | None]:
         """Generate summary using the highest-priority model available (legacy method)."""  # noqa: E501
 
         # Find the highest priority model for summary generation
@@ -729,6 +733,8 @@ Summary:"""  # noqa: E501
 
     def _get_model_provider_for_config(self, model_config) -> LiteLLMProvider:
         """Get or create a model provider instance for the given configuration (legacy method)."""  # noqa: E501
+        from daip_live.model_provider.provider import LiteLLMProvider
+
         cache_key = f"{model_config.provider}_{model_config.model_name}"
 
         if cache_key not in self.model_cache:
