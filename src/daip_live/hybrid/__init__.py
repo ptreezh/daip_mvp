@@ -13,6 +13,7 @@ from daip_live.hybrid.cloud_pool import (
     DelegationResult,
     ProviderStatus,
 )
+from daip_live.hybrid.delegation_pipeline import DelegationPipeline, PipelineResult
 from daip_live.hybrid.sanitization import SanitizationResult, sanitize_prompt
 from daip_live.hybrid.security_gate import RiskLevel, SecurityGate
 
@@ -26,4 +27,6 @@ __all__ = [
     "ProviderStatus",
     "DelegationRequest",
     "DelegationResult",
+    "DelegationPipeline",
+    "PipelineResult",
 ]

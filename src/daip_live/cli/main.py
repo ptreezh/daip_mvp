@@ -526,6 +526,26 @@ async def _handle_conversation_intent(intent: Intent):
     from rich.console import Console
 
     console = Console()
+
+    # 混合路由（Stage 5 最小闭环，2026-08-10）：
+    # feature flag DAIP_HYBRID_ENABLED 启用；LOW 风险且云端可用时委托，
+    # 否则走本地 step_executor。云端不可用自动回退本地。
+    import os
+
+    if os.environ.get("DAIP_HYBRID_ENABLED", "").lower() in ("1", "true", "yes"):
+        from daip_live.hybrid.delegation_pipeline import DelegationPipeline
+
+        pipeline = DelegationPipeline()
+        result = await pipeline.execute(prompt)
+        if result.cloud_delegated and result.content:
+            console.print(result.content)
+            return
+        if result.needs_human_approval:
+            console.print(
+                "[yellow]检测到敏感信息（密码/凭据等），已阻止云端委托，"
+                "请确认是否继续本地处理。[/yellow]"
+            )
+
     agent = container.agent_executor()
     step_executor = agent.step_executor
     session = agent.session_manager.create_session(
