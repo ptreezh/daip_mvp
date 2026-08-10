@@ -1,19 +1,19 @@
 
-# DAIP-LIVE: SPEC驱动开发示范项目
+# DAIP-LIVE: 个人本地优先 AI 工作台
 
-[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> 🎓 **展示SPEC驱动开发方法的完整AI应用示范项目**
+> 🖥️ **本地优先、隐私可控的单用户 AI 工作台**
 
-DAIP-LIVE (Dynamic AI-driven Project-execution LIVE System) 是一个综合性的AI助手系统，展示了从概念到开源的完整SPEC驱动开发流程。项目实现多模型协作、自然语言处理、Wiki协作和智能辩论系统。
+DAIP-LIVE (Dynamic AI-driven Project-execution LIVE System) 是面向个人用户的本地 AI 工作台：知识库管理、wiki 协作、多角色 AI 辩论、学术论文检索、角色/模型/会话管理，全部数据本地存储。核心原则：隐私、透明、用户可控。
 
 ## ✨ **核心特色**
 
-### 🤖 **多模型AI协作**
-- 支持OpenAI、Claude、本地Ollama等多种AI模型
-- 智能角色扮演和协作辩论
-- 自然语言驱动的交互体验
+### 🤖 **多角色 AI 协作**
+- 本地 Ollama 多模型（llama3、deepseek-r1、qwen 等）
+- 智能角色扮演和协作辩论（pro_arguer/con_arguer 等真实角色）
+- 自然语言驱动（`ask` 单轮对话）
 
 ### 📝 **Wiki协作系统**
 - 多角色共同创建和编辑知识库
@@ -33,9 +33,9 @@ DAIP-LIVE (Dynamic AI-driven Project-execution LIVE System) 是一个综合性�
 ## 🚀 **快速开始**
 
 ### **环境要求**
-- Python 3.9+
+- Python 3.10+（streamlit 依赖要求，AGENTS.md 曾写 3.9 已修正）
 - Poetry (推荐) 或 pip
-- Ollama (可选，用于本地模型)
+- Ollama（本地模型推理，含 llama3 + nomic-embed-text 嵌入模型）
 
 ### **安装步骤**
 
@@ -75,13 +75,23 @@ daip knowledge sync                 # 摄取 knowledge/ 到向量库（元数据
 daip knowledge search "量子计算"     # 语义搜索（返回真实相关文档）
 daip knowledge status               # 查看索引统计
 
-# 创建Wiki页面
+# 创建Wiki页面（真实写入 knowledge/wiki/）
 daip wiki create "机器学习基础概念"
 
-# 模型/会话/角色管理（S1-2 挂载）
-daip model status
+# 学术论文检索（arxiv 真实 API）
+daip doc search "quantum computing"   # 搜索 arXiv 论文（返回标题/作者/年份）
+daip doc download "2301.07041"        # 下载 arXiv 论文 PDF + 元数据
+
+# 模型/会话/角色管理（真实 Ollama/DB/yaml）
+daip model list                       # 列出本地 Ollama 模型（真实 /api/tags）
+daip model status                     # 当前模型状态
+daip model info llama3:latest         # 模型详细信息
 daip session list
+daip session clear
 daip role list
+daip role show pro_arguer
+daip role create 新角色 --persona "..." --tools "search,read"   # 真实写入 roles/*.yaml
+daip role delete 新角色 --force        # 真实删除 roles/*.yaml
 
 # 查看帮助（共 10 个命令组）
 daip --help

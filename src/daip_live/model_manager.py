@@ -30,9 +30,7 @@ def _format_modified(modified_at) -> str:
                 dt = dt.replace(tzinfo=timezone.utc)
             return dt.strftime("%Y-%m-%d")
         # 兼容 Unix 时间戳（int/float）
-        return datetime.fromtimestamp(modified_at, tz=timezone.utc).strftime(
-            "%Y-%m-%d"
-        )
+        return datetime.fromtimestamp(modified_at, tz=timezone.utc).strftime("%Y-%m-%d")
     except (OSError, ValueError, OverflowError, TypeError):
         return "Unknown"
 

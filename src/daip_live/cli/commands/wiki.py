@@ -23,9 +23,8 @@ from ..utils.performance_monitor import PerformanceMonitor
 def _get_wiki_dir(config_data: dict[str, Any] | None) -> str:
     """从配置解析 wiki 页面目录（兼容 pages_directory 与旧 directory key）。"""
     wiki_cfg = (config_data or {}).get("wiki", {}) or {}
-    return wiki_cfg.get(
-        "pages_directory", wiki_cfg.get("directory", "wiki/")
-    )
+    return wiki_cfg.get("pages_directory", wiki_cfg.get("directory", "wiki/"))
+
 
 # Create the wiki command app
 app = typer.Typer(

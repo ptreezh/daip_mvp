@@ -361,9 +361,7 @@ def doc_download(
         result = await asyncio.to_thread(downloader.download_arxiv_paper, topic)
         if not result.success:
             console.print("[yellow]未直接匹配 arXiv ID，尝试主题搜索...[/yellow]")
-            papers = await asyncio.to_thread(
-                downloader.search_arxiv, topic, 1
-            )
+            papers = await asyncio.to_thread(downloader.search_arxiv, topic, 1)
             if not papers or not papers[0].arxiv_id:
                 console.print(
                     f"[red]❌ 未找到主题 '{topic}' 的论文"
@@ -413,9 +411,7 @@ def doc_search(
             return
 
         downloader = PaperDownloader(download_dir=Path("./papers"))
-        results = await asyncio.to_thread(
-            downloader.search_arxiv, query, max_results
-        )
+        results = await asyncio.to_thread(downloader.search_arxiv, query, max_results)
 
         if results:
             console.print(f"🔍 Found {len(results)} papers:")

@@ -825,4 +825,3 @@ class PaperDownloader:
 
         self.logger.info(f"清理了 {count} 个缓存文件")
         return count
-
