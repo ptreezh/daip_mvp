@@ -523,12 +523,7 @@ async def _handle_conversation_intent(intent: Intent):
     task_description = intent.parameters.get("task_description", "")
     original_request = intent.parameters.get("original_request", "")
 
-    prompt = (
-        question
-        or chat_content
-        or task_description
-        or original_request
-    )
+    prompt = question or chat_content or task_description or original_request
     if not prompt:
         return
 

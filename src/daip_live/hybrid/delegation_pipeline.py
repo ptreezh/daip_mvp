@@ -276,9 +276,7 @@ class DelegationPipeline:
         # 5. 汇总
         cloud_results = [r for r in subtask_results if r.cloud_delegated]
         any_delegated = bool(cloud_results)
-        provider_name = (
-            cloud_results[0].provider_name if cloud_results else "local"
-        )
+        provider_name = cloud_results[0].provider_name if cloud_results else "local"
         content = "\n".join(r.content for r in subtask_results if r.content)
 
         return PipelineResult(

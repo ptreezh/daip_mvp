@@ -57,15 +57,16 @@ class TestDelegationPipelineV3:
         async def fake_cloud(**kwargs):
             sent_messages.append(kwargs.get("messages", []))
             response = MagicMock()
-            response.choices = [
-                MagicMock(message=MagicMock(content="subtask answer"))
-            ]
+            response.choices = [MagicMock(message=MagicMock(content="subtask answer"))]
             response.usage = MagicMock(total_tokens=10)
             return response
 
-        with _stub_decomposer(pipeline, subtasks), patch(
-            "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
-            new=AsyncMock(side_effect=fake_cloud),
+        with (
+            _stub_decomposer(pipeline, subtasks),
+            patch(
+                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                new=AsyncMock(side_effect=fake_cloud),
+            ),
         ):
             result = asyncio.run(
                 pipeline.execute(
@@ -94,27 +95,26 @@ class TestDelegationPipelineV3:
 
         async def fake_cloud(**kwargs):
             response = MagicMock()
-            response.choices = [
-                MagicMock(message=MagicMock(content="subtask answer"))
-            ]
+            response.choices = [MagicMock(message=MagicMock(content="subtask answer"))]
             response.usage = MagicMock(total_tokens=10)
             return response
 
-        with _stub_decomposer(
-            pipeline,
-            [
-                "Analyze AI impact on healthcare",
-                "Analyze AI impact on education",
-                "Analyze AI impact on manufacturing",
-            ],
-        ), patch(
-            "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
-            new=AsyncMock(side_effect=fake_cloud),
+        with (
+            _stub_decomposer(
+                pipeline,
+                [
+                    "Analyze AI impact on healthcare",
+                    "Analyze AI impact on education",
+                    "Analyze AI impact on manufacturing",
+                ],
+            ),
+            patch(
+                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                new=AsyncMock(side_effect=fake_cloud),
+            ),
         ):
             result = asyncio.run(
-                pipeline.execute(
-                    "Analyze AI economic impact", api_key="test-key"
-                )
+                pipeline.execute("Analyze AI economic impact", api_key="test-key")
             )
 
         assert result.cloud_delegated is True
@@ -135,19 +135,21 @@ class TestDelegationPipelineV3:
                 "Subtask three generic",
             ]
 
-        with patch.object(
-            pipeline,
-            "_decompose_with_local_model",
-            new=AsyncMock(side_effect=fake_decompose),
-        ), patch(
-            "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
-            new=AsyncMock(),
-        ) as mock_cloud:
+        with (
+            patch.object(
+                pipeline,
+                "_decompose_with_local_model",
+                new=AsyncMock(side_effect=fake_decompose),
+            ),
+            patch(
+                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                new=AsyncMock(),
+            ) as mock_cloud,
+        ):
+
             async def fake_cloud(**kwargs):
                 response = MagicMock()
-                response.choices = [
-                    MagicMock(message=MagicMock(content="a"))
-                ]
+                response.choices = [MagicMock(message=MagicMock(content="a"))]
                 response.usage = MagicMock(total_tokens=1)
                 return response
 
@@ -181,27 +183,26 @@ class TestDelegationPipelineV3:
         async def fake_cloud(**kwargs):
             used_providers.add(kwargs.get("model", "unknown"))
             response = MagicMock()
-            response.choices = [
-                MagicMock(message=MagicMock(content="subtask answer"))
-            ]
+            response.choices = [MagicMock(message=MagicMock(content="subtask answer"))]
             response.usage = MagicMock(total_tokens=10)
             return response
 
-        with _stub_decomposer(
-            pipeline,
-            [
-                "Compare US fiscal policy",
-                "Compare China fiscal policy",
-                "Compare EU fiscal policy",
-            ],
-        ), patch(
-            "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
-            new=AsyncMock(side_effect=fake_cloud),
+        with (
+            _stub_decomposer(
+                pipeline,
+                [
+                    "Compare US fiscal policy",
+                    "Compare China fiscal policy",
+                    "Compare EU fiscal policy",
+                ],
+            ),
+            patch(
+                "daip_live.hybrid.delegation_pipeline.litellm.acompletion",
+                new=AsyncMock(side_effect=fake_cloud),
+            ),
         ):
             result = asyncio.run(
-                pipeline.execute(
-                    "Compare economic policies", api_key="test-key"
-                )
+                pipeline.execute("Compare economic policies", api_key="test-key")
             )
 
         assert result.cloud_delegated is True
@@ -215,9 +216,7 @@ class TestDelegationPipelineV3:
             pipeline,
             ["Subtask one", "Subtask two", "Subtask three"],
         ):
-            result = asyncio.run(
-                pipeline.execute("Summarize key points", api_key=None)
-            )
+            result = asyncio.run(pipeline.execute("Summarize key points", api_key=None))
 
         assert result.success is True
         assert result.cloud_delegated is False
