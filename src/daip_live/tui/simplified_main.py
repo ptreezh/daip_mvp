@@ -1742,110 +1742,53 @@ class SimplifiedTUI(App):
             )
 
     def _handle_paper_search(self, query: str) -> None:
-        """处理论文搜索 - 使用真实系统"""
+        """处理论文搜索 - 使用真实 arxiv API（doc.paper_downloader）"""
         try:
             self._update_log_view("[dim]🔍 正在搜索论文...[/dim]")
+            import tempfile
+            from pathlib import Path
 
-            # 尝试使用真实的论文搜索工具
-            if hasattr(self, "container") and self.container:
-                try:
-                    # 尝试从container获取论文工具
-                    from daip_live.basic_tools.core import search_academic_papers
-                    from daip_live.doc.models.document_models import (
-                        PaperSource,  # noqa: F401
-                    )
-                    from daip_live.doc.tools.paper_downloader import (
-                        PaperDownloader,  # noqa: F401
-                    )
+            from daip_live.doc.paper_downloader import PaperDownloader
 
-                    # 使用真实搜索功能 - 该函数是同步的，不需要await
-                    results = search_academic_papers(query=query, max_results=5)
+            downloader = PaperDownloader(download_dir=Path(tempfile.mkdtemp()))
+            papers = downloader.search_arxiv(query, max_results=5)
 
-                    if "No papers found" in results or len(results) == 0:
-                        self._update_log_view("[yellow]⚠️ 未找到相关论文[/yellow]")
-                        return
+            if not papers:
+                self._update_log_view("[yellow]⚠️ 未找到相关论文[/yellow]")
+                return
 
-                    self._update_log_view("[green]✅ 论文搜索完成[/green]")
-                    # 显示搜索结果
-                    result_lines = results.split("\n")
-                    for line in result_lines:
-                        if line.strip():
-                            self._update_log_view(f"[cyan]{line}[/cyan]")
-
-                except ImportError:
-                    # 如果工具不可用，回退到基本功能
-                    self._update_log_view("[yellow]⚠️ 论文搜索工具暂不可用[/yellow]")
-                    self._update_log_view(
-                        f"[cyan]找到关于 '{query}' 的相关论文 (模拟)[/cyan]"
-                    )
-                except Exception as e:
-                    self._update_log_view(f"[red]❌ 真实论文搜索失败: {str(e)}[/red]")
-                    self._update_log_view(f"[cyan]降级为本地搜索: '{query}'[/cyan]")
-            else:
-                # 如果container不可用，尝试直接调用
-                try:
-                    from daip_live.basic_tools.core import search_academic_papers
-
-                    results = search_academic_papers(query=query, max_results=5)
-
-                    if "No papers found" in results or len(results) == 0:
-                        self._update_log_view("[yellow]⚠️ 未找到相关论文[/yellow]")
-                        return
-
-                    self._update_log_view("[green]✅ 论文搜索完成[/green]")
-                    result_lines = results.split("\n")
-                    for line in result_lines:
-                        if line.strip():
-                            self._update_log_view(f"[cyan]{line}[/cyan]")
-                except Exception as e:
-                    self._update_log_view(f"[red]❌ 论文搜索失败: {str(e)}[/red]")
-
+            self._update_log_view("[green]✅ 论文搜索完成[/green]")
+            for paper in papers:
+                pub_date = paper.published_date.strftime("%Y-%m-%d")
+                authors = ", ".join(paper.authors[:3])
+                if len(paper.authors) > 3:
+                    authors += " et al."
+                self._update_log_view(f"[cyan]📄 {paper.title}[/cyan]")
+                self._update_log_view(
+                    f"[dim]   {authors} | {pub_date} | {paper.arxiv_id}[/dim]"
+                )
         except Exception as e:
-            self._update_log_view(f"[red]❌ 论文搜索失败: {str(e)}[/red]")
+            self._update_log_view(f"[red]❌ 真实论文搜索失败: {str(e)}[/red]")
+            self._update_log_view(f"[cyan]降级为本地搜索: '{query}'[/cyan]")
 
     def _handle_paper_download(self, identifier: str) -> None:
-        """处理论文下载 - 使用真实系统"""
+        """处理论文下载 - 使用真实 arxiv API（doc.paper_downloader）"""
         try:
             self._update_log_view(f"[dim]📥 正在下载论文: {identifier}[/dim]")
+            from pathlib import Path
 
-            # 尝试使用真实的论文下载功能
-            if hasattr(self, "container") and self.container:
-                try:
-                    # 尝试从container获取论文下载工具
-                    from daip_live.basic_tools.core import download_paper
+            from daip_live.doc.paper_downloader import PaperDownloader
 
-                    # 使用真实下载功能 - 该函数是同步的，不需要await
-                    result = download_paper(paper_id=identifier)
+            downloader = PaperDownloader(download_dir=Path("papers"))
+            result = downloader.download_arxiv_paper(identifier)
 
-                    self._update_log_view("[green]✅ 论文下载完成[/green]")
-                    result_lines = result.split("\n")
-                    for line in result_lines:
-                        if line.strip():
-                            self._update_log_view(f"[cyan]{line}[/cyan]")
-
-                except ImportError:
-                    self._update_log_view("[yellow]⚠️ 论文下载工具暂不可用[/yellow]")
-                    self._update_log_view("[cyan]论文已保存到下载目录 (模拟)[/cyan]")
-                except Exception as e:
-                    self._update_log_view(f"[red]❌ 真实论文下载失败: {str(e)}[/red]")
-                    self._update_log_view(
-                        f"[cyan]降级为本地下载: '{identifier}' (模拟)[/cyan]"
-                    )
+            if result.success:
+                self._update_log_view("[green]✅ 论文下载完成[/green]")
+                self._update_log_view(f"[cyan]📄 {result.pdf_path}[/cyan]")
             else:
-                # 如果container不可用，尝试直接调用
-                try:
-                    from daip_live.basic_tools.core import download_paper
-
-                    result = download_paper(paper_id=identifier)
-
-                    self._update_log_view("[green]✅ 论文下载完成[/green]")
-                    result_lines = result.split("\n")
-                    for line in result_lines:
-                        if line.strip():
-                            self._update_log_view(f"[cyan]{line}[/cyan]")
-                except Exception as e:
-                    self._update_log_view(f"[red]❌ 论文下载失败: {str(e)}[/red]")
-
+                self._update_log_view(
+                    f"[red]❌ 论文下载失败: {result.error_message}[/red]"
+                )
         except Exception as e:
             self._update_log_view(f"[red]❌ 论文下载失败: {str(e)}[/red]")
 
