@@ -202,7 +202,12 @@ def debate_multimodel(
                 console.print(f"  {role_name} → {model_name}")
 
         # Track debate in history
-        start_event = DebateStartEvent(topic=topic, roles=role_list, rounds=rounds)
+        start_event = DebateStartEvent(
+            topic=topic,
+            roles=role_list,
+            rounds=rounds,
+            session_id=f"debate_multimodel_{int(time.time())}",
+        )
         await debate_history_tracker.start_tracking(start_event)
 
         # Run debate and capture events
