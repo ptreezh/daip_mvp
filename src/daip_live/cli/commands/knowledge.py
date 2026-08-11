@@ -101,11 +101,16 @@ app = typer.Typer(
 
 @app.callback(invoke_without_command=True)
 def _knowledge_root_callback(ctx: typer.Context):
-    """默认入口（S4-2）：`daip knowledge <query>` 视为搜索查询。"""
-    if ctx.invoked_subcommand is None and ctx.args:
+    """根入口：无子命令时默认同步。
+
+    注：Typer 不支持 `knowledge <query>` 裸参数（会被当作未知子命令名拒绝）；
+    搜索请用显式子命令 `knowledge search <query>` 或 `knowledge auto <query>`。
+    历史上此处曾尝试用 ctx.args 支持裸参数，但 Typer 在回调前即拒绝未知命令。
+    """
+    if ctx.invoked_subcommand is None:
         import asyncio
 
-        asyncio.run(_search_knowledge_default(ctx.args[0]))
+        asyncio.run(_sync_knowledge_default())
 
 
 # Define a default command that can be called explicitly
