@@ -42,7 +42,8 @@ class TestDebateManager(unittest.TestCase):
             self.mock_session_manager.create_session.return_value = mock_session
 
             # Mock model provider responses
-            self.mock_model_provider.generate = AsyncMock(
+            # 契约: DebateManager 调 agenerate（返回 (content, metadata) 元组）
+            self.mock_model_provider.agenerate = AsyncMock(
                 side_effect=[
                     ("Pro argument 1", {"total_tokens": 10}),
                     ("Con argument 1", {"total_tokens": 10}),
@@ -73,7 +74,7 @@ class TestDebateManager(unittest.TestCase):
             self.mock_role_manager.get_role_by_name.assert_has_calls(
                 [call("pro_arguer"), call("con_arguer")]
             )
-            self.assertEqual(self.mock_model_provider.generate.call_count, 5)
+            self.assertEqual(self.mock_model_provider.agenerate.call_count, 5)
 
             # Check status by value to handle potential enum instance differences
             self.assertEqual(final_session.status.value, AgentState.COMPLETED.value)

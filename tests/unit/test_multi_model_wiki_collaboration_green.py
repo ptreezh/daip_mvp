@@ -50,14 +50,14 @@ ROLE_YAML = textwrap.dedent(
 
 
 class FakeModelProvider:
-    """外部边界模拟：记录 generate 调用，返回确定性二元组 (content, usage)"""
+    """外部边界模拟：记录 agenerate 调用，返回确定性二元组 (content, usage)"""
 
     def __init__(self, responses=None, default_content=None):
         self.responses = responses or {}
         self.default_content = default_content or "这是模拟模型的确定性响应内容。"
         self.calls = []
 
-    async def generate(
+    async def agenerate(
         self, prompt, model=None, temperature=None, max_tokens=None, **kwargs
     ):
         self.calls.append(
@@ -146,22 +146,15 @@ class TestSimpleCollaborationEngineGREEN:
         asyncio.run(
             engine.create_collaborative_wiki(title="机器学习基础", topic="机器学习")
         )
-        # 3 个默认角色 x 1 轮
+        # 默认 3 角色（pro_arguer/con_arguer/research_analyst）x 1 轮；
+        # fixture roles 目录无这些角色 -> mapping None -> 回退默认模型 llama3:instruct
         assert len(provider.calls) == 3
 
-        domain_calls = [c for c in provider.calls if "领域专家" in c["prompt"]]
-        researcher_calls = [c for c in provider.calls if "研究员" in c["prompt"]]
-        editor_calls = [c for c in provider.calls if "编辑" in c["prompt"]]
-
-        assert len(domain_calls) == 1
-        assert domain_calls[0]["model"] == "ollama/llama3:instruct"
-        assert researcher_calls[0]["model"] == "ollama/mistral:latest"
-        assert editor_calls[0]["model"] == "ollama/gemma:latest"
-
         for call in provider.calls:
-            # generate 以关键字传参（生产契约），且透传 YAML 中的配置
+            # agenerate 以关键字传参（生产契约），无 mapping 时用默认模型与默认参数
+            assert call["model"] == "ollama/llama3:instruct"
             assert call["temperature"] == 0.7
-            assert call["max_tokens"] == 1024
+            assert call["max_tokens"] == 1000
 
     def test_content_includes_all_role_contributions_and_sections(self, engine_fixture):
         engine, _, _ = engine_fixture
@@ -173,14 +166,17 @@ class TestSimpleCollaborationEngineGREEN:
         # 章节结构（synthesize 固定章节，仅非空章节出现）
         assert content.startswith("# 机器学习基础")
         assert "## 协作主题" in content
-        assert "## 核心概念" in content
+        # 默认角色 pro_arguer/con_arguer/research_analyst 路由到应用场景/挑战/研究进展
         assert "## 技术要点" in content
+        assert "## 应用场景" in content
         assert "## 研究进展" in content
+        assert "## 挑战与展望" in content
         assert "## 参考资料" in content
-        assert "## 概述" in content
+        # 至少 3 个非空章节 + 协作说明
+        assert content.count("## ") >= 5
         # 协作说明列出参与角色
         assert "## 协作说明" in content
-        assert "domain_expert, researcher, editor" in content
+        assert "pro_arguer, con_arguer, research_analyst" in content
 
     def test_unknown_role_falls_back_to_default_model_and_domain_prompt(
         self, engine_fixture
@@ -200,11 +196,11 @@ class TestSimpleCollaborationEngineGREEN:
         # 未知角色回退到 domain_expert 提示模板
         assert "领域专家" in call["prompt"]
 
-    def test_all_models_fail_uses_fallback_content_without_crashing(
+    def test_all_models_fail_raises_without_fake_content(
         self, roles_dir, tmp_path
     ):
         class FailingProvider(FakeModelProvider):
-            async def generate(
+            async def agenerate(
                 self, prompt, model=None, temperature=None, max_tokens=None, **kwargs
             ):
                 self.calls.append({"prompt": prompt, "model": model})
@@ -218,14 +214,11 @@ class TestSimpleCollaborationEngineGREEN:
             model_provider=provider,
             wiki_manager=wiki_manager,
         )
-        page, content = asyncio.run(
-            engine.create_collaborative_wiki(title="降级测试", topic="测试主题")
-        )
-        # 全部模型失败 -> 角色化兜底内容，页面仍创建成功
-        assert page.file_path.exists()
-        assert "作为领域专家，我认为" in content
-        assert "作为研究员，我发现" in content
-        assert "作为编辑，我建议" in content
+        # 全部模型失败 -> 明确抛错（不返回模拟假内容、不创建空页面）
+        with pytest.raises(RuntimeError, match="贡献生成均失败"):
+            asyncio.run(
+                engine.create_collaborative_wiki(title="降级测试", topic="测试主题")
+            )
 
     def test_progress_callback_receives_updates_until_complete(self, engine_fixture):
         engine, _, _ = engine_fixture

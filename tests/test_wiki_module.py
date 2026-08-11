@@ -45,7 +45,8 @@ def temp_wiki_dir_with_mock_services(temp_wiki_dir):
         mock_mapping.role_model_config.max_tokens = 150
 
         mock_role_manager.get_role_model_mapping.return_value = mock_mapping
-        mock_model_provider.generate = AsyncMock(return_value=("模拟AI生成的内容", {}))
+        # 源码契约: WikiManager 协作路径调 agenerate（generate 是 async generator）
+        mock_model_provider.agenerate = AsyncMock(return_value=("模拟AI生成的内容", {}))
 
         yield temp_wiki_dir, mock_role_manager, mock_model_provider
 
@@ -743,7 +744,7 @@ async def run_all_async_tests():
             mock_mapping.role_model_config.max_tokens = 150
 
             mock_role_manager.get_role_model_mapping.return_value = mock_mapping
-            mock_model_provider.generate = AsyncMock(
+            mock_model_provider.agenerate = AsyncMock(
                 return_value=("模拟AI生成的内容", {})
             )
 

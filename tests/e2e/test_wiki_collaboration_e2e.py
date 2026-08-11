@@ -152,8 +152,8 @@ class TestWikiCollaborationE2E:
         sections = file_content.split("##")
         assert len(sections) >= 4  # 应该有多个章节
 
-        # 验证包含不同角色的贡献
-        content_indicators = ["领域专家", "研究", "编辑", "批评"]
+        # 验证包含不同角色的贡献（mock 数据用英文角色名）
+        content_indicators = ["domain_expert", "researcher", "editor", "critic"]
         for indicator in content_indicators:
             assert (
                 indicator in file_content or indicator.lower() in file_content.lower()

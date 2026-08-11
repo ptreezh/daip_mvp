@@ -19,7 +19,12 @@ class RoleIntelligenceSelector:
     def __init__(self, role_manager: RoleManager, roles_dir: Optional[Path] = None):
         self.role_manager = role_manager
         self.roles_dir = roles_dir or Path("roles")
-        self.default_roles = ["domain_expert", "researcher", "editor", "critic"]
+        self.default_roles = [
+            "pro_arguer",
+            "con_arguer",
+            "research_analyst",
+            "creative_writer",
+        ]
 
     def analyze_topic_for_roles(self, topic: str, max_roles: int = 4) -> list[str]:
         """
@@ -68,12 +73,13 @@ class RoleIntelligenceSelector:
             if hasattr(self.role_manager, "list_roles"):
                 return self.role_manager.list_roles()
             else:
-                # 如果RoleManager无法提供角色列表，从roles目录扫描
+                # 如果RoleManager无法提供角色列表，从roles目录扫描（支持 yaml/json）
                 role_files = []
                 if self.roles_dir.exists():
-                    for file_path in self.roles_dir.glob("*.json"):
-                        role_name = file_path.stem
-                        role_files.append(role_name)
+                    for pattern in ("*.yaml", "*.yml", "*.json"):
+                        for file_path in self.roles_dir.glob(pattern):
+                            role_name = file_path.stem
+                            role_files.append(role_name)
                 return role_files
         except Exception:
             # 如果获取角色列表失败，返回空列表
@@ -250,16 +256,22 @@ class RoleIntelligenceSelector:
                 if isinstance(role_info, dict) and "persona" in role_info:
                     return role_info["persona"]
 
-            # 如果RoleManager不可用，尝试直接读取角色文件
-            role_file_path = self.roles_dir / f"{role_name}.json"
-            if role_file_path.exists():
-                with open(role_file_path, encoding="utf-8") as f:
-                    role_data = json.load(f)
-                    if isinstance(role_data, dict):
-                        # 尝试获取角色描述字段
-                        return role_data.get(
-                            "persona", role_data.get("description", "")
-                        )
+            # 如果RoleManager不可用，尝试直接读取角色文件（yaml/json）
+            for ext in ("yaml", "yml", "json"):
+                role_file_path = self.roles_dir / f"{role_name}.{ext}"
+                if role_file_path.exists():
+                    with open(role_file_path, encoding="utf-8") as f:
+                        if ext == "json":
+                            role_data = json.load(f)
+                        else:
+                            import yaml
+
+                            role_data = yaml.safe_load(f)
+                        if isinstance(role_data, dict):
+                            # 尝试获取角色描述字段
+                            return role_data.get(
+                                "persona", role_data.get("description", "")
+                            )
         except Exception:
             # 如果无法获取角色描述，返回None
             pass

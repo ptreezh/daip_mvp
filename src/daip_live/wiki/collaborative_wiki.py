@@ -39,12 +39,12 @@ class MultiRoleWikiCollaborator:
         self.model_provider = model_provider
         self.wiki_manager = wiki_manager
 
-        # 定义维基协作的主要角色类型
+        # 定义维基协作的主要角色类型（使用 roles/ 目录中真实存在的角色）
         self.default_roles = [
-            "domain_expert",  # 领域专家 - 提供专业知识
-            "researcher",  # 研究员 - 提供研究依据
-            "editor",  # 编辑 - 负责结构和表述
-            "critic",  # 批评家 - 挑剔和完善
+            "pro_arguer",  # 正方 - 提供专业知识与论证
+            "con_arguer",  # 反方 - 提供批判性观点
+            "research_analyst",  # 研究员 - 提供研究依据
+            "creative_writer",  # 创意作者 - 负责结构与表述
         ]
 
         # 初始化智能角色选择器

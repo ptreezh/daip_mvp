@@ -133,7 +133,28 @@ class EnhancedDebateManager:
             log.error(error_msg)
             raise ValueError(error_msg)
 
-        # 校验并收集映射：任何 None/无效映射都必须报错，绝不静默创建默认映射
+        # 校验并收集映射：缺失角色给出可操作的错误（列出缺失 + 可用角色）
+        missing_roles = [
+            roles_names[i]
+            for i, m in enumerate(role_mappings or [])
+            if m is None or not hasattr(m, "role_model_config")
+        ]
+        if missing_roles:
+            available = []
+            if self.role_manager:
+                try:
+                    role_list = self.role_manager.list_roles()
+                    if role_list:
+                        available = sorted(r.name for r in role_list)
+                except Exception:
+                    available = []
+            log.error(f"Missing role mappings for: {missing_roles}")
+            raise ValueError(
+                f"角色不存在或缺少模型配置: {missing_roles}。"
+                f"可用角色: {available or '（无）'}。"
+                f"请用 `daip role list` 查看可用角色。"
+            )
+
         valid_mappings = []
         for i, mapping in enumerate(role_mappings or []):
             role_name = roles_names[i] if i < len(roles_names) else f"role_{i}"

@@ -60,13 +60,13 @@ ROLE_YAML = textwrap.dedent(
 FAKE_RESPONSE = "这是EnhancedWikiManager协作路径的确定性响应内容。"
 
 
-async def fake_provider_generate(
+async def fake_provider_agenerate(
     prompt, model=None, temperature=None, max_tokens=None, **kwargs
 ):
     """EnhancedWikiManager 边界模拟：真实 LiteLLMProvider 实例的方法替换。
 
     无 self 参数的普通 async 函数，赋给实例属性后
-    `instance.generate(prompt, model=...)` 直接命中，无需联网。
+    `instance.agenerate(prompt, model=...)` 直接命中，无需联网。
     """
     return FAKE_RESPONSE, {"usage": {"total_tokens": len(FAKE_RESPONSE)}}
 
@@ -135,7 +135,7 @@ class TestEnhancedWikiManagerCollaboration:
 
     def make_enhanced_wiki(self, tmp_path, real_role_model_manager):
         provider = LiteLLMProvider(config=ProviderConfig(model="test-model"))
-        provider.generate = fake_provider_generate
+        provider.agenerate = fake_provider_agenerate
         return EnhancedWikiManager(
             wiki_root=tmp_path / "wiki",
             role_model_manager=real_role_model_manager,

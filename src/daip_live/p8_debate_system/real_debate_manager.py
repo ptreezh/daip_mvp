@@ -153,8 +153,9 @@ class RealDebateManager(IDebateManager):
             prompt = self._build_debate_prompt(role, context)
 
             # 调用AI模型生成回应
+            # 源码契约: agenerate 返回 (content, metadata)；generate 是 async generator
             start_time = asyncio.get_event_loop().time()
-            response = await self.model_provider.generate(prompt)
+            response, _ = await self.model_provider.agenerate(prompt)
             response_time = asyncio.get_event_loop().time() - start_time
 
             # 更新参与者状态
@@ -287,7 +288,7 @@ class RealDebateManager(IDebateManager):
 [总结内容]
 """
 
-            conclusion = await self.model_provider.generate(conclusion_prompt)
+            conclusion, _ = await self.model_provider.agenerate(conclusion_prompt)
             return conclusion.strip()
         except Exception as e:
             log.error(f"Error generating debate conclusion: {e}")

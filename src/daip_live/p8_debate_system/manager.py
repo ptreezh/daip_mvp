@@ -134,7 +134,7 @@ class DebateManager:
         """Generate a response from a role given the topic and history."""
         history_str = self._format_history(history)
         prompt = f"Debate Topic: {topic}\n\nYour Persona: {persona}\n\nConversation History:\n{history_str}\n\nBased on the history and your persona, what is your next argument?"  # noqa: E501
-        response_content, token_info = await self.model_provider.generate(prompt)
+        response_content, token_info = await self.model_provider.agenerate(prompt)
         return response_content, token_info
 
     async def _generate_summary(
@@ -143,5 +143,7 @@ class DebateManager:
         """Generate a summary of the debate."""
         history_str = self._format_history(history)
         summary_prompt = f"Please provide a neutral summary of the following debate, identifying key arguments, points of contention, and any potential consensus.\n\nDebate History:\n{history_str}"  # noqa: E501
-        summary_content, token_info = await self.model_provider.generate(summary_prompt)
+        summary_content, token_info = await self.model_provider.agenerate(
+            summary_prompt
+        )
         return summary_content, token_info

@@ -590,7 +590,8 @@ class WikiManager:
                     model_name = f"ollama/{model_name}"
 
                 # 生成内容
-                generated_content, _ = await self.model_provider.generate(
+                # 契约: agenerate 返回 (content, metadata)；generate 是 async generator
+                generated_content, _ = await self.model_provider.agenerate(
                     prompt,
                     model=model_name,
                     temperature=model_config.temperature,
@@ -626,10 +627,10 @@ class WikiManager:
         """创建由多个AI角色协作完成的Wiki页面"""
         if roles_instructions is None:
             roles_instructions = {
-                "domain_expert": "作为领域专家，请提供专业知识和核心技术要点",
-                "researcher": "作为研究员，请提供研究依据和参考资料",
-                "editor": "作为编辑，请负责内容结构和语言润色",
-                "analyst": "作为分析师，请提供批判性思考和改进建议",
+                "pro_arguer": "作为正方论证者，请提供专业知识和核心技术要点",
+                "con_arguer": "作为反方批评者，请提供批判性思考和潜在不足",
+                "research_analyst": "作为研究员，请提供研究依据和参考资料",
+                "creative_writer": "作为创意作者，请负责内容结构和语言润色",
             }
 
         # 首先创建基础页面
@@ -679,7 +680,8 @@ class WikiManager:
         """
 
         # 生成内容
-        generated_content, _ = await self.model_provider.generate(
+        # 源码契约: agenerate 返回 (content, metadata) 元组；generate 是 async generator
+        generated_content, _ = await self.model_provider.agenerate(
             prompt,
             model=model_config.model_name,
             temperature=model_config.temperature,

@@ -109,7 +109,8 @@ class SimpleCollaborationEngine:
             tuple: (WikiPage对象, 格式化内容字符串)
         """
         if roles is None:
-            roles = ["domain_expert", "researcher", "editor"]
+            # 默认使用 roles/ 目录中真实存在的角色
+            roles = ["pro_arguer", "con_arguer", "research_analyst"]
 
         total_steps = len(roles) * rounds
         progress = CollaborationProgress(total_steps)
@@ -152,6 +153,13 @@ class SimpleCollaborationEngine:
                         progress.add_error(error_msg)
                         if self.progress_callback:
                             self.progress_callback(progress)
+
+            # 所有角色都失败时不得创建空页面（避免假成功）
+            if not contributions:
+                raise RuntimeError(
+                    f"所有角色（{', '.join(roles)}）的贡献生成均失败，"
+                    f"未创建任何 wiki 内容"
+                ) from None
 
             # 整合内容
             progress.update("系统", "正在整合所有角色的贡献...")
@@ -239,34 +247,24 @@ class SimpleCollaborationEngine:
 
         for idx, attempt_model in enumerate(all_models_to_try):
             try:
-                content, _ = await self.model_provider.generate(
+                # 契约: agenerate(prompt, model=..., temperature=..., max_tokens=...)
+                # 返回 (content, metadata)；generate 是 async generator 不能解包
+                content, _ = await self.model_provider.agenerate(
                     prompt,
                     model=attempt_model,
                     temperature=temperature,
                     max_tokens=max_tokens,
                 )
-                if idx > 0:  # 如果不是首选模型，记录回退信息
-                    pass
-                else:
-                    pass
                 return content.strip()
             except Exception:
                 if idx < len(all_models_to_try) - 1:  # 不是最后一个模型
                     continue
                 else:
-                    # 所有模型都失败，使用模拟内容
-                    # 使用更智能的回退内容，基于角色和主题
-                    role_specific_prefix = {
-                        "domain_expert": "作为领域专家，我认为",
-                        "researcher": "作为研究员，我发现",
-                        "editor": "作为编辑，我建议",
-                        "critic": "作为批评家，我认为需要注意",
-                        "analyst": "作为分析师，我评估",
-                        "teacher": "作为教师，我解释",
-                    }
-                    prefix = role_specific_prefix.get(role, f"作为{role}，我认为")
-                    fallback_content = f"{prefix}{topic}是一个重要的话题。基于专业知识分析，这个主题涉及多个关键方面，值得深入研究和讨论。"  # noqa: E501
-                    return fallback_content
+                    # 所有模型都失败：明确报错（不返回模拟假内容）
+                    raise RuntimeError(
+                        f"所有候选模型均调用失败（角色 {role}，主题 {topic[:50]}），"
+                        f"已尝试: {', '.join(all_models_to_try)}"
+                    ) from None
 
     def _synthesize_collaborative_content(
         self, title: str, contributions: dict[str, list[str]], topic: str
@@ -284,7 +282,7 @@ class SimpleCollaborationEngine:
             "## 参考资料": [],
         }
 
-        # 按角色分配内容到不同章节
+        # 按角色分配内容到不同章节（映射真实角色，未知角色按内容关键词路由）
         for role_name, role_contributions in contributions.items():
             combined_content = "\n\n".join(role_contributions)
 
@@ -295,23 +293,39 @@ class SimpleCollaborationEngine:
                 sections["## 技术要点"].append(
                     f"### {role_name.title()}技术分析\n{combined_content}"
                 )
-            elif role_name == "researcher":
+            elif role_name in ("researcher", "research_analyst"):
                 sections["## 研究进展"].append(f"### 研究数据\n{combined_content}")
                 sections["## 参考资料"].append(f"### {combined_content}")
-            elif role_name == "editor":
+            elif role_name in ("editor", "creative_writer"):
                 sections["## 概述"].append(f"### 结构化概述\n{combined_content}")
-            elif role_name == "critic":
-                sections["## 挑战与展望"].append(f"### 批评性分析\n{combined_content}")
-            elif role_name == "analyst":
+            elif role_name in ("critic", "con_arguer"):
+                sections["## 挑战与展望"].append(f"### 批判性分析\n{combined_content}")
+            elif role_name in ("analyst", "pro_arguer"):
                 sections["## 应用场景"].append(f"### 市场分析\n{combined_content}")
-                sections["## 挑战与展望"].append(f"### 发展前景\n{combined_content}")
+                sections["## 技术要点"].append(f"### 技术分析\n{combined_content}")
             elif role_name == "teacher":
                 sections["## 核心概念"].append(f"### 基础概念解释\n{combined_content}")
             else:
-                # 其他角色添加到概述
-                sections["## 概述"].append(
-                    f"### {role_name.title()}观点\n{combined_content}"
-                )
+                # 未知角色：按内容关键词路由到相关章节
+                routed = False
+                for keyword, section in (
+                    ("技术", "## 技术要点"),
+                    ("研究", "## 研究进展"),
+                    ("应用", "## 应用场景"),
+                    ("挑战", "## 挑战与展望"),
+                    ("参考", "## 参考资料"),
+                ):
+                    if keyword in combined_content:
+                        sections[section].append(
+                            f"### {role_name.title()}观点\n{combined_content}"
+                        )
+                        routed = True
+                        break
+                if not routed:
+                    # 其他角色添加到概述
+                    sections["## 概述"].append(
+                        f"### {role_name.title()}观点\n{combined_content}"
+                    )
 
         # 构建完整内容
         content_parts = [
