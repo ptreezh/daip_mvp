@@ -6,6 +6,7 @@ It follows the module-first design principle and integrates with the container s
 """  # noqa: E501
 
 import asyncio
+import os
 import sys
 import time
 from pathlib import Path
@@ -49,6 +50,30 @@ from daip_live.core.models import (
 )
 from daip_live.p8_debate_system.enhanced_debate_manager import EnhancedDebateManager
 from daip_live.tui_modular import DAIP_TUI
+
+
+def _load_dotenv_if_present() -> None:
+    """轻量 .env 加载（无第三方依赖）：KEY=VALUE 写入环境，不覆盖已存在变量。
+
+    供 DAIP_HYBRID_AGNES_API_KEY 等凭据使用；.env 已 gitignore。
+    """
+    env_file = Path(".env")
+    if not env_file.exists():
+        return
+    try:
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key, value = key.strip(), value.strip()
+            if key and not os.environ.get(key):
+                os.environ[key] = value
+    except OSError:
+        pass
+
+
+_load_dotenv_if_present()
 
 # Create CLI app
 app = typer.Typer()

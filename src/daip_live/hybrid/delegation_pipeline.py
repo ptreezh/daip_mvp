@@ -26,6 +26,7 @@ from daip_live.hybrid.cloud_pool import (
     CloudPool,
     DelegationResult,
     ProviderStatus,
+    build_default_cloud_pool,
 )
 from daip_live.hybrid.sanitization import sanitize_prompt
 from daip_live.hybrid.security_gate import RiskLevel, SecurityGate
@@ -154,7 +155,7 @@ class DelegationPipeline:
         min_subtasks: int = 3,
         decomposer_model: str = LOCAL_DECOMPOSER_MODEL,
     ):
-        self.cloud_pool = cloud_pool or CloudPool()
+        self.cloud_pool = cloud_pool or build_default_cloud_pool()
         self.enabled = enabled
         self.min_subtasks = min_subtasks
         self.decomposer_model = decomposer_model
@@ -353,13 +354,24 @@ class DelegationPipeline:
         # 延迟 import：避免模块级连带加载 litellm（CLI 冷启动优化 2026-08-10）
         import litellm
 
-        response = await litellm.acompletion(
-            model=f"{provider.name}/{provider.model}",
-            messages=messages,
-            api_key=api_key or None,
-            max_tokens=2000,
-            temperature=0.7,
-        )
+        # OpenAI 兼容端点（provider.base_url）用 openai/ 前缀 + api_base；
+        # 否则保持 {name}/{model}（litellm 原生 provider 前缀）
+        if provider.base_url:
+            model = f"openai/{provider.model}"
+        else:
+            model = f"{provider.name}/{provider.model}"
+
+        kwargs = {
+            "model": model,
+            "messages": messages,
+            "api_key": api_key or None,
+            "max_tokens": 2000,
+            "temperature": 0.7,
+        }
+        if provider.base_url:
+            kwargs["api_base"] = provider.base_url
+
+        response = await litellm.acompletion(**kwargs)
         content = response.choices[0].message.content
         usage = getattr(response, "usage", None)
         tokens = usage.total_tokens if usage else 0

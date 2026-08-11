@@ -12,6 +12,7 @@ DelegationPipeline 防回归测试（Stage 5 最小闭环 v3，2026-08-10）
 """
 
 import asyncio
+import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from daip_live.hybrid.cloud_pool import CloudPool, CloudProvider, ProviderStatus
@@ -236,3 +237,72 @@ class TestDelegationPipelineV3:
 
         assert result.cloud_delegated is False
         assert result.needs_human_approval is True
+
+    def test_base_url_provider_uses_openai_prefix_and_api_base(self):
+        """带 base_url 的 provider 用 openai/ 前缀 + api_base 调用。"""
+        provider = CloudProvider(
+            name="agnes",
+            model="agnes-2.5-flash",
+            api_key_env="DAIP_HYBRID_AGNES_API_KEY",
+            base_url="https://api.agnes-ai.cn/v1",
+        )
+        provider.status = ProviderStatus.AVAILABLE
+        pool = CloudPool()
+        pool.add_provider(provider)
+        pipeline = DelegationPipeline(cloud_pool=pool)
+
+        call_kwargs = {}
+
+        async def fake_cloud(**kwargs):
+            call_kwargs.update(kwargs)
+            response = MagicMock()
+            response.choices = [MagicMock(message=MagicMock(content="answer"))]
+            response.usage = MagicMock(total_tokens=10)
+            return response
+
+        with (
+            _stub_decomposer(
+                pipeline,
+                ["Subtask alpha", "Subtask beta", "Subtask gamma"],
+            ),
+            patch(
+                "litellm.acompletion",
+                new=AsyncMock(side_effect=fake_cloud),
+            ),
+        ):
+            result = asyncio.run(
+                pipeline.execute("Do three things", api_key="test-key")
+            )
+
+        assert result.cloud_delegated is True
+        assert call_kwargs["model"] == "openai/agnes-2.5-flash"
+        assert call_kwargs["api_base"] == "https://api.agnes-ai.cn/v1"
+
+    def test_build_default_pool_from_env(self):
+        """环境变量配置 key 时默认池含 agnes provider；未配置时为空。"""
+        import daip_live.hybrid.cloud_pool as cp
+
+        with patch.dict(os.environ, {"DAIP_HYBRID_AGNES_API_KEY": "sk-test-key"}):
+            pool = cp.build_default_cloud_pool()
+            provider = pool.get_provider("agnes")
+            assert provider is not None
+            assert provider.base_url == cp.AGNES_BASE_URL
+            assert provider.status == ProviderStatus.AVAILABLE
+
+        with patch.dict(os.environ, {}, clear=False):
+            # 移除该 key（保留其它 env）
+            os.environ.pop("DAIP_HYBRID_AGNES_API_KEY", None)
+            pool = cp.build_default_cloud_pool()
+            assert pool.get_provider("agnes") is None
+
+    def test_default_pipeline_uses_env_pool_when_key_present(self):
+        """DelegationPipeline() 无参构造时从环境变量加载默认池。"""
+
+        with patch.dict(os.environ, {"DAIP_HYBRID_AGNES_API_KEY": "sk-test-key"}):
+            pipeline = DelegationPipeline()
+            assert pipeline.cloud_pool.get_provider("agnes") is not None
+
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("DAIP_HYBRID_AGNES_API_KEY", None)
+            pipeline = DelegationPipeline()
+            assert pipeline.cloud_pool.get_provider("agnes") is None

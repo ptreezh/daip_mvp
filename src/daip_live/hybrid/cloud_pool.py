@@ -29,6 +29,7 @@ class CloudProvider:
     max_concurrent: int = 3
     status: ProviderStatus = field(default=ProviderStatus.UNKNOWN)
     current_requests: int = field(default=0)
+    base_url: Optional[str] = None  # OpenAI 兼容端点（如 https://api.agnes-ai.cn/v1）
 
     def is_available(self) -> bool:
         """Check if provider can accept new requests."""
@@ -106,3 +107,34 @@ class CloudPool:
         """Decrement active request count for a provider."""
         if provider := self.providers.get(name):
             provider.current_requests = max(0, provider.current_requests - 1)
+
+
+# 环境变量配置的默认云端 provider（API key 来自环境，绝不硬编码进代码）
+AGNES_API_KEY_ENV = "DAIP_HYBRID_AGNES_API_KEY"
+AGNES_MODEL_ENV = "DAIP_HYBRID_AGNES_MODEL"
+AGNES_BASE_URL = "https://api.agnes-ai.cn/v1"
+AGNES_DEFAULT_MODEL = "agnes-2.5-flash"
+
+
+def build_default_cloud_pool() -> CloudPool:
+    """从环境变量构造默认云端 provider 池（OpenAI 兼容端点）。
+
+    环境变量：
+    - DAIP_HYBRID_AGNES_API_KEY: agnes-ai.cn API key（必需，否则池为空）
+    - DAIP_HYBRID_AGNES_MODEL: 模型名（默认 agnes-2.5-flash）
+
+    Returns:
+        CloudPool: 含 agnes provider 的池；key 未配置时为空池（云端不可用）。
+    """
+    pool = CloudPool()
+    if os.environ.get(AGNES_API_KEY_ENV):
+        pool.add_provider(
+            CloudProvider(
+                name="agnes",
+                model=os.environ.get(AGNES_MODEL_ENV, AGNES_DEFAULT_MODEL),
+                api_key_env=AGNES_API_KEY_ENV,
+                base_url=AGNES_BASE_URL,
+                status=ProviderStatus.AVAILABLE,
+            )
+        )
+    return pool
