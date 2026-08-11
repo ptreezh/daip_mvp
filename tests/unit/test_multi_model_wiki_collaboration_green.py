@@ -196,9 +196,7 @@ class TestSimpleCollaborationEngineGREEN:
         # 未知角色回退到 domain_expert 提示模板
         assert "领域专家" in call["prompt"]
 
-    def test_all_models_fail_raises_without_fake_content(
-        self, roles_dir, tmp_path
-    ):
+    def test_all_models_fail_raises_without_fake_content(self, roles_dir, tmp_path):
         class FailingProvider(FakeModelProvider):
             async def agenerate(
                 self, prompt, model=None, temperature=None, max_tokens=None, **kwargs
