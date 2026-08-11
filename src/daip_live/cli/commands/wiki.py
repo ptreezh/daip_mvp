@@ -77,9 +77,6 @@ def create(
                     from daip_live.p4_role_manager_tools.role_model_manager import (
                         RoleModelManager,
                     )
-                    from daip_live.persistence.database import DatabaseManager
-
-                    DatabaseManager(":memory:")  # Using in-memory for CLI
 
                     # Create roles directory if it doesn't exist
                     roles_path = Path("roles")
@@ -203,9 +200,6 @@ def list(
                     from daip_live.p4_role_manager_tools.role_model_manager import (
                         RoleModelManager,
                     )
-                    from daip_live.persistence.database import DatabaseManager
-
-                    DatabaseManager(":memory:")  # Using in-memory for CLI
 
                     # Create roles directory if it doesn't exist
                     roles_path = Path("roles")
@@ -356,9 +350,6 @@ def search(
                     from daip_live.p4_role_manager_tools.role_model_manager import (
                         RoleModelManager,
                     )
-                    from daip_live.persistence.database import DatabaseManager
-
-                    DatabaseManager(":memory:")  # Using in-memory for CLI
 
                     # Create roles directory if it doesn't exist
                     roles_path = Path("roles")
@@ -504,9 +495,6 @@ def show(
                     from daip_live.p4_role_manager_tools.role_model_manager import (
                         RoleModelManager,
                     )
-                    from daip_live.persistence.database import DatabaseManager
-
-                    DatabaseManager(":memory:")  # Using in-memory for CLI
 
                     # Create roles directory if it doesn't exist
                     roles_path = Path("roles")
@@ -663,9 +651,6 @@ def delete(
                     from daip_live.p4_role_manager_tools.role_model_manager import (
                         RoleModelManager,
                     )
-                    from daip_live.persistence.database import DatabaseManager
-
-                    DatabaseManager(":memory:")  # Using in-memory for CLI
 
                     # Create roles directory if it doesn't exist
                     roles_path = Path("roles")
@@ -757,9 +742,6 @@ def stats(
                     from daip_live.p4_role_manager_tools.role_model_manager import (
                         RoleModelManager,
                     )
-                    from daip_live.persistence.database import DatabaseManager
-
-                    DatabaseManager(":memory:")  # Using in-memory for CLI
 
                     # Create roles directory if it doesn't exist
                     roles_path = Path("roles")
@@ -887,9 +869,6 @@ def export(
                     from daip_live.p4_role_manager_tools.role_model_manager import (
                         RoleModelManager,
                     )
-                    from daip_live.persistence.database import DatabaseManager
-
-                    DatabaseManager(":memory:")  # Using in-memory for CLI
 
                     # Create roles directory if it doesn't exist
                     roles_path = Path("roles")
