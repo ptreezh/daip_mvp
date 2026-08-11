@@ -44,7 +44,7 @@
 | CLI 冷启动（已优化） | 根因 = litellm import ~9-14s | 2026-08-10 完成：provider/delegation_pipeline 函数级懒加载 → import 9.45s→0.39s / 6.73s→0.31s；`knowledge status` 21s→1.94s；1774P 无回归 |
 | `daip knowledge <query>` 裸参数（已收敛） | Typer 架构限制（未知命令优先报错，callback 的 ctx.args 从不触发） | 2026-08-10 删除死 callback：无参数默认 sync；搜索用显式 `knowledge search/auto <query>`；docstring 记录限制 |
 | wiki CLI `:memory:` DB（已清理） | 8 处 `DatabaseManager(":memory:")` 为死代码（构造后丢弃；WikiManager 实际文件系统持久化 .md + .wiki_index.json） | 2026-08-10 删除 8 处死代码；端到端验证页面真实落盘 |
-| Stage 5 混合路由 | ✅ 最小闭环已实施（2026-08-10） | **核心原则（用户）**：全局上下文永不发云端；任务本地模型（Ollama）分解为 >=3 自包含子任务；子任务级分发不同云端模型；无 key/失败/高风险回退本地。feature flag `DAIP_HYBRID_ENABLED`（默认关）。**未做**：人工确认流、规则外置 config、云端 provider 真实接入（需 API key） |
+| Stage 5 混合路由 | ✅ 最小闭环 + 真实云端接入（2026-08-10/11） | **核心原则（用户）**：全局上下文永不发云端；任务本地模型（Ollama）分解为 >=3 自包含子任务；子任务级分发不同云端模型；无 key/失败/高风险回退本地。**真实接入**：agnes-ai.cn（OpenAI 兼容）经 env 配置（`DAIP_HYBRID_AGNES_API_KEY/MODEL`，key 存 .env 已 gitignore）+ cli.main 轻量 .env 加载器；端到端实测：本地分解→agnes-2.5-flash 真实执行、全局上下文零泄露。feature flag `DAIP_HYBRID_ENABLED`（默认关）。**未做**：人工确认流、规则外置 config |
 | 云端 API key | config.yaml 无云端段 | 混合路由实施时补 |
 | 模型检查器 bug（已修复） | 曾对嵌入模型 nomic-embed-text 调 generate() 致辩论无法启动 | 2026-08-09 修复：嵌入模型走 embed() 检查 + "does not support" 独立分类；防回归测试 4 个 |
 | PermissionInteraction 枚举 bug（已修复） | `use_enum_values=True` 使赋值后 state 变字符串，`to_result().granted`/状态比较恒 False（安全相关） | 2026-08-09 修复：移除 use_enum_values；合并被覆盖吞掉的重复测试类（恢复 8 个测试） |
@@ -60,7 +60,7 @@
 
 | 项 | 性质 | 说明 |
 |----|------|------|
-| **Stage 5 混合路由（云端）** | ✅ 最小闭环已实施（2026-08-10，见上表） | 本地分解+子任务分发+全局上下文隔离已完成；真实云端接入需 API key |
+| **Stage 5 混合路由（云端）** | ✅ 真实云端接入完成（2026-08-11） | agnes-ai.cn OpenAI 兼容端点已打通（env 配置 + .env 加载）；本地分解 + 子任务分发 + 全局上下文隔离实测通过 |
 | **pubmed/web 论文来源** | doc 命令明确提示"暂不支持" | 仅 arxiv 可用；pubmed/web 需另接 API（当前诚实降级提示，非假成功） |
 | **mypy 917 项类型注解** | Backlog | CI 软门禁，非运行时 bug |
 | **CLI 冷启动（已优化）** | ✅ 2026-08-10 完成 | provider/delegation_pipeline 懒加载；knowledge status 21s→1.94s |
