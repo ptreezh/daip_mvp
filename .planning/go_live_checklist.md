@@ -56,6 +56,15 @@
 | debate multimodel（已修复） | 缺 session_id 致 pydantic 报错 | 2026-08-10 修复：补 timestamp session_id |
 | TUI 论文搜索/下载（已修复） | 用 basic_tools.core 依赖已删 arxiv 库 → 恒降级"模拟" | 2026-08-10 修复：改用 doc.paper_downloader 真实 API |
 
+## 3a2. 压力测试与多模型真实化（2026-08-11 grill-down）
+
+| 项 | 结果 |
+|----|------|
+| **压力测试套件** | `tests/stress/test_core_features_stress.py` 22 项（wiki 批量 100 页/重复 200 次/特殊字符/索引损坏/100KB 往返；debate 3 角色 3 轮/连续 10 场/未知角色；论文 100 条解析/并发下载部分失败；知识库 50 文档幂等/空库） |
+| **真实 bug 修复（5 个）** | ① simple_collaboration_engine 用错 API（generate 是 async generator 却当 tuple 解包）→ 模型全失败静默返回假内容 → 改 agenerate + 抛错；② 所有角色失败仍创建空页面假成功 → 抛错；③ 合成按硬编码旧角色名（domain_expert 等不存在）分章节 → 真实角色映射+关键词路由；④ 默认角色引用不存在角色 + selector 只扫 json 不扫 yaml → 真实角色 + yaml 支持；⑤ EnhancedDebateManager 未知角色裸 ValueError → 可操作错误（列缺失+可用角色） |
+| **真实模型量化** | Wiki 协作：3 角色 1 轮 54.3s → 12839 字零假内容；Debate：2 角色 1 轮 29.2s 完整事件流 |
+| **测试规模** | 1791 passed / 433 skipped / 0 failed（本地 + CI 一致）；CI run 31510719127 success |
+
 ## 3b. 仍未实现清单（诚实盘点，2026-08-10）
 
 | 项 | 性质 | 说明 |
