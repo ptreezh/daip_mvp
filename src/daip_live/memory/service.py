@@ -79,7 +79,8 @@ Structured Summary:
 """  # noqa: E501
 
         # 3. Call the LLM to get the summary
-        summary, _ = await self.model_provider.generate(prompt)
+        # 契约: agenerate 返回 (content, metadata)；generate 是 async generator 不能解包
+        summary, _ = await self.model_provider.agenerate(prompt)
 
         # 4. Store the summary
         session.compressed_history = summary

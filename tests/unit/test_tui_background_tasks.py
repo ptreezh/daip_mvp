@@ -13,7 +13,7 @@ Aligned with the current SimplifiedTUI implementation:
 """
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 
@@ -140,20 +140,36 @@ class TestTUIBackgroundTaskManagement:
         """Test that compacting a session with an active session reports success."""
         # Setup
         tui_app._current_session_id = "sess-1"
+        # 构造真实压缩所需依赖
+        session = MagicMock()
+        session.history = [MagicMock() for _ in range(10)]
+        session.compressed_history = None
+        tui_app._session_manager = MagicMock()
+        tui_app._session_manager.get_session.return_value = session
+        tui_app._memory_service = AsyncMock()
+
+        async def fake_compress(s):
+            s.compressed_history = "压缩摘要内容"
+
+        tui_app._memory_service.compress_history.side_effect = fake_compress
 
         with patch.object(tui_app, "_update_log_view") as mock_update_log:
             # Execute
             await tui_app._handle_compact_command("")
 
             # Assert
-            mock_update_log.assert_any_call("[dim]正在压缩当前会话数据...[/dim]")
-            mock_update_log.assert_any_call("[green]✅ 会话压缩完成[/green]")
+            tui_app._memory_service.compress_history.assert_awaited_once_with(session)
+            tui_app._session_manager.save_session.assert_called_once_with(session)
+            joined = " ".join(str(c[0][0]) for c in mock_update_log.call_args_list)
+            assert "压缩完成" in joined
+            assert "10 条历史" in joined
 
     @pytest.mark.asyncio
     async def test_handle_compact_command_without_session(self, tui_app):
         """Test that compacting without an active session shows a warning."""
         # Setup
         tui_app._current_session_id = None
+        tui_app._session_manager = None
 
         with patch.object(tui_app, "_update_log_view") as mock_update_log:
             # Execute

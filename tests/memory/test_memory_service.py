@@ -14,7 +14,7 @@ class TestMemoryService:
     def mock_model_provider(self):
         """Fixture for a mock LiteLLMProvider."""
         mock_provider = Mock(spec=LiteLLMProvider)
-        mock_provider.generate = AsyncMock(return_value=("LLM summary", {}))
+        mock_provider.agenerate = AsyncMock(return_value=("LLM summary", {}))
         return mock_provider
 
     @pytest.fixture
@@ -196,7 +196,7 @@ class TestMemoryService:
         await memory_service.compress_history(mock_session)
 
         # Assert
-        mock_model_provider.generate.assert_called_once()
+        mock_model_provider.agenerate.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_add_and_get_todo_list(self, memory_service):

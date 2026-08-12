@@ -1409,9 +1409,42 @@ class SimplifiedTUI(App):
 
         return cmd, args.strip()
 
+    async def _ensure_session(self) -> str:
+        """确保存在真实会话：首次对话创建并持久化，后续复用最近会话。
+
+        无 session_manager 时降级返回 "default"（不假装持久化）。
+        """
+        if getattr(self, "_current_session_id", None):
+            return self._current_session_id
+        if not getattr(self, "_session_manager", None):
+            self._current_session_id = "default"
+            return "default"
+
+        try:
+            # 复用最近一个未结束会话（重启 TUI 后保持连续性）
+            sessions = self._session_manager.list_sessions()
+            if sessions:
+                self._current_session_id = sessions[-1].session_id
+                return self._current_session_id
+        except Exception:
+            pass
+
+        try:
+            session = self._session_manager.create_session(
+                goal="TUI 对话", session_type="chat", participant_ids=["user"]
+            )
+            self._current_session_id = session.session_id
+            return self._current_session_id
+        except Exception:
+            self._current_session_id = "default"
+            return "default"
+
     async def _handle_chat_input(self, user_input: str) -> None:
         """处理聊天输入"""
         try:
+            # 确保有真实会话（首次对话创建，后续复用；无 session_manager 时降级）
+            session_id = await self._ensure_session()
+
             # 首先尝试意图识别，以确保特定命令优先于搜索
             self._update_system_log(
                 f"[dim]🧠 Intent recognition started for: {user_input[:50]}...[/dim]"
@@ -1419,7 +1452,6 @@ class SimplifiedTUI(App):
 
             try:
                 # Get current session ID for context
-                session_id = getattr(self, "_current_session_id", "default")
 
                 # Check if the intent recognizer supports context-aware recognition
                 if hasattr(self._intent_recognizer, "recognize_intent_with_context"):
@@ -2497,12 +2529,48 @@ class SimplifiedTUI(App):
             raise RuntimeError("Claude技能适配器未正确初始化")
 
     def _handle_claude_skills_sync_command(self, args: str) -> None:
-        """处理Claude技能同步命令"""
-        self._update_log_view("[bold cyan]🔄 同步Claude Skills...[/bold cyan]")
-        # 模拟同步过程
-        self._update_log_view("[dim]检查技能库更新...[/dim]")
-        self._update_log_view("[dim]下载最新技能定义...[/dim]")
-        self._update_log_view("[green]✅ Claude Skills 同步完成[/green]")
+        """处理Claude技能同步命令 - 真实扫描本地 skills 目录（无网络下载）"""
+        self._update_log_view("[bold cyan]🔄 扫描 Claude Skills...[/bold cyan]")
+        try:
+            import os
+            from pathlib import Path
+
+            # 优先 env 覆盖，其次用户级目录
+            skills_dir = os.environ.get(
+                "DAIP_SKILLS_DIR", str(Path.home() / ".claude" / "skills")
+            )
+            skills_path = Path(skills_dir)
+            if not skills_path.exists():
+                self._update_log_view(
+                    f"[yellow]⚠️ 未找到 Skills 目录: {skills_dir}（"
+                    f"可用 DAIP_SKILLS_DIR 环境变量指定）[/yellow]"
+                )
+                self._update_log_view(
+                    "[dim]本地扫描语义：无网络同步 API，不假装同步成功[/dim]"
+                )
+                return
+
+            skill_dirs = [p for p in skills_path.iterdir() if p.is_dir()]
+            # 最近修改的技能
+            latest = None
+            latest_mtime = 0.0
+            for d in skill_dirs:
+                mtime = d.stat().st_mtime
+                if mtime > latest_mtime:
+                    latest_mtime = mtime
+                    latest = d.name
+            self._update_log_view(
+                f"[green]✅ Skills 目录扫描完成: {len(skill_dirs)} 个技能[/green]"
+            )
+            if latest:
+                import datetime
+
+                ts = datetime.datetime.fromtimestamp(latest_mtime).strftime(
+                    "%Y-%m-%d %H:%M"
+                )
+                self._update_log_view(f"[dim]最近更新: {latest}（{ts}）[/dim]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ Skills 扫描失败: {e}[/bold red]")
 
     async def _handle_clear_command(self, args: str) -> None:
         """处理清屏命令"""
@@ -2516,15 +2584,38 @@ class SimplifiedTUI(App):
             self._update_log_view(f"[bold red]❌ 清屏命令执行失败: {e}[/bold red]")
 
     async def _handle_compact_command(self, args: str) -> None:
-        """处理压缩命令"""
+        """处理压缩命令：真实调用 memory_service.compress_history"""
         try:
             self._update_log_view("[bold cyan]🗜️ 压缩会话...[/bold cyan]")
-            if self._current_session_id:
-                self._update_log_view("[dim]正在压缩当前会话数据...[/dim]")
-                # 模拟压缩过程
-                self._update_log_view("[green]✅ 会话压缩完成[/green]")
-            else:
+            session_id = getattr(self, "_current_session_id", None)
+            if not session_id or not getattr(self, "_session_manager", None):
                 self._update_log_view("[yellow]⚠️ 没有活动会话可以压缩[/yellow]")
+                return
+
+            session = self._session_manager.get_session(session_id)
+            if not session:
+                self._update_log_view("[yellow]⚠️ 找不到当前会话，无法压缩[/yellow]")
+                return
+
+            history_len = len(getattr(session, "history", []) or [])
+            if history_len <= 5:
+                self._update_log_view(
+                    f"[dim]会话历史仅 {history_len} 条（<=5），无需压缩[/dim]"
+                )
+                return
+
+            if not getattr(self, "_memory_service", None):
+                self._update_log_view("[red]❌ 记忆服务不可用，无法压缩[/red]")
+                return
+
+            self._update_log_view(f"[dim]正在压缩 {history_len} 条会话历史...[/dim]")
+            await self._memory_service.compress_history(session)
+            self._session_manager.save_session(session)
+            summary_len = len(session.compressed_history or "")
+            self._update_log_view(
+                f"[green]✅ 会话压缩完成: {history_len} 条历史 → "
+                f"{summary_len} 字摘要[/green]"
+            )
         except Exception as e:
             self._update_log_view(f"[bold red]❌ 压缩命令执行失败: {e}[/bold red]")
 
@@ -2695,14 +2786,61 @@ class SimplifiedTUI(App):
         if subcommand == "search":
             await self._handle_knowledge_search(sub_args)
         elif subcommand == "sync":
-            self._update_log_view("[dim]🔄 同步知识库...[/dim]")
-            self._update_log_view("[green]✅ 知识库同步完成[/green]")
+            await self._handle_knowledge_sync()
         elif subcommand == "stats":
-            self._update_log_view("[bold cyan]📊 知识库统计[/bold cyan]")
-            self._update_log_view("[dim]文档数量: 1,234[/dim]")
-            self._update_log_view("[dim]索引大小: 456MB[/dim]")
+            await self._handle_knowledge_stats()
         else:
             self._update_log_view(f"[yellow]⚠️ 未知子命令: {subcommand}[/yellow]")
+
+    async def _handle_knowledge_sync(self) -> None:
+        """处理知识库同步 - 真实调用 sync_knowledge_base"""
+        self._update_log_view("[dim]🔄 同步知识库...[/dim]")
+        if not getattr(self, "_knowledge_manager", None):
+            self._update_log_view("[yellow]⚠️ 知识库管理器未初始化，无法同步[/yellow]")
+            return
+        try:
+            sync_result = await self._knowledge_manager.sync_knowledge_base()
+            self._update_log_view(
+                f"[green]✅ 知识库同步完成: "
+                f"新增 {sync_result.get('added', 0)} / "
+                f"更新 {sync_result.get('updated', 0)} / "
+                f"删除 {sync_result.get('removed', 0)} / "
+                f"未变 {sync_result.get('unchanged', 0)}[/green]"
+            )
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 知识库同步失败: {e}[/bold red]")
+
+    async def _handle_knowledge_stats(self) -> None:
+        """处理知识库统计 - 读取真实数据（无硬编码）"""
+        if not getattr(self, "_knowledge_manager", None):
+            self._update_log_view("[yellow]⚠️ 知识库管理器未初始化[/yellow]")
+            return
+        try:
+            from pathlib import Path
+
+            sources = self._knowledge_manager.db_manager.get_all_knowledge_sources()
+            total_docs = len(sources)
+            indexed = (
+                self._knowledge_manager.faiss_index.ntotal
+                if self._knowledge_manager.faiss_index
+                else 0
+            )
+            # 真实磁盘占用
+            total_size = 0
+            for s in sources:
+                try:
+                    path = Path(s.file_path)
+                    if path.exists():
+                        total_size += path.stat().st_size
+                except Exception:
+                    continue
+            size_mb = total_size / (1024 * 1024)
+            self._update_log_view("[bold cyan]📊 知识库统计[/bold cyan]")
+            self._update_log_view(f"[dim]文档数量: {total_docs}[/dim]")
+            self._update_log_view(f"[dim]索引向量: {indexed}[/dim]")
+            self._update_log_view(f"[dim]磁盘占用: {size_mb:.2f}MB[/dim]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 知识库统计失败: {e}[/bold red]")
 
     def _handle_model_command(self, args: str) -> None:
         """处理模型命令"""
