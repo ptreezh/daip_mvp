@@ -243,7 +243,7 @@ class TUIAutocomplete:
         """知识库命令的建议"""
         if parts[0] == "/knowledge":
             if len(parts) == 1 or (len(parts) == 2 and parts[1] == ""):
-                subcommands = ["sync", "search"]
+                subcommands = ["sync", "search", "stats"]
                 if len(parts) >= 2:
                     prefix = parts[1] if len(parts) == 2 else ""
                     suggestions = [

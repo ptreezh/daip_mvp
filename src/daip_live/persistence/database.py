@@ -39,6 +39,22 @@ class DatabaseManager:
     def _create_tables(self):
         metadata_obj.create_all(self.engine)
 
+    def close(self) -> None:
+        """释放 SQLite 连接与文件锁（Windows 上必须显式调用避免文件占用）。
+
+        幂等：可多次调用；调用后本实例不应再使用。
+        """
+        try:
+            self.engine.dispose()
+        except Exception:
+            pass
+
+    def __del__(self):
+        try:
+            self.engine.dispose()
+        except Exception:
+            pass
+
     # --- Session Methods (New Implementation) ---
 
     def save_session(self, session: Session):

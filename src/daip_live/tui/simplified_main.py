@@ -279,6 +279,7 @@ class SimplifiedTUI(App):
             ("/permission", "权限管理"),
             ("/role", "角色管理"),
             ("/knowledge", "知识库管理"),
+            ("/sync", "扫描本地 Skills（DAIP_SKILLS_DIR 或 ~/.claude/skills）"),
         ]
 
         # Background tasks management
@@ -593,10 +594,51 @@ class SimplifiedTUI(App):
 
             self._role_manager = RoleManager()
 
+    def _get_knowledge_config(self):
+        """从 config.yaml 解析知识库配置（含 DAIP_KNOWLEDGE_DIR 隔离），
+        不存在时回退默认目录。与 CLI knowledge 命令保持一致。"""
+        import os
+
+        from daip_live.core.models import KnowledgeBaseConfig
+
+        try:
+            from pathlib import Path
+
+            import yaml
+
+            config_path = Path("config.yaml")
+            if config_path.exists():
+                with open(config_path, encoding="utf-8") as f:
+                    config_data = yaml.safe_load(f)
+                knowledge_dir = config_data.get("knowledge_base", {}).get(
+                    "directory", "docs/"
+                )
+                embedding_dim = config_data.get("knowledge_base", {}).get(
+                    "embedding_dimension", 768
+                )
+            else:
+                knowledge_dir = "docs/"
+                embedding_dim = 768
+        except Exception:
+            knowledge_dir = "docs/"
+            embedding_dim = 768
+
+        # 测试隔离环境变量
+        knowledge_dir = os.environ.get("DAIP_KNOWLEDGE_DIR") or knowledge_dir
+
+        # 确保目录存在（faiss 写索引需要）
+        try:
+            Path(knowledge_dir).mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
+
+        return KnowledgeBaseConfig(
+            directory=knowledge_dir, embedding_dimension=embedding_dim
+        )
+
     def _initialize_knowledge_manager(self):
         """初始化知识管理器（使用真实实现）"""
         try:
-            from daip_live.core.models import KnowledgeBaseConfig
             from daip_live.knowledge.manager import KnowledgeManager
 
             # 尝从container获取所需依赖
@@ -611,16 +653,22 @@ class SimplifiedTUI(App):
                             pass
 
                     model_provider = getattr(self, "_model_provider", None)
+                    if not model_provider and hasattr(self.container, "embed_provider"):
+                        # 嵌入用 embed_provider（含 embedding_model 配置，避免 404）
+                        try:
+                            model_provider = self.container.embed_provider()
+                        except Exception:
+                            pass
                     if not model_provider and hasattr(self.container, "model_provider"):
                         try:
                             model_provider = self.container.model_provider()
                         except Exception:
                             pass
 
-                    # 创建配置
+                    # 创建配置（从 config.yaml 读取，避免硬编码）
                     config = getattr(self, "_config", None)
                     if not config:
-                        config = KnowledgeBaseConfig(directory="knowledge_base")
+                        config = self._get_knowledge_config()
 
                     if db_manager is None or model_provider is None:
                         raise RuntimeError(
@@ -639,18 +687,17 @@ class SimplifiedTUI(App):
                 # 如果container不可用，尝试直接从container初始化
                 try:
                     from daip_live.container import Container
-                    from daip_live.core.models import KnowledgeBaseConfig
 
                     container = Container()
                     db_manager = container.db_manager()
-                    model_provider = container.model_provider()
+                    model_provider = container.embed_provider()
 
                     if db_manager is None or model_provider is None:
                         raise RuntimeError(
                             "KnowledgeManager需要db_manager和model_provider，但未找到"
                         )
 
-                    config = KnowledgeBaseConfig(directory="knowledge_base")
+                    config = self._get_knowledge_config()
 
                     self._knowledge_manager = KnowledgeManager(
                         db_manager=db_manager,
@@ -1318,6 +1365,7 @@ class SimplifiedTUI(App):
             "claude_skills_run": self._handle_claude_skills_run_command,
             "claude_skills_search": self._handle_claude_skills_search_command,
             "claude_skills_sync": self._handle_claude_skills_sync_command,
+            "sync": self._handle_claude_skills_sync_command,  # /sync 别名
             "clear": self._handle_clear_command,
             "compact": self._handle_compact_command,
             "debate_history": self._handle_debate_history_command,
@@ -2310,12 +2358,15 @@ class SimplifiedTUI(App):
   /wiki <标题>              - 直接创建Wiki (智能识别)
   /wiki create <标题>       - 创建Wiki页面
   /wiki search <页面>        - 搜索Wiki页面
-  /knowledge <操作>         - 知识库管理
+  /knowledge search <关键词> - 搜索知识库（真实向量检索）
+  /knowledge sync           - 同步知识库（真实摄取变更）
+  /knowledge stats          - 知识库统计（真实文档/索引/磁盘）
 
 ⚙️ 系统管理
   /model                  - 查看可用模型
   /model switch <模型>      - 切换模型
-  /compact                - 压缩当前会话
+  /compact                - 压缩当前会话（真实 LLM 摘要）
+  /sync                   - 扫描本地 Skills 目录（真实扫描）
   /clear                  - 清空屏幕
   /permission <操作>       - 权限管理
 
@@ -2584,9 +2635,8 @@ class SimplifiedTUI(App):
             self._update_log_view(f"[bold red]❌ 清屏命令执行失败: {e}[/bold red]")
 
     async def _handle_compact_command(self, args: str) -> None:
-        """处理压缩命令：真实调用 memory_service.compress_history"""
+        """压缩命令：真实 compress_history（后台执行，UI 不阻塞）"""
         try:
-            self._update_log_view("[bold cyan]🗜️ 压缩会话...[/bold cyan]")
             session_id = getattr(self, "_current_session_id", None)
             if not session_id or not getattr(self, "_session_manager", None):
                 self._update_log_view("[yellow]⚠️ 没有活动会话可以压缩[/yellow]")
@@ -2608,7 +2658,21 @@ class SimplifiedTUI(App):
                 self._update_log_view("[red]❌ 记忆服务不可用，无法压缩[/red]")
                 return
 
-            self._update_log_view(f"[dim]正在压缩 {history_len} 条会话历史...[/dim]")
+            self._update_log_view(
+                f"[bold cyan]🗜️ 正在压缩 {history_len} 条会话历史"
+                "（后台执行）...[/bold cyan]"
+            )
+
+            # 后台执行压缩，避免阻塞 UI
+            task = asyncio.create_task(self._run_compression(session, history_len))
+            self._background_tasks.add(task)
+            task.add_done_callback(self._background_tasks.discard)
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 压缩命令执行失败: {e}[/bold red]")
+
+    async def _run_compression(self, session, history_len: int) -> None:
+        """后台执行真实压缩并报告结果。"""
+        try:
             await self._memory_service.compress_history(session)
             self._session_manager.save_session(session)
             summary_len = len(session.compressed_history or "")
@@ -2617,7 +2681,7 @@ class SimplifiedTUI(App):
                 f"{summary_len} 字摘要[/green]"
             )
         except Exception as e:
-            self._update_log_view(f"[bold red]❌ 压缩命令执行失败: {e}[/bold red]")
+            self._update_log_view(f"[bold red]❌ 会话压缩失败: {e}[/bold red]")
 
     async def _handle_debate_history_command(self, args: str) -> None:
         """处理辩论历史命令"""

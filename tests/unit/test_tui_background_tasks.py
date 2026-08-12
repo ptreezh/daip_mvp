@@ -154,8 +154,15 @@ class TestTUIBackgroundTaskManagement:
         tui_app._memory_service.compress_history.side_effect = fake_compress
 
         with patch.object(tui_app, "_update_log_view") as mock_update_log:
-            # Execute
+            # Execute（后台任务模式：立即返回，UI 不阻塞）
             await tui_app._handle_compact_command("")
+
+            # 立即返回：压缩在后台任务中执行
+            tui_app._memory_service.compress_history.assert_not_awaited()
+            assert len(tui_app._background_tasks) == 1
+
+            # 等后台任务完成
+            await asyncio.gather(*list(tui_app._background_tasks))
 
             # Assert
             tui_app._memory_service.compress_history.assert_awaited_once_with(session)

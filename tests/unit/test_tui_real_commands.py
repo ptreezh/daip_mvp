@@ -4,6 +4,7 @@
 mock _update_log_view 捕获输出，不启动 UI。
 """
 
+import asyncio
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -66,8 +67,8 @@ class TestEnsureSession:
 
 
 class TestCompactCommand:
-    async def test_compacts_real_session(self):
-        """有会话+历史>5 时真实压缩并输出量化信息。"""
+    async def test_compacts_real_session_background(self):
+        """有会话+历史>5 时启动后台压缩任务，完成时输出量化信息。"""
         session = MagicMock()
         session.history = [MagicMock() for _ in range(10)]
         session.compressed_history = None
@@ -76,7 +77,6 @@ class TestCompactCommand:
         memory = AsyncMock()
         memory.compress_history = AsyncMock()
 
-        # compress_history 会设置 compressed_history
         async def fake_compress(s):
             s.compressed_history = "这是压缩后的结构化摘要。"
 
@@ -86,18 +86,28 @@ class TestCompactCommand:
             _session_manager=sm,
             _memory_service=memory,
         )
+        tui._background_tasks = set()
 
         await tui._handle_compact_command("")
 
-        memory.compress_history.assert_called_once_with(session)
-        sm.save_session.assert_called_once_with(session)
+        # 立即返回（后台任务启动），UI 不阻塞
+        memory.compress_history.assert_not_awaited()
+        assert len(tui._background_tasks) == 1
         joined = " ".join(_captured(tui))
-        assert "10 条历史" in joined
-        assert "压缩完成" in joined
+        assert "后台执行" in joined
+
+        # 等后台任务完成并验证结果
+        await asyncio.gather(*list(tui._background_tasks))
+        memory.compress_history.assert_awaited_once_with(session)
+        sm.save_session.assert_called_once_with(session)
+        joined2 = " ".join(_captured(tui))
+        assert "10 条历史" in joined2
+        assert "压缩完成" in joined2
 
     async def test_no_session_honest_message(self):
         """无会话时诚实提示，不假装压缩。"""
         tui = _make_tui(_current_session_id=None, _session_manager=None)
+        tui._background_tasks = set()
         await tui._handle_compact_command("")
         joined = " ".join(_captured(tui))
         assert "没有活动会话" in joined
@@ -114,6 +124,7 @@ class TestCompactCommand:
             _session_manager=sm,
             _memory_service=memory,
         )
+        tui._background_tasks = set()
         await tui._handle_compact_command("")
         memory.compress_history.assert_not_called()
         joined = " ".join(_captured(tui))
@@ -182,6 +193,13 @@ class TestClaudeSkillsSyncCommand:
             tui._handle_claude_skills_sync_command("")
         joined = " ".join(_captured(tui))
         assert "2 个技能" in joined
+
+    def test_sync_alias_dispatches(self):
+        """/sync 别名映射到 claude_skills_sync handler。"""
+        tui = _make_tui()
+        with patch.object(tui, "_handle_claude_skills_sync_command") as mock_handler:
+            asyncio.run(tui._dispatch_command("sync", ""))
+        mock_handler.assert_called_once_with("")
 
     def test_missing_dir_honest(self):
         """目录缺失时诚实提示，不假装同步成功。"""
