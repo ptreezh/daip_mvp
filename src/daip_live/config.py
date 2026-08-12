@@ -61,6 +61,33 @@ def create_config_yaml_if_not_exists(path: str = "config.yaml") -> None:
             yaml.dump(default_config, f, indent=2)
 
 
+def set_default_model(model_name: str) -> bool:
+    """持久化设置默认模型（写回 config.yaml 的 llm_provider.default_model）。
+
+    Args:
+        model_name: 模型名（如 ollama/llama3:latest）
+
+    Returns:
+        bool: 是否写入成功
+    """
+    try:
+        with open(config_manager._config_path, encoding="utf-8") as f:
+            raw_config = yaml.safe_load(f) or {}
+
+        if "llm_provider" not in raw_config:
+            raw_config["llm_provider"] = {}
+        raw_config["llm_provider"]["default_model"] = model_name
+
+        with open(config_manager._config_path, "w", encoding="utf-8") as f:
+            yaml.dump(raw_config, f, indent=2, allow_unicode=True)
+
+        # 重置 config manager 使其重新加载
+        config_manager._config = None
+        return True
+    except Exception:
+        return False
+
+
 def check_and_update_model_availability() -> str:
     """
     Check if the configured default model is available and update to an available model if needed.

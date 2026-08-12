@@ -1376,11 +1376,9 @@ class SimplifiedTUI(App):
             "model": self._handle_model_command,
             "pa": self._handle_pa_command,
             "permission": self._handle_permission_command,
-            "project": self._handle_project_command,
             "quit": self._handle_quit_command,
             "role": self._handle_role_command,
             "run": self._handle_run_command,
-            "scaffold": self._handle_scaffold_command,
             "session": self._handle_session_command,
             "shortcut": self._handle_shortcut_command,
             "skill": self._handle_skill_command,
@@ -1427,7 +1425,6 @@ class SimplifiedTUI(App):
             "papers",
             "screen",
             "confirm",
-            "project",
         }
 
         # 如果命令本身就是子命令且不在需要智能处理的映射中，不做转换
@@ -3050,17 +3047,47 @@ class SimplifiedTUI(App):
             self._update_log_view(f"[bold red]❌ 模型状态获取失败: {e}[/bold red]")
 
     def _handle_model_switch(self, model_name: str) -> None:
-        """切换模型 - 诚实提示（持久化切换需 config 写入，待实现）"""
+        """切换模型 - 真实持久化到 config.yaml"""
         if not model_name:
             self._update_log_view("[yellow]⚠️ 请指定模型名称[/yellow]")
             return
 
         self._update_log_view(f"[bold cyan]🔄 切换到模型: {model_name}[/bold cyan]")
-        self._update_log_view(
-            "[yellow]⚠️ 模型切换持久化尚未实现（需写入 config.yaml 的 "
-            "llm_provider.default_model）。当前会话仍使用配置默认模型。"
-            "可用 /model status 查看当前实际模型。[/yellow]"
-        )
+        try:
+            # 1. 验证模型存在（本地 Ollama）
+            from daip_live.model_manager import ModelManager
+
+            available = ModelManager().get_available_models()
+            valid_names = {m.get("name", "") for m in available}
+            # 支持 ollama/ 前缀或裸名
+            bare = model_name.split("/")[-1] if "/" in model_name else model_name
+            exists = any(
+                name == model_name or name == bare or name.endswith(f"/{bare}")
+                for name in valid_names
+            )
+            if not exists:
+                self._update_log_view(
+                    f"[yellow]⚠️ 模型 {model_name} 不在本地 Ollama 可用列表中。"
+                    "请先 pull 该模型（ollama pull <model>）。[/yellow]"
+                )
+                return
+
+            # 2. 持久化写回 config.yaml
+            from daip_live.config import set_default_model
+
+            if set_default_model(model_name):
+                self._update_log_view(
+                    f"[green]✅ 模型已切换并持久化: {model_name}（config.yaml）[/green]"
+                )
+                self._update_log_view(
+                    "[dim]新模型将在下次模型调用时生效（当前会话如有缓存需重启）[/dim]"
+                )
+            else:
+                self._update_log_view(
+                    "[red]❌ 模型写入 config.yaml 失败（权限或文件问题）[/red]"
+                )
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 模型切换失败: {e}[/bold red]")
 
     async def _handle_pa_command(self, args: str) -> None:
         """处理个人助理命令"""
@@ -3123,30 +3150,6 @@ class SimplifiedTUI(App):
         except Exception as e:
             self._update_log_view(f"[bold red]❌ 权限命令执行失败: {e}[/bold red]")
 
-    def _handle_project_command(self, args: str) -> None:
-        """处理项目命令"""
-        self._update_log_view("[bold cyan]📁 项目管理[/bold cyan]")
-        if not args.strip():
-            self._update_log_view(
-                "[yellow]⚠️ 用法: /project <create|list|status> <参数>[/yellow]"
-            )
-            return
-
-        parts = args.split(maxsplit=1)
-        subcommand = parts[0] if parts else ""
-
-        if subcommand == "create":
-            self._update_log_view(
-                "[yellow]⚠️ 当前版本未实现项目管理功能（无持久化存储）。"
-                "请使用 /wiki create 管理内容页面。[/yellow]"
-            )
-        elif subcommand == "list":
-            self._update_log_view(
-                "[yellow]⚠️ 项目管理未实现，暂无项目列表（无持久化存储）。[/yellow]"
-            )
-        else:
-            self._update_log_view(f"[yellow]⚠️ 未知子命令: {subcommand}[/yellow]")
-
     async def _handle_quit_command(self, args: str) -> None:
         """处理退出命令"""
         try:
@@ -3199,19 +3202,6 @@ class SimplifiedTUI(App):
                 raise RuntimeError(f"任务执行失败: {e}")
         else:
             raise RuntimeError("任务执行器未正确初始化")
-
-    def _handle_scaffold_command(self, args: str) -> None:
-        """处理脚手架命令 - 诚实提示（CLI 无 scaffold 能力，不做假创建）"""
-        self._update_log_view("[bold cyan]🏗️ 项目脚手架[/bold cyan]")
-        if not args.strip():
-            self._update_log_view(
-                "[yellow]⚠️ 用法: /scaffold <项目类型> <项目名>[/yellow]"
-            )
-            return
-        self._update_log_view(
-            "[yellow]⚠️ 当前版本 CLI 未提供 scaffold 能力（项目脚手架为规划功能）。"
-            "请使用 /wiki create 或知识库功能创建内容。[/yellow]"
-        )
 
     def _handle_session_command(self, args: str) -> None:
         """处理会话命令 - 后台功能，用户界面隐藏"""

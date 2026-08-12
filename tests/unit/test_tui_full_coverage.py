@@ -132,11 +132,9 @@ class TestFullCoverage:
             ("model", "switch gpt-4"),
             ("pa", "任务"),
             ("permission", ""),
-            ("project", "list"),
             ("quit", "confirm"),
             ("role", "list"),
             ("run", "任务"),
-            ("scaffold", "web myapp"),
             ("session", "list"),
             ("shortcut", ""),
             ("skill", "list"),
@@ -196,11 +194,9 @@ class TestFullCoverage:
                         "model": "model",
                         "pa": "pa",
                         "permission": "permission",
-                        "project": "project",
                         "quit": "quit",
                         "role": "role",
                         "run": "run",
-                        "scaffold": "scaffold",
                         "session": "session",
                         "shortcut": "shortcut",
                         "skill": "skill",
@@ -255,3 +251,25 @@ class TestFullCoverage:
         names = {name for name, _ in tui._available_commands}
         for cmd in ["/help", "/compact", "/knowledge", "/sync", "/model", "/wiki"]:
             assert cmd in names, f"autocomplete 缺 {cmd}"
+        # 已移除命令不应出现在可用命令中
+        for cmd in ["/project", "/scaffold"]:
+            assert cmd not in names, f"已移除命令 {cmd} 仍出现在 autocomplete"
+
+    @pytest.mark.asyncio
+    async def test_removed_commands_show_unsupported(self):
+        """已移除命令（project/scaffold）dispatch 后走未支持路径（有建议提示）。"""
+        tui = _make_tui()
+        await _run(tui, "project", "list")
+        joined = " ".join(_captured(tui))
+        assert (
+            "未支持的命令" in joined or "Unknown command" in joined or "/help" in joined
+        )
+
+        tui._update_log_view.reset_mock()
+        await _run(tui, "scaffold", "web myapp")
+        joined2 = " ".join(_captured(tui))
+        assert (
+            "未支持的命令" in joined2
+            or "Unknown command" in joined2
+            or "/help" in joined2
+        )

@@ -50,12 +50,16 @@ def test_handle_model_command_list(tui_app):
 
 
 def test_handle_model_command_switch(tui_app):
-    """switch 子命令诚实提示（持久化切换未实现，不假装完成）"""
-    tui_app._handle_model_command("switch gpt-4")
+    """switch 子命令真实校验模型存在性（不存在时提示 pull）"""
+    with patch(
+        "daip_live.model_manager.ModelManager.get_available_models",
+        return_value=[{"name": "llama3:latest", "size_mb": 4340}],
+    ):
+        tui_app._handle_model_command("switch gpt-4")
     logs = _join_logs(tui_app)
     assert "🔄 切换到模型: gpt-4" in logs
-    assert "模型切换持久化尚未实现" in logs
-    assert "✅ 模型切换完成" not in logs  # 不再假装成功
+    assert "不在本地 Ollama 可用列表中" in logs
+    assert "ollama pull" in logs
 
 
 def test_handle_model_command_switch_no_name(tui_app):
@@ -111,9 +115,26 @@ def test_handle_model_list_output(tui_app):
 
 
 def test_handle_model_switch_direct(tui_app):
-    """直接调用模型切换 - 诚实提示"""
-    tui_app._handle_model_switch("llama2")
+    """直接调用模型切换 - 真实校验 + 存在时持久化"""
+    with patch(
+        "daip_live.model_manager.ModelManager.get_available_models",
+        return_value=[{"name": "llama3:latest", "size_mb": 4340}],
+    ):
+        tui_app._handle_model_switch("llama3:latest")
     logs = _join_logs(tui_app)
-    assert "🔄 切换到模型: llama2" in logs
-    assert "模型切换持久化尚未实现" in logs
-    assert "✅ 模型切换完成" not in logs
+    assert "🔄 切换到模型: llama3:latest" in logs
+    assert "✅ 模型已切换并持久化" in logs
+
+
+def test_handle_model_switch_validates_existence(tui_app):
+    """切换不存在的模型时提示 pull，不写 config"""
+    from unittest.mock import patch as _patch
+
+    with _patch(
+        "daip_live.model_manager.ModelManager.get_available_models",
+        return_value=[{"name": "llama3:latest", "size_mb": 4340}],
+    ):
+        tui_app._handle_model_switch("nonexistent-model")
+    logs = _join_logs(tui_app)
+    assert "不在本地 Ollama 可用列表中" in logs
+    assert "✅ 模型已切换并持久化" not in logs
