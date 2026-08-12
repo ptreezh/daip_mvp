@@ -75,7 +75,7 @@
 | **CLI 冷启动（已优化）** | ✅ 2026-08-10 完成 | provider/delegation_pipeline 懒加载；knowledge status 21s→1.94s |
 | **turn_in_round 硬编码 1** | ✅ 已修复 | history_tracker 轮内序号递增（见 35dad6b） |
 | **wiki CLI `:memory:` DB（已清理）** | ✅ 2026-08-10 完成 | 8 处死代码删除；文件系统持久化端到端验证 |
-| **TUI `/sync`（Claude Skills）与 `/compact`** | TUI 内部命令为模拟 | 仅提示"同步/压缩完成"不做实际工作；非 CLI 核心 |
+| **TUI `/sync`（Claude Skills）与 `/compact`** | ✅ 2026-08-11 真实化 | 见方案 `.planning/tui_real_commands_plan.md`：/compact 接真实 compress_history、/knowledge sync 接真实 sync_knowledge_base、/knowledge stats 去硬编码（原 1,234/456MB 假数据）、/claude_skills_sync 真实目录扫描；TUI 会话系统修复（_current_session_id 此前恒 None） |
 | **433 skip 测试** | 绝大多数是旧 spec | TDD 红阶段/旧 TUI API spec（测已删除代码），skip 正确；无真实功能缺口 |
 | **multi_agent_collab 模拟搜索** | 死代码 | 模块未被 CLI 引用（仅旧 TUI import 痕迹），内部 _simulate 不影响交付 |
 | **`daip knowledge <query>` 裸参数（已收敛）** | ✅ 2026-08-10 | 死 callback 删除；用 `knowledge search/auto <query>` |
