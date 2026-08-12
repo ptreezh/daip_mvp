@@ -2492,12 +2492,17 @@ class SimplifiedTUI(App):
                 # 不降级到模拟实现，而是抛出错误
                 raise RuntimeError(f"Claude技能列表获取失败: {e}")
         else:
-            # 如果Claude适配器不可用，抛出错误
-            raise RuntimeError("Claude技能适配器未正确初始化")
+            # 适配器不可用：诚实提示（不伪造技能列表）
+            self._update_log_view(
+                "[yellow]⚠️ Claude 技能适配器未初始化，无法列出技能。"
+                "请检查技能系统配置。[/yellow]"
+            )
 
     def _handle_claude_skills_list_command_fallback(self) -> None:
-        """当Claude技能适配器不可用时抛出错误而不是提供模拟实现"""
-        raise RuntimeError("Claude技能适配器未正确初始化")
+        """当Claude技能适配器不可用时提示而非模拟"""
+        self._update_log_view(
+            "[yellow]⚠️ Claude 技能适配器未初始化，无法列出技能。[/yellow]"
+        )
 
     def _handle_claude_skills_run_command(self, args: str) -> None:
         """处理Claude技能执行命令"""
@@ -2577,7 +2582,10 @@ class SimplifiedTUI(App):
                 self._update_log_view(f"[red]❌ 技能搜索失败: {e}[/red]")
                 raise RuntimeError(f"技能搜索失败: {e}")
         else:
-            raise RuntimeError("Claude技能适配器未正确初始化")
+            self._update_log_view(
+                "[yellow]⚠️ Claude 技能适配器未初始化，无法搜索技能。"
+                "请检查技能系统配置。[/yellow]"
+            )
 
     def _handle_claude_skills_sync_command(self, args: str) -> None:
         """处理Claude技能同步命令 - 真实扫描本地 skills 目录（无网络下载）"""
@@ -2736,18 +2744,11 @@ class SimplifiedTUI(App):
                 else:  # 显示所有辩论历史
                     await self._show_all_debate_history(debate_history_tracker)
             else:
-                # 如果没有辩论历史跟踪器，使用模拟数据
+                # 没有辩论历史跟踪器：诚实提示（不伪造示例数据）
                 self._update_log_view(
-                    "[yellow]⚠️ 辩论历史跟踪器不可用，显示示例数据[/yellow]"
+                    "[yellow]⚠️ 辩论历史跟踪器不可用，无法显示历史记录。"
+                    "请确认辩论系统已初始化。[/yellow]"
                 )
-                debates = [
-                    "AI伦理辩论 - 2024-01-15",
-                    "技术发展趋势讨论 - 2024-01-10",
-                    "未来教育模式辩论 - 2024-01-05",
-                ]
-                for debate in debates:
-                    self._update_log_view(f"[dim]  • {debate}[/dim]")
-                self._update_log_view("[dim]使用 /debate view <ID> 查看详细信息[/dim]")
 
         except Exception as e:
             self._update_log_view(f"[bold red]❌ 辩论历史命令执行失败: {e}[/bold red]")
@@ -2821,19 +2822,86 @@ class SimplifiedTUI(App):
             self._update_log_view(f"[yellow]⚠️ 未知子命令: {subcommand}[/yellow]")
 
     def _handle_init_command(self, args: str) -> None:
-        """处理初始化命令"""
+        """处理初始化命令 - 真实检查配置/数据库/模型状态"""
         self._update_log_view("[bold cyan]🚀 初始化DAIP-LIVE...[/bold cyan]")
-        self._update_log_view("[dim]检查配置文件...[/dim]")
-        self._update_log_view("[dim]初始化数据库...[/dim]")
-        self._update_log_view("[dim]加载模型配置...[/dim]")
-        self._update_log_view("[green]✅ DAIP-LIVE 初始化完成[/green]")
+        try:
+            from pathlib import Path
+
+            import yaml
+
+            # 1. 配置检查
+            config_path = Path("config.yaml")
+            if config_path.exists():
+                with open(config_path, encoding="utf-8") as f:
+                    cfg = yaml.safe_load(f) or {}
+                default_model = cfg.get("llm_provider", {}).get(
+                    "default_model", "未配置"
+                )
+                embedding = cfg.get("llm_provider", {}).get("embedding_model", "未配置")
+                self._update_log_view(
+                    f"[dim]✅ 配置文件: {config_path}（默认模型 {default_model}）[/dim]"
+                )
+            else:
+                self._update_log_view(
+                    "[yellow]⚠️ 配置文件 config.yaml 不存在（首次运行需创建）[/yellow]"
+                )
+                embedding = "未配置"
+
+            # 2. 数据库检查
+            db_ok = False
+            try:
+                from sqlalchemy import text
+
+                if getattr(self, "_db_manager", None):
+                    with self._db_manager.engine.connect() as conn:
+                        conn.execute(text("SELECT 1"))
+                    db_ok = True
+            except Exception:
+                db_ok = False
+            self._update_log_view(
+                f"[{'green' if db_ok else 'red'}]数据库: "
+                f"{'✅ 连接正常' if db_ok else '❌ 连接失败'}"
+                f"[/{'green' if db_ok else 'red'}]"
+            )
+
+            # 3. 嵌入模型
+            self._update_log_view(f"[dim]嵌入模型: {embedding}[/dim]")
+
+            if config_path.exists() and db_ok:
+                self._update_log_view(
+                    "[green]✅ DAIP-LIVE 初始化检查完成，系统就绪[/green]"
+                )
+            else:
+                self._update_log_view(
+                    "[yellow]⚠️ 初始化检查存在警告（配置缺失或数据库不可用）[/yellow]"
+                )
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 初始化检查失败: {e}[/bold red]")
 
     def _handle_intention_command(self, args: str) -> None:
-        """处理意图命令"""
+        """处理意图命令 - 展示真实识别器配置（无硬编码准确率）"""
         self._update_log_view("[bold cyan]🎯 意图识别系统[/bold cyan]")
-        self._update_log_view("[dim]当前使用混合意图识别器 (规则+LLM)[/dim]")
-        self._update_log_view("[dim]支持自然语言理解和参数提取[/dim]")
-        self._update_log_view("[dim]识别准确率: ~85%[/dim]")
+        try:
+            recognizer = getattr(self, "_intent_recognizer", None)
+            if recognizer is not None:
+                # 真实识别器信息
+                cls_name = type(recognizer).__name__
+                methods = [
+                    m
+                    for m in dir(recognizer)
+                    if m.startswith("recognize") and callable(getattr(recognizer, m))
+                ]
+                self._update_log_view(f"[dim]识别器: {cls_name}[/dim]")
+                self._update_log_view(
+                    f"[dim]识别方法: {', '.join(methods) or '无'}[/dim]"
+                )
+                self._update_log_view(
+                    "[dim]支持自然语言理解和参数提取（实际能力见识别器实现）[/dim]"
+                )
+            else:
+                self._update_log_view("[yellow]⚠️ 意图识别器未初始化[/yellow]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 意图识别信息获取失败: {e}[/bold red]")
 
     async def _handle_knowledge_command(self, args: str) -> None:
         """处理知识库命令"""
@@ -2921,35 +2989,78 @@ class SimplifiedTUI(App):
         elif subcommand == "switch":
             self._handle_model_switch(sub_args)
         elif subcommand == "status":
-            self._update_log_view("[bold cyan]🤖 当前模型状态[/bold cyan]")
-            self._update_log_view("[dim]活动模型: gpt-4[/dim]")
-            self._update_log_view("[dim]提供商: OpenAI[/dim]")
-            self._update_log_view("[dim]状态: ✅ 正常[/dim]")
+            self._handle_model_status()
         else:
             self._update_log_view(f"[yellow]⚠️ 未知子命令: {subcommand}[/yellow]")
 
     def _handle_model_list(self) -> None:
-        """列出可用模型"""
+        """列出可用模型 - 真实 Ollama /api/tags"""
         self._update_log_view("[bold cyan]🤖 可用模型列表[/bold cyan]")
-        models = [
-            "gpt-4 - OpenAI GPT-4",
-            "gpt-3.5-turbo - OpenAI GPT-3.5 Turbo",
-            "claude-3 - Anthropic Claude 3",
-            "llama2 - Meta LLaMA 2",
-            "mistral - Mistral AI",
-        ]
-        for model in models:
-            self._update_log_view(f"[dim]  • {model}[/dim]")
+        try:
+            from daip_live.model_manager import ModelManager
+
+            models = ModelManager().get_available_models()
+            if not models:
+                self._update_log_view(
+                    "[yellow]⚠️ 未获取到模型（Ollama 未运行？"
+                    "请确认本地 Ollama 服务）[/yellow]"
+                )
+                return
+            for model in models:
+                name = model.get("name", model.get("model", "?"))
+                size_mb = model.get("size_mb")
+                detail = f"（{size_mb}MB）" if size_mb else ""
+                self._update_log_view(f"[dim]  • {name} {detail}[/dim]")
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 模型列表获取失败: {e}[/bold red]")
+
+    def _handle_model_status(self) -> None:
+        """模型状态 - 真实 config 默认模型 + Ollama 在线检测"""
+        self._update_log_view("[bold cyan]🤖 当前模型状态[/bold cyan]")
+        try:
+            # 读 config 默认模型
+            default_model = "未配置"
+            try:
+                from pathlib import Path
+
+                import yaml
+
+                cfg_path = Path("config.yaml")
+                if cfg_path.exists():
+                    with open(cfg_path, encoding="utf-8") as f:
+                        cfg = yaml.safe_load(f) or {}
+                    default_model = cfg.get("llm_provider", {}).get(
+                        "default_model", "未配置"
+                    )
+            except Exception:
+                pass
+            self._update_log_view(f"[dim]配置默认模型: {default_model}[/dim]")
+
+            # Ollama 在线检测
+            import urllib.request
+
+            try:
+                urllib.request.urlopen("http://localhost:11434/api/tags", timeout=3)
+                self._update_log_view("[green]Ollama 服务: ✅ 在线[/green]")
+            except Exception:
+                self._update_log_view(
+                    "[yellow]Ollama 服务: ⚠️ 未检测到（模型推理将不可用）[/yellow]"
+                )
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 模型状态获取失败: {e}[/bold red]")
 
     def _handle_model_switch(self, model_name: str) -> None:
-        """切换模型"""
+        """切换模型 - 诚实提示（持久化切换需 config 写入，待实现）"""
         if not model_name:
             self._update_log_view("[yellow]⚠️ 请指定模型名称[/yellow]")
             return
 
         self._update_log_view(f"[bold cyan]🔄 切换到模型: {model_name}[/bold cyan]")
-        # 模拟模型切换
-        self._update_log_view("[green]✅ 模型切换完成[/green]")
+        self._update_log_view(
+            "[yellow]⚠️ 模型切换持久化尚未实现（需写入 config.yaml 的 "
+            "llm_provider.default_model）。当前会话仍使用配置默认模型。"
+            "可用 /model status 查看当前实际模型。[/yellow]"
+        )
 
     async def _handle_pa_command(self, args: str) -> None:
         """处理个人助理命令"""
@@ -2975,17 +3086,42 @@ class SimplifiedTUI(App):
             raise RuntimeError("个人助理执行器未正确初始化")
 
     def _handle_permission_command(self, args: str) -> None:
-        """处理权限命令"""
+        """处理权限命令 - 尝试接入真实 PermissionManager"""
         self._update_log_view("[bold cyan]🔐 权限管理系统[/bold cyan]")
-        permissions = [
-            "tool_execution - 工具执行权限",
-            "file_access - 文件访问权限",
-            "network_access - 网络访问权限",
-            "system_commands - 系统命令权限",
-        ]
-        for perm in permissions:
-            self._update_log_view(f"[dim]  • {perm}[/dim]")
-        self._update_log_view("[dim]使用 /permission <权限名> <on|off> 控制权限[/dim]")
+        try:
+            # 尝试从 container 获取真实 PermissionManager
+            permission_manager = None
+            if hasattr(self, "container") and self.container:
+                try:
+                    permission_manager = self.container.permission_manager()
+                except Exception:
+                    permission_manager = None
+
+            if permission_manager is not None:
+                # 显示真实权限配置
+                try:
+                    config = getattr(permission_manager, "permission_config", None)
+                    tools = getattr(config, "tools", {}) if config else {}
+                    if tools:
+                        self._update_log_view(
+                            f"[dim]已配置 {len(tools)} 条权限规则:[/dim]"
+                        )
+                        for tool, perm in list(tools.items())[:20]:
+                            self._update_log_view(f"[dim]  • {tool}: {perm}[/dim]")
+                        return
+                except Exception:
+                    pass
+                self._update_log_view(
+                    "[dim]权限管理器已就绪（工具按需请求权限，规则见系统配置）[/dim]"
+                )
+                return
+
+            self._update_log_view(
+                "[yellow]⚠️ 权限管理器不可用，无法显示真实权限状态。"
+                "权限检查在工具执行时自动进行。[/yellow]"
+            )
+        except Exception as e:
+            self._update_log_view(f"[bold red]❌ 权限命令执行失败: {e}[/bold red]")
 
     def _handle_project_command(self, args: str) -> None:
         """处理项目命令"""
@@ -2998,15 +3134,16 @@ class SimplifiedTUI(App):
 
         parts = args.split(maxsplit=1)
         subcommand = parts[0] if parts else ""
-        sub_args = parts[1] if len(parts) > 1 else ""
 
         if subcommand == "create":
-            self._update_log_view(f"[dim]创建项目: {sub_args}[/dim]")
-            self._update_log_view("[green]✅ 项目创建完成[/green]")
+            self._update_log_view(
+                "[yellow]⚠️ 当前版本未实现项目管理功能（无持久化存储）。"
+                "请使用 /wiki create 管理内容页面。[/yellow]"
+            )
         elif subcommand == "list":
-            projects = ["AI助手项目", "数据分析工具", "文档管理系统"]
-            for project in projects:
-                self._update_log_view(f"[dim]  • {project}[/dim]")
+            self._update_log_view(
+                "[yellow]⚠️ 项目管理未实现，暂无项目列表（无持久化存储）。[/yellow]"
+            )
         else:
             self._update_log_view(f"[yellow]⚠️ 未知子命令: {subcommand}[/yellow]")
 
@@ -3064,20 +3201,17 @@ class SimplifiedTUI(App):
             raise RuntimeError("任务执行器未正确初始化")
 
     def _handle_scaffold_command(self, args: str) -> None:
-        """处理脚手架命令"""
+        """处理脚手架命令 - 诚实提示（CLI 无 scaffold 能力，不做假创建）"""
         self._update_log_view("[bold cyan]🏗️ 项目脚手架[/bold cyan]")
         if not args.strip():
             self._update_log_view(
                 "[yellow]⚠️ 用法: /scaffold <项目类型> <项目名>[/yellow]"
             )
             return
-
-        parts = args.split(maxsplit=1)
-        project_type = parts[0] if parts else ""
-        project_name = parts[1] if len(parts) > 1 else ""
-
-        self._update_log_view(f"[dim]创建 {project_type} 项目: {project_name}[/dim]")
-        self._update_log_view("[green]✅ 项目脚手架创建完成[/green]")
+        self._update_log_view(
+            "[yellow]⚠️ 当前版本 CLI 未提供 scaffold 能力（项目脚手架为规划功能）。"
+            "请使用 /wiki create 或知识库功能创建内容。[/yellow]"
+        )
 
     def _handle_session_command(self, args: str) -> None:
         """处理会话命令 - 后台功能，用户界面隐藏"""
