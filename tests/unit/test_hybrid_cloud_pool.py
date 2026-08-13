@@ -29,8 +29,9 @@ def test_cloud_pool_add_provider():
     assert "openai" in pool.providers
 
 
-def test_cloud_pool_get_available_provider():
+def test_cloud_pool_get_available_provider(monkeypatch):
     """Test getting an available provider from the pool."""
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     pool = CloudPool()
     provider = CloudProvider(name="openai", model="gpt-4", api_key_env="OPENAI_API_KEY")
     provider.status = ProviderStatus.AVAILABLE
@@ -76,8 +77,9 @@ def test_delegation_result_creation():
     assert result.success is True
 
 
-def test_cloud_pool_has_available_providers():
+def test_cloud_pool_has_available_providers(monkeypatch):
     """Test checking if pool has available providers."""
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     pool = CloudPool()
     assert pool.has_available() is False
     provider = CloudProvider(name="openai", model="gpt-4", api_key_env="OPENAI_API_KEY")
