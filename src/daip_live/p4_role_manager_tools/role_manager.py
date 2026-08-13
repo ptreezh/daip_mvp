@@ -103,6 +103,9 @@ class RoleManager:
                         role_name = os.path.splitext(os.path.basename(file_path))[0]
                         role_data["name"] = role_name
 
+                        # 从 model_configs 提取真实模型名（is_primary 优先）
+                        role_data["model"] = self._extract_model(role_data)
+
                         role = Role(**role_data)
                         self._roles[role.name] = role
 
@@ -126,6 +129,7 @@ class RoleManager:
                         role_data = yaml.safe_load(f)
                         if isinstance(role_data, dict):
                             role_data["name"] = name
+                            role_data["model"] = self._extract_model(role_data)
                             role = Role(**role_data)
                             self._roles[role.name] = role
                             return role
@@ -228,6 +232,20 @@ class RoleManager:
 
             # 如果都找不到，返回相对于当前工作目录的路径
             return roles_path
+
+    def _extract_model(self, role_data: dict) -> Optional[str]:
+        """从 model_configs 提取主模型名（is_primary 优先，去 provider 前缀）。"""
+        configs = role_data.get("model_configs") or []
+        if not configs:
+            return None
+        primary = next(
+            (c for c in configs if c.get("is_primary")), configs[0]
+        )
+        model_name = primary.get("model_name", "") if isinstance(primary, dict) else ""
+        if not model_name:
+            return None
+        # "ollama/llama3:8b" → "llama3:8b"
+        return str(model_name).split("/", 1)[-1]
 
     def list_roles(self) -> list[Role]:
         """Returns a list of all available roles."""

@@ -56,46 +56,6 @@ class TestDebateManagerReturnType:
             "mock_session": mock_session,
         }
 
-    def test_generate_returns_tuple_handling_works(self, mock_dependencies):
-        pytest.skip(
-            "旧spec：源码 generate 已是 async generator（provider.py:276），tuple 返回契约不存在；当前源码为准"  # noqa: E501
-        )
-        """GREEN测试：验证model_provider.generate返回tuple时能正确处理"""
-        # Arrange
-        debate_manager = DebateManager(
-            session_manager=mock_dependencies["session_manager"],
-            role_manager=mock_dependencies["role_manager"],
-            model_provider=mock_dependencies["model_provider"],
-        )
-
-        # Mock model_provider.generate返回Tuple[str, Any] (这是实际行为)
-        mock_content = "This is my argument"
-        mock_usage = {"total_tokens": 100}
-        mock_dependencies["model_provider"].generate.return_value = (
-            mock_content,
-            mock_usage,
-        )
-
-        # Act - 这应该成功，因为DebateManager正确处理了tuple返回值
-        import asyncio
-
-        async def run_debate_and_collect_events():
-            events = []
-            async for event in debate_manager.run_debate(
-                topic="AI能够取代人类大部分工作",
-                roles_names=["pro_arguer", "con_arguer"],
-                num_rounds=1,
-            ):
-                events.append(event)
-            return events
-
-        # 验证debate成功运行，没有ValidationError
-        events = asyncio.run(run_debate_and_collect_events())
-
-        # Assert - 验证辩论成功完成
-        assert len(events) > 0
-        # 验证没有validation error发生
-
     def test_direct_dialogue_turn_creation_with_tuple_fails(self):
         """RED测试：直接创建DialogueTurn时传入tuple应该失败"""
         from daip_live.core.models import DialogueTurn
@@ -130,57 +90,6 @@ class TestDebateManagerReturnType:
             DialogueTurn(participant_id="test_role", content=None)
 
         assert "content" in str(exc_info.value).lower()
-
-    def test_debate_manager_fixed_tuple_unpacking(self, mock_dependencies):
-        pytest.skip(
-            "旧spec：源码 generate 已是 async generator（provider.py:276），tuple 返回契约不存在；当前源码为准"  # noqa: E501
-        )
-        """GREEN测试：验证修复后的DebateManager能正确处理tuple返回值"""
-        # Arrange
-        debate_manager = DebateManager(
-            session_manager=mock_dependencies["session_manager"],
-            role_manager=mock_dependencies["role_manager"],
-            model_provider=mock_dependencies["model_provider"],
-        )
-
-        # Mock model_provider.generate返回Tuple[str, Any]
-        mock_content = "This is my argument"
-        mock_usage = {"total_tokens": 100}
-        mock_dependencies["model_provider"].generate.return_value = (
-            mock_content,
-            mock_usage,
-        )
-
-        # Act - 这应该不再抛出ValidationError
-        import asyncio
-
-        async def run_debate_and_get_session():
-            # Track the session that would be created and updated
-            mock_session = mock_dependencies[
-                "session_manager"
-            ].create_session.return_value
-
-            async for event in debate_manager.run_debate(
-                topic="AI能够取代人类大部分工作",
-                roles_names=["pro_arguer", "con_arguer"],
-                num_rounds=1,
-            ):
-                pass  # Just run through all events
-
-            return mock_session
-
-        result_session = asyncio.run(run_debate_and_get_session())
-
-        # Assert - 验证辩论成功完成
-        assert result_session.status == AgentState.COMPLETED
-        assert len(result_session.history) == 2  # 两个角色各发言一次
-        assert result_session.history[0].content == mock_content
-        assert result_session.history[1].content == mock_content
-        assert result_session.summary is not None
-
-        # 验证session_manager.save_session被调用
-        mock_dependencies["session_manager"].save_session.assert_called_once()
-
 
 class TestDebateManagerIntegration:
     """辩论管理器集成测试"""

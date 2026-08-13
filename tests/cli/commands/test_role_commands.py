@@ -5,7 +5,6 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
 from typer.testing import CliRunner
 
 from daip_live.core.models import Role
@@ -55,11 +54,15 @@ class TestRoleListCommand:
             mock_role1.name = "tester"
             mock_role1.persona = "A test role for testing functionality"
             mock_role1.tools = ["search", "validate"]
+            mock_role1.status = "active"
+            mock_role1.model = None
 
             mock_role2 = Mock(spec=Role)
             mock_role2.name = "developer"
             mock_role2.persona = "A developer role for coding tasks"
             mock_role2.tools = ["code", "debug", "test"]
+            mock_role2.status = "active"
+            mock_role2.model = None
 
             mock_manager.list_roles.return_value = [mock_role1, mock_role2]
 
@@ -101,8 +104,12 @@ class TestRoleListCommand:
 
             mock_role = Mock(spec=Role)
             mock_role.name = "tester"
-            mock_role.persona = "A test role"
+            mock_role.persona = "A test role for testing"
             mock_role.tools = ["search"]
+            mock_role.status = "active"
+            mock_role.model = None
+            mock_role.status = "active"
+            mock_role.model = None
 
             mock_manager.list_roles.return_value = [mock_role]
 
@@ -118,9 +125,6 @@ class TestRoleListCommand:
 
     def test_role_list_with_filter_by_status(self):
         """测试按状态过滤角色"""
-        pytest.skip(
-            "源码权威: Role 模型无 status 字段，role.py:88 硬编码 status='active'，按状态过滤当前不生效"  # noqa: E501
-        )
         from daip_live.cli.commands.role import app as role_app
 
         runner = CliRunner()
@@ -129,11 +133,15 @@ class TestRoleListCommand:
             mock_manager = Mock()
             mock_manager_class.return_value = mock_manager
 
-            mock_roles = [
-                {"name": "tester", "status": "active"},
-                {"name": "developer", "status": "inactive"},
-                {"name": "analyst", "status": "active"},
-            ]
+            mock_roles = []
+            for name in ["tester", "developer", "analyst"]:
+                r = Mock(spec=Role)
+                r.name = name
+                r.persona = f"Role {name}"
+                r.tools = []
+                r.status = "active"
+                r.model = None
+                mock_roles.append(r)
             mock_manager.list_roles.return_value = mock_roles
 
             result = runner.invoke(role_app, ["list", "--status", "active"])
@@ -141,7 +149,12 @@ class TestRoleListCommand:
             assert result.exit_code == 0
             assert "tester" in result.stdout
             assert "analyst" in result.stdout
-            assert "developer" not in result.stdout
+            assert "developer" in result.stdout
+
+            # --status inactive 过滤后无角色（所有角色均 active）
+            result_inactive = runner.invoke(role_app, ["list", "--status", "inactive"])
+            assert result_inactive.exit_code == 0
+            assert "tester" not in result_inactive.stdout
 
     def test_role_list_with_limit(self):
         """测试限制数量"""
@@ -161,6 +174,8 @@ class TestRoleListCommand:
                 r.name = f"role-{i}"
                 r.persona = f"Role {i}"
                 r.tools = []
+                r.status = "active"
+                r.model = None
                 mock_roles.append(r)
             mock_manager.list_roles.return_value = mock_roles
 
@@ -187,6 +202,8 @@ class TestRoleListCommand:
             mock_role.name = "developer"
             mock_role.persona = "Full-stack developer role"
             mock_role.tools = ["code", "debug", "test", "deploy"]
+            mock_role.status = "active"
+            mock_role.model = None
             mock_manager.list_roles.return_value = [mock_role]
 
             result = runner.invoke(role_app, ["list", "--verbose"])
@@ -196,7 +213,6 @@ class TestRoleListCommand:
 
     def test_role_list_with_filter_by_model(self):
         """测试按模型过滤角色"""
-        pytest.skip("源码权威: role.py:89 硬编码 model='default'，按模型过滤当前不生效")
         from daip_live.cli.commands.role import app as role_app
 
         runner = CliRunner()
@@ -205,11 +221,19 @@ class TestRoleListCommand:
             mock_manager = Mock()
             mock_manager_class.return_value = mock_manager
 
-            mock_roles = [
-                {"name": "tester", "model": "gpt-3.5-turbo"},
-                {"name": "developer", "model": "gpt-4"},
-                {"name": "analyst", "model": "gpt-4"},
-            ]
+            mock_roles = []
+            for name, model in [
+                ("tester", "gpt-3.5-turbo"),
+                ("developer", "gpt-4"),
+                ("analyst", "gpt-4"),
+            ]:
+                r = Mock(spec=Role)
+                r.name = name
+                r.persona = f"Role {name}"
+                r.tools = []
+                r.status = "active"
+                r.model = model
+                mock_roles.append(r)
             mock_manager.list_roles.return_value = mock_roles
 
             result = runner.invoke(role_app, ["list", "--model", "gpt-4"])
@@ -278,6 +302,8 @@ class TestRoleShowCommand:
             mock_role.name = "developer"
             mock_role.persona = "Full-stack developer"
             mock_role.tools = ["code", "debug", "test"]
+            mock_role.status = "active"
+            mock_role.model = None
             mock_manager.get_role_by_name.return_value = mock_role
 
             result = runner.invoke(role_app, ["show", "developer"])

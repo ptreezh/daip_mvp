@@ -388,9 +388,11 @@ class UserResponseCollector:
 
     async def _show_countdown_warning(self, remaining_seconds: int) -> None:
         """显示倒计时警告"""
+        logger.info("Time remaining: %ds", remaining_seconds)
 
     async def _show_invalid_input_error(self) -> None:
         """显示无效输入错误"""
+        logger.warning("Invalid input provided for permission response")
 
     def cancel_collection(self) -> None:
         """取消响应收集"""

@@ -1,11 +1,12 @@
 """The ToolManager and its secure execution pipeline."""
 
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from pydantic import ValidationError
 
 from daip_live.core.exceptions import DAIPError
 from daip_live.core.models import (  # Assuming SessionContext is defined here
+    PermissionRequestEvent,
     SessionContext,
     ToolPermissionConfig,
 )
@@ -45,15 +46,31 @@ class ToolTimeoutError(ToolError):
 class ToolPermissionError(ToolError):
     """Raised when a tool is denied by the permission policy."""
 
-    pass
+    def __init__(
+        self,
+        message: str,
+        tool_name: Optional[str] = None,
+        args: Optional[dict[str, Any]] = None,
+        reason: Optional[str] = None,
+    ):
+        self.tool_name = tool_name
+        self.tool_args = args
+        self.reason = reason
+        super().__init__(message)
 
 
 class ToolPermissionRequest(DAIPError):
     """A control-flow exception to request user permission."""
 
-    def __init__(self, tool_name: str, args: dict[str, Any]):
+    def __init__(
+        self,
+        tool_name: str,
+        args: dict[str, Any],
+        request: Optional[PermissionRequestEvent] = None,
+    ):
         self.tool_name = tool_name
-        self.args = args
+        self.tool_args = args
+        self.request = request
         super().__init__(
             f"Permission required for tool '{tool_name}' with args: {args}"
         )

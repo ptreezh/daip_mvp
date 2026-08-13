@@ -14,6 +14,8 @@ from daip_live.agent_engine.executor import AgentExecutor
 from daip_live.core.models import (
     AgentState,
     PermissionRequestEvent,
+    PermissionResponse,
+    SessionContext,
     ToolCallEvent,
     ToolOutputEvent,
 )
@@ -335,14 +337,11 @@ class TestEndToEndPermissionIntegration:
             pass
 
         end_time = time.time()
-        end_time - start_time
+        execution_time = end_time - start_time
 
-        # 红阶段：记录性能数据但不断言
-
-        # 性能基准要求（后续实现时验证）
-        # assert execution_time < 5.0, f"执行时间{execution_time}秒超过阈值5.0秒"
-
-        pytest.skip("端到端性能基准测试待实现 - 需要建立性能基准线")
+        # 验证流程完整执行且性能达标
+        assert len(events) > 0, "应该产生至少一个事件"
+        assert execution_time < 5.0, f"执行时间{execution_time:.2f}秒超过阈值5.0秒"
 
 
 class TestEndToEndPermissionScenarios:
@@ -389,24 +388,37 @@ class TestEndToEndPermissionScenarios:
         except Exception:
             pass
 
-        # 红阶段：分析事件流中的权限行为
-        [
+        # 验证事件流中的权限行为
+        read_calls = [
             e
             for e in events
             if isinstance(e, ToolCallEvent) and e.tool_name == "read_file"
         ]
-        [
+        write_calls = [
             e
             for e in events
             if isinstance(e, ToolCallEvent) and e.tool_name == "write_file"
         ]
-        [
+        exec_calls = [
             e
             for e in events
             if isinstance(e, ToolCallEvent) and e.tool_name == "execute_command"
         ]
 
-        pytest.skip("开发者工作流权限场景测试待实现 - 需要验证复杂工作流中的权限行为")
+        # 模型固定输出 read_file → read_file 应被调用（allow 直通）
+        assert len(events) > 0, "应该产生至少一个事件"
+        assert len(read_calls) > 0, "read_file 应该被调用（allow 权限）"
+        # 测试模型不输出 write_file/execute_command 调用，因此无对应调用事件
+        assert len(write_calls) == 0
+        assert len(exec_calls) == 0
+
+        # 权限规则配置已生效
+        assert env["permission_manager"].get_permission_status("read_file") == "allow"
+        assert env["permission_manager"].get_permission_status("write_file") == "ask"
+        assert (
+            env["permission_manager"].get_permission_status("execute_command")
+            == "deny"
+        )
 
     # ===== 测试5: 权限缓存验证 - 红阶段 =====
     @pytest.mark.asyncio
@@ -423,35 +435,26 @@ class TestEndToEndPermissionScenarios:
         env = end_to_end_test_environment
         env["permission_manager"].set_permission_rule("write_file", "ask")
 
-        # 第一次执行：用户授予权限
-        user_goal_1 = "请写入第一个配置文件"
-        await env["user_input_queue"].put("y")  # 用户授予权限
+        # 第一次：用户选择"始终授予"（ALWAYS）→ 写入缓存
+        await env["user_input_queue"].put("a")
+        await env["user_input_queue"].put("y")  # 确认选择
 
-        # 执行第一次任务
-        events_1 = []
-        try:
-            async for event in env["agent_executor"].run(user_goal_1):
-                events_1.append(event)
-        except Exception:
-            pass
+        result_1 = await env["permission_manager"].check_permission(
+            "write_file", {"path": "config.yaml"}, SessionContext()
+        )
 
-        # 验证权限被缓存
-        env["permission_manager"].get_cached_permissions()
+        # 验证 ALWAYS 被缓存
+        assert result_1.response == PermissionResponse.ALWAYS
+        assert "write_file" in env["permission_manager"].get_cached_permissions()
 
-        # 第二次执行：应该直接使用缓存
-        user_goal_2 = "请写入第二个配置文件"
-        events_2 = []
-        try:
-            async for event in env["agent_executor"].run(user_goal_2):
-                events_2.append(event)
-        except Exception:
-            pass
+        # 第二次：直接命中缓存，无需用户输入（队列已空也不阻塞）
+        result_2 = await env["permission_manager"].check_permission(
+            "write_file", {"path": "config.yaml"}, SessionContext()
+        )
 
-        # 验证第二次执行的行为差异
-        [e for e in events_1 if isinstance(e, PermissionRequestEvent)]
-        [e for e in events_2 if isinstance(e, PermissionRequestEvent)]
-
-        pytest.skip("权限缓存端到端验证待实现 - 需要验证缓存机制在完整工作流中的有效性")
+        assert result_2.cached is True
+        assert result_2.response == PermissionResponse.ALWAYS
+        assert result_2.granted is True
 
 
 # ===== 测试工具和数据工厂 =====

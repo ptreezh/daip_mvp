@@ -81,8 +81,8 @@ def list(
                         "name": role.name,
                         "persona": role.persona,
                         "tools": role.tools,
-                        "status": "active",  # Default status since Role model doesn't have it  # noqa: E501
-                        "model": "default",  # Default model since Role model doesn't have it  # noqa: E501
+                        "status": role.status,
+                        "model": role.model or "default",
                     }
                     role_dicts.append(role_dict)
 

@@ -179,18 +179,48 @@ class TestPermissionManagerIntegration:
         assert result == PermissionResponse.GRANT
 
     def test_permission_rule_persistence(self):
-        """测试权限规则持久化 - 红"""
-        # Given: PermissionManager和权限规则
-        # When: 更新权限规则
-        # Then: 验证规则被持久化
-        pytest.skip("权限规则持久化待实现 - 红阶段")
+        """测试权限规则设置与生效 - 绿"""
+        from daip_live.permission.permission_manager import PermissionManager
 
-    def test_permission_cache_functionality(self):
-        """测试权限缓存功能 - 红"""
-        # Given: PermissionManager和缓存配置
-        # When: 多次检查相同权限
-        # Then: 验证缓存生效
-        pytest.skip("权限缓存功能待实现 - 红阶段")
+        user_queue = asyncio.Queue()
+        tui_interface = MagicMock()
+        manager = PermissionManager(user_queue, tui_interface)
+
+        # When: 设置权限规则
+        manager.set_permission_rule("test_tool", "allow")
+
+        # Then: 规则立即生效（内存配置，KISS/YAGNI设计）
+        assert manager.get_permission_status("test_tool") == "allow"
+        assert manager.permission_config.tools["test_tool"] == "allow"
+
+        # 无效权限值应拒绝
+        with pytest.raises(ValueError):
+            manager.set_permission_rule("bad_tool", "invalid")
+
+    @pytest.mark.asyncio
+    async def test_permission_cache_functionality(self):
+        """测试权限缓存功能 - 绿"""
+        from daip_live.permission.permission_manager import PermissionManager
+
+        user_queue = asyncio.Queue()
+        tui_interface = MagicMock()
+        manager = PermissionManager(user_queue, tui_interface)
+
+        # 用户选择"始终授予" → 写入缓存
+        await user_queue.put("a")
+        await user_queue.put("y")  # 确认选择
+        result = await manager.check_permission("test_tool", {}, SessionContext())
+
+        # Then: 验证 ALWAYS 被缓存
+        assert result.response == PermissionResponse.ALWAYS
+        assert "test_tool" in manager.get_cached_permissions()
+
+        # When: 再次检查同一工具 → 走缓存，无需用户输入
+        result2 = await manager.check_permission("test_tool", {}, SessionContext())
+
+        # Then: 缓存命中，直接授予
+        assert result2.response == PermissionResponse.ALWAYS
+        assert result2.cached is True
 
 
 class TestPermissionManagerErrorHandling:

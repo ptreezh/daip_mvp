@@ -490,11 +490,12 @@ class TestClaudeSkillAdapterManager:
 
     async def test_load_claude_skills_simple_method_new_format(self, temp_skills_dir):
         """测试简单方法加载新格式Claude技能"""
-        pytest.skip(
-            "源码权威: load_claude_skills_from_directory 只支持 manifest.json+tools.json 传统格式（claude_skill_adapter.py:46-49），SKILL.md 新格式未实现"  # noqa: E501
+        from src.daip_live.skills.updated_claude_adapter import (
+            ClaudeSkillAdapterManager as UpdatedAdapterManager,
         )
+
         skill_manager = SkillManager()
-        adapter_manager = ClaudeSkillAdapterManager(skill_manager)
+        adapter_manager = UpdatedAdapterManager(skill_manager)
 
         # 创建技能目录
         skill_dir = temp_skills_dir / "new_format_skill"

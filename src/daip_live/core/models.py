@@ -112,6 +112,8 @@ class Role(BaseModel):
     name: str
     persona: str
     tools: list[str]
+    model: Optional[str] = None
+    status: str = "active"
 
 
 # --- New Session and Dialogue Models (Multi-Agent) ---
@@ -224,6 +226,7 @@ class PermissionResult(BaseModel):
     duplicate: bool = False
     circuit_breaker_open: bool = False
     remembered: bool = False
+    cached: bool = False
     error_message: Optional[str] = None
     needs_manual_review: bool = False
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

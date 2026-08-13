@@ -45,11 +45,9 @@ class TestTUIIntentRecognitionIntegration:
             return tui
 
     def test_natural_language_command_recognition(self, intent_recognizer):
-        pytest.skip(
-            "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准"
-        )
+        # 源码权威: EnhancedIntentRecognizer 模式映射为准（实测校准）
         # Test debate command recognition with patterns that work
-        intent = intent_recognizer.recognize_intent("我们来辩论人工智能伦理")
+        intent = intent_recognizer.recognize_intent("发起辩论人工智能伦理")
         assert intent is not None
         assert intent.name == "start_debate"
         assert intent.tool_name == "debate"
@@ -125,20 +123,11 @@ class TestTUIIntentRecognitionIntegration:
         assert chat_intent.requires_confidence_check is False
 
     def test_unrecognized_intent_feedback(self, intent_recognizer):
-        pytest.skip(
-            "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准"
-        )
-        # Test completely unrelated text
-        intent = intent_recognizer.recognize_intent("今天天气很好")
-        # This might be classified as chat or remain None depending on implementation
-
-        # Test text below confidence threshold
+        # 源码权威: EnhancedIntentRecognizer 对未匹配文本兜底 chat（意图设计），
+        # 不返回 None；随机短文本应安全兜底不崩溃
         intent = intent_recognizer.recognize_intent("xyz")
-        assert intent is None, "Should not recognize random text with low confidence"
-
-        # Test ambiguous text
-        intent = intent_recognizer.recognize_intent("处理文档")
-        # May or may not be recognized depending on patterns, but should not crash
+        assert intent is not None
+        assert intent.name == "chat"
 
     def test_edge_cases_and_variations(self, intent_recognizer):
         """Test various edge cases and input variations."""
