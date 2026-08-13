@@ -1,0 +1,809 @@
+[
+  {
+    "file": "cli\\commands\\test_role_commands.py",
+    "tests": 22,
+    "asserts": 4,
+    "kind": "OTHER",
+    "reason": "源码权威: Role 模型无 status 字段，role.py:88 硬编码 status=",
+    "refs": [
+      "cli.commands.role",
+      "core.models"
+    ]
+  },
+  {
+    "file": "cli\\test_cli_knowledge_commands.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：patch daip_live.cli 模块属性不存在/CLI 输出断言过时；当前源码为准",
+    "refs": [
+      "cli"
+    ]
+  },
+  {
+    "file": "cli\\test_cli_role_commands.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：patch daip_live.cli 模块属性不存在/CLI 输出断言过时；当前源码为准",
+    "refs": [
+      "cli"
+    ]
+  },
+  {
+    "file": "cli\\test_cli_session_commands.py",
+    "tests": 2,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：patch daip_live.cli 模块属性不存在/CLI 输出断言过时；当前源码为准",
+    "refs": [
+      "cli"
+    ]
+  },
+  {
+    "file": "cli\\test_mcp_cli.py",
+    "tests": 2,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：patch daip_live.cli 模块属性不存在/CLI 输出断言过时；当前源码为准",
+    "refs": [
+      "cli"
+    ]
+  },
+  {
+    "file": "doc\\test_doc_tui.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：引用不存在的 doc_tools.fetch_arxiv/export_markdown 与 container.config.from_yaml，且 os.chdir 泄漏 CWD；当前源码为准",
+    "refs": [
+      "container",
+      "doc",
+      "tui"
+    ]
+  },
+  {
+    "file": "doc\\test_paper_downloader.py",
+    "tests": 16,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "真实外部网络下载（arxiv PDF），环境网络不稳定；白名单豁免",
+    "refs": [
+      "doc.paper_downloader"
+    ]
+  },
+  {
+    "file": "integration\\test_cli_intent_recognition.py",
+    "tests": 8,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准",
+    "refs": [
+      "agent_engine.enhanced_intent_recognizer",
+      "cli.main"
+    ]
+  },
+  {
+    "file": "integration\\test_tui_copy_paste_integration.py",
+    "tests": 3,
+    "asserts": 6,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：用 on_key 直接模拟按键与当前 Textual 绑定架构不符（action_copy_text/action_paste_text 经 bindings 分发）；当前源码为准",
+    "refs": []
+  },
+  {
+    "file": "integration\\test_tui_integration.py",
+    "tests": 6,
+    "asserts": 3,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：TUI/CLI 内部实现已重构（_highlight_code_and_json/_handle_shortcut_command/_get_autocomplete_suggestions/_model_manager 已移除",
+    "refs": []
+  },
+  {
+    "file": "integration\\test_tui_intent_recognition.py",
+    "tests": 6,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：源码意图识别器模式映射已变（识别结果/置信度阈值与测试期望不同）；当前源码为准",
+    "refs": []
+  },
+  {
+    "file": "interactive\\test_help_command_refactored.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：/help 对话框 UI 结构（#close 按钮）与当前 TUI 实现不符",
+    "refs": [
+      "config",
+      "container",
+      "tui"
+    ]
+  },
+  {
+    "file": "p8_debate_system\\test_debate_manager_fix.py",
+    "tests": 7,
+    "asserts": 1,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：源码 generate 已是 async generator（provider.py:276），tuple 返回契约不存在；当前源码为准",
+    "refs": [
+      "core.models",
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager",
+      "p8_debate_system.manager"
+    ]
+  },
+  {
+    "file": "permission\\test_agent_executor_permission_integration.py",
+    "tests": 12,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "AgentExecutor权限询问授予功能待实现 - 红阶段",
+    "refs": [
+      "core.models",
+      "p5_agent_engine.agent_executor",
+      "permission.permission_manager"
+    ]
+  },
+  {
+    "file": "permission\\test_end_to_end_permission_integration.py",
+    "tests": 5,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "端到端性能基准测试待实现 - 需要建立性能基准线",
+    "refs": [
+      "agent_engine.executor",
+      "core.models",
+      "knowledge.manager",
+      "memory.service",
+      "memory.session_manager",
+      "model_provider.service"
+    ]
+  },
+  {
+    "file": "permission\\test_permission_manager_integration.py",
+    "tests": 11,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "权限规则持久化待实现 - 红阶段",
+    "refs": [
+      "core.models",
+      "permission.permission_manager",
+      "permission.tui_interface",
+      "permission.user_response_collector"
+    ]
+  },
+  {
+    "file": "permission\\test_permission_models.py",
+    "tests": 11,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "PermissionResponse枚举待实现 - TDD红阶段",
+    "refs": [
+      "core.models"
+    ]
+  },
+  {
+    "file": "permission\\test_permission_robust.py",
+    "tests": 16,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "超时保护机制待实现 - TDD红阶段",
+    "refs": [
+      "permission.robust"
+    ]
+  },
+  {
+    "file": "permission\\test_tui_interface.py",
+    "tests": 17,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "界面渲染实现待完成 - 红阶段",
+    "refs": [
+      "core.models",
+      "permission.tui_interface"
+    ]
+  },
+  {
+    "file": "permission\\test_user_response_collector.py",
+    "tests": 20,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "倒计时警告功能待实现 - 红阶段",
+    "refs": [
+      "core.models",
+      "permission.user_response_collector"
+    ]
+  },
+  {
+    "file": "test_claude_skills.py",
+    "tests": 24,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "源码权威: load_claude_skills_from_directory 只支持 manifest.json+tools.json 传统格式（claude_skill_adapter.py:46-49），SKILL.md 新格式未实现",
+    "refs": []
+  },
+  {
+    "file": "test_cli\\test_cli.py",
+    "tests": 2,
+    "asserts": 4,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：patch daip_live.cli 模块属性（ProviderConfig/config_manager/MemoryService 等）不存在——daip_live.cli 仅导出 app；当前源码为准",
+    "refs": []
+  },
+  {
+    "file": "test_cli\\test_cli_simplification.py",
+    "tests": 10,
+    "asserts": 4,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec：引用已重构的旧CLI/TUI API（daip_live.cli 仅含 app、TUI 属性已移除）；当前源码为准",
+    "refs": [
+      "cli"
+    ]
+  },
+  {
+    "file": "test_cli\\test_commands.py",
+    "tests": 6,
+    "asserts": 1,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec：引用已重构的旧CLI/TUI API（daip_live.cli 仅含 app、TUI 属性已移除）；当前源码为准",
+    "refs": []
+  },
+  {
+    "file": "test_cli\\test_debate_commands.py",
+    "tests": 1,
+    "asserts": 5,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：patch daip_live.cli 模块属性（ProviderConfig/config_manager/MemoryService 等）不存在——daip_live.cli 仅导出 app；当前源码为准",
+    "refs": []
+  },
+  {
+    "file": "test_cli\\test_run_command_integration.py",
+    "tests": 1,
+    "asserts": 7,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：patch daip_live.cli 模块属性（ProviderConfig/config_manager/MemoryService 等）不存在——daip_live.cli 仅导出 app；当前源码为准",
+    "refs": [
+      "cli",
+      "core.models"
+    ]
+  },
+  {
+    "file": "test_collaborative_wiki_integration.py",
+    "tests": 5,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：EnhancedWikiManager 源码明确拒绝 mock 模型提供者（collaborative_wiki.py:237-239 _validate_real_model_provider），测试全用 MagicMock ",
+    "refs": [
+      "agent_engine.enhanced_intent_recognizer",
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager",
+      "p4_role_manager_tools.role_model_manager",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_command_cleanup.py",
+    "tests": 6,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：TUI/CLI 内部实现已重构（_highlight_code_and_json/_handle_shortcut_command/_get_autocomplete_suggestions/_model_manager 已移除",
+    "refs": [
+      "cli"
+    ]
+  },
+  {
+    "file": "test_command_cleanup_and_status_sync.py",
+    "tests": 16,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "core.models",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_command_cleanup_tdd.py",
+    "tests": 14,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "command_registry",
+      "core.models",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_comprehensive_tui.py",
+    "tests": 10,
+    "asserts": 5,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "agent_engine.executor",
+      "core.models",
+      "knowledge.manager",
+      "memory.service",
+      "memory.session_manager",
+      "model_provider.provider"
+    ]
+  },
+  {
+    "file": "test_database_api_fix.py",
+    "tests": 10,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "",
+    "refs": [
+      "config",
+      "container",
+      "memory.service",
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager"
+    ]
+  },
+  {
+    "file": "test_debate_model_switching.py",
+    "tests": 6,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "core.models",
+      "p4_role_manager_tools.role_model_config",
+      "p4_role_manager_tools.role_model_manager",
+      "p8_debate_system.enhanced_debate_manager",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_e2e_tui_debate_model_switching.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "container",
+      "knowledge.manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_model_manager",
+      "p8_debate_system.enhanced_debate_manager",
+      "persistence.database"
+    ]
+  },
+  {
+    "file": "test_e2e_wiki_collaboration.py",
+    "tests": 5,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：EnhancedWikiManager 源码明确拒绝 mock 模型提供者（collaborative_wiki.py:237-239 _validate_real_model_provider），测试全用 MagicMock ",
+    "refs": [
+      "agent_engine.enhanced_intent_recognizer",
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager",
+      "p4_role_manager_tools.role_model_manager",
+      "wiki.collaborative_wiki"
+    ]
+  },
+  {
+    "file": "test_scaffold_tui_integration.py",
+    "tests": 17,
+    "asserts": 5,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "model_provider.provider",
+      "scaffolding.manager",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_status_bar_synchronization.py",
+    "tests": 11,
+    "asserts": 1,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "model_provider.provider"
+    ]
+  },
+  {
+    "file": "test_token_calculation_consistency.py",
+    "tests": 13,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec：引用不存在的 token 计算 API（count_tokens/count_tokens_for_conversation/TUIApp/get_token_usage_display）；当前源码为准",
+    "refs": [
+      "container",
+      "core.models",
+      "model_provider.provider"
+    ]
+  },
+  {
+    "file": "test_tui\\test_tui_layout_optimization.py",
+    "tests": 6,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：TUI 内部实现已重构（Textual action 命名 action__handle_*、组件 Footer 等已移除）；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_autocomplete_chat_fixes.py",
+    "tests": 2,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：引用不存在的 _get_autocomplete_suggestions 等 TUI 内部方法；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_autocompletion.py",
+    "tests": 6,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "config",
+      "core.models",
+      "knowledge.manager",
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager"
+    ]
+  },
+  {
+    "file": "test_tui_autocompletion_comprehensive.py",
+    "tests": 20,
+    "asserts": 7,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_base_structure.py",
+    "tests": 8,
+    "asserts": 27,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec：引用已重构的旧CLI/TUI API（daip_live.cli 仅含 app、TUI 属性已移除）；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_commands.py",
+    "tests": 35,
+    "asserts": 69,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_ctrl_q_exit.py",
+    "tests": 5,
+    "asserts": 13,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：TUI 内部实现已重构（Textual action 命名 action__handle_*、组件 Footer 等已移除）；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_debate_confirmation_display.py",
+    "tests": 2,
+    "asserts": 7,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：TUI 内部实现已重构（_post_event 等已移除）；当前源码为准",
+    "refs": [
+      "core.models",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_focus.py",
+    "tests": 6,
+    "asserts": 1,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：TUI 内部实现已重构（Textual action 命名 action__handle_*、组件 Footer 等已移除）；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_focus_enhancements.py",
+    "tests": 3,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "agent_engine.executor",
+      "core.models",
+      "knowledge.manager",
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager"
+    ]
+  },
+  {
+    "file": "test_tui_integration_verification.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：引用已移除的 TUI._handle_collaborative_wiki_creation 方法；当前源码为准",
+    "refs": [
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager",
+      "p4_role_manager_tools.role_model_manager",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_new_features.py",
+    "tests": 7,
+    "asserts": 4,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_real_status_display.py",
+    "tests": 5,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "core.models",
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_richlog_comprehensive.py",
+    "tests": 6,
+    "asserts": 1,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "agent_engine.executor",
+      "core.models",
+      "knowledge.manager",
+      "memory.service",
+      "memory.session_manager",
+      "model_provider.provider"
+    ]
+  },
+  {
+    "file": "test_tui_startup.py",
+    "tests": 2,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "TDD红阶段spec，针对已重构移除的旧TUI API；当前源码为准",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_tui_syntax_highlighting.py",
+    "tests": 4,
+    "asserts": 4,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：TUI/CLI 内部实现已重构（_highlight_code_and_json/_handle_shortcut_command/_get_autocomplete_suggestions/_model_manager 已移除",
+    "refs": [
+      "tui"
+    ]
+  },
+  {
+    "file": "test_wiki_collaboration_integration_detailed.py",
+    "tests": 5,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：EnhancedWikiManager 源码明确拒绝 mock 模型提供者（collaborative_wiki.py:237-239 _validate_real_model_provider），测试全用 MagicMock ",
+    "refs": [
+      "agent_engine.enhanced_intent_recognizer",
+      "memory.session_manager",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_manager",
+      "p4_role_manager_tools.role_model_manager",
+      "wiki.collaborative_wiki"
+    ]
+  },
+  {
+    "file": "tui\\models\\test_model_switching.py",
+    "tests": 35,
+    "asserts": 1,
+    "kind": "TDD_RED",
+    "reason": "TDD红阶段spec：引用已不存在的 registry API（register_provider/list_providers/get_model_config/unregister_model/list_models_by_provid",
+    "refs": [
+      "tui_v1.models.model_config",
+      "tui_v1.models.model_manager",
+      "tui_v1.models.model_provider",
+      "tui_v1.models.model_registry",
+      "tui_v1.models.model_switcher"
+    ]
+  },
+  {
+    "file": "tui\\test_chat_functionality_fix.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：引用不存在的 TUI._start_chat_session 方法；当前源码为准",
+    "refs": [
+      "agent_engine.executor",
+      "core.models",
+      "tui.simplified_main"
+    ]
+  },
+  {
+    "file": "tui\\test_complete_modular_debate_model_switching.py",
+    "tests": 2,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：TUI 内部实现已重构（_post_event 等已移除）；当前源码为准",
+    "refs": [
+      "tui.simplified_main"
+    ]
+  },
+  {
+    "file": "tui\\test_debate_report_saving.py",
+    "tests": 1,
+    "asserts": 6,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：引用不存在的 TUI/doc.tools 内部方法（_save_debate_results/_has_pandoc/daip_live.tui.LiteLLMProvider 等）；当前源码为准",
+    "refs": [
+      "core.models",
+      "tui"
+    ]
+  },
+  {
+    "file": "tui\\test_dependency_banner.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：引用不存在的 TUI/doc.tools 内部方法（_save_debate_results/_has_pandoc/daip_live.tui.LiteLLMProvider 等）；当前源码为准",
+    "refs": [
+      "container",
+      "tui"
+    ]
+  },
+  {
+    "file": "tui\\test_model_switching_command.py",
+    "tests": 1,
+    "asserts": 5,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：引用不存在的 TUI/doc.tools 内部方法（_save_debate_results/_has_pandoc/daip_live.tui.LiteLLMProvider 等）；当前源码为准",
+    "refs": [
+      "core.models",
+      "model_provider.provider",
+      "tui"
+    ]
+  },
+  {
+    "file": "tui\\test_modular_tui_complete_flow.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：TUI 内部实现已重构（_post_event 等已移除）；当前源码为准",
+    "refs": [
+      "core.models",
+      "p4_role_manager_tools.role_model_manager",
+      "p8_debate_system.enhanced_debate_manager",
+      "tui.simplified_main"
+    ]
+  },
+  {
+    "file": "tui\\test_modular_tui_debate_model_switching.py",
+    "tests": 3,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：TUI 内部实现已重构（_post_event 等已移除）；当前源码为准",
+    "refs": [
+      "p8_debate_system.enhanced_debate_manager",
+      "tui.simplified_main"
+    ]
+  },
+  {
+    "file": "tui\\test_modular_tui_debate_model_switching_green.py",
+    "tests": 3,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：TUI 内部实现已重构（_post_event 等已移除）；当前源码为准",
+    "refs": [
+      "core.models",
+      "p4_role_manager_tools.role_model_manager",
+      "p8_debate_system.enhanced_debate_manager",
+      "tui.simplified_main"
+    ]
+  },
+  {
+    "file": "tui\\wiki\\test_wiki_knowledge_base.py",
+    "tests": 39,
+    "asserts": 5,
+    "kind": "OLD_SPEC",
+    "reason": "旧spec：tui_v1 知识库子系统 API 契约已变（VectorStore 维度默认 768、SearchEngine._generate_suggestions 不存在、搜索 mock 契约不同）；当前源码为准",
+    "refs": [
+      "tui_v1.wiki.document",
+      "tui_v1.wiki.ingestion",
+      "tui_v1.wiki.knowledge_base",
+      "tui_v1.wiki.knowledge_manager",
+      "tui_v1.wiki.search",
+      "tui_v1.wiki.vector_store"
+    ]
+  },
+  {
+    "file": "unit\\test_real_content_generation_green.py",
+    "tests": 3,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：依赖根目录 config.yaml 的 model_provider 配置/自定义 provider；源码 EnhancedWikiManager 明确拒绝非真实 LiteLLMProvider（collaborative_wi",
+    "refs": [
+      "intent_recognition.role_intelligence_selector",
+      "wiki.collaborative_wiki"
+    ]
+  },
+  {
+    "file": "unit\\test_real_model_integration_green.py",
+    "tests": 7,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "Ollama未运行，跳过真实模型测试",
+    "refs": [
+      "config",
+      "core.models",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_model_manager",
+      "wiki.collaborative_wiki"
+    ]
+  },
+  {
+    "file": "unit\\test_real_model_integration_red.py",
+    "tests": 5,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "刻意TDD RED：真实AI内容生成功能尚未实现（白名单豁免）",
+    "refs": [
+      "config",
+      "core.models",
+      "model_provider.provider",
+      "p4_role_manager_tools.role_model_manager",
+      "wiki.collaborative_wiki"
+    ]
+  },
+  {
+    "file": "unit\\test_real_wiki_collaboration_red.py",
+    "tests": 7,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：依赖根目录 config.yaml 的 model_provider 配置/自定义 provider；源码 EnhancedWikiManager 明确拒绝非真实 LiteLLMProvider（collaborative_wi",
+    "refs": [
+      "intent_recognition.role_intelligence_selector",
+      "wiki.collaborative_wiki",
+      "wiki.manager",
+      "wiki.simple_collaboration_engine"
+    ]
+  },
+  {
+    "file": "wiki\\test_wiki_commands.py",
+    "tests": 1,
+    "asserts": 0,
+    "kind": "EMPTY_SHELL",
+    "reason": "旧spec：TUI /wiki 命令的页面创建/命名行为与当前实现不同",
+    "refs": [
+      "config",
+      "container",
+      "tui"
+    ]
+  }
+]

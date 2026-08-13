@@ -33,7 +33,9 @@ def test_required_test_files_exist():
         "tests/unit/test_tui_input_handling.py",
         "tests/unit/test_tui_model_switching.py",
         "tests/unit/test_tui_background_tasks.py",
-        "tests/integration/test_tui_integration.py",
+        "tests/unit/test_tui_full_flow.py",
+        "tests/unit/test_tui_real_commands.py",
+        "tests/unit/test_tui_full_coverage.py",
     ]
 
     for file_path in required_files:
