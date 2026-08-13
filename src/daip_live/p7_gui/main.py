@@ -111,6 +111,13 @@ def get_agent_executor(
     )  # Pass model_provider to MemoryService
     user_input_queue = asyncio.Queue()
 
+    # 安全审计修复（2026-08-13）：GUI 路径此前绕过权限系统
+    # （AgentExecutor 未传 permission_manager → StepExecutor 直接执行工具）。
+    # 现在接入 PermissionManager：allow 正常、deny 拒绝、ask 无确认 UI → 超时默认拒绝。
+    from daip_live.permission.permission_manager import PermissionManager
+
+    permission_manager = PermissionManager(user_input_queue, tui_interface=None)
+
     return AgentExecutor(
         session_manager=session_manager,
         memory_service=memory_service,
@@ -118,6 +125,7 @@ def get_agent_executor(
         model_provider=model_provider,
         tool_manager=tool_manager,
         user_input_queue=user_input_queue,
+        permission_manager=permission_manager,
     )
 
 

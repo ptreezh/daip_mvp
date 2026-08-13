@@ -10,6 +10,15 @@ param(
 )
 
 $BackupDir = Join-Path $ProjectRoot "backups"
+$ErrorLog = Join-Path $BackupDir "backup-error.log"
+
+# 失败时记录错误日志（计划任务静默失败 3 天无发现，2026-08-13 生产审计修复）
+trap {
+    $msg = "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] ERROR: $($_.Exception.Message)"
+    Write-Error $msg
+    try { Add-Content -LiteralPath $ErrorLog -Value $msg -Encoding utf8 } catch { }
+    exit 1
+}
 
 function Assert-Item($Path) {
     if (-not (Test-Path -LiteralPath $Path)) { throw "缺少待备份项: $Path" }
