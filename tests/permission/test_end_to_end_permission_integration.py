@@ -416,8 +416,7 @@ class TestEndToEndPermissionScenarios:
         assert env["permission_manager"].get_permission_status("read_file") == "allow"
         assert env["permission_manager"].get_permission_status("write_file") == "ask"
         assert (
-            env["permission_manager"].get_permission_status("execute_command")
-            == "deny"
+            env["permission_manager"].get_permission_status("execute_command") == "deny"
         )
 
     # ===== 测试5: 权限缓存验证 - 红阶段 =====

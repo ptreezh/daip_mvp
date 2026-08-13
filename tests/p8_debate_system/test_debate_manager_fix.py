@@ -91,6 +91,7 @@ class TestDebateManagerReturnType:
 
         assert "content" in str(exc_info.value).lower()
 
+
 class TestDebateManagerIntegration:
     """辩论管理器集成测试"""
 

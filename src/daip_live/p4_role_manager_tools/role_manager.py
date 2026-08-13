@@ -238,9 +238,7 @@ class RoleManager:
         configs = role_data.get("model_configs") or []
         if not configs:
             return None
-        primary = next(
-            (c for c in configs if c.get("is_primary")), configs[0]
-        )
+        primary = next((c for c in configs if c.get("is_primary")), configs[0])
         model_name = primary.get("model_name", "") if isinstance(primary, dict) else ""
         if not model_name:
             return None
